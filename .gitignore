@@ -1,5 +1,5 @@
 .gradle
 .idea
 build
-src/main/resources/libyakt.so
+src/main/resources/libjakt.so
 src/main/resources/jakt-jna-binding
