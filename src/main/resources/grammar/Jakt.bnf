@@ -1,0 +1,167 @@
+{
+    parserClass="org.serenityos.jakt.parser.JaktParser"
+
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Jakt"
+    psiImplClassSuffix="Impl"
+    psiPackage="org.intellij.sdk.language.psi"
+    psiImplPackage="org.intellij.sdk.language.psi.impl"
+
+    elementTypeHolderClass="org.serenityos.jakt.JaktTypes"
+    elementTypeClass="org.serenityos.jakt.JaktElement"
+    tokenTypeClass="org.serenityos.jakt.JaktToken"
+
+    tokens=[
+        EXTERN_KEYWORD      // extern
+
+        CLASS_KEYWORD       // class
+        STRUCT_KEYWORD      // struct
+        FUNCTION_KEYWORD    // function
+
+        LET_KEYWORD         // let
+
+        IF_KEYWORD          // if
+        ELSE_KEYWORD        // else
+
+        WHILE_KEYWORD       // while
+        FOR_KEYWORD         // for
+        LOOP_KEYWORD        // loop
+
+        RETURN_KEYWORD      // return
+        THROW_KEYWORD       // throw
+        DEFER_KEYWORD       // defer
+
+        TRUE_KEYWORD        // true
+        FALSE_KEYWORD       // false
+
+        MUTABLE_KEYWORD     // mutable
+        ANONYMOUS_KEYWORD   // anonymous
+        RAW_KEYWORD         // raw
+        THROWS_KEYWORD      // throws
+
+        PAREN_OPEN          // (
+        PAREN_CLOSE         // )
+        CURLY_OPEN          // {
+        CURLY_CLOSE         // }
+        BRACKET_OPEN        // [
+        BRACKET_CLOSE       // ]
+        COLON               // :
+        COLON_COLON         // ::
+        SEMICOLON           // ;
+        DOT                 // .
+        DOT_DOT             // ..
+        COMMA               // ,
+        EQUALS              // =
+        PLUS                // +
+        MINUS               // -
+        ASTERISK            // *
+        SLASH               // /
+        ARROW               // ->
+        FAT_ARROW           // =>
+        QUESTION_MARK       // ?
+        EXCLAMATION_POINT   // !
+        LESS_THAN           // <
+        LESS_THAN_EQUALS    // <=
+        GREATER_THAN        // >
+        GREATER_THAN_EQUALS // >=
+        // DOUBLE_QUOTE        // "
+        SINGLE_QUOTE        // '
+        AMPERSAND           // &
+
+        STRING_LITERAL      // "foo"
+
+        SPACE
+        COMMENT=""
+        IDENTIFIER
+    ]
+}
+
+root ::= [ ( ExternFunctionDeclaration | ExternStructDeclaration | FunctionDeclaration | ClassDeclaration | StructDeclaration ) * ]
+
+Expression ::= AssignmentExpression | ExpressionWithoutAssignment
+ExpressionWithoutAssignment ::= Literal | BinaryExpression | CallExpression | RangeExpression | Qualifier
+Qualifier ::= MemberExpression | StaticMemberExpression | ComputedMemberExpression | IDENTIFIER
+
+Statement ::=
+    Block |
+    Expression |
+    ReturnStatement |
+    ThrowStatement |
+    DeferStatement |
+    IfStatement |
+    WhileStatement |
+    LoopStatement |
+    ForStatement |
+    VariableDeclarationStatement
+Block ::= CURLY_OPEN [ Statement * ] CURLY_CLOSE
+
+// Types
+Type ::= ArrayType | GenericType | ( RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ] )
+
+GenericType ::= IDENTIFIER LESS_THAN Type GREATER_THAN
+ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
+TypeAnnotation ::= COLON Type
+
+// Declarations
+FunctionReturnType ::= THROWS_KEYWORD? [ ARROW Type ]
+
+ExternFunctionDeclaration ::= EXTERN_KEYWORD FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
+ExternStructDeclaration ::= EXTERN_KEYWORD STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE FunctionReturnType?
+
+FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression )
+ClassDeclaration ::= CLASS_KEYWORD IDENTIFIER CURLY_OPEN [ ( FunctionDeclaration | FieldDeclaration ) * ] CURLY_CLOSE
+StructDeclaration ::= STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE
+
+// Fields
+FieldDeclarationList ::= <<list FieldDeclaration>>
+FieldDeclaration ::= IDENTIFIER TypeAnnotation
+
+// Expressions
+MemberExpression ::= IDENTIFIER DOT IDENTIFIER
+StaticMemberExpression ::= IDENTIFIER COLON_COLON IDENTIFIER
+ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN ExpressionWithoutAssignment BRACKET_CLOSE
+CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
+AssignmentExpression ::= Qualifier EQUALS Expression
+
+BinaryExpression ::= Expression BinaryOperand Expression
+BinaryOperand ::= LESS_THAN | LESS_THAN_EQUALS | GREATER_THAN | GREATER_THAN_EQUALS | AMPERSAND | PLUS | MINUS | ASTERISK | SLASH
+
+RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
+
+// Statements
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
+IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Statement [ ELSE_KEYWORD Statement ]
+ReturnStatement ::= RETURN_KEYWORD Expression?
+ThrowStatement ::= THROW_KEYWORD Expression
+DeferStatement ::= DEFER_KEYWORD Statement
+WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Statement
+LoopStatement ::= LOOP_KEYWORD Statement
+
+// FIXME: Properly implement for loop
+ForStatement ::= FOR_KEYWORD ExpressionWithoutAssignment Statement
+
+// Parameters
+ParameterList ::= <<list Parameter>>
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
+
+// Arguments
+ArgumentList ::= <<list Argument>>
+Argument ::= LabeledArgument | UnlabeledArgument
+
+LabeledArgument ::= IDENTIFIER COLON Expression
+UnlabeledArgument ::= Expression
+
+// Literals
+Literal ::= STRING_LITERAL | NumericLiteral | CharacterLiteral | BooleanLiteral
+
+CharacterLiteral ::= SINGLE_QUOTE "t" SINGLE_QUOTE
+BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
+
+BinaryDigit ::= "0" | "1"
+BinaryNumericLiteral ::= "0b" BinaryDigit*
+
+NumericLiteral ::= BinaryNumericLiteral
+
+// Helpers
+private meta list ::= <<p>> (COMMA <<p>>) *

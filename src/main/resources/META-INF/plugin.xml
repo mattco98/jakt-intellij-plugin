@@ -8,11 +8,19 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType
-                name="Jakt File"
-                implementationClass="org.serenityos.jakt.JaktLanguage$FileType"
+                name="Jakt file"
+                implementationClass="org.serenityos.jakt.JaktFile$Type"
                 fieldName="INSTANCE"
                 language="Jakt"
                 extensions="jakt"
+        />
+        <lang.parserDefinition
+            language="Jakt"
+            implementationClass="org.serenityos.jakt.JaktParserDefinition"
+        />
+        <lang.syntaxHighlighterFactory
+            language="Jakt"
+            implementationClass="org.serenityos.jakt.JaktSyntaxHighlighterFactory"
         />
     </extensions>
 </idea-plugin>
