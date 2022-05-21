@@ -1,4 +1,4 @@
-package org.serenityos.jakt.types
+package org.serenityos.jakt.bindings.types
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -11,7 +11,7 @@ sealed class ParseResult {
     object Serializer : KSerializer<ParseResult> by rustEnumSerializer()
 
     @Serializable
-    class Error(val error: org.serenityos.jakt.types.Error) : ParseResult()
+    class Error(val error: org.serenityos.jakt.bindings.types.Error) : ParseResult()
 
     @Serializable
     class File(val file: ParsedFile) : ParseResult()

@@ -1,4 +1,4 @@
-package org.serenityos.jakt.types
+package org.serenityos.jakt.bindings.types
 
 import kotlinx.serialization.*
 
@@ -169,7 +169,7 @@ sealed class Expression {
 
     data class Array(val values: List<TExpression>, val fillSize: TExpression?, override val span: Span) : Expression()
 
-    data class Dictionary(val values: List<org.serenityos.jakt.types.Tuple<TExpression, TExpression>>, override val span: Span) : Expression()
+    data class Dictionary(val values: List<org.serenityos.jakt.bindings.types.Tuple<TExpression, TExpression>>, override val span: Span) : Expression()
 
     data class Set(val values: List<TExpression>, override val span: Span) : Expression()
 

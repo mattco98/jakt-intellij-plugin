@@ -1,4 +1,4 @@
-package org.serenityos.jakt.types
+package org.serenityos.jakt.bindings.types
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

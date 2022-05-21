@@ -1,11 +1,11 @@
-package org.serenityos.jakt.jna
+package org.serenityos.jakt.bindings
 
 import com.sun.jna.Library
 import com.sun.jna.Native
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
-import org.serenityos.jakt.types.LexResult
-import org.serenityos.jakt.types.ParseResult
+import org.serenityos.jakt.bindings.types.LexResult
+import org.serenityos.jakt.bindings.types.ParseResult
 import java.io.File
 
 interface JaktC : Library {
