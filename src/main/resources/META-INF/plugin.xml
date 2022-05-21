@@ -1,0 +1,18 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>org.serenityos.jakt</id>
+    <name>Jakt</name>
+    <vendor>SerenityOS</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+                name="Jakt File"
+                implementationClass="org.serenityos.jakt.JaktLanguage$FileType"
+                fieldName="INSTANCE"
+                language="Jakt"
+                extensions="jakt"
+        />
+    </extensions>
+</idea-plugin>
