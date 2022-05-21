@@ -22,5 +22,8 @@
             language="Jakt"
             implementationClass="org.serenityos.jakt.JaktSyntaxHighlighterFactory"
         />
+        <colorSettingsPage
+            implementation="org.serenityos.jakt.JaktColorSettingsPage"
+        />
     </extensions>
 </idea-plugin>

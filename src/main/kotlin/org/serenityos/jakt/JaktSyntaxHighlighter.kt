@@ -11,24 +11,24 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 import org.serenityos.jakt.JaktTypes.*
 
-val HIGHLIGHT_DOT = arrayOf(createTextAttributesKey("JAKT_DOT", DefaultLanguageHighlighterColors.DOT))
-val HIGHLIGHT_COMMA = arrayOf(createTextAttributesKey("JAKT_COMMA", DefaultLanguageHighlighterColors.COMMA))
-val HIGHLIGHT_IDENTIFIER = arrayOf(createTextAttributesKey("JAKT_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER))
-val HIGHLIGHT_STRING = arrayOf(createTextAttributesKey("JAKT_STRING", DefaultLanguageHighlighterColors.STRING))
-val HIGHLIGHT_OPERATION_SIGN = arrayOf(createTextAttributesKey("JAKT_OPERATION_SIGN", DefaultLanguageHighlighterColors.OPERATION_SIGN))
-val HIGHLIGHT_KEYWORD = arrayOf(createTextAttributesKey("JAKT_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD))
-val HIGHLIGHT_COMMENT = arrayOf(createTextAttributesKey("JAKT_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT))
-val HIGHLIGHT_NUMBER = arrayOf(createTextAttributesKey("JAKT_NUMBER", DefaultLanguageHighlighterColors.NUMBER))
+val HIGHLIGHT_DOT = createTextAttributesKey("JAKT_DOT", DefaultLanguageHighlighterColors.DOT)
+val HIGHLIGHT_COMMA = createTextAttributesKey("JAKT_COMMA", DefaultLanguageHighlighterColors.COMMA)
+val HIGHLIGHT_IDENTIFIER = createTextAttributesKey("JAKT_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER)
+val HIGHLIGHT_STRING = createTextAttributesKey("JAKT_STRING", DefaultLanguageHighlighterColors.STRING)
+val HIGHLIGHT_OPERATION_SIGN = createTextAttributesKey("JAKT_OPERATION_SIGN", DefaultLanguageHighlighterColors.OPERATION_SIGN)
+val HIGHLIGHT_KEYWORD = createTextAttributesKey("JAKT_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
+val HIGHLIGHT_COMMENT = createTextAttributesKey("JAKT_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT)
+val HIGHLIGHT_NUMBER = createTextAttributesKey("JAKT_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
 
-val HIGHLIGHT_PARENTHESES = arrayOf(createTextAttributesKey("JAKT_PARENTHESES", DefaultLanguageHighlighterColors.PARENTHESES))
-val HIGHLIGHT_BRACES = arrayOf(createTextAttributesKey("JAKT_BRACES", DefaultLanguageHighlighterColors.BRACES))
-val HIGHLIGHT_BRACKETS = arrayOf(createTextAttributesKey("JAKT_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS))
+val HIGHLIGHT_PARENTHESES = createTextAttributesKey("JAKT_PARENTHESES", DefaultLanguageHighlighterColors.PARENTHESES)
+val HIGHLIGHT_BRACES = createTextAttributesKey("JAKT_BRACES", DefaultLanguageHighlighterColors.BRACES)
+val HIGHLIGHT_BRACKETS = createTextAttributesKey("JAKT_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS)
 
 class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer(): Lexer = JaktLexerAdapter()
 
-    override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> =
-        when (tokenType) {
+    override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> {
+        return when (tokenType) {
             EXTERN_KEYWORD,
 
             CLASS_KEYWORD,
@@ -70,6 +70,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             DOT_DOT -> HIGHLIGHT_DOT
 
             COMMA -> HIGHLIGHT_COMMA
+
             EQUALS,
             PLUS,
             MINUS,
@@ -81,8 +82,10 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             STRING_LITERAL -> HIGHLIGHT_STRING
             COMMENT -> HIGHLIGHT_COMMENT
-            else -> TextAttributesKey.EMPTY_ARRAY
-        }
+
+            else -> return emptyArray()
+        }.let { arrayOf(it) }
+    }
 }
 
 class JaktSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
