@@ -25,5 +25,9 @@
         <colorSettingsPage
             implementation="org.serenityos.jakt.JaktColorSettingsPage"
         />
+        <externalAnnotator
+            language="Jakt"
+            implementationClass="org.serenityos.jakt.JaktAnnotator"
+        />
     </extensions>
 </idea-plugin>
