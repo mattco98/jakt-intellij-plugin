@@ -48,6 +48,10 @@ tasks {
         }
     }
 
+    compileKotlin {
+        dependsOn(generateParser, generateLexer)
+    }
+
     generateParser {
         source.set("src/main/resources/grammar/Jakt.bnf")
 
