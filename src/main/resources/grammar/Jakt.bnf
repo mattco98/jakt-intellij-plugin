@@ -12,7 +12,7 @@
     elementTypeClass="org.serenityos.jakt.JaktElement"
     tokenTypeClass="org.serenityos.jakt.JaktToken"
 
-    extends(".*Expression")=Expression
+    parserUtilClass="org.serenityos.jakt.JaktParserUtil"
 
     tokens=[
         EXTERN_KEYWORD='extern'
@@ -55,6 +55,7 @@
         DOT_DOT='..'
         COMMA=','
         EQUALS='='
+        DOUBLE_EQUALS='=='
         NOT_EQUALS='!='
         PLUS='+'
         MINUS='-'
@@ -68,44 +69,96 @@
         ARROW='->'
         FAT_ARROW='=>'
         QUESTION_MARK='?'
+        DOUBLE_QUESTION_MARK='??'
         EXCLAMATION_POINT='!'
         LESS_THAN='<'
         LESS_THAN_EQUALS='<='
         GREATER_THAN='>'
         GREATER_THAN_EQUALS='>='
         AMPERSAND='&'
+        PIPE='|'
+        CARET='^'
+        AND='and'
+        OR='or'
 
-        STRING_LITERAL="regexp:(\"([^'\\]|\\.)*\")"
-        CHARACTER_LITERAL="regexp:('([^'\\]|\\.)*')"
+        HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*"
+        BINARY_LITERAL="regexp:(0b|0B)[01](_?[01])*"
+        DECIMAL_LITERAL="regexp:\d(_?\d)*"
 
-        BINARY_DIGIT="regexp:[01]"
-        DECIMAL_DIGIT="regexp:\d"
-        HEX_DIGIT="regexp:[\dA-Fa-f]"
+        STRING_LITERAL="regexp:\"([^\"\\]|\\.)*\""
+        CHAR_LITERAL="regexp:'([^'\\]|\\.)*'"
+        IDENTIFIER="regexp:[A-Za-z_]\w*"
 
-        SPACE
-        COMMENT=""
-        IDENTIFIER
+        SPACE="regexp:[ \t\n\x0B\f\r]+"
+        COMMENT="regexp://[^\\R]*"
     ]
+
+    extends(".+BinaryExpression")=BinaryExpression
+    extends(".+Expression")=Expression
+    extends(".+Statement")=Statement
 }
 
-root ::= (ExternFunctionDeclaration | ExternStructDeclaration | FunctionDeclaration | ClassDeclaration | StructDeclaration)*
+File ::= TopLevelDefinition*
 
-Expression ::= AssignmentExpression | ExpressionWithoutAssignment
-ExpressionWithoutAssignment ::= Literal | BinaryExpression | CallExpression | RangeExpression | Qualifier
-Qualifier ::= MemberExpression | StaticMemberExpression | ComputedMemberExpression | IDENTIFIER
+private TopLevelDefinition ::=
+      ExternFunctionDeclaration
+    | ExternStructDeclaration
+    | FunctionDeclaration
+    | ClassDeclaration
+    | StructDeclaration
+    {recoverWhile=TopLevelDefinition_recover}
+
+private TopLevelDefinition_recover ::= !(EXTERN_KEYWORD | FUNCTION_KEYWORD | CLASS_KEYWORD | STRUCT_KEYWORD)
+
+Qualifier ::=
+      MemberExpression
+    | StaticMemberExpression
+    | ComputedMemberExpression
+    | IDENTIFIER
+    {extends=Expression}
 
 Statement ::=
-    Block |
-    Expression |
-    ReturnStatement |
-    ThrowStatement |
-    DeferStatement |
-    IfStatement |
-    WhileStatement |
-    LoopStatement |
-    ForStatement |
-    VariableDeclarationStatement
-Block ::= CURLY_OPEN Statement* CURLY_CLOSE
+      Expression
+    | ReturnStatement
+    | ThrowStatement
+    | DeferStatement
+    | IfStatement
+    | WhileStatement
+    | LoopStatement
+    | ForStatement
+    | VariableDeclarationStatement
+
+private StatementLead ::=
+      EXTERN_KEYWORD
+    | CLASS_KEYWORD
+    | STRUCT_KEYWORD
+    | FUNCTION_KEYWORD
+    | LET_KEYWORD
+    | WHILE_KEYWORD
+    | FOR_KEYWORD
+    | LOOP_KEYWORD
+    | RETURN_KEYWORD
+    | THROW_KEYWORD
+    | DEFER_KEYWORD
+    | THROWS_KEYWORD
+    | SEMICOLON
+
+private ExpressionLead ::=
+      IF_KEYWORD
+    | TRUE_KEYWORD
+    | FALSE_KEYWORD
+    | PAREN_OPEN
+    | PAREN_CLOSE
+    | CURLY_OPEN
+    | CURLY_CLOSE
+    | BRACKET_OPEN
+    | BRACKET_CLOSE
+    | PLUS
+    | MINUS
+    | EXCLAMATION_POINT
+    | STRING_LITERAL
+    | CHAR_LITERAL
+    | Literal
 
 // Types
 Type ::= ArrayType | GenericType | ( RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ] )
@@ -115,7 +168,7 @@ ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
 TypeAnnotation ::= COLON Type
 
 // Declarations
-FunctionReturnType ::= THROWS_KEYWORD? [ ARROW Type ]
+FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
 ExternStructDeclaration ::= EXTERN_KEYWORD STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE FunctionReturnType?
@@ -129,28 +182,69 @@ FieldDeclarationList ::= <<list FieldDeclaration>>
 FieldDeclaration ::= IDENTIFIER TypeAnnotation
 
 // Expressions
+Expression ::=
+      LogicalOrBinaryExpression
+    | LogicalAndBinaryExpression
+    | BitwiseOrBinaryExpression
+    | BitwiseXorBinaryExpression
+    | BitwiseAndBinaryExpression
+    | RelationalBinaryExpression
+    | ShiftBinaryExpression
+    | AddBinaryExpression
+    | MultiplyBinaryExpression
+    | AssignmentBinaryExpression
+    | ParenExpression
+    | CallExpression
+    | RangeExpression
+    | Literal
+    | Qualifier
+    | Block
+
 MemberExpression ::= IDENTIFIER DOT IDENTIFIER
 StaticMemberExpression ::= IDENTIFIER COLON_COLON IDENTIFIER
-ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN ExpressionWithoutAssignment BRACKET_CLOSE
+ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
-AssignmentExpression ::= Qualifier EQUALS Expression
-
-BinaryExpression ::= ExpressionWithoutAssignment BinaryOperand ExpressionWithoutAssignment
-BinaryOperand ::= LESS_THAN | LESS_THAN_EQUALS | GREATER_THAN | GREATER_THAN_EQUALS | AMPERSAND | PLUS | MINUS | ASTERISK | SLASH
-
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
+ParenExpression ::= PAREN_OPEN <<enterMode "PAREN">> Expression <<exitMode "PAREN">> PAREN_CLOSE
+
+fake BinaryExpression ::= Expression+ {
+    methods=[left="Expression[0]" right="Expression[1]"]
+}
+
+LogicalOrBinaryExpression ::= Expression LogicalOrOp Expression
+LogicalAndBinaryExpression ::= Expression AND Expression
+BitwiseOrBinaryExpression ::= Expression PIPE Expression
+BitwiseXorBinaryExpression ::= Expression CARET Expression
+BitwiseAndBinaryExpression ::= Expression AMPERSAND Expression
+RelationalBinaryExpression ::= Expression RelationalOp Expression
+ShiftBinaryExpression ::= Expression ShiftOp Expression
+AddBinaryExpression ::= Expression AddOp Expression
+MultiplyBinaryExpression ::= Expression MultiplyOp Expression
+AssignmentBinaryExpression ::= <<isModeOff "PAREN">> Qualifier AssignmentOp Expression {rightAssociative=true}
+
+private AddOp ::= PLUS | MINUS
+private MultiplyOp ::= ASTERISK | SLASH | PERCENT
+private ShiftOp ::= ARITH_LEFT_SHIFT | LEFT_SHIFT | ARITH_RIGHT_SHIFT | RIGHT_SHIFT
+private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GREATER_THAN | DOUBLE_EQUALS | NOT_EQUALS
+private LogicalOrOp ::= OR | DOUBLE_QUESTION_MARK
+private AssignmentOp ::= (AddOp | MultiplyOp | ShiftOp)? EQUALS
+
+Block ::= CURLY_OPEN <<withOff BlockElement* "PAREN">> CURLY_CLOSE {pin(".*")=1 extends=Expression}
+private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recover}
+// TODO: Include newlines?
+private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
 
 // Statements
 VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
-IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
-ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
-ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
+IfStatement ::= IF_KEYWORD Expression Block [ ELSE_KEYWORD Block ]
+ReturnStatement ::= RETURN_KEYWORD Expression?
+ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
-WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
+WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 
 // FIXME: Properly implement for loop
-ForStatement ::= FOR_KEYWORD ExpressionWithoutAssignment Statement
+ForStatement ::= FOR_KEYWORD Expression Statement
 
 // Parameters
 ParameterList ::= <<list Parameter>>
@@ -164,17 +258,19 @@ LabeledArgument ::= IDENTIFIER COLON Expression
 UnlabeledArgument ::= Expression
 
 // Literals
-Literal ::= STRING_LITERAL | CHARACTER_LITERAL | NumericLiteral |  BooleanLiteral
+Literal ::=
+      STRING_LITERAL
+    | CHAR_LITERAL
+    | NumericLiteral
+    | BooleanLiteral
+    {extends=Expression}
 
 BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
 
-// TODO: The lexer allows leading underscores, but I assume that's a bug
-// TODO: Disallow repeated underscores
-BinaryNumericLiteral ::= "0b" BINARY_DIGIT ('_'? BINARY_DIGIT)*
-DecimalNumericLiteral ::= DECIMAL_DIGIT ('_'? DECIMAL_DIGIT)*
-HexNumericLiteral ::= "0x" HEX_DIGIT
-
-NumericLiteral ::= BinaryNumericLiteral | DecimalNumericLiteral | HexNumericLiteral
+NumericLiteral ::=
+      BINARY_LITERAL
+    | HEX_LITERAL
+    | DECIMAL_LITERAL
 
 // Helpers
 private meta list ::= <<p>> (COMMA <<p>>) *
