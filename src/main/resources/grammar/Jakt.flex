@@ -74,10 +74,16 @@ STRING_LITERAL=\"([^\"\\]|\\[\s\S])*\"
     ".."               { return DOT_DOT; }
     ","                { return COMMA; }
     "="                { return EQUALS; }
+    "!="               { return NOT_EQUALS; }
     "+"                { return PLUS; }
     "-"                { return MINUS; }
     "*"                { return ASTERISK; }
     "/"                { return SLASH; }
+    "%"                { return PERCENT; }
+    "<<"               { return LEFT_SHIFT; }
+    ">>"               { return RIGHT_SHIFT; }
+    "<<<"              { return ARITH_LEFT_SHIFT; }
+    ">>>"              { return ARITH_RIGHT_SHIFT; }
     "->"               { return ARROW; }
     "=>"               { return FAT_ARROW; }
     "?"                { return QUESTION_MARK; }

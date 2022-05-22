@@ -12,64 +12,75 @@
     elementTypeClass="org.serenityos.jakt.JaktElement"
     tokenTypeClass="org.serenityos.jakt.JaktToken"
 
+    extends(".*Expression")=Expression
+
     tokens=[
-        EXTERN_KEYWORD      // extern
+        EXTERN_KEYWORD='extern'
 
-        CLASS_KEYWORD       // class
-        STRUCT_KEYWORD      // struct
-        FUNCTION_KEYWORD    // function
+        CLASS_KEYWORD='class'
+        STRUCT_KEYWORD='struct'
+        FUNCTION_KEYWORD='function'
 
-        LET_KEYWORD         // let
+        LET_KEYWORD='let'
 
-        IF_KEYWORD          // if
-        ELSE_KEYWORD        // else
+        IF_KEYWORD='if'
+        ELSE_KEYWORD='else'
 
-        WHILE_KEYWORD       // while
-        FOR_KEYWORD         // for
-        LOOP_KEYWORD        // loop
+        WHILE_KEYWORD='while'
+        FOR_KEYWORD='for'
+        LOOP_KEYWORD='loop'
 
-        RETURN_KEYWORD      // return
-        THROW_KEYWORD       // throw
-        DEFER_KEYWORD       // defer
+        RETURN_KEYWORD='return'
+        THROW_KEYWORD='throw'
+        DEFER_KEYWORD='defer'
 
-        TRUE_KEYWORD        // true
-        FALSE_KEYWORD       // false
+        TRUE_KEYWORD='true'
+        FALSE_KEYWORD='false'
 
-        MUTABLE_KEYWORD     // mutable
-        ANONYMOUS_KEYWORD   // anonymous
-        RAW_KEYWORD         // raw
-        THROWS_KEYWORD      // throws
+        MUTABLE_KEYWORD='mutable'
+        ANONYMOUS_KEYWORD='anonymous'
+        RAW_KEYWORD='raw'
+        THROWS_KEYWORD='throws'
 
-        PAREN_OPEN          // (
-        PAREN_CLOSE         // )
-        CURLY_OPEN          // {
-        CURLY_CLOSE         // }
-        BRACKET_OPEN        // [
-        BRACKET_CLOSE       // ]
-        COLON               // :
-        COLON_COLON         // ::
-        SEMICOLON           // ;
-        DOT                 // .
-        DOT_DOT             // ..
-        COMMA               // ,
-        EQUALS              // =
-        PLUS                // +
-        MINUS               // -
-        ASTERISK            // *
-        SLASH               // /
-        ARROW               // ->
-        FAT_ARROW           // =>
-        QUESTION_MARK       // ?
-        EXCLAMATION_POINT   // !
-        LESS_THAN           // <
-        LESS_THAN_EQUALS    // <=
-        GREATER_THAN        // >
-        GREATER_THAN_EQUALS // >=
-        // DOUBLE_QUOTE        // "
-        SINGLE_QUOTE        // '
-        AMPERSAND           // &
+        PAREN_OPEN='('
+        PAREN_CLOSE=')'
+        CURLY_OPEN='{'
+        CURLY_CLOSE='}'
+        BRACKET_OPEN='['
+        BRACKET_CLOSE=']'
+        COLON=':'
+        COLON_COLON='::'
+        SEMICOLON=';'
+        DOT='.'
+        DOT_DOT='..'
+        COMMA=','
+        EQUALS='='
+        NOT_EQUALS='!='
+        PLUS='+'
+        MINUS='-'
+        ASTERISK='*'
+        SLASH='/'
+        LEFT_SHIFT='<<'
+        RIGHT_SHIFT='>>'
+        ARITH_LEFT_SHIFT='<<<'
+        ARITH_RIGHT_SHIFT='>>>'
+        PERCENT='%'
+        ARROW='->'
+        FAT_ARROW='=>'
+        QUESTION_MARK='?'
+        EXCLAMATION_POINT='!'
+        LESS_THAN='<'
+        LESS_THAN_EQUALS='<='
+        GREATER_THAN='>'
+        GREATER_THAN_EQUALS='>='
+        AMPERSAND='&'
 
-        STRING_LITERAL      // "foo"
+        STRING_LITERAL="regexp:(\"([^'\\]|\\.)*\")"
+        CHARACTER_LITERAL="regexp:('([^'\\]|\\.)*')"
+
+        BINARY_DIGIT="regexp:[01]"
+        DECIMAL_DIGIT="regexp:\d"
+        HEX_DIGIT="regexp:[\dA-Fa-f]"
 
         SPACE
         COMMENT=""
@@ -77,7 +88,7 @@
     ]
 }
 
-root ::= [ ( ExternFunctionDeclaration | ExternStructDeclaration | FunctionDeclaration | ClassDeclaration | StructDeclaration ) * ]
+root ::= (ExternFunctionDeclaration | ExternStructDeclaration | FunctionDeclaration | ClassDeclaration | StructDeclaration)*
 
 Expression ::= AssignmentExpression | ExpressionWithoutAssignment
 ExpressionWithoutAssignment ::= Literal | BinaryExpression | CallExpression | RangeExpression | Qualifier
@@ -94,7 +105,7 @@ Statement ::=
     LoopStatement |
     ForStatement |
     VariableDeclarationStatement
-Block ::= CURLY_OPEN [ Statement * ] CURLY_CLOSE
+Block ::= CURLY_OPEN Statement* CURLY_CLOSE
 
 // Types
 Type ::= ArrayType | GenericType | ( RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ] )
@@ -110,7 +121,7 @@ ExternFunctionDeclaration ::= EXTERN_KEYWORD FUNCTION_KEYWORD IDENTIFIER PAREN_O
 ExternStructDeclaration ::= EXTERN_KEYWORD STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE FunctionReturnType?
 
 FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression )
-ClassDeclaration ::= CLASS_KEYWORD IDENTIFIER CURLY_OPEN [ ( FunctionDeclaration | FieldDeclaration ) * ] CURLY_CLOSE
+ClassDeclaration ::= CLASS_KEYWORD IDENTIFIER CURLY_OPEN ( FunctionDeclaration | FieldDeclaration )* CURLY_CLOSE
 StructDeclaration ::= STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE
 
 // Fields
@@ -124,19 +135,19 @@ ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN ExpressionWithoutAssignment
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
 AssignmentExpression ::= Qualifier EQUALS Expression
 
-BinaryExpression ::= Expression BinaryOperand Expression
+BinaryExpression ::= ExpressionWithoutAssignment BinaryOperand ExpressionWithoutAssignment
 BinaryOperand ::= LESS_THAN | LESS_THAN_EQUALS | GREATER_THAN | GREATER_THAN_EQUALS | AMPERSAND | PLUS | MINUS | ASTERISK | SLASH
 
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 
 // Statements
 VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
-IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Statement [ ELSE_KEYWORD Statement ]
-ReturnStatement ::= RETURN_KEYWORD Expression?
-ThrowStatement ::= THROW_KEYWORD Expression
+IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
+ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
+ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
 DeferStatement ::= DEFER_KEYWORD Statement
-WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Statement
-LoopStatement ::= LOOP_KEYWORD Statement
+WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
+LoopStatement ::= LOOP_KEYWORD Block
 
 // FIXME: Properly implement for loop
 ForStatement ::= FOR_KEYWORD ExpressionWithoutAssignment Statement
@@ -153,15 +164,17 @@ LabeledArgument ::= IDENTIFIER COLON Expression
 UnlabeledArgument ::= Expression
 
 // Literals
-Literal ::= STRING_LITERAL | NumericLiteral | CharacterLiteral | BooleanLiteral
+Literal ::= STRING_LITERAL | CHARACTER_LITERAL | NumericLiteral |  BooleanLiteral
 
-CharacterLiteral ::= SINGLE_QUOTE "t" SINGLE_QUOTE
 BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
 
-BinaryDigit ::= "0" | "1"
-BinaryNumericLiteral ::= "0b" BinaryDigit*
+// TODO: The lexer allows leading underscores, but I assume that's a bug
+// TODO: Disallow repeated underscores
+BinaryNumericLiteral ::= "0b" BINARY_DIGIT ('_'? BINARY_DIGIT)*
+DecimalNumericLiteral ::= DECIMAL_DIGIT ('_'? DECIMAL_DIGIT)*
+HexNumericLiteral ::= "0x" HEX_DIGIT
 
-NumericLiteral ::= BinaryNumericLiteral
+NumericLiteral ::= BinaryNumericLiteral | DecimalNumericLiteral | HexNumericLiteral
 
 // Helpers
 private meta list ::= <<p>> (COMMA <<p>>) *
