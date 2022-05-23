@@ -4,35 +4,33 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
-import org.serenityos.jakt.bindings.types.LexResult
-import org.serenityos.jakt.bindings.types.ParseResult
 import java.io.File
 
+
 interface JaktC : Library {
-    fun lex(string: String): String
-    fun parse(string: String): String
+    fun typecheck(content: String): String
 
     @Suppress("UnnecessaryOptInAnnotation")
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
         private val INSTANCE = Native.load("/libjakt.so", JaktC::class.java) as JaktC
 
-        fun lex(file: File): LexResult {
+        fun typecheck(file: File): TypecheckResult {
             require(file.exists())
-            return lex(file.readText())
+            return typecheck(file.readText())
         }
 
-        fun lex(string: String): LexResult {
-            return Json.decodeFromString(INSTANCE.lex(string))
-        }
-
-        fun parse(file: File): ParseResult {
-            require(file.exists())
-            return parse(file.readText())
-        }
-
-        fun parse(string: String): ParseResult {
-            return Json.decodeFromString(INSTANCE.parse(string))
+        fun typecheck(content: String): TypecheckResult {
+            return Json.decodeFromString(INSTANCE.typecheck(content))
         }
     }
+}
+
+fun main() {
+    val result = JaktC.typecheck("""
+        function main() {
+            let a = b
+            return 2
+        }
+    """.trimIndent())
 }

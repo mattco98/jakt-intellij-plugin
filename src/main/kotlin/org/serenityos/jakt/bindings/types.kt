@@ -1,4 +1,4 @@
-package org.serenityos.jakt.bindings.types
+package org.serenityos.jakt.bindings
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -11,9 +11,68 @@ typealias ScopeId = Int
 typealias TypeId = Int
 
 @Serializable
+data class Span(@SerialName("file_id") val fileId: Int, val start: Int, val end: Int)
+
+@Serializable
 enum class SafetyMode {
     Safe,
     Unsafe,
+}
+
+@Serializable
+enum class DefinitionLinkage {
+    Internal,
+    External,
+}
+
+@Serializable
+enum class DefinitionType {
+    Class,
+    Struct,
+}
+
+@Serializable
+enum class FunctionLinkage {
+    Internal,
+    External,
+    ImplicitConstructor,
+    ImplicitEnumConstructor,
+}
+
+@Serializable
+enum class BinaryOperator {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
+    Equal,
+    NotEqual,
+    LessThan,
+    GreaterThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+    LogicalAnd,
+    LogicalOr,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseLeftShift,
+    BitwiseRightShift,
+    ArithmeticLeftShift,
+    ArithmeticRightShift,
+    Assign,
+    AddAssign,
+    SubtractAssign,
+    MultiplyAssign,
+    DivideAssign,
+    ModuloAssign,
+    BitwiseAndAssign,
+    BitwiseOrAssign,
+    BitwiseXorAssign,
+    BitwiseLeftShiftAssign,
+    BitwiseRightShiftAssign,
+    NoneCoalescing,
 }
 
 @Serializable(with = Type.Serializer::class)
@@ -88,7 +147,7 @@ sealed class CheckedEnumVariant {
 
     data class WithValue(
         override val name: String,
-        val value: Expression,
+        val value: CheckedExpression,
         override val span: Span,
     ) : CheckedEnumVariant()
 
@@ -304,6 +363,9 @@ sealed class CheckedMatchCase {
     ) : CheckedMatchCase()
 }
 
+typealias TBoolean = Boolean
+typealias TNumericConstant = NumericConstant
+
 @Serializable(with = CheckedExpression.Serializer::class)
 sealed class CheckedExpression {
     abstract val span: Span
@@ -391,7 +453,7 @@ sealed class CheckedExpression {
 
     data class Match(
         val target: CheckedExpression,
-        val cases: List<MatchCase>,
+        val cases: List<CheckedMatchCase>,
         override val span: Span,
         val type: TypeId,
     ) : CheckedExpression()

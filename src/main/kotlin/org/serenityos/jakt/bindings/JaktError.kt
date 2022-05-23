@@ -1,7 +1,6 @@
-package org.serenityos.jakt.bindings.types
+package org.serenityos.jakt.bindings
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable(with = JaktError.Serializer::class)

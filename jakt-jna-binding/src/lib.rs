@@ -2,63 +2,44 @@ extern crate libc;
 extern crate core;
 
 use std::ffi::{CStr, CString};
-use std::path::Path;
 use serde_derive::Serialize;
 use jakt::{JaktError, lexer, parser};
-use jakt::lexer::Token;
-use jakt::parser::ParsedFile;
+use jakt::typechecker::{Project, typecheck_namespace};
 use libc::c_char;
-use serde::Serialize;
 
 #[derive(Serialize)]
-struct LexResult {
-    tokens: Vec<Token>,
-    error: Option<JaktError>,
+enum TypecheckResult {
+    ParseError(JaktError),
+    TypeError(JaktError),
+    Ok(Project),
 }
 
-#[derive(Serialize)]
-enum ParseResult {
-    Error(JaktError),
-    File(ParsedFile),
-}
-
-fn lex_impl(bytes: &[u8]) -> LexResult {
+fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
     let (tokens, error) = lexer::lex(0, bytes);
-    LexResult { tokens, error }
-}
+    if let Some(error) = error {
+        return TypecheckResult::ParseError(error)
+    };
 
-fn parse_impl(bytes: &[u8]) -> ParseResult {
-    let result = lex_impl(bytes);
-    if result.error.is_some() {
-        return ParseResult::Error(result.error.unwrap())
+    let (namespace, error) = parser::parse_namespace(tokens.as_slice(), &mut 0);
+    if let Some(error) = error {
+        return TypecheckResult::ParseError(error)
     }
 
-    let (file, error) = parser::parse_file(result.tokens.as_slice());
-
-    if error.is_some() {
-        return ParseResult::Error(error.unwrap());
+    let mut project = Project::new();
+    match typecheck_namespace(&namespace, 0, &mut project) {
+        Some(error) => TypecheckResult::TypeError(error),
+        _ => TypecheckResult::Ok(project)
     }
-
-    ParseResult::File(file)
 }
 
-fn serialize<T: Serialize>(string: *const c_char, action: fn(&[u8]) -> T) -> *mut c_char {
+#[no_mangle]
+pub fn typecheck(string: *const c_char) -> *mut c_char {
     let string = unsafe {
         assert!(!string.is_null());
         CStr::from_ptr(string)
     };
 
-    let parsed_result = action(string.to_bytes());
-    let serialized_result = serde_json::to_string(&parsed_result).unwrap();
+    let result = typecheck_result(string.to_bytes());
+    let serialized_result = serde_json::to_string(&result).unwrap();
     CString::new(serialized_result).unwrap().into_raw()
-}
-
-#[no_mangle]
-pub extern fn lex(string: *const c_char) -> *mut c_char {
-    serialize(string, lex_impl)
-}
-
-#[no_mangle]
-pub extern fn parse(string: *const c_char) -> *mut c_char {
-    serialize(string, parse_impl)
 }
