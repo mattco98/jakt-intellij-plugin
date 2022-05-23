@@ -160,14 +160,20 @@ private ExpressionLead ::=
     | CHAR_LITERAL
     | Literal
 
-// Types
+/*************************************
+ *               TYPES               *
+ *************************************/
+
 Type ::= ArrayType | GenericType | ( RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ] )
 
 GenericType ::= IDENTIFIER LESS_THAN Type GREATER_THAN
 ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
 TypeAnnotation ::= COLON Type
 
-// Declarations
+/*************************************
+ *           Declarations            *
+ *************************************/
+
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
@@ -175,13 +181,40 @@ ExternStructDeclaration ::= EXTERN_KEYWORD STRUCT_KEYWORD IDENTIFIER CURLY_OPEN 
 
 FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression )
 ClassDeclaration ::= CLASS_KEYWORD IDENTIFIER CURLY_OPEN ( FunctionDeclaration | FieldDeclaration )* CURLY_CLOSE
-StructDeclaration ::= STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE
+StructDeclaration ::= STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclaration* CURLY_CLOSE
 
-// Fields
-FieldDeclarationList ::= <<list FieldDeclaration>>
 FieldDeclaration ::= IDENTIFIER TypeAnnotation
 
-// Expressions
+/*************************************
+ *            STATEMENTS             *
+ *************************************/
+
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
+IfStatement ::= IF_KEYWORD Expression Block [ ELSE_KEYWORD Block ]
+ReturnStatement ::= RETURN_KEYWORD Expression?
+ThrowStatement ::= THROW_KEYWORD Expression
+DeferStatement ::= DEFER_KEYWORD Statement
+WhileStatement ::= WHILE_KEYWORD Expression Block
+LoopStatement ::= LOOP_KEYWORD Block
+
+// FIXME: Properly implement for loop
+ForStatement ::= FOR_KEYWORD Expression Statement
+
+// Parameters
+ParameterList ::= <<list Parameter>>
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
+
+// Arguments
+ArgumentList ::= <<list Argument>>
+Argument ::= LabeledArgument | UnlabeledArgument
+
+LabeledArgument ::= IDENTIFIER COLON Expression
+UnlabeledArgument ::= Expression
+
+/*************************************
+ *            EXPRESSIONS            *
+ *************************************/
+
 Expression ::=
       LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
@@ -233,29 +266,6 @@ Block ::= CURLY_OPEN <<withOff BlockElement* "PAREN">> CURLY_CLOSE {pin(".*")=1 
 private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recover}
 // TODO: Include newlines?
 private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
-
-// Statements
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
-IfStatement ::= IF_KEYWORD Expression Block [ ELSE_KEYWORD Block ]
-ReturnStatement ::= RETURN_KEYWORD Expression?
-ThrowStatement ::= THROW_KEYWORD Expression
-DeferStatement ::= DEFER_KEYWORD Statement
-WhileStatement ::= WHILE_KEYWORD Expression Block
-LoopStatement ::= LOOP_KEYWORD Block
-
-// FIXME: Properly implement for loop
-ForStatement ::= FOR_KEYWORD Expression Statement
-
-// Parameters
-ParameterList ::= <<list Parameter>>
-Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
-
-// Arguments
-ArgumentList ::= <<list Argument>>
-Argument ::= LabeledArgument | UnlabeledArgument
-
-LabeledArgument ::= IDENTIFIER COLON Expression
-UnlabeledArgument ::= Expression
 
 // Literals
 Literal ::=
