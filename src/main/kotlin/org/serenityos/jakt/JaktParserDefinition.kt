@@ -13,11 +13,6 @@ import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.serenityos.jakt.parser.JaktParser
 
-val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
-val COMMENTS = TokenSet.create()
-val STRING_LITERALS = TokenSet.create(JaktTypes.STRING_LITERAL)
-
-
 class JaktParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = JaktLexerAdapter()
     override fun createParser(project: Project?): PsiParser = JaktParser()
@@ -33,5 +28,9 @@ class JaktParserDefinition : ParserDefinition {
 
     companion object {
         private val FILE = IFileElementType(JaktLanguage)
+
+        private val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
+        private val COMMENTS = TokenSet.create(JaktTypes.COMMENT)
+        private val STRING_LITERALS = TokenSet.create(JaktTypes.STRING_LITERAL)
     }
 }

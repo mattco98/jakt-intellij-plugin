@@ -31,7 +31,7 @@ DECIMAL_LITERAL=[0-9](_?[0-9])*
 STRING_LITERAL=\"([^\"\\]|\\.)*\"
 CHAR_LITERAL='([^'\\]|\\.)*'
 IDENTIFIER=[A-Za-z_]\w*
-COMMENT="//"[^\\R]*
+COMMENT="//".*
 
 %%
 <YYINITIAL> {
