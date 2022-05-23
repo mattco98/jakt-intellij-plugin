@@ -4,3 +4,4 @@ build
 src/main/gen
 src/main/resources/libjakt.so
 src/main/resources/jakt-jna-binding
+src/main/resources/testData
