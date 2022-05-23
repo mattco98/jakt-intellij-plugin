@@ -20,6 +20,8 @@
         CLASS_KEYWORD='class'
         STRUCT_KEYWORD='struct'
         FUNCTION_KEYWORD='function'
+        PUBLIC_KEYWORD='public'
+        PRIVATE_KEYWORD='private'
 
         LET_KEYWORD='let'
 
@@ -96,14 +98,15 @@
     extends(".+BinaryExpression")=BinaryExpression
     extends(".+Expression")=Expression
     extends(".+Statement")=Statement
+
+    name(".+Expression")=expression
+    name(".+Statement")=statement
 }
 
 File ::= TopLevelDefinition*
 
 private TopLevelDefinition ::=
-      ExternFunctionDeclaration
-    | ExternStructDeclaration
-    | FunctionDeclaration
+      FunctionDeclaration
     | ClassDeclaration
     | StructDeclaration
     {recoverWhile=TopLevelDefinition_recover}
@@ -164,9 +167,11 @@ private ExpressionLead ::=
  *               TYPES               *
  *************************************/
 
-Type ::= ArrayType | GenericType | ( RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ] )
+Type ::= ArrayType | GenericType | PlainType
 
-GenericType ::= IDENTIFIER LESS_THAN Type GREATER_THAN
+PlainType ::= RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
+GenericType ::= IDENTIFIER GenericBounds
+GenericBounds ::= LESS_THAN <<list Type>> GREATER_THAN
 ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
 TypeAnnotation ::= COLON Type
 
@@ -175,21 +180,28 @@ TypeAnnotation ::= COLON Type
  *************************************/
 
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
+FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression ) {pin=1}
 
-ExternFunctionDeclaration ::= EXTERN_KEYWORD FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
-ExternStructDeclaration ::= EXTERN_KEYWORD STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclarationList? CURLY_CLOSE FunctionReturnType?
+ClassDeclaration ::= EXTERN_KEYWORD? CLASS_KEYWORD IDENTIFIER GenericBounds? StructBody
+StructDeclaration ::= EXTERN_KEYWORD? STRUCT_KEYWORD IDENTIFIER GenericBounds? StructBody
+StructBody ::= CURLY_OPEN StructMembers CURLY_CLOSE
 
-FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression )
-ClassDeclaration ::= CLASS_KEYWORD IDENTIFIER CURLY_OPEN ( FunctionDeclaration | FieldDeclaration )* CURLY_CLOSE
-StructDeclaration ::= STRUCT_KEYWORD IDENTIFIER CURLY_OPEN FieldDeclaration* CURLY_CLOSE
+private StructMembers ::= StructMember (StructMemberSeparator StructMember)* {
+    pin=1
+    recoverWhile=StructMember_recover
+}
+StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
+private StructMember_recover ::= !(CURLY_CLOSE | StructMemberSeparator)
 
-FieldDeclaration ::= IDENTIFIER TypeAnnotation
+StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
+StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
+StructMemberSeparator ::= COMMA | EOL {name="comma or eol"}
 
 /*************************************
  *            STATEMENTS             *
  *************************************/
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression {pin=1}
 IfStatement ::= IF_KEYWORD Expression Block [ ELSE_KEYWORD Block ]
 ReturnStatement ::= RETURN_KEYWORD Expression?
 ThrowStatement ::= THROW_KEYWORD Expression
