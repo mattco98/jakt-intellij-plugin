@@ -42,6 +42,7 @@
         MUTABLE_KEYWORD='mutable'
         ANONYMOUS_KEYWORD='anonymous'
         RAW_KEYWORD='raw'
+        WEAK_KEYWORD='weak'
         THROWS_KEYWORD='throws'
 
         PAREN_OPEN='('
@@ -167,12 +168,23 @@ private ExpressionLead ::=
  *               TYPES               *
  *************************************/
 
-Type ::= ArrayType | GenericType | PlainType
+Type ::=
+      RawType
+    | WeakType
+    | ArrayType
+    | GenericType
+    | DictionaryType
+    | SetType
+    | PlainType
 
-PlainType ::= RAW_KEYWORD? IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
+RawType ::= RAW_KEYWORD Type
+WeakType ::= WEAK_KEYWORD Type
+PlainType ::= IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
 GenericType ::= IDENTIFIER GenericBounds
 GenericBounds ::= LESS_THAN <<list Type>> GREATER_THAN
 ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
+DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
+SetType ::= CURLY_OPEN Type CURLY_CLOSE
 TypeAnnotation ::= COLON Type
 
 /*************************************
@@ -241,6 +253,9 @@ Expression ::=
     | ParenExpression
     | CallExpression
     | RangeExpression
+    | ArrayExpression
+    | DictionaryExpression
+    | SetExpression
     | Literal
     | Qualifier
     | Block
@@ -279,7 +294,15 @@ private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recov
 // TODO: Include newlines?
 private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
 
-// Literals
+ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
+SizedArrayBody ::= Expression SEMICOLON NumericLiteral
+ElementsArrayBody ::= <<list Expression>>
+
+DictionaryExpression ::= BRACKET_OPEN <<list DictionaryElement>>? BRACKET_CLOSE
+DictionaryElement ::= Expression COLON Expression
+
+SetExpression ::= CURLY_OPEN <<list Expression>>? CURLY_CLOSE
+
 Literal ::=
       STRING_LITERAL
     | CHAR_LITERAL
