@@ -25,12 +25,3 @@ interface JaktC : Library {
         }
     }
 }
-
-fun main() {
-    val result = JaktC.typecheck("""
-        function main() {
-            let a = b
-            return 2
-        }
-    """.trimIndent())
-}

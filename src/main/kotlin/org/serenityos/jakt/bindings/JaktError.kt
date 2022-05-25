@@ -17,4 +17,11 @@ sealed class JaktError {
     class ValidationError(override val message: String, override val span: Span) : JaktError()
 
     class TypecheckError(override val message: String, override val span: Span) : JaktError()
+    
+    class TypecheckErrorWithHint(
+        override val message: String,
+        override val span: Span,
+        val hintMessage: String,
+        val hintSpan: Span,
+    ) : JaktError()
 }

@@ -11,68 +11,9 @@ typealias ScopeId = Int
 typealias TypeId = Int
 
 @Serializable
-data class Span(@SerialName("file_id") val fileId: Int, val start: Int, val end: Int)
-
-@Serializable
 enum class SafetyMode {
     Safe,
     Unsafe,
-}
-
-@Serializable
-enum class DefinitionLinkage {
-    Internal,
-    External,
-}
-
-@Serializable
-enum class DefinitionType {
-    Class,
-    Struct,
-}
-
-@Serializable
-enum class FunctionLinkage {
-    Internal,
-    External,
-    ImplicitConstructor,
-    ImplicitEnumConstructor,
-}
-
-@Serializable
-enum class BinaryOperator {
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Modulo,
-    Equal,
-    NotEqual,
-    LessThan,
-    GreaterThan,
-    LessThanOrEqual,
-    GreaterThanOrEqual,
-    LogicalAnd,
-    LogicalOr,
-    BitwiseAnd,
-    BitwiseOr,
-    BitwiseXor,
-    BitwiseLeftShift,
-    BitwiseRightShift,
-    ArithmeticLeftShift,
-    ArithmeticRightShift,
-    Assign,
-    AddAssign,
-    SubtractAssign,
-    MultiplyAssign,
-    DivideAssign,
-    ModuloAssign,
-    BitwiseAndAssign,
-    BitwiseOrAssign,
-    BitwiseXorAssign,
-    BitwiseLeftShiftAssign,
-    BitwiseRightShiftAssign,
-    NoneCoalescing,
 }
 
 @Serializable(with = Type.Serializer::class)
@@ -117,6 +58,8 @@ data class CheckedStruct(
     val definitionLinkage: DefinitionLinkage,
     @SerialName("definition_type")
     val definitionType: DefinitionType,
+    @SerialName("type_id")
+    val typeId: TypeId,
 )
 
 @Serializable
@@ -132,6 +75,8 @@ data class CheckedEnum(
     @SerialName("underlying_type")
     val underlyingType: TypeId?,
     val span: Span,
+    @SerialName("type_id")
+    val typeId: TypeId,
 )
 
 @Serializable(with = CheckedEnumVariant.Serializer::class)
@@ -143,7 +88,7 @@ sealed class CheckedEnumVariant {
 
     data class Untyped(override val name: String, override val span: Span) : CheckedEnumVariant()
 
-    data class Typed(override val name: String, val type: TypeId, override val span: Span) : CheckedEnumVariant()
+    data class Typed(override val name: String, val typeId: TypeId, override val span: Span) : CheckedEnumVariant()
 
     data class WithValue(
         override val name: String,
@@ -157,6 +102,12 @@ sealed class CheckedEnumVariant {
         override val span: Span,
     ) : CheckedEnumVariant()
 }
+
+@Serializable
+data class CheckedNamespace(
+    val name: String?,
+    val scope: ScopeId,
+)
 
 @Serializable
 data class CheckedParameter(
@@ -181,37 +132,51 @@ sealed class FunctionGenericParameter {
 @Serializable
 data class CheckedFunction(
     val name: String,
+    val visibility: Visibility,
     val throws: Boolean,
-    @SerialName("return_type")
-    val returnType: TypeId,
+    @SerialName("return_type_id")
+    val returnTypeId: TypeId,
     @SerialName("params")
     val parameters: List<CheckedParameter>,
     @SerialName("generic_parameters")
     val genericParameters: List<FunctionGenericParameter>,
     @SerialName("function_scope_id")
-    val scopeId: ScopeId,
+    val functionScopeId: ScopeId,
     val block: CheckedBlock,
+    @SerialName("parsed_function")
+    val parsedFunction: ParsedFunction?,
     val linkage: FunctionLinkage,
+    @SerialName("is_instantiated")
+    val isInstantiated: Boolean,
 )
 
 @Serializable
-data class CheckedBlock(@SerialName("stmts") val statements: List<CheckedStatement>)
+data class CheckedBlock(
+    @SerialName("stmts")
+    val statements: List<CheckedStatement>,
+    @SerialName("definitely_returns")
+    val definitelyReturns: Boolean,
+)
 
 @Serializable
 data class CheckedVarDecl(
     val name: String,
-    @SerialName("ty")
-    val type: TypeId,
+    @SerialName("type_id")
+    val typeId: TypeId,
     val mutable: Boolean,
     val span: Span,
+    val visibility: Visibility,
 )
 
 @Serializable
 data class CheckedVariable(
     val name: String,
-    @SerialName("ty")
-    val type: TypeId,
+    @SerialName("type_id")
+    val typeId: TypeId,
     val mutable: Boolean,
+    val visibility: Visibility,
+    @SerialName("definition_span")
+    val definitionSpan: Span,
 )
 
 @Serializable(with = CheckedStatement.Serializer::class)
@@ -221,8 +186,6 @@ sealed class CheckedStatement {
     data class Expression(val expression: CheckedExpression) : CheckedStatement()
 
     data class Defer(val statement: CheckedStatement) : CheckedStatement()
-
-    data class UnsafeBlock(val body: CheckedBlock) : CheckedStatement()
 
     data class VarDecl(val varDecl: CheckedVarDecl, val initializer: CheckedExpression) : CheckedStatement()
 
@@ -238,39 +201,34 @@ sealed class CheckedStatement {
 
     data class While(val condition: CheckedExpression, val body: CheckedBlock) : CheckedStatement()
 
-    data class For(
-        val iteratorName: String,
-        val initializer: CheckedExpression,
-        val body: CheckedBlock,
-    ) : CheckedStatement()
+    data class Return(val value: CheckedExpression) : CheckedStatement()
 
     object Break : CheckedStatement()
 
     object Continue : CheckedStatement()
-
-    data class Return(val value: CheckedExpression) : CheckedStatement()
 
     data class Throw(val target: CheckedExpression) : CheckedStatement()
 
     data class Try(
         val tryBlock: CheckedStatement,
         val errorName: String,
-        val errorSpan: Span,
         val catchBlock: CheckedBlock,
     ) : CheckedStatement()
 
-    data class InlineCpp(val body: CheckedBlock, val span: Span) : CheckedStatement()
+    data class InlineCpp(val strings: List<String>) : CheckedStatement()
 
     object Garbage : CheckedStatement()
 }
 
-@Serializable(with = IntegerConstant.Serializer::class)
-sealed class IntegerConstant {
-    object Serializer : KSerializer<IntegerConstant> by rustEnumSerializer()
+@Serializable(with = NumberConstant.Serializer::class)
+sealed class NumberConstant {
+    object Serializer : KSerializer<NumberConstant> by rustEnumSerializer()
 
-    data class Signed(val value: Long) : IntegerConstant()
+    data class Signed(val value: Long) : NumberConstant()
 
-    data class Unsigned(val value: ULong) : IntegerConstant()
+    data class Unsigned(val value: ULong) : NumberConstant()
+
+    data class Floating(val value: Double) : NumberConstant()
 }
 
 @Serializable(with = NumericConstant.Serializer::class)
@@ -296,6 +254,10 @@ sealed class NumericConstant {
     data class U64(val value: Long) : NumericConstant()
 
     data class USize(val value: Long) : NumericConstant()
+
+    data class F32(val value: Float) : NumericConstant()
+
+    data class F64(val value: Double) : NumericConstant()
 }
 
 
@@ -338,7 +300,7 @@ sealed class CheckedUnaryOperator {
 
     data class TypeCast(val cast: CheckedTypeCast) : CheckedUnaryOperator()
 
-    data class Is(val type: TypeId) : CheckedUnaryOperator()
+    data class Is(val typeId: TypeId) : CheckedUnaryOperator()
 }
 
 @Serializable(with = CheckedMatchBody.Serializer::class)
@@ -355,16 +317,21 @@ sealed class CheckedMatchCase {
     object Serializer : KSerializer<CheckedMatchCase> by rustEnumSerializer()
 
     data class EnumVariant(
-        val name: List<Pair<String, Span>>,
-        val arguments: List<Pair<String?, String>>,
-        val subtypeType: TypeId,
-        val scope: ScopeId,
+        @SerialName("variant_name")
+        val name: List<Tuple2<String, Span>>,
+        @SerialName("variant_arguments")
+        val arguments: List<Tuple2<String?, String>>,
+        @SerialName("subject_type_id")
+        val subjectTypeId: TypeId,
+        @SerialName("scope_id")
+        val scopeId: ScopeId,
         val body: CheckedMatchBody
     ) : CheckedMatchCase()
 }
 
 typealias TBoolean = Boolean
 typealias TNumericConstant = NumericConstant
+typealias TTuple<A, B> = Tuple2<A, B>
 
 @Serializable(with = CheckedExpression.Serializer::class)
 sealed class CheckedExpression {
@@ -378,13 +345,13 @@ sealed class CheckedExpression {
 
     data class QuotedString(val value: String, override val span: Span) : CheckedExpression()
 
-    data class CharacterLiteral(val value: Char, override val span: Span) : CheckedExpression()
+    data class CharacterConstant(val value: Char, override val span: Span) : CheckedExpression()
 
     data class UnaryOp(
         val value: CheckedExpression,
         val operator: CheckedUnaryOperator,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class BinaryOp(
@@ -392,7 +359,7 @@ sealed class CheckedExpression {
         val operator: BinaryOperator,
         val rightValue: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Tuple(val values: List<CheckedExpression>, override val span: Span, val type: TypeId) : CheckedExpression()
@@ -401,61 +368,61 @@ sealed class CheckedExpression {
         val from: CheckedExpression,
         val to: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Array(
         val values: List<CheckedExpression>,
         val fillSize: CheckedExpression?,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Dictionary(
-        val values: List<Pair<CheckedExpression, CheckedExpression>>,
+        val values: List<TTuple<CheckedExpression, CheckedExpression>>,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Set(
         val values: List<CheckedExpression>,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class IndexedExpression(
         val value: CheckedExpression,
         val index: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class IndexedDictionary(
         val value: CheckedExpression,
         val index: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class IndexedTuple(
         val expression: CheckedExpression,
-        val index: Int,
+        val index: Long,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class IndexedStruct(
         val expression: CheckedExpression,
         val name: String,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Match(
         val target: CheckedExpression,
         val cases: List<CheckedMatchCase>,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Call(val call: CheckedCall, override val span: Span, val type: TypeId) : CheckedExpression()
@@ -464,7 +431,13 @@ sealed class CheckedExpression {
         val receiver: CheckedExpression,
         val call: CheckedCall,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
+    ) : CheckedExpression()
+
+    data class NamespacedVar(
+        val namespace: List<CheckedNamespace>,
+        val variable: CheckedVariable,
+        override val span: Span,
     ) : CheckedExpression()
 
     data class Var(val value: CheckedVariable, override val span: Span) : CheckedExpression()
@@ -474,13 +447,13 @@ sealed class CheckedExpression {
     data class OptionalSome(
         val expression: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class ForcedUnwrap(
         val expression: CheckedExpression,
         override val span: Span,
-        val type: TypeId,
+        val typeId: TypeId,
     ) : CheckedExpression()
 
     data class Garbage(override val span: Span) : CheckedExpression()
@@ -499,20 +472,22 @@ data class CheckedCall(
     val name: String,
     @SerialName("callee_throws")
     val calleeThrows: Boolean,
-    val args: List<Pair<String, CheckedExpression>>,
+    val args: List<Tuple2<String, CheckedExpression>>,
     @SerialName("type_args")
     val typeArgs: List<TypeId>,
     val linkage: FunctionLinkage,
-    @SerialName("ty")
-    val type: TypeId,
+    @SerialName("type_id")
+    val typeId: TypeId,
 )
 
 @Serializable
 data class Scope(
+    @SerialName("namespace_name")
+    val namespaceName: String?,
     val vars: List<CheckedVariable>,
-    val structs: List<Pair<String, StructId>>,
-    val functions: List<Pair<String, FunctionId>>,
-    val enums: List<Pair<String, EnumId>>,
-    val types: List<Pair<String, TypeId>>,
+    val structs: List<Tuple3<String, StructId, Span>>,
+    val functions: List<Tuple3<String, FunctionId, Span>>,
+    val enums: List<Tuple3<String, EnumId, Span>>,
+    val types: List<Tuple3<String, TypeId, Span>>,
     val parent: ScopeId?,
 )
