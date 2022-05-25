@@ -19,6 +19,7 @@
 
         CLASS_KEYWORD='class'
         STRUCT_KEYWORD='struct'
+        ENUM_KEYWORD='enum'
         FUNCTION_KEYWORD='function'
         PUBLIC_KEYWORD='public'
         PRIVATE_KEYWORD='private'
@@ -110,6 +111,7 @@ private TopLevelDefinition ::=
       FunctionDeclaration
     | ClassDeclaration
     | StructDeclaration
+    | EnumDeclaration
     {recoverWhile=TopLevelDefinition_recover}
 
 private TopLevelDefinition_recover ::= !(EXTERN_KEYWORD | FUNCTION_KEYWORD | CLASS_KEYWORD | STRUCT_KEYWORD)
@@ -196,18 +198,44 @@ FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PA
 
 ClassDeclaration ::= EXTERN_KEYWORD? CLASS_KEYWORD IDENTIFIER GenericBounds? StructBody
 StructDeclaration ::= EXTERN_KEYWORD? STRUCT_KEYWORD IDENTIFIER GenericBounds? StructBody
-StructBody ::= CURLY_OPEN StructMembers CURLY_CLOSE
+StructBody ::= CURLY_OPEN StructMembers? CURLY_CLOSE
 
-private StructMembers ::= StructMember (StructMemberSeparator StructMember)* {
+private StructMembers ::= StructMember (MemberSeparator StructMember)* {
     pin=1
     recoverWhile=StructMember_recover
 }
 StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
-private StructMember_recover ::= !(CURLY_CLOSE | StructMemberSeparator)
+private StructMember_recover ::= !CURLY_CLOSE | (&MemberSeparator !IDENTIFIER)
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
-StructMemberSeparator ::= COMMA | EOL {name="comma or eol"}
+MemberSeparator ::= COMMA | EOL {name="comma or eol"}
+
+private EnumDeclaration ::= UnderlyingTypeEnumDeclaration | NormalEnumDeclaration
+
+UnderlyingTypeEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER TypeAnnotation OPEN_CURLY UnderlyingTypeEnumMembers CLOSE_CURLY
+
+private UnderlyingTypeEnumMembers ::= UnderlyingTypeEnumMember (MemberSeparator UnderlyingTypeEnumMember)* {
+    pin=1
+    recoverWhile=StructMember_recover
+}
+UnderlyingTypeEnumMember ::= IDENTIFIER (EQUALS Expression)?
+
+NormalEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER GenericBounds? OPEN_CURLY NormalEnumMembers CLOSE_CURLY
+
+private NormalEnumMembers ::= NormalEnumMember (MemberSeparator NormalEnumMember)* {
+    pin=1
+    recoverWhile=StructMember_recover
+}
+private NormalEnumMember ::= TypedNormalEnumMember | StructNormalEnumMember
+TypedNormalEnumMember ::= IDENTIFIER (OPEN_PAREN Type CLOSE_PAREN)?
+
+StructNormalEnumMember ::= IDENTIFIER OPEN_PAREN StructNormalEnumMemberBody? CLOSE_PAREN
+private StructNormalEnumMemberBody ::= StructNormalEnumMemberPart (MemberSeparator StructNormalEnumMemberPart)* {
+    pin=1
+    recoverWhile=StructMember_recover
+}
+private StructNormalEnumMemberPart ::= IDENTIFIER TypeAnnotation
 
 /*************************************
  *            STATEMENTS             *
