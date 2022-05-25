@@ -203,8 +203,9 @@ TypeAnnotation ::= COLON Type
  *           Declarations            *
  *************************************/
 
-FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression ) {pin=1}
+FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? FunctionBody {pin=1}
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
+private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 ParameterList ::= <<list Parameter>>
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
@@ -253,22 +254,22 @@ private StructNormalEnumMemberPart ::= IDENTIFIER TypeAnnotation
  *            STATEMENTS             *
  *************************************/
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS Expression {pin=1}
-IfStatement ::= IF_KEYWORD Expression Block [ ELSE_KEYWORD Block ]
-ReturnStatement ::= RETURN_KEYWORD Expression?
-ThrowStatement ::= THROW_KEYWORD Expression
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {pin=1}
+IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
+ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
+ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
 DeferStatement ::= DEFER_KEYWORD Statement
-WhileStatement ::= WHILE_KEYWORD Expression Block
+WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
 LoopStatement ::= LOOP_KEYWORD Block
 
-ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD <<withOn "NO_ASSIGN" Expression>> Block
+ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
 // Arguments
 ArgumentList ::= <<list Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 
-LabeledArgument ::= IDENTIFIER COLON Expression
-UnlabeledArgument ::= Expression
+LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
+UnlabeledArgument ::= ExpressionWithoutAssignment
 
 // TODO: Maybe delegate unsafe checking to plugin analysis for better error messages?
 UnsafeStatement ::= UNSAFE_KEYWORD <<withOn Block "UNSAFE">>
@@ -302,14 +303,16 @@ Expression ::=
     | Qualifier
     | Block
 
+private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">>
+
 MemberExpression ::= IDENTIFIER DOT IDENTIFIER
 QualifiedMemberExpression ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
 ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
-ParenExpression ::= PAREN_OPEN <<enterMode "NO_ASSIGN">> Expression <<exitMode "NO_ASSIGN">> PAREN_CLOSE
+ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
-OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN Expression PAREN_CLOSE
+OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 OptionalNoneExpression ::= NONE_TYPE
 
 fake BinaryExpression ::= Expression+ {
@@ -340,13 +343,13 @@ private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recov
 private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
 
 ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
-SizedArrayBody ::= Expression SEMICOLON NumericLiteral
-ElementsArrayBody ::= <<list Expression>>
+SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
+ElementsArrayBody ::= <<list ExpressionWithoutAssignment>>
 
 DictionaryExpression ::= BRACKET_OPEN <<list DictionaryElement>>? BRACKET_CLOSE
 DictionaryElement ::= Expression COLON Expression
 
-SetExpression ::= CURLY_OPEN <<list Expression>>? CURLY_CLOSE
+SetExpression ::= CURLY_OPEN <<list ExpressionWithoutAssignment>>? CURLY_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD Expression OPEN_CURLY MatchPatterns CLOSE_CURLY
 private MatchPatterns ::= MatchPattern (MemberSeparator MatchPattern)* {
@@ -359,7 +362,7 @@ PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 // TODO: This is incomplete
 IdentPatternHead ::= (IDENTIFIER | QualifiedMemberExpression) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
-ExpressionPatternHead ::= OPEN_PAREN <<withOn "NO_ASSIGN" Expression>> CLOSE_PAREN
+ExpressionPatternHead ::= OPEN_PAREN ExpressionWithoutAssignment CLOSE_PAREN
 
 Literal ::=
       STRING_LITERAL
