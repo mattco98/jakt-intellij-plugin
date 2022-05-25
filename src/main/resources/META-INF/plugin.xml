@@ -22,6 +22,10 @@
             language="Jakt"
             implementationClass="org.serenityos.jakt.plugin.JaktSyntaxHighlighterFactory"
         />
+        <lang.commenter
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktCommenter"
+        />
         <colorSettingsPage
             implementation="org.serenityos.jakt.plugin.JaktColorSettingsPage"
         />
