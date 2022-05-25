@@ -26,6 +26,7 @@
 
         LET_KEYWORD='let'
 
+        MATCH_KEYWORD='match'
         IF_KEYWORD='if'
         ELSE_KEYWORD='else'
 
@@ -121,7 +122,7 @@ private TopLevelDefinition_recover ::= !(EXTERN_KEYWORD | FUNCTION_KEYWORD | CLA
 
 Qualifier ::=
       MemberExpression
-    | StaticMemberExpression
+    | QualifiedMemberExpression
     | ComputedMemberExpression
     | IDENTIFIER
     {extends=Expression}
@@ -153,6 +154,7 @@ private StatementLead ::=
     | DEFER_KEYWORD
     | THROWS_KEYWORD
     | SEMICOLON
+    | ExpressionLead
 
 private ExpressionLead ::=
       IF_KEYWORD
@@ -290,12 +292,13 @@ Expression ::=
     | ArrayExpression
     | DictionaryExpression
     | SetExpression
+    | MatchExpression
     | Literal
     | Qualifier
     | Block
 
 MemberExpression ::= IDENTIFIER DOT IDENTIFIER
-StaticMemberExpression ::= IDENTIFIER COLON_COLON IDENTIFIER
+QualifiedMemberExpression ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
 ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
@@ -337,6 +340,18 @@ DictionaryElement ::= Expression COLON Expression
 
 SetExpression ::= CURLY_OPEN <<list Expression>>? CURLY_CLOSE
 
+MatchExpression ::= MATCH_KEYWORD Expression OPEN_CURLY MatchPatterns CLOSE_CURLY
+private MatchPatterns ::= MatchPattern (MemberSeparator MatchPattern)* {
+    pin=1
+    recoverWhile=MatchPatterns_recover
+}
+private MatchPatterns_recover ::= !CURLY_CLOSE | (&MemberSeparator (ELSE_KEYWORD | OPEN_PAREN | IDENTIFIER))
+MatchPattern ::= PatternHead PatternTrail
+PatternTrail ::= FAT_ARROW Expression
+PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
+// TODO: This is incomplete
+IdentPatternHead ::= (Identifier | QualifiedMemberExpression) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
+
 Literal ::=
       STRING_LITERAL
     | CHAR_LITERAL
@@ -352,4 +367,4 @@ NumericLiteral ::=
     | DECIMAL_LITERAL
 
 // Helpers
-private meta list ::= <<p>> (COMMA <<p>>) *
+private meta list ::= <<p>> (COMMA <<p>>)*
