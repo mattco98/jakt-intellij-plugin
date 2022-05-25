@@ -9,10 +9,10 @@
     psiImplPackage="org.intellij.sdk.language.psi.impl"
 
     elementTypeHolderClass="org.serenityos.jakt.JaktTypes"
-    elementTypeClass="org.serenityos.jakt.JaktElement"
-    tokenTypeClass="org.serenityos.jakt.JaktToken"
+    elementTypeClass="org.serenityos.jakt.plugin.JaktElement"
+    tokenTypeClass="org.serenityos.jakt.plugin.JaktToken"
 
-    parserUtilClass="org.serenityos.jakt.JaktParserUtil"
+    parserUtilClass="org.serenityos.jakt.plugin.JaktParserUtil"
 
     tokens=[
         EXTERN_KEYWORD='extern'

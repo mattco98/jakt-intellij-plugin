@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.lang.PsiBuilder
 import com.intellij.lang.parser.GeneratedParserUtilBase

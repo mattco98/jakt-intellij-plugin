@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor

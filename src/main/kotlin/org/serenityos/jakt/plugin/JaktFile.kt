@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType

@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.lang.annotation.AnnotationHolder

@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.lang.Language
 import com.intellij.openapi.util.IconLoader

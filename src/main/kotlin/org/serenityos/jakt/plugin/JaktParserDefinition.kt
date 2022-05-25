@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.plugin
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
@@ -11,6 +11,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
+import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.parser.JaktParser
 
 class JaktParserDefinition : ParserDefinition {
