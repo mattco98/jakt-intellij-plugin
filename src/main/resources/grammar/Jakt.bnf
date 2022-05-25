@@ -30,8 +30,9 @@
         ELSE_KEYWORD='else'
 
         WHILE_KEYWORD='while'
-        FOR_KEYWORD='for'
         LOOP_KEYWORD='loop'
+        FOR_KEYWORD='for'
+        IN_KEYWORD='in'
         UNSAFE='unsafe'
         CPP_KEYWORD='cpp'
 
@@ -255,8 +256,7 @@ DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 
-// FIXME: Properly implement for loop
-ForStatement ::= FOR_KEYWORD Expression Statement
+ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD <<withOn "NO_ASSIGN" Expression>> Block
 
 // Arguments
 ArgumentList ::= <<list Argument>>
@@ -299,7 +299,7 @@ StaticMemberExpression ::= IDENTIFIER COLON_COLON IDENTIFIER
 ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
-ParenExpression ::= PAREN_OPEN <<enterMode "PAREN">> Expression <<exitMode "PAREN">> PAREN_CLOSE
+ParenExpression ::= PAREN_OPEN <<enterMode "NO_ASSIGN">> Expression <<exitMode "NO_ASSIGN">> PAREN_CLOSE
 
 fake BinaryExpression ::= Expression+ {
     methods=[left="Expression[0]" right="Expression[1]"]
@@ -314,7 +314,7 @@ RelationalBinaryExpression ::= Expression RelationalOp Expression
 ShiftBinaryExpression ::= Expression ShiftOp Expression
 AddBinaryExpression ::= Expression AddOp Expression
 MultiplyBinaryExpression ::= Expression MultiplyOp Expression
-AssignmentBinaryExpression ::= <<isModeOff "PAREN">> Qualifier AssignmentOp Expression {rightAssociative=true}
+AssignmentBinaryExpression ::= <<isModeOff "NO_ASSIGN">> Qualifier AssignmentOp Expression {rightAssociative=true}
 
 private AddOp ::= PLUS | MINUS
 private MultiplyOp ::= ASTERISK | SLASH | PERCENT
@@ -323,7 +323,7 @@ private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GR
 private LogicalOrOp ::= OR | DOUBLE_QUESTION_MARK
 private AssignmentOp ::= (AddOp | MultiplyOp | ShiftOp)? EQUALS
 
-Block ::= CURLY_OPEN <<withOff BlockElement* "PAREN">> CURLY_CLOSE {pin(".*")=1 extends=Expression}
+Block ::= CURLY_OPEN <<withOff BlockElement* "NO_ASSIGN">> CURLY_CLOSE {pin(".*")=1 extends=Expression}
 private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recover}
 // TODO: Include newlines?
 private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
