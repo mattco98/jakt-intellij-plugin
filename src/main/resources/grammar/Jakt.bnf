@@ -50,6 +50,9 @@
         WEAK_KEYWORD='weak'
         THROWS_KEYWORD='throws'
 
+        SOME_TYPE='Some'
+        NONE_TYPE='None'
+
         PAREN_OPEN='('
         PAREN_CLOSE=')'
         CURLY_OPEN='{'
@@ -287,6 +290,7 @@ Expression ::=
     | MultiplyBinaryExpression
     | AssignmentBinaryExpression
     | ParenExpression
+    | OptionalSomeExpression // Must come before CallExpression
     | CallExpression
     | RangeExpression
     | ArrayExpression
@@ -294,6 +298,7 @@ Expression ::=
     | SetExpression
     | MatchExpression
     | Literal
+    | OptionalNoneExpression // Must come before Qualifier
     | Qualifier
     | Block
 
@@ -303,6 +308,9 @@ ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 ParenExpression ::= PAREN_OPEN <<enterMode "NO_ASSIGN">> Expression <<exitMode "NO_ASSIGN">> PAREN_CLOSE
+
+OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN Expression PAREN_CLOSE
+OptionalNoneExpression ::= NONE_TYPE
 
 fake BinaryExpression ::= Expression+ {
     methods=[left="Expression[0]" right="Expression[1]"]
@@ -350,7 +358,8 @@ MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 // TODO: This is incomplete
-IdentPatternHead ::= (Identifier | QualifiedMemberExpression) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
+IdentPatternHead ::= (IDENTIFIER | QualifiedMemberExpression) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
+ExpressionPatternHead ::= OPEN_PAREN <<withOn "NO_ASSIGN" Expression>> CLOSE_PAREN
 
 Literal ::=
       STRING_LITERAL
