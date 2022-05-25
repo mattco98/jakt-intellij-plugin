@@ -32,6 +32,8 @@
         WHILE_KEYWORD='while'
         FOR_KEYWORD='for'
         LOOP_KEYWORD='loop'
+        UNSAFE='unsafe'
+        CPP_KEYWORD='cpp'
 
         RETURN_KEYWORD='return'
         THROW_KEYWORD='throw'
@@ -133,6 +135,8 @@ Statement ::=
     | LoopStatement
     | ForStatement
     | VariableDeclarationStatement
+    | UnsafeStatement
+    | CppStatement
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -193,8 +197,10 @@ TypeAnnotation ::= COLON Type
  *           Declarations            *
  *************************************/
 
-FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? ( Block | FAT_ARROW Expression ) {pin=1}
+FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
+ParameterList ::= <<list Parameter>>
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
 ClassDeclaration ::= EXTERN_KEYWORD? CLASS_KEYWORD IDENTIFIER GenericBounds? StructBody
 StructDeclaration ::= EXTERN_KEYWORD? STRUCT_KEYWORD IDENTIFIER GenericBounds? StructBody
@@ -252,16 +258,16 @@ LoopStatement ::= LOOP_KEYWORD Block
 // FIXME: Properly implement for loop
 ForStatement ::= FOR_KEYWORD Expression Statement
 
-// Parameters
-ParameterList ::= <<list Parameter>>
-Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
-
 // Arguments
 ArgumentList ::= <<list Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 
 LabeledArgument ::= IDENTIFIER COLON Expression
 UnlabeledArgument ::= Expression
+
+// TODO: Maybe delegate unsafe checking to plugin analysis for better error messages?
+UnsafeStatement ::= UNSAFE_KEYWORD <<withOn Block "UNSAFE">>
+CppStatement ::= <<isModeOn "UNSAFE">> CPP_KEYWORD Block
 
 /*************************************
  *            EXPRESSIONS            *
