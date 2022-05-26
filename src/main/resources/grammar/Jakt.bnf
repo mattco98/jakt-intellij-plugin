@@ -266,9 +266,6 @@ LoopStatement ::= LOOP_KEYWORD Block
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
-LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
-UnlabeledArgument ::= ExpressionWithoutAssignment
-
 // TODO: Maybe delegate unsafe checking to plugin analysis for better error messages?
 UnsafeStatement ::= UNSAFE_KEYWORD <<withOn Block "UNSAFE">>
 CppStatement ::= <<isModeOn "UNSAFE">> CPP_KEYWORD Block
@@ -303,7 +300,7 @@ Expression ::=
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">>
 
-MemberQualifier ::= IDENTIFIER DOT IDENTIFIER {methods=[left="IDENTIFIER[0]" right="IDENTIFIER[1]"]}
+MemberQualifier ::= IDENTIFIER DOT IDENTIFIER
 NamespacedMemberQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
 ComputedMemberQualifier ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
 PlainMemberQualifier ::= IDENTIFIER
@@ -311,6 +308,8 @@ PlainMemberQualifier ::= IDENTIFIER
 CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=2 recoverWhile=CallExpression_recover}
 ArgumentList ::= <<list Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
+LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
+UnlabeledArgument ::= ExpressionWithoutAssignment
 private CallExpression_recover ::= !<<eof>>
 
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral

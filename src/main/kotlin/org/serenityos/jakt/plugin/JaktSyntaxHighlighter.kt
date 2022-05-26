@@ -43,6 +43,7 @@ object Highlights {
     val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL")
     val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW")
     val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW")
+    val FUNCTION_PARAMETER_LABEL = IDENTIFIER.extend("FUNCTION_PARAMETER_LABEL")
 
     private fun TextAttributesKey.extend(name: String) = TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
