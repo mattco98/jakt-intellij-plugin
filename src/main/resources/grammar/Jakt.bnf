@@ -194,6 +194,7 @@ Type ::=
     | GenericType
     | DictionaryType
     | SetType
+    | TupleType
     | PlainType
 
 RawType ::= RAW_KEYWORD Type
@@ -204,13 +205,14 @@ GenericBounds ::= LESS_THAN <<list Type>> GREATER_THAN
 ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
 SetType ::= CURLY_OPEN Type CURLY_CLOSE
+TupleType ::= PAREN_OPEN <<list Type>> PAREN_CLOSE
 TypeAnnotation ::= COLON Type
 
 /*************************************
  *           Declarations            *
  *************************************/
 
-FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? FunctionBody {pin=1}
+FunctionDeclaration ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? FunctionBody {pin=1}
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 ParameterList ::= <<list Parameter>>
@@ -295,6 +297,7 @@ Expression ::=
     | ArrayExpression
     | DictionaryExpression
     | SetExpression
+    | TupleExpression
     | MatchExpression
     | Literal
     | OptionalNoneExpression // Must come before Qualifier
@@ -357,8 +360,8 @@ ElementsArrayBody ::= <<list ExpressionWithoutAssignment>>
 
 DictionaryExpression ::= BRACKET_OPEN <<list DictionaryElement>>? BRACKET_CLOSE
 DictionaryElement ::= Expression COLON Expression
-
 SetExpression ::= CURLY_OPEN <<list ExpressionWithoutAssignment>>? CURLY_CLOSE
+TupleExpression ::= PAREN_OPEN <<list ExpressionWithoutAssignment>> PAREN_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD Expression CURLY_OPEN MatchPatterns CURLY_CLOSE
 private MatchPatterns ::= MatchPattern (MemberSeparator MatchPattern)* {
