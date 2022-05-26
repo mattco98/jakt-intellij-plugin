@@ -43,6 +43,7 @@
         TRUE_KEYWORD='true'
         FALSE_KEYWORD='false'
 
+        REF_KEYWORD='ref'
         MUTABLE_KEYWORD='mutable'
         ANONYMOUS_KEYWORD='anonymous'
         RAW_KEYWORD='raw'
@@ -121,7 +122,13 @@ private TopLevelDefinition ::=
     | EnumDeclaration
     {recoverWhile=TopLevelDefinition_recover}
 
-private TopLevelDefinition_recover ::= !(EXTERN_KEYWORD | FUNCTION_KEYWORD | CLASS_KEYWORD | STRUCT_KEYWORD)
+private TopLevelDefinition_recover ::= !(
+      EXTERN_KEYWORD
+    | FUNCTION_KEYWORD
+    | CLASS_KEYWORD
+    | STRUCT_KEYWORD
+    | ENUM_KEYWORD
+    | REF_KEYWORD)
 
 Qualifier ::=
       MemberQualifier

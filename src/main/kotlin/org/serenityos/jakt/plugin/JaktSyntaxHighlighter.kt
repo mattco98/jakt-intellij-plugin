@@ -74,6 +74,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             CLASS_KEYWORD,
             STRUCT_KEYWORD,
             FUNCTION_KEYWORD,
+            ENUM_KEYWORD,
             LET_KEYWORD -> Highlights.KEYWORD_DECLARATION
 
             // RESTRICTED_KEYWORD,
@@ -89,6 +90,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             THROW_KEYWORD,
             DEFER_KEYWORD -> Highlights.KEYWORD_CONTROL_FLOW
 
+            REF_KEYWORD,
             MUTABLE_KEYWORD,
             ANONYMOUS_KEYWORD,
             RAW_KEYWORD,
