@@ -86,6 +86,8 @@ COMMENT="//"[^\r\n]*
   "-"                    { return MINUS; }
   "*"                    { return ASTERISK; }
   "/"                    { return SLASH; }
+  "++"                   { return PLUS_PLUS; }
+  "--"                   { return MINUS_MINUS; }
   "<<"                   { return LEFT_SHIFT; }
   ">>"                   { return RIGHT_SHIFT; }
   "<<<"                  { return ARITH_LEFT_SHIFT; }
@@ -103,8 +105,10 @@ COMMENT="//"[^\r\n]*
   "&"                    { return AMPERSAND; }
   "|"                    { return PIPE; }
   "^"                    { return CARET; }
+  "~"                    { return TILDE; }
   "and"                  { return AND; }
   "or"                   { return OR; }
+  "not"                  { return NOT; }
 
   {HEX_LITERAL}          { return HEX_LITERAL; }
   {BINARY_LITERAL}       { return BINARY_LITERAL; }

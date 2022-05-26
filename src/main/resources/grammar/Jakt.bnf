@@ -72,6 +72,8 @@
         MINUS='-'
         ASTERISK='*'
         SLASH='/'
+        PLUS_PLUS='++'
+        MINUS_MINUS='--'
         LEFT_SHIFT='<<'
         RIGHT_SHIFT='>>'
         ARITH_LEFT_SHIFT='<<<'
@@ -89,8 +91,10 @@
         AMPERSAND='&'
         PIPE='|'
         CARET='^'
+        TILDE='~'
         AND='and'
         OR='or'
+        NOT='not'
 
         HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*"
         BINARY_LITERAL="regexp:(0b|0B)[01](_?[01])*"
@@ -290,6 +294,8 @@ Expression ::=
     | ShiftBinaryExpression
     | AddBinaryExpression
     | MultiplyBinaryExpression
+    | PrefixUnaryExpression
+    | PostfixUnaryExpression
     | AssignmentBinaryExpression
     | ParenExpression
     | OptionalSomeExpression // Must come before CallExpression
@@ -339,6 +345,9 @@ ShiftBinaryExpression ::= Expression ShiftOp Expression
 AddBinaryExpression ::= Expression AddOp Expression
 MultiplyBinaryExpression ::= Expression MultiplyOp Expression
 AssignmentBinaryExpression ::= <<isModeOff "NO_ASSIGN">> Qualifier AssignmentOp Expression {rightAssociative=true}
+fake UnaryExpression ::= PrefixOp? Expression PostfixOp?
+PrefixUnaryExpression ::= PrefixOp Expression {extends=UnaryExpression}
+PostfixUnaryExpression ::= Expression PostfixOp {extends=UnaryExpression}
 
 private AddOp ::= PLUS | MINUS
 private MultiplyOp ::= ASTERISK | SLASH | PERCENT
@@ -346,6 +355,15 @@ private ShiftOp ::= ARITH_LEFT_SHIFT | LEFT_SHIFT | ARITH_RIGHT_SHIFT | RIGHT_SH
 private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GREATER_THAN | DOUBLE_EQUALS | NOT_EQUALS
 private LogicalOrOp ::= OR | DOUBLE_QUESTION_MARK
 private AssignmentOp ::= (AddOp | MultiplyOp | ShiftOp)? EQUALS
+private PrefixOp ::=
+      PLUS_PLUS
+    | MINUS_MINUS
+    | MINUS
+    | NOT
+    | TILDE
+    | AMPERSAND RAW_KEYWORD
+    | <<isModeOn "UNSAFE">> ASTERISK
+private PostfixOp ::= PLUS_PLUS | MINUS_MINUS |
 
 Block ::= CURLY_OPEN <<withOff Statement* "NO_ASSIGN">> CURLY_CLOSE {
     pin=1
