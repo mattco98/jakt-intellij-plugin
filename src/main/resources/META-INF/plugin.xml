@@ -27,7 +27,7 @@
         />
         <externalAnnotator
             language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.JaktAnnotator"
+            implementationClass="org.serenityos.jakt.plugin.JaktExternalAnnotator"
         />
     </extensions>
 </idea-plugin>

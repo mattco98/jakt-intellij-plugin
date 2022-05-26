@@ -1,6 +1,5 @@
 package org.serenityos.jakt.plugin
 
-import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -10,7 +9,7 @@ import org.serenityos.jakt.bindings.JaktC
 import org.serenityos.jakt.bindings.JaktError
 import org.serenityos.jakt.bindings.TypecheckResult
 
-class JaktAnnotator : ExternalAnnotator<String, JaktError?>() {
+class JaktExternalAnnotator : ExternalAnnotator<String, JaktError?>() {
     override fun collectInformation(file: PsiFile): String {
         return file.viewProvider.contents.toString()
     }
