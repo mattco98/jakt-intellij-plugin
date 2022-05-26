@@ -97,6 +97,7 @@
         DECIMAL_LITERAL="regexp:\d(_?\d)*"
 
         STRING_LITERAL="regexp:\"([^\"\\]|\\.)*\""
+        BYTE_CHAR_LITERAL="regexp:b'([^'\\]|\\.)*'"
         CHAR_LITERAL="regexp:'([^'\\]|\\.)*'"
         IDENTIFIER="regexp:[A-Za-z_]\w*"
 
@@ -363,12 +364,12 @@ DictionaryElement ::= Expression COLON Expression
 SetExpression ::= CURLY_OPEN <<list ExpressionWithoutAssignment>>? CURLY_CLOSE
 TupleExpression ::= PAREN_OPEN <<list ExpressionWithoutAssignment>> PAREN_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD Expression CURLY_OPEN MatchPatterns CURLY_CLOSE
+MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment CURLY_OPEN MatchPatterns? CURLY_CLOSE
 private MatchPatterns ::= MatchPattern (MemberSeparator MatchPattern)* {
     pin=1
     recoverWhile=MatchPatterns_recover
 }
-private MatchPatterns_recover ::= !CURLY_CLOSE | (&MemberSeparator (ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER))
+private MatchPatterns_recover ::= !CURLY_CLOSE | !(&MemberSeparator (ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER))
 MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead

@@ -29,6 +29,7 @@ BINARY_LITERAL=(0b|0B)[01](_?[01])*
 DECIMAL_LITERAL=[0-9](_?[0-9])*
 STRING_LITERAL=\"([^\"\\]|\\.)*\"
 CHAR_LITERAL='([^'\\]|\\.)*'
+BYTE_CHAR_LITERAL=b'([^'\\]|\\.)*'
 IDENTIFIER=[A-Za-z_][a-zA-Z_0-9]*
 COMMENT="//"[^\r\n]*
 
@@ -110,6 +111,7 @@ COMMENT="//"[^\r\n]*
   {DECIMAL_LITERAL}      { return DECIMAL_LITERAL; }
   {STRING_LITERAL}       { return STRING_LITERAL; }
   {CHAR_LITERAL}         { return CHAR_LITERAL; }
+  {BYTE_CHAR_LITERAL}    { return BYTE_CHAR_LITERAL; }
   {IDENTIFIER}           { return IDENTIFIER; }
   {COMMENT}              { return COMMENT; }
 
