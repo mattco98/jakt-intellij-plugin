@@ -110,6 +110,8 @@
 
     name(".+Expression")=expression
     name(".+Statement")=statement
+
+    generateTokenAccessors=true
 }
 
 File ::= TopLevelDefinition*
@@ -124,10 +126,10 @@ private TopLevelDefinition ::=
 private TopLevelDefinition_recover ::= !(EXTERN_KEYWORD | FUNCTION_KEYWORD | CLASS_KEYWORD | STRUCT_KEYWORD)
 
 Qualifier ::=
-      MemberExpression
-    | QualifiedMemberExpression
-    | ComputedMemberExpression
-    | IDENTIFIER
+      MemberQualifier
+    | NamespacedMemberQualifier
+    | ComputedMemberQualifier
+    | PlainMemberQualifier
     {extends=Expression}
 
 Statement ::=
@@ -264,10 +266,6 @@ LoopStatement ::= LOOP_KEYWORD Block
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
-// Arguments
-ArgumentList ::= <<list Argument>>
-Argument ::= LabeledArgument | UnlabeledArgument
-
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
 UnlabeledArgument ::= ExpressionWithoutAssignment
 
@@ -305,10 +303,16 @@ Expression ::=
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">>
 
-MemberExpression ::= IDENTIFIER DOT IDENTIFIER
-QualifiedMemberExpression ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
-ComputedMemberExpression ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
-CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE
+MemberQualifier ::= IDENTIFIER DOT IDENTIFIER {methods=[left="IDENTIFIER[0]" right="IDENTIFIER[1]"]}
+NamespacedMemberQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
+ComputedMemberQualifier ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
+PlainMemberQualifier ::= IDENTIFIER
+
+CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=2 recoverWhile=CallExpression_recover}
+ArgumentList ::= <<list Argument>>
+Argument ::= LabeledArgument | UnlabeledArgument
+private CallExpression_recover ::= !<<eof>>
+
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
@@ -361,7 +365,7 @@ MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 // TODO: This is incomplete
-IdentPatternHead ::= (IDENTIFIER | QualifiedMemberExpression) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
+IdentPatternHead ::= (IDENTIFIER | NamespacedMemberQualifier) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
 ExpressionPatternHead ::= OPEN_PAREN ExpressionWithoutAssignment CLOSE_PAREN
 
 Literal ::=

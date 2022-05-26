@@ -45,6 +45,9 @@ object Highlights {
     val OTHER_OPERATOR = OPERATOR_BASE.extend("OTHER_OPERATOR")
     val ARROW = OPERATOR_BASE.extend("ARROW")
 
+    val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION")
+    val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL")
+
     private fun TextAttributesKey.extend(name: String) = TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
 

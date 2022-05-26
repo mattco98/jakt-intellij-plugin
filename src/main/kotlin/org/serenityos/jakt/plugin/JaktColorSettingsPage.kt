@@ -11,20 +11,23 @@ class JaktColorSettingsPage : ColorSettingsPage {
 
     // TODO: Eventually put every syntax here
     override fun getDemoText() = """
-        function main() {
+        function <FUNCTION_DECLARATION>main</FUNCTION_DECLARATION>() {
             let i = 5
             if i == 5 and 7 > 6 {
-                println("OK")
+                <FUNCTION_CALL>println</FUNCTION_CALL>("OK")
             }
             let a = true
             let b = true
             if a and b {
-                println("OK")
+                <FUNCTION_CALL>println</FUNCTION_CALL>("OK")
             }
         }
     """.trimIndent()
 
-    override fun getAdditionalHighlightingTagToDescriptorMap() = null
+    override fun getAdditionalHighlightingTagToDescriptorMap() = mapOf(
+        "FUNCTION_DECLARATION" to Highlights.FUNCTION_DECLARATION,
+        "FUNCTION_CALL" to Highlights.FUNCTION_CALL
+    )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
 
@@ -66,6 +69,9 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Operators//Arithmetic Operators" to Highlights.ARITHMETIC_OPERATOR,
             "Operators//Bitwise Operators" to Highlights.BITWISE_OPERATOR,
             "Operators//Other" to Highlights.BITWISE_OPERATOR,
+
+            "Functions//Declaration" to Highlights.FUNCTION_DECLARATION,
+            "Function//Call" to Highlights.FUNCTION_CALL,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
     }
 }
