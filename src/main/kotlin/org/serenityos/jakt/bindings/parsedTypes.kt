@@ -129,6 +129,24 @@ enum class DefinitionType {
 }
 
 @Serializable
+data class ParsedFunction(
+    val name: String,
+    val visibility: Visibility,
+    @SerialName("name_span")
+    val nameSpan: Span,
+    val params: List<ParsedParameter>,
+    @SerialName("generic_parameters")
+    val genericParameters: List<Tuple2<String, Span>>,
+    val block: ParsedBlock,
+    val throws: Boolean,
+    @SerialName("return_type")
+    val returnType: ParsedType,
+    val linkage: FunctionLinkage,
+    @SerialName("must_instantiate")
+    val mustInstantiate: Boolean,
+)
+
+@Serializable
 enum class Visibility {
     Public,
     Private,
@@ -136,7 +154,7 @@ enum class Visibility {
 
 @Serializable
 data class ParsedParameter(
-    @SerialName("required_label")
+    @SerialName("requires_label")
     val requiresLabel: Boolean,
     val variable: ParsedVariable,
 )
@@ -404,9 +422,3 @@ enum class BinaryOperator {
     BitwiseRightShiftAssign,
     NoneCoalescing,
 }
-
-@Serializable
-data class ParsedFunction(
-    val name: String,
-    val visbility: Visibility
-)

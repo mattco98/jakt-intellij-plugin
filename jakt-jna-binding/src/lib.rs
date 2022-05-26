@@ -3,9 +3,14 @@ extern crate core;
 
 use std::ffi::{CStr, CString};
 use serde_derive::Serialize;
-use jakt::{JaktError, lexer, parser};
-use jakt::typechecker::{Project, typecheck_namespace};
 use libc::c_char;
+use jakt::{
+    JaktError,
+    lexer,
+    parser,
+    compiler::Compiler,
+    typechecker::{Project, typecheck_namespace},
+};
 
 #[derive(Serialize)]
 enum TypecheckResult {
@@ -15,6 +20,11 @@ enum TypecheckResult {
 }
 
 fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
+    let mut project = Project::new();
+    if let Some(_err) = Compiler::new().include_prelude(&mut project) {
+        panic!("Failed to include prelude")
+    }
+
     let (tokens, error) = lexer::lex(0, bytes);
     if let Some(error) = error {
         return TypecheckResult::ParseError(error)
@@ -25,7 +35,6 @@ fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
         return TypecheckResult::ParseError(error)
     }
 
-    let mut project = Project::new();
     match typecheck_namespace(&namespace, 0, &mut project) {
         Some(error) => TypecheckResult::TypeError(error),
         _ => TypecheckResult::Ok(project)

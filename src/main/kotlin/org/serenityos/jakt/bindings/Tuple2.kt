@@ -50,7 +50,7 @@ class Tuple3Serializer<A, B, C>(
         return decoder.decodeStructure(descriptor) {
             val first = decodeSerializableElement(firstSerializer.descriptor, 0, firstSerializer)
             val second = decodeSerializableElement(secondSerializer.descriptor, 1, secondSerializer)
-            val third = decodeSerializableElement(thirdSerializer.descriptor, 3, thirdSerializer)
+            val third = decodeSerializableElement(thirdSerializer.descriptor, 2, thirdSerializer)
             Tuple3(first, second, third)
         }
     }

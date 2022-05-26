@@ -42,8 +42,12 @@ data class Project(
     val enums: List<CheckedEnum>,
     val scopes: List<Scope>,
     val types: List<Type>,
+
+    // Internal state
     @SerialName("current_function_index")
-    val currentFunctionIndex: Int?
+    private val currentFunctionIndex: Int?,
+    @SerialName("inside_defer")
+    private val insideDefer: Boolean,
 )
 
 @Serializable
@@ -116,7 +120,7 @@ data class CheckedParameter(
     val variable: CheckedVariable,
 )
 
-@Serializable
+@Serializable(with = FunctionGenericParameter.Serializer::class)
 sealed class FunctionGenericParameter {
     // TODO: Does this apply to the inherited classes?
     @SerialName("type_id")
@@ -193,7 +197,7 @@ sealed class CheckedStatement {
         val condition: CheckedExpression,
         val ifBlock: CheckedBlock,
         val elseBlock: CheckedBlock?,
-    )
+    ) : CheckedStatement()
 
     data class Block(val body: CheckedBlock) : CheckedStatement()
 
@@ -490,4 +494,5 @@ data class Scope(
     val enums: List<Tuple3<String, EnumId, Span>>,
     val types: List<Tuple3<String, TypeId, Span>>,
     val parent: ScopeId?,
+    val children: List<ScopeId>,
 )
