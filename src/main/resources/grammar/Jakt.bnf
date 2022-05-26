@@ -340,10 +340,13 @@ private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GR
 private LogicalOrOp ::= OR | DOUBLE_QUESTION_MARK
 private AssignmentOp ::= (AddOp | MultiplyOp | ShiftOp)? EQUALS
 
-Block ::= CURLY_OPEN <<withOff BlockElement* "NO_ASSIGN">> CURLY_CLOSE {pin(".*")=1 extends=Expression}
-private BlockElement ::= !CURLY_CLOSE Statement {recoverWhile=BlockElement_recover}
+Block ::= CURLY_OPEN <<withOff Statement* "NO_ASSIGN">> CURLY_CLOSE {
+    pin=1
+    recoverWhile=Block_recover
+    extends=Expression
+}
 // TODO: Include newlines?
-private BlockElement_recover ::= !(CURLY_CLOSE | ';' | <<eof>> | ExpressionLead | StatementLead)
+private Block_recover ::= !(CURLY_CLOSE | <<eof>>)
 
 ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
 SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
