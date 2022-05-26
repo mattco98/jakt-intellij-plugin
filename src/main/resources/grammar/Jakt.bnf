@@ -25,7 +25,6 @@
         PRIVATE_KEYWORD='private'
 
         LET_KEYWORD='let'
-
         MATCH_KEYWORD='match'
         IF_KEYWORD='if'
         ELSE_KEYWORD='else'
@@ -34,7 +33,7 @@
         LOOP_KEYWORD='loop'
         FOR_KEYWORD='for'
         IN_KEYWORD='in'
-        UNSAFE='unsafe'
+        UNSAFE_KEYWORD='unsafe'
         CPP_KEYWORD='cpp'
 
         RETURN_KEYWORD='return'
@@ -100,8 +99,7 @@
         CHAR_LITERAL="regexp:'([^'\\]|\\.)*'"
         IDENTIFIER="regexp:[A-Za-z_]\w*"
 
-        SPACE="regexp:[ \t\n\x0B\f\r]+"
-        COMMENT="regexp://[^\\R]*"
+        COMMENT="regexp://[^\r\n]*"
     ]
 
     extends(".+BinaryExpression")=BinaryExpression
@@ -224,11 +222,12 @@ private StructMember_recover ::= !CURLY_CLOSE | (&MemberSeparator !IDENTIFIER)
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
-MemberSeparator ::= COMMA | EOL {name="comma or eol"}
+// TODO: Make this only comma or eol
+MemberSeparator ::= COMMA? {name="comma"}
 
 private EnumDeclaration ::= UnderlyingTypeEnumDeclaration | NormalEnumDeclaration
 
-UnderlyingTypeEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER TypeAnnotation OPEN_CURLY UnderlyingTypeEnumMembers CLOSE_CURLY
+UnderlyingTypeEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER TypeAnnotation CURLY_OPEN UnderlyingTypeEnumMembers CURLY_CLOSE
 
 private UnderlyingTypeEnumMembers ::= UnderlyingTypeEnumMember (MemberSeparator UnderlyingTypeEnumMember)* {
     pin=1
@@ -236,16 +235,16 @@ private UnderlyingTypeEnumMembers ::= UnderlyingTypeEnumMember (MemberSeparator 
 }
 UnderlyingTypeEnumMember ::= IDENTIFIER (EQUALS Expression)?
 
-NormalEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER GenericBounds? OPEN_CURLY NormalEnumMembers CLOSE_CURLY
+NormalEnumDeclaration ::= REF_KEYWORD? ENUM_KEYWORD IDENTIFIER GenericBounds? CURLY_OPEN NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= NormalEnumMember (MemberSeparator NormalEnumMember)* {
     pin=1
     recoverWhile=StructMember_recover
 }
 private NormalEnumMember ::= TypedNormalEnumMember | StructNormalEnumMember
-TypedNormalEnumMember ::= IDENTIFIER (OPEN_PAREN Type CLOSE_PAREN)?
+TypedNormalEnumMember ::= IDENTIFIER (PAREN_OPEN Type PAREN_CLOSE)?
 
-StructNormalEnumMember ::= IDENTIFIER OPEN_PAREN StructNormalEnumMemberBody? CLOSE_PAREN
+StructNormalEnumMember ::= IDENTIFIER PAREN_OPEN StructNormalEnumMemberBody? PAREN_CLOSE
 private StructNormalEnumMemberBody ::= StructNormalEnumMemberPart (MemberSeparator StructNormalEnumMemberPart)* {
     pin=1
     recoverWhile=StructMember_recover
@@ -357,18 +356,18 @@ DictionaryElement ::= Expression COLON Expression
 
 SetExpression ::= CURLY_OPEN <<list ExpressionWithoutAssignment>>? CURLY_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD Expression OPEN_CURLY MatchPatterns CLOSE_CURLY
+MatchExpression ::= MATCH_KEYWORD Expression CURLY_OPEN MatchPatterns CURLY_CLOSE
 private MatchPatterns ::= MatchPattern (MemberSeparator MatchPattern)* {
     pin=1
     recoverWhile=MatchPatterns_recover
 }
-private MatchPatterns_recover ::= !CURLY_CLOSE | (&MemberSeparator (ELSE_KEYWORD | OPEN_PAREN | IDENTIFIER))
+private MatchPatterns_recover ::= !CURLY_CLOSE | (&MemberSeparator (ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER))
 MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 // TODO: This is incomplete
-IdentPatternHead ::= (IDENTIFIER | NamespacedMemberQualifier) OPEN_PAREN <<list IDENTIFIER>> CLOSE_PAREN
-ExpressionPatternHead ::= OPEN_PAREN ExpressionWithoutAssignment CLOSE_PAREN
+IdentPatternHead ::= (IDENTIFIER | NamespacedMemberQualifier) PAREN_OPEN <<list IDENTIFIER>> PAREN_CLOSE
+ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
 Literal ::=
       STRING_LITERAL
