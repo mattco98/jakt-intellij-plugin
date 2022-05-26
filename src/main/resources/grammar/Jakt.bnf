@@ -229,34 +229,31 @@ private StructMember_recover ::= !CURLY_CLOSE | (&MemberSeparator !IDENTIFIER)
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
-// TODO: Make this only comma or eol
-MemberSeparator ::= COMMA? {name="comma"}
+// TODO: Handle EOL manually and make this comma or EOL
+MemberSeparator ::= COMMA {name="comma"}
 
-private EnumDeclaration ::= UnderlyingTypeEnumDeclaration | NormalEnumDeclaration
+EnumDeclaration ::= EnumHead EnumBody
+private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
+private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD IDENTIFIER
 
-UnderlyingTypeEnumDeclaration ::= ENUM_KEYWORD IDENTIFIER TypeAnnotation CURLY_OPEN UnderlyingTypeEnumMembers CURLY_CLOSE
+UnderlyingTypeEnumBody ::= TypeAnnotation CURLY_OPEN UnderlyingTypeEnumMembers CURLY_CLOSE {pin=1}
 
 private UnderlyingTypeEnumMembers ::= UnderlyingTypeEnumMember (MemberSeparator UnderlyingTypeEnumMember)* {
     pin=1
     recoverWhile=StructMember_recover
 }
-UnderlyingTypeEnumMember ::= IDENTIFIER (EQUALS Expression)?
+UnderlyingTypeEnumMember ::= IDENTIFIER [EQUALS Expression]
 
-NormalEnumDeclaration ::= REF_KEYWORD? ENUM_KEYWORD IDENTIFIER GenericBounds? CURLY_OPEN NormalEnumMembers CURLY_CLOSE
+NormalEnumBody ::= GenericBounds? CURLY_OPEN NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= NormalEnumMember (MemberSeparator NormalEnumMember)* {
     pin=1
     recoverWhile=StructMember_recover
 }
-private NormalEnumMember ::= TypedNormalEnumMember | StructNormalEnumMember
-TypedNormalEnumMember ::= IDENTIFIER (PAREN_OPEN Type PAREN_CLOSE)?
-
-StructNormalEnumMember ::= IDENTIFIER PAREN_OPEN StructNormalEnumMemberBody? PAREN_CLOSE
-private StructNormalEnumMemberBody ::= StructNormalEnumMemberPart (MemberSeparator StructNormalEnumMemberPart)* {
-    pin=1
-    recoverWhile=StructMember_recover
-}
-private StructNormalEnumMemberPart ::= IDENTIFIER TypeAnnotation
+private NormalEnumMember ::= IDENTIFIER NormalEnumMemberBody?
+private NormalEnumMemberBody ::= PAREN_OPEN (StructEnumMemberBody | TypeEnumMemberBody) PAREN_CLOSE
+TypeEnumMemberBody ::= <<list Type>>
+StructEnumMemberBody ::= <<list (IDENTIFIER TypeAnnotation)>>
 
 /*************************************
  *            STATEMENTS             *
