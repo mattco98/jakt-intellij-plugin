@@ -40,16 +40,17 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Identifiers" to Highlights.IDENTIFIER,
             "Comments" to Highlights.COMMENT,
 
+            "Functions//Declaration" to Highlights.FUNCTION_DECLARATION,
+            "Functions//Call" to Highlights.FUNCTION_CALL,
+            "Functions//Arrow" to Highlights.FUNCTION_ARROW,
+            "Functions//Fat Arrow" to Highlights.FUNCTION_FAT_ARROW,
+
             "Literals//Numbers" to Highlights.LITERAL_NUMBER,
             "Literals//Strings and Characters" to Highlights.LITERAL_STRING,
             "Literals//Booleans" to Highlights.LITERAL_BOOLEAN,
             "Literals//Arrays" to Highlights.LITERAL_ARRAY,
             "Literals//Dictionaries" to Highlights.LITERAL_DICTIONARY,
             "Literals//Sets" to Highlights.LITERAL_SET,
-
-            "Delimiters//Braces" to Highlights.DELIMITER_BRACE,
-            "Delimiters//Brackets" to Highlights.DELIMITER_BRACKET,
-            "Delimiters//Parenthesis" to Highlights.DELIMITER_PARENTHESIS,
 
             "Keywords//Base" to Highlights.KEYWORD_BASE,
             "Keywords//Declaration" to Highlights.KEYWORD_DECLARATION,
@@ -58,20 +59,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Keywords//Modifiers" to Highlights.KEYWORD_MODIFIER,
             "Keywords//unsafe and cpp" to Highlights.KEYWORD_UNSAFE,
 
-            "Operators//Base" to Highlights.OPERATOR_BASE,
-            "Operators//Dot" to Highlights.DOT,
-            "Operators//Range" to Highlights.RANGE,
-            "Operators//Comma" to Highlights.COMMA,
-            "Operators//Colon" to Highlights.COLON,
-            "Operators//Namespace" to Highlights.NAMESPACE,
-            "Operators//Semicolon" to Highlights.SEMICOLON,
-            "Operators//Arrow" to Highlights.ARROW,
-            "Operators//Arithmetic Operators" to Highlights.ARITHMETIC_OPERATOR,
-            "Operators//Bitwise Operators" to Highlights.BITWISE_OPERATOR,
-            "Operators//Other" to Highlights.BITWISE_OPERATOR,
-
-            "Functions//Declaration" to Highlights.FUNCTION_DECLARATION,
-            "Function//Call" to Highlights.FUNCTION_CALL,
+            "Operators and Delimiters//Braces" to Highlights.DELIM_BRACE,
+            "Operators and Delimiters//Brackets" to Highlights.DELIM_BRACKET,
+            "Operators and Delimiters//Colon" to Highlights.COLON,
+            "Operators and Delimiters//Comma" to Highlights.COMMA,
+            "Operators and Delimiters//Dot" to Highlights.DOT,
+            "Operators and Delimiters//Namespace" to Highlights.NAMESPACE,
+            "Operators and Delimiters//Range" to Highlights.RANGE,
+            "Operators and Delimiters//Semicolon" to Highlights.SEMICOLON,
+            "Operators and Delimiters//Operator Sign" to Highlights.OPERATOR,
+            "Operators and Delimiters//Parenthesis" to Highlights.DELIM_PARENTHESIS,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
     }
 }

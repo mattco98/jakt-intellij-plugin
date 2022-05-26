@@ -21,10 +21,6 @@ object Highlights {
     val LITERAL_DICTIONARY = Default.BRACKETS.extend("LITERAL_DICTIONARY")
     val LITERAL_SET = Default.BRACES.extend("LITERAL_SET")
 
-    val DELIMITER_PARENTHESIS = Default.PARENTHESES.extend("DELIMITER_PARENTHESES")
-    val DELIMITER_BRACE = Default.BRACES.extend("DELIMITER_BRACE")
-    val DELIMITER_BRACKET = Default.BRACKETS.extend("DELIMITER_BRACKET")
-
     val KEYWORD_BASE = Default.KEYWORD.extend("KEYWORD_BASE")
     val KEYWORD_VISIBILITY = KEYWORD_BASE.extend("KEYWORD_VISIBILITY")
     val KEYWORD_DECLARATION = KEYWORD_BASE.extend("KEYWORD_DECLARATION")
@@ -32,21 +28,21 @@ object Highlights {
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
     val KEYWORD_UNSAFE = KEYWORD_BASE.extend("KEYWORD_UNSAFE")
 
-    val OPERATOR_BASE = Default.OPERATION_SIGN.extend("OPERATOR_BASE")
-    val DOT = OPERATOR_BASE.extend("DOT")
-    val RANGE = OPERATOR_BASE.extend("RANGE")
-    val COMMA = OPERATOR_BASE.extend("COMMA")
-    val COLON = OPERATOR_BASE.extend("COLON")
-    val NAMESPACE = OPERATOR_BASE.extend("NAMESPACE")
-    val SEMICOLON = OPERATOR_BASE.extend("SEMICOLON")
-    val ARITHMETIC_OPERATOR = OPERATOR_BASE.extend("BINARY_OPERATOR")
-    val BITWISE_OPERATOR = OPERATOR_BASE.extend("BITWISE_OPERATOR")
-    val COMPARISON_OPERATOR = OPERATOR_BASE.extend("COMPARISON_OPERATOR")
-    val OTHER_OPERATOR = OPERATOR_BASE.extend("OTHER_OPERATOR")
-    val ARROW = OPERATOR_BASE.extend("ARROW")
+    val DELIM_PARENTHESIS = Default.PARENTHESES.extend("DELIM_PARENTHESES")
+    val DELIM_BRACE = Default.BRACES.extend("DELIM_BRACE")
+    val DELIM_BRACKET = Default.BRACKETS.extend("DELIM_BRACKET")
+    val COLON = Default.OPERATION_SIGN.extend("COLON")
+    val COMMA = Default.OPERATION_SIGN.extend("COMMA")
+    val DOT = Default.OPERATION_SIGN.extend("DOT")
+    val NAMESPACE = Default.OPERATION_SIGN.extend("NAMESPACE")
+    val RANGE = Default.OPERATION_SIGN.extend("RANGE")
+    val SEMICOLON = Default.OPERATION_SIGN.extend("SEMICOLON")
+    val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR")
 
     val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION")
     val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL")
+    val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW")
+    val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW")
 
     private fun TextAttributesKey.extend(name: String) = TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
@@ -66,9 +62,12 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             DICTIONARY_EXPRESSION -> Highlights.LITERAL_DICTIONARY
             SET_EXPRESSION -> Highlights.LITERAL_SET
 
-            PAREN_OPEN, PAREN_CLOSE -> Highlights.DELIMITER_PARENTHESIS
-            CURLY_OPEN, CURLY_CLOSE -> Highlights.DELIMITER_BRACE
-            BRACKET_OPEN, BRACKET_CLOSE -> Highlights.DELIMITER_BRACKET
+            PAREN_OPEN,
+            PAREN_CLOSE -> Highlights.DELIM_PARENTHESIS
+            CURLY_OPEN,
+            CURLY_CLOSE -> Highlights.DELIM_BRACE
+            BRACKET_OPEN,
+            BRACKET_CLOSE -> Highlights.DELIM_BRACKET
 
             EXTERN_KEYWORD,
             CLASS_KEYWORD,
@@ -94,7 +93,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             RAW_KEYWORD,
             THROWS_KEYWORD -> Highlights.KEYWORD_MODIFIER
 
-            UNSAFE_KEYWORD, CPP_KEYWORD -> Highlights.KEYWORD_UNSAFE
+            UNSAFE_KEYWORD,
+            CPP_KEYWORD -> Highlights.KEYWORD_UNSAFE
 
             DOT -> Highlights.DOT
             DOT_DOT -> Highlights.RANGE
@@ -102,22 +102,32 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             COLON -> Highlights.COLON
             COLON_COLON -> Highlights.NAMESPACE
             SEMICOLON -> Highlights.SEMICOLON
-            ARROW, FAT_ARROW -> Highlights.ARROW
 
-            PLUS, MINUS,
-            ASTERISK, SLASH, PERCENT -> Highlights.ARITHMETIC_OPERATOR
-
-            LEFT_SHIFT, RIGHT_SHIFT,
-            ARITH_LEFT_SHIFT, ARITH_RIGHT_SHIFT,
-            AMPERSAND, PIPE, CARET -> Highlights.BITWISE_OPERATOR
-
-            DOUBLE_EQUALS, NOT_EQUALS,
-            LESS_THAN, LESS_THAN_EQUALS,
-            GREATER_THAN, GREATER_THAN_EQUALS,
-            AND, OR -> Highlights.COMPARISON_OPERATOR
-
+            PLUS,
+            MINUS,
+            ASTERISK,
+            SLASH, PERCENT,
+            LEFT_SHIFT,
+            RIGHT_SHIFT,
+            ARITH_LEFT_SHIFT,
+            ARITH_RIGHT_SHIFT,
+            AMPERSAND,
+            PIPE,
+            CARET,
+            DOUBLE_EQUALS,
+            NOT_EQUALS,
+            LESS_THAN,
+            LESS_THAN_EQUALS,
+            GREATER_THAN,
+            GREATER_THAN_EQUALS,
+            AND,
+            OR,
             EQUALS,
-            QUESTION_MARK, DOUBLE_QUESTION_MARK -> Highlights.OTHER_OPERATOR
+            QUESTION_MARK,
+            DOUBLE_QUESTION_MARK -> Highlights.OPERATOR
+
+            ARROW -> Highlights.FUNCTION_ARROW
+            FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
 
             else -> {
                 if (tokenType is JaktElement)
