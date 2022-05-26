@@ -56,8 +56,12 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             IDENTIFIER -> Highlights.IDENTIFIER
             COMMENT -> Highlights.COMMENT
 
-            NUMERIC_LITERAL -> Highlights.LITERAL_NUMBER
-            STRING_LITERAL -> Highlights.LITERAL_STRING
+            NUMERIC_LITERAL,
+            DECIMAL_LITERAL,
+            HEX_LITERAL,
+            BINARY_LITERAL -> Highlights.LITERAL_NUMBER
+            STRING_LITERAL,
+            CHAR_LITERAL -> Highlights.LITERAL_STRING
             BOOLEAN_LITERAL -> Highlights.LITERAL_BOOLEAN
             ARRAY_EXPRESSION -> Highlights.LITERAL_ARRAY
             DICTIONARY_EXPRESSION -> Highlights.LITERAL_DICTIONARY
@@ -85,15 +89,18 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             ELSE_KEYWORD,
             WHILE_KEYWORD,
             FOR_KEYWORD,
+            IN_KEYWORD,
             LOOP_KEYWORD,
             RETURN_KEYWORD,
             THROW_KEYWORD,
+            MATCH_KEYWORD,
             DEFER_KEYWORD -> Highlights.KEYWORD_CONTROL_FLOW
 
             REF_KEYWORD,
             MUTABLE_KEYWORD,
             ANONYMOUS_KEYWORD,
             RAW_KEYWORD,
+            WEAK_KEYWORD,
             THROWS_KEYWORD -> Highlights.KEYWORD_MODIFIER
 
             UNSAFE_KEYWORD,
@@ -133,8 +140,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
 
             else -> {
-                if (tokenType is JaktElement)
-                    println("No Token highlighting defined for element ${tokenType::class.simpleName}!")
+                if (tokenType is JaktToken)
+                    println("No Token highlighting defined for element $tokenType!")
                 return emptyArray()
             }
         }.let { arrayOf(it) }
