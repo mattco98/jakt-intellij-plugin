@@ -42,6 +42,7 @@ COMMENT="//"[^\r\n]*
   {NEWLINE}              { return NEWLINE; }
 
   "extern"               { return EXTERN_KEYWORD; }
+  "namespace"            { return NAMESPACE_KEYWORD; }
   "class"                { return CLASS_KEYWORD; }
   "struct"               { return STRUCT_KEYWORD; }
   "enum"                 { return ENUM_KEYWORD; }

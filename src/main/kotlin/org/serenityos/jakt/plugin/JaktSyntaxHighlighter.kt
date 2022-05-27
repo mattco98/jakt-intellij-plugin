@@ -77,6 +77,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             BRACKET_CLOSE -> Highlights.DELIM_BRACKET
 
             EXTERN_KEYWORD,
+            NAMESPACE_KEYWORD,
             CLASS_KEYWORD,
             STRUCT_KEYWORD,
             FUNCTION_KEYWORD,

@@ -17,6 +17,7 @@
     tokens=[
         EXTERN_KEYWORD='extern'
 
+        NAMESPACE_KEYWORD='namespace'
         CLASS_KEYWORD='class'
         STRUCT_KEYWORD='struct'
         ENUM_KEYWORD='enum'
@@ -130,7 +131,7 @@ private TopLevelDefinition ::=
     | ClassDeclaration
     | StructDeclaration
     | EnumDeclaration
-    {recoverWhile=TopLevelDefinition_recover}
+    | NamespaceDeclaration
 
 private TopLevelDefinition_recover ::= !(
       EXTERN_KEYWORD
@@ -138,7 +139,8 @@ private TopLevelDefinition_recover ::= !(
     | CLASS_KEYWORD
     | STRUCT_KEYWORD
     | ENUM_KEYWORD
-    | REF_KEYWORD)
+    | REF_KEYWORD
+    | !CURLY_CLOSE) // So this won't eat the trailing curly of a namespace
 
 Statement ::=
       Expression
@@ -261,6 +263,7 @@ StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>> {
 private StructEnumMemberBodyPart_recover ::= !(IDENTIFIER | COMMA | PAREN_CLOSE | NEWLINE)
 StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 
+NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 /*************************************
  *            STATEMENTS             *
  *************************************/
