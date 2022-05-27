@@ -120,6 +120,10 @@
     generateTokenAccessors=true
 }
 
+/*************************************
+ *               ROOT                *
+ *************************************/
+
 File ::= TopLevelDefinitionList?
 
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)* {
@@ -141,19 +145,6 @@ private TopLevelDefinition_recover ::= !(
     | ENUM_KEYWORD
     | REF_KEYWORD
     | !CURLY_CLOSE) // So this won't eat the trailing curly of a namespace
-
-Statement ::=
-      Expression
-    | ReturnStatement
-    | ThrowStatement
-    | DeferStatement
-    | IfStatement
-    | WhileStatement
-    | LoopStatement
-    | ForStatement
-    | VariableDeclarationStatement
-    | UnsafeStatement
-    | CppStatement
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -189,31 +180,6 @@ private ExpressionLead ::=
     | Literal
 
 /*************************************
- *               TYPES               *
- *************************************/
-
-Type ::=
-      RawType
-    | WeakType
-    | ArrayType
-    | GenericType
-    | DictionaryType
-    | SetType
-    | TupleType
-    | PlainType
-
-RawType ::= RAW_KEYWORD Type
-WeakType ::= WEAK_KEYWORD Type
-PlainType ::= IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
-GenericType ::= IDENTIFIER GenericBounds
-GenericBounds ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
-ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
-DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
-SetType ::= CURLY_OPEN Type CURLY_CLOSE
-TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE
-TypeAnnotation ::= COLON Type
-
-/*************************************
  *           Declarations            *
  *************************************/
 
@@ -223,10 +189,12 @@ private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 ParameterList ::= <<commaList Parameter>>
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
+NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 ClassDeclaration ::= EXTERN_KEYWORD? CLASS_KEYWORD IDENTIFIER GenericBounds? NL StructBody {pin=2}
 StructDeclaration ::= EXTERN_KEYWORD? STRUCT_KEYWORD IDENTIFIER GenericBounds? NL StructBody {pin=2}
 StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 
+// Structs
 private StructMembers ::= <<commaOrEolList StructMember>> {
     pin=1
     recoverWhile=StructMember_recover
@@ -238,6 +206,7 @@ StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
+// Enums
 EnumDeclaration ::= EnumHead EnumBody
 private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL {pin=2}
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
@@ -263,10 +232,28 @@ StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>> {
 private StructEnumMemberBodyPart_recover ::= !(IDENTIFIER | COMMA | PAREN_CLOSE | NEWLINE)
 StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 
-NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 /*************************************
  *            STATEMENTS             *
  *************************************/
+
+private StatementList ::= Statement (StatementSeparator Statement)* {
+    recoverWhile=StatementList_recover
+}
+private StatementSeparator ::= (NEWLINE | SEMICOLON)+
+private StatementList_recover ::= !(CURLY_CLOSE | StatementSeparator | StatementLead)
+
+Statement ::=
+      Expression
+    | ReturnStatement
+    | ThrowStatement
+    | DeferStatement
+    | IfStatement
+    | WhileStatement
+    | LoopStatement
+    | ForStatement
+    | VariableDeclarationStatement
+    | UnsafeStatement
+    | CppStatement
 
 VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {pin=1}
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
@@ -283,12 +270,38 @@ UnsafeStatement ::= UNSAFE_KEYWORD <<withOn Block "UNSAFE">>
 CppStatement ::= <<isModeOn "UNSAFE">> CPP_KEYWORD Block
 
 /*************************************
+ *               TYPES               *
+ *************************************/
+
+Type ::=
+      RawType
+    | WeakType
+    | ArrayType
+    | GenericType
+    | DictionaryType
+    | SetType
+    | TupleType
+    | PlainType
+
+RawType ::= RAW_KEYWORD Type
+WeakType ::= WEAK_KEYWORD Type
+PlainType ::= IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
+GenericType ::= IDENTIFIER GenericBounds
+GenericBounds ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
+ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
+DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
+SetType ::= CURLY_OPEN Type CURLY_CLOSE
+TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE
+TypeAnnotation ::= COLON Type
+
+/*************************************
  *            EXPRESSIONS            *
  *************************************/
 
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
       OptionalSomeExpression // Must come before CallExpression
+    | OptionalNoneExpression // Must come before Qualifier
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
     | LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
@@ -312,31 +325,59 @@ Expression ::=
     | TupleExpression
     | MatchExpression
     | Literal
-    | OptionalNoneExpression // Must come before Qualifier
     | NamespacedQualifier
     | PlainQualifier
     | Block
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
 
-NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
-PlainQualifier ::= IDENTIFIER {extends=Expression}
+OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
+OptionalNoneExpression ::= NONE_TYPE
 
-MemberAccessExpression ::= Expression DOT (IDENTIFIER | DECIMAL_LITERAL)
-IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
-
-CallExpression ::= Expression GenericBounds? PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=3 recoverWhile=CallExpression_recover}
+CallExpression ::= Expression GenericBounds? PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=3}
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
 UnlabeledArgument ::= ExpressionWithoutAssignment
-private CallExpression_recover ::= !<<eof>>
 
-RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
+MemberAccessExpression ::= Expression DOT (IDENTIFIER | DECIMAL_LITERAL)
+IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
+RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 
-OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
-OptionalNoneExpression ::= NONE_TYPE
+ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
+SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
+ElementsArrayBody ::= <<commaOrEolList ExpressionWithoutAssignment>>
+
+DictionaryExpression ::= BRACKET_OPEN <<commaOrEolList DictionaryElement>>? BRACKET_CLOSE
+DictionaryElement ::= Expression COLON Expression
+SetExpression ::= CURLY_OPEN <<commaOrEolList ExpressionWithoutAssignment>>? CURLY_CLOSE
+TupleExpression ::= PAREN_OPEN <<commaOrEolList ExpressionWithoutAssignment>> PAREN_CLOSE
+
+MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
+private MatchPatterns ::= <<commaOrEolList MatchPattern>> {
+    pin=1
+    recoverWhile=MatchPatterns_recover
+}
+private MatchPatterns_recover ::= !(CURLY_CLOSE | ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER)
+MatchPattern ::= PatternHead PatternTrail
+PatternTrail ::= FAT_ARROW Expression
+PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
+// TODO: This is incomplete
+IdentPatternHead ::= (IDENTIFIER | NamespacedQualifier) [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
+ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
+
+NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
+PlainQualifier ::= IDENTIFIER {extends=Expression}
+
+Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
+    pin=1
+    extends=Expression
+}
+
+/*************************************
+ *        BINARY EXPRESSIONS         *
+ *************************************/
 
 fake BinaryExpression ::= Expression+ {
     methods=[left="Expression[0]" right="Expression[1]"]
@@ -375,37 +416,9 @@ private PrefixOp ::=
     | <<isModeOn "UNSAFE">> ASTERISK
 private PostfixOp ::= PLUS_PLUS | MINUS_MINUS
 
-Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
-    pin=1
-    extends=Expression
-}
-private StatementList ::= Statement (StatementSeparator Statement)* {
-    recoverWhile=StatementList_recover
-}
-private StatementSeparator ::= (NEWLINE | SEMICOLON)+
-private StatementList_recover ::= !(CURLY_CLOSE | StatementSeparator | StatementLead)
-
-ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
-SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
-ElementsArrayBody ::= <<commaOrEolList ExpressionWithoutAssignment>>
-
-DictionaryExpression ::= BRACKET_OPEN <<commaOrEolList DictionaryElement>>? BRACKET_CLOSE
-DictionaryElement ::= Expression COLON Expression
-SetExpression ::= CURLY_OPEN <<commaOrEolList ExpressionWithoutAssignment>>? CURLY_CLOSE
-TupleExpression ::= PAREN_OPEN <<commaOrEolList ExpressionWithoutAssignment>> PAREN_CLOSE
-
-MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
-private MatchPatterns ::= <<commaOrEolList MatchPattern>> {
-    pin=1
-    recoverWhile=MatchPatterns_recover
-}
-private MatchPatterns_recover ::= !(CURLY_CLOSE | ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER)
-MatchPattern ::= PatternHead PatternTrail
-PatternTrail ::= FAT_ARROW Expression
-PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
-// TODO: This is incomplete
-IdentPatternHead ::= (IDENTIFIER | NamespacedQualifier) [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
-ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
+/*************************************
+ *             LITERALS              *
+ *************************************/
 
 Literal ::=
       STRING_LITERAL
@@ -415,15 +428,17 @@ Literal ::=
     | BooleanLiteral
     {extends=Expression}
 
-BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
-
 NumericLiteral ::=
       BINARY_LITERAL
     | HEX_LITERAL
     | DECIMAL_LITERAL
 
-private NL ::= NEWLINE*
+BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
 
-// Helpers
+/*************************************
+ *             HELPERS               *
+ *************************************/
+
+private NL ::= NEWLINE*
 private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
 private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
