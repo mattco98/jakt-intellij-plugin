@@ -135,13 +135,6 @@ private TopLevelDefinition_recover ::= !(
     | ENUM_KEYWORD
     | REF_KEYWORD)
 
-Qualifier ::=
-      MemberQualifier
-    | NamespacedMemberQualifier
-    | ComputedMemberQualifier
-    | PlainMemberQualifier
-    {extends=Expression}
-
 Statement ::=
       Expression
     | ReturnStatement
@@ -299,6 +292,8 @@ Expression ::=
     | AssignmentBinaryExpression
     | ParenExpression
     | OptionalSomeExpression // Must come before CallExpression
+    | MemberAccessExpression
+    | IndexedAccessExpression
     | CallExpression
     | RangeExpression
     | ArrayExpression
@@ -308,17 +303,19 @@ Expression ::=
     | MatchExpression
     | Literal
     | OptionalNoneExpression // Must come before Qualifier
-    | Qualifier
+    | NamespacedQualifier
+    | PlainQualifier
     | Block
 
-private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">>
+private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
 
-MemberQualifier ::= IDENTIFIER DOT IDENTIFIER
-NamespacedMemberQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+
-ComputedMemberQualifier ::= IDENTIFIER BRACKET_OPEN Expression BRACKET_CLOSE
-PlainMemberQualifier ::= IDENTIFIER
+NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
+PlainQualifier ::= IDENTIFIER {extends=Expression}
 
-CallExpression ::= Qualifier PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=2 recoverWhile=CallExpression_recover}
+MemberAccessExpression ::= Expression DOT (IDENTIFIER | DECIMAL_LITERAL)
+IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
+
+CallExpression ::= Expression PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=2 recoverWhile=CallExpression_recover}
 ArgumentList ::= <<list Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
@@ -344,7 +341,10 @@ RelationalBinaryExpression ::= Expression RelationalOp Expression
 ShiftBinaryExpression ::= Expression ShiftOp Expression
 AddBinaryExpression ::= Expression AddOp Expression
 MultiplyBinaryExpression ::= Expression MultiplyOp Expression
-AssignmentBinaryExpression ::= <<isModeOff "NO_ASSIGN">> Qualifier AssignmentOp Expression {rightAssociative=true}
+// TODO: Restrict LHS?
+// TODO: Invert Expression{WithoutAssignment} => Expression{WithAssignment}, as this can't be a part
+//       of the expression tree root
+AssignmentBinaryExpression ::= Expression AssignmentOp Expression {rightAssociative=true}
 fake UnaryExpression ::= PrefixOp? Expression PostfixOp?
 PrefixUnaryExpression ::= PrefixOp Expression {extends=UnaryExpression}
 PostfixUnaryExpression ::= Expression PostfixOp {extends=UnaryExpression}
@@ -363,7 +363,7 @@ private PrefixOp ::=
     | TILDE
     | AMPERSAND RAW_KEYWORD
     | <<isModeOn "UNSAFE">> ASTERISK
-private PostfixOp ::= PLUS_PLUS | MINUS_MINUS |
+private PostfixOp ::= PLUS_PLUS | MINUS_MINUS
 
 Block ::= CURLY_OPEN <<withOff Statement* "NO_ASSIGN">> CURLY_CLOSE {
     pin=1
@@ -392,7 +392,7 @@ MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 // TODO: This is incomplete
-IdentPatternHead ::= (IDENTIFIER | NamespacedMemberQualifier) PAREN_OPEN <<list IDENTIFIER>> PAREN_CLOSE
+IdentPatternHead ::= (IDENTIFIER | NamespacedQualifier) PAREN_OPEN <<list IDENTIFIER>> PAREN_CLOSE
 ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
 Literal ::=
