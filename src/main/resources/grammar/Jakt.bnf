@@ -397,6 +397,7 @@ ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
 Literal ::=
       STRING_LITERAL
+    | BYTE_CHAR_LITERAL
     | CHAR_LITERAL
     | NumericLiteral
     | BooleanLiteral
