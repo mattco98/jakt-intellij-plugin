@@ -146,6 +146,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
 
+            NEWLINE -> return emptyArray()
+
             else -> {
                 if (tokenType is JaktToken)
                     println("No Token highlighting defined for element $tokenType!")

@@ -6,6 +6,7 @@ import com.intellij.psi.tree.IElementType;
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static org.serenityos.jakt.JaktTypes.*;
+import org.serenityos.jakt.plugin.JaktLexerBase;
 
 %%
 
@@ -18,11 +19,13 @@ import static org.serenityos.jakt.JaktTypes.*;
 %public
 %class JaktLexer
 %implements FlexLexer
+%extends JaktLexerBase
 %function advance
 %type IElementType
 %unicode
 
-WHITE_SPACE=\s+
+WHITE_SPACE=[\t\f\v ]+
+NEWLINE=[\r\n]
 
 HEX_LITERAL=(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*
 BINARY_LITERAL=(0b|0B)[01](_?[01])*
@@ -35,7 +38,8 @@ COMMENT="//"[^\r\n]*
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE}          { return WHITE_SPACE; }
+  {WHITE_SPACE}          { return SPACE; }
+  {NEWLINE}              { return NEWLINE; }
 
   "extern"               { return EXTERN_KEYWORD; }
   "class"                { return CLASS_KEYWORD; }
