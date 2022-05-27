@@ -63,7 +63,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             STRING_LITERAL,
             CHAR_LITERAL,
             BYTE_CHAR_LITERAL -> Highlights.LITERAL_STRING
-            BOOLEAN_LITERAL -> Highlights.LITERAL_BOOLEAN
+            TRUE_KEYWORD,
+            FALSE_KEYWORD -> Highlights.LITERAL_BOOLEAN
             ARRAY_EXPRESSION -> Highlights.LITERAL_ARRAY
             DICTIONARY_EXPRESSION -> Highlights.LITERAL_DICTIONARY
             SET_EXPRESSION -> Highlights.LITERAL_SET
