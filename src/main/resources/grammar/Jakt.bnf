@@ -124,7 +124,7 @@
  *               ROOT                *
  *************************************/
 
-File ::= TopLevelDefinitionList?
+File ::= NL TopLevelDefinitionList? NL
 
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)* {
     recoverWhile=TopLevelDefinition_recover
@@ -132,19 +132,22 @@ private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLev
 
 private TopLevelDefinition ::=
       FunctionDeclaration
-    | ClassDeclaration
     | StructDeclaration
     | EnumDeclaration
+    | ExternDeclaration
     | NamespaceDeclaration
 
 private TopLevelDefinition_recover ::= !(
       EXTERN_KEYWORD
+    | NAMESPACE_KEYWORD
     | FUNCTION_KEYWORD
     | CLASS_KEYWORD
     | STRUCT_KEYWORD
     | ENUM_KEYWORD
     | REF_KEYWORD
-    | !CURLY_CLOSE) // So this won't eat the trailing curly of a namespace
+    | CURLY_CLOSE // So this won't eat the trailing curly of a namespace
+    | NEWLINE
+    | <<eof>>)
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -180,30 +183,41 @@ private ExpressionLead ::=
     | Literal
 
 /*************************************
- *           Declarations            *
+ *       Extern Declarations         *
  *************************************/
 
-FunctionDeclaration ::= EXTERN_KEYWORD? FUNCTION_KEYWORD IDENTIFIER GenericBounds? PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType? FunctionBody {pin=2}
+private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration
+
+ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader
+private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
-private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 ParameterList ::= <<commaList Parameter>>
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
+ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
+private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL {pin=1}
+
+private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
+ExternStructMember ::= StructField | ExternFunctionDeclaration
+StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
+
+/*************************************
+ *      Non-Extern Declarations      *
+ *************************************/
+
+FunctionDeclaration ::= FunctionHeader FunctionBody {pin=1}
+private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
+
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
-ClassDeclaration ::= EXTERN_KEYWORD? CLASS_KEYWORD IDENTIFIER GenericBounds? NL StructBody {pin=2}
-StructDeclaration ::= EXTERN_KEYWORD? STRUCT_KEYWORD IDENTIFIER GenericBounds? NL StructBody {pin=2}
+StructDeclaration ::= StructHeader StructBody
 StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 
 // Structs
-private StructMembers ::= <<commaOrEolList StructMember>> {
-    pin=1
-    recoverWhile=StructMember_recover
-}
+private StructMembers ::= <<commaOrEolList StructMember>>;
 StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
 private StructMember_recover ::= !CURLY_CLOSE | (&MemberSeparator !IDENTIFIER)
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
-StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // Enums
