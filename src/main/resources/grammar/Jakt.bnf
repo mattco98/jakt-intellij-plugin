@@ -126,9 +126,7 @@
 
 File ::= NL TopLevelDefinitionList? NL
 
-private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)* {
-    recoverWhile=TopLevelDefinition_recover
-}
+private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
 
 private TopLevelDefinition ::=
       FunctionDeclaration
@@ -136,18 +134,6 @@ private TopLevelDefinition ::=
     | EnumDeclaration
     | ExternDeclaration
     | NamespaceDeclaration
-
-private TopLevelDefinition_recover ::= !(
-      EXTERN_KEYWORD
-    | NAMESPACE_KEYWORD
-    | FUNCTION_KEYWORD
-    | CLASS_KEYWORD
-    | STRUCT_KEYWORD
-    | ENUM_KEYWORD
-    | REF_KEYWORD
-    | CURLY_CLOSE // So this won't eat the trailing curly of a namespace
-    | NEWLINE
-    | <<eof>>)
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -195,17 +181,17 @@ ParameterList ::= <<commaList Parameter>>
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
-private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL {pin=1}
+private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
 ExternStructMember ::= StructField | ExternFunctionDeclaration
-StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation {pin=1}
+StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation
 
 /*************************************
  *      Non-Extern Declarations      *
  *************************************/
 
-FunctionDeclaration ::= FunctionHeader FunctionBody {pin=1}
+FunctionDeclaration ::= FunctionHeader FunctionBody
 private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
@@ -215,46 +201,35 @@ StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 // Structs
 private StructMembers ::= <<commaOrEolList StructMember>>;
 StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
-private StructMember_recover ::= !CURLY_CLOSE | (&MemberSeparator !IDENTIFIER)
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // Enums
 EnumDeclaration ::= EnumHead EnumBody
-private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL {pin=2}
+private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
-UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE {pin=1}
+UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE
 
-private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumMember>> {
-    recoverWhile=StructMember_recover
-}
+private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumMember>>
 UnderlyingTypeEnumMember ::= IDENTIFIER [EQUALS Expression]
 
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
-private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>> {
-    recoverWhile=StructMember_recover
-}
+private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
 private NormalEnumMember ::= IDENTIFIER NormalEnumMemberBody?
 private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
-StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>> {
-    recoverWhile=StructEnumMemberBodyPart_recover
-}
-private StructEnumMemberBodyPart_recover ::= !(IDENTIFIER | COMMA | PAREN_CLOSE | NEWLINE)
+StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
 StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 
 /*************************************
  *            STATEMENTS             *
  *************************************/
 
-private StatementList ::= Statement (StatementSeparator Statement)* {
-    recoverWhile=StatementList_recover
-}
+private StatementList ::= Statement (StatementSeparator Statement)*
 private StatementSeparator ::= (NEWLINE | SEMICOLON)+
-private StatementList_recover ::= !(CURLY_CLOSE | StatementSeparator | StatementLead)
 
 Statement ::=
       Expression
@@ -269,7 +244,7 @@ Statement ::=
     | UnsafeStatement
     | CppStatement
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {pin=1}
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
 ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
 ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
@@ -348,7 +323,7 @@ private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name=
 OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 OptionalNoneExpression ::= NONE_TYPE
 
-CallExpression ::= Expression GenericBounds? PAREN_OPEN ArgumentList? PAREN_CLOSE {pin=3}
+CallExpression ::= Expression GenericBounds? PAREN_OPEN ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
@@ -369,11 +344,7 @@ SetExpression ::= CURLY_OPEN <<commaOrEolList ExpressionWithoutAssignment>>? CUR
 TupleExpression ::= PAREN_OPEN <<commaOrEolList ExpressionWithoutAssignment>> PAREN_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
-private MatchPatterns ::= <<commaOrEolList MatchPattern>> {
-    pin=1
-    recoverWhile=MatchPatterns_recover
-}
-private MatchPatterns_recover ::= !(CURLY_CLOSE | ELSE_KEYWORD | PAREN_OPEN | IDENTIFIER)
+private MatchPatterns ::= <<commaOrEolList MatchPattern>>
 MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW Expression
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
@@ -385,7 +356,6 @@ NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression
 PlainQualifier ::= IDENTIFIER {extends=Expression}
 
 Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
-    pin=1
     extends=Expression
 }
 
