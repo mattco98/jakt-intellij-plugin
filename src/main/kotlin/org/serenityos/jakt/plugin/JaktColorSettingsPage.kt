@@ -9,24 +9,89 @@ class JaktColorSettingsPage : ColorSettingsPage {
 
     override fun getHighlighter() = JaktSyntaxHighlighter()
 
-    // TODO: Eventually put every syntax here
     override fun getDemoText() = """
-        function <FUNCTION_DECLARATION>main</FUNCTION_DECLARATION>() {
-            let i = 5
-            if i == 5 and 7 > 6 {
-                <FUNCTION_CALL>println</FUNCTION_CALL>("OK")
+        enum WithUnderlyingType: <T>i32</T> {
+            A
+            B = 2
+            C
+        }
+        
+        ref enum Foo<<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
+            Bar
+            Baz(<T>Foo</T><<T>i32</T>, <T>T</T>>)
+            Qux(a: [<T>String</T>:{<T>U</T>}], b: <T>WithUnderlyingType</T>)
+        }
+        
+        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(f: <T>Foo</T><<T>i32</T>, <T>A</T>>, anonymous strings: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
+            match f {
+                Bar => [0; 10]
+                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (string.0 + 1, strings.1))
+                Qux(dict, t) => {
+                    for str in strings.1.<FUNC_CALL>iterator</FUNC_CALL>() {
+                        let mutable i = 0
+                        loop {
+                            if str[i] == b'z' and not (i > 5) {
+                                continue
+                            }
+                            i++
+                            if i == 10 {
+                                return [i; 0b1010]
+                            }
+                        }
+                    }
+                    [1, 2, 3 << 9]
+                }
             }
-            let a = true
-            let b = true
-            if a and b {
-                <FUNCTION_CALL>println</FUNCTION_CALL>("OK")
+        }
+        
+        namespace E {
+            extern struct D {
+                function <FUNC_DECL>invoke</FUNC_DECL>(this, a: weak <T>i32</T>?) -> <T>String</T>
             }
+        
+            class P {
+                foo: <T>i32</T>
+        
+                // Create a new P from the given value
+                function <FUNC_DECL>make</FUNC_DECL>(value: <T>i32</T>) => <FUNC_CALL>P</FUNC_CALL>(foo: value)
+                function <FUNC_DECL>get_foo</FUNC_DECL>(this) => .foo
+                function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, value: <T>i32</T>) {
+                    .foo = value
+                }
+            }
+        }
+
+        function <FUNC_DECL>get_p</FUNC_DECL>() -> <NS_QUAL>E</NS_QUAL>::<T>P</T>? => <OPT_T>None</OPT_T>
+        
+        function <FUNC_DECL>main</FUNC_DECL>() {
+            let p = <NS_QUAL>E</NS_QUAL>::<T>P</T>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
+            <FUNC_CALL>println</FUNC_CALL>("value = {}", p.<FUNC_CALL>get_foo</FUNC_CALL>())
+            p.<FUNC_CALL>set_foo</FUNC_CALL>(value: 0x123)
+            unsafe {
+                cpp {
+                    "p.set_foo(98);"
+                }
+            }
+        
+            <FUNC_CALL>println</FUNC_CALL>("{}", <FUNC_CALL>get_p</FUNC_CALL>()!.<FUNC_CALL>set_foo</FUNC_CALL>(value: 20))
+        
+            let x = 10
+            let y = &raw x
+            unsafe {
+                <FUNC_CALL>println</FUNC_CALL>("{}", *y) // 10
+            }
+        
+            return 0
         }
     """.trimIndent()
 
     override fun getAdditionalHighlightingTagToDescriptorMap() = mapOf(
-        "FUNCTION_DECLARATION" to Highlights.FUNCTION_DECLARATION,
-        "FUNCTION_CALL" to Highlights.FUNCTION_CALL
+        "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
+        "FUNC_CALL" to Highlights.FUNCTION_CALL,
+        "NS_QUAL" to Highlights.TYPE_NAMESPACE_QUALIFIER,
+        "T" to Highlights.TYPE_NAME,
+        "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
+        "OPT_T" to Highlights.TYPE_OPTIONAL_TYPE,
     )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
