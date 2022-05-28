@@ -274,7 +274,7 @@ Type ::=
 
 RawType ::= RAW_KEYWORD Type
 WeakType ::= WEAK_KEYWORD Type
-PlainType ::= IDENTIFIER [ QUESTION_MARK | EXCLAMATION_POINT ]
+PlainType ::= IDENTIFIER QUESTION_MARK?
 GenericType ::= IDENTIFIER GenericBounds
 GenericBounds ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
 ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE

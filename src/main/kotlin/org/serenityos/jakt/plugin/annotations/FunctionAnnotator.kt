@@ -10,13 +10,12 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.Highlights
 
-// TODO: Split this up into multiple classes when this class starts to get too complex
-object JaktAnnotatorImpl : JaktAnnotator() {
+object FunctionAnnotator : JaktAnnotator() {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder) {
         when (element) {
             is JaktFunctionDeclaration -> holder
                 .newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.identifier!!)
+                .range(element.identifier)
                 .textAttributes(Highlights.FUNCTION_DECLARATION)
                 .create()
             is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.let {

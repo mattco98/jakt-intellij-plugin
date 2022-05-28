@@ -69,6 +69,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Operators and Delimiters//Semicolon" to Highlights.SEMICOLON,
             "Operators and Delimiters//Operator Sign" to Highlights.OPERATOR,
             "Operators and Delimiters//Parenthesis" to Highlights.DELIM_PARENTHESIS,
+            "Operators and Delimiters//Optional Assertion" to Highlights.OPTIONAL_ASSERTION,
+
+            "Types//Type Name" to Highlights.TYPE_NAME,
+            "Types//Generic Type Name" to Highlights.TYPE_GENERIC_NAME,
+            "Types//Raw Qualifier" to Highlights.TYPE_RAW,
+            "Types//Weak Qualifier" to Highlights.TYPE_WEAK,
+            "Types//Namespace Qualifier" to Highlights.TYPE_NAMESPACE_QUALIFIER,
+            "Types//Namespace Operator" to Highlights.TYPE_NAMESPACE_OPERATOR,
+            "Types//Optional Qualifier" to Highlights.TYPE_OPTIONAL_QUALIFIER,
+            "Types//Optional Type" to Highlights.TYPE_OPTIONAL_TYPE,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
     }
 }

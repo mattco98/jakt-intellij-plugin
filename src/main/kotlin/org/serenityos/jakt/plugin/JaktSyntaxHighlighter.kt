@@ -28,22 +28,32 @@ object Highlights {
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
     val KEYWORD_UNSAFE = KEYWORD_BASE.extend("KEYWORD_UNSAFE")
 
+    val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR")
     val DELIM_PARENTHESIS = Default.PARENTHESES.extend("DELIM_PARENTHESES")
     val DELIM_BRACE = Default.BRACES.extend("DELIM_BRACE")
     val DELIM_BRACKET = Default.BRACKETS.extend("DELIM_BRACKET")
-    val COLON = Default.OPERATION_SIGN.extend("COLON")
-    val COMMA = Default.OPERATION_SIGN.extend("COMMA")
-    val DOT = Default.OPERATION_SIGN.extend("DOT")
-    val NAMESPACE = Default.OPERATION_SIGN.extend("NAMESPACE")
-    val RANGE = Default.OPERATION_SIGN.extend("RANGE")
-    val SEMICOLON = Default.OPERATION_SIGN.extend("SEMICOLON")
-    val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR")
+    val COLON = OPERATOR.extend("COLON")
+    val COMMA = OPERATOR.extend("COMMA")
+    val DOT = OPERATOR.extend("DOT")
+    val NAMESPACE = OPERATOR.extend("NAMESPACE")
+    val RANGE = OPERATOR.extend("RANGE")
+    val SEMICOLON = OPERATOR.extend("SEMICOLON")
+    val OPTIONAL_ASSERTION = OPERATOR.extend("OPTIONAL_ASSERTION")
 
     val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION")
     val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL")
     val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW")
     val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW")
     val FUNCTION_PARAMETER_LABEL = IDENTIFIER.extend("FUNCTION_PARAMETER_LABEL")
+
+    val TYPE_NAME = IDENTIFIER.extend("TYPE_NAME")
+    val TYPE_GENERIC_NAME = TYPE_NAME.extend("TYPE_GENERIC_NAME")
+    val TYPE_RAW = KEYWORD_MODIFIER.extend("TYPE_RAW")
+    val TYPE_WEAK = KEYWORD_MODIFIER.extend("TYPE_WEAK")
+    val TYPE_NAMESPACE_QUALIFIER = IDENTIFIER.extend("TYPE_NAMESPACE_QUALIFIER")
+    val TYPE_NAMESPACE_OPERATOR = OPERATOR.extend("TYPE_NAMESPACE_OPERATOR")
+    val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER")
+    val TYPE_OPTIONAL_TYPE = OPERATOR.extend("TYPE_OPTIONAL_TYPE")
 
     private fun TextAttributesKey.extend(name: String) = TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
@@ -115,6 +125,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             COLON -> Highlights.COLON
             COLON_COLON -> Highlights.NAMESPACE
             SEMICOLON -> Highlights.SEMICOLON
+            EXCLAMATION_POINT -> Highlights.OPTIONAL_ASSERTION
 
             PLUS,
             MINUS,
@@ -146,6 +157,13 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
+
+            RAW_KEYWORD -> Highlights.TYPE_RAW
+            WEAK_KEYWORD -> Highlights.TYPE_WEAK
+            QUESTION_MARK -> Highlights.TYPE_OPTIONAL_QUALIFIER
+            COLON_COLON -> Highlights.TYPE_NAMESPACE_OPERATOR
+            SOME_TYPE -> Highlights.TYPE_OPTIONAL_TYPE
+            NONE_TYPE -> Highlights.TYPE_OPTIONAL_TYPE
 
             NEWLINE -> return emptyArray()
 
