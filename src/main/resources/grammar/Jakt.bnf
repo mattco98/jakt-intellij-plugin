@@ -184,7 +184,7 @@ ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStru
 private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
-ExternStructMember ::= StructField | ExternFunctionDeclaration
+ExternStructMember ::= StructField | FunctionHeader
 StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation
 
 /*************************************
@@ -254,9 +254,8 @@ LoopStatement ::= LOOP_KEYWORD Block
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
-// TODO: Maybe delegate unsafe checking to plugin analysis for better error messages?
-UnsafeStatement ::= UNSAFE_KEYWORD <<withOn Block "UNSAFE">>
-CppStatement ::= <<isModeOn "UNSAFE">> CPP_KEYWORD Block
+UnsafeStatement ::= UNSAFE_KEYWORD Block
+CppStatement ::= CPP_KEYWORD Block
 
 /*************************************
  *               TYPES               *
@@ -270,6 +269,7 @@ Type ::=
     | DictionaryType
     | SetType
     | TupleType
+    | NamespacedType
     | PlainType
 
 RawType ::= RAW_KEYWORD Type
@@ -281,6 +281,7 @@ ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
 SetType ::= CURLY_OPEN Type CURLY_CLOSE
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE
+NamespacedType ::= IDENTIFIER COLON_COLON Type
 TypeAnnotation ::= COLON Type
 
 /*************************************
@@ -307,6 +308,7 @@ Expression ::=
     | ParenExpression
     | MemberAccessExpression
     | IndexedAccessExpression
+    | FieldAccessExpression
     | RangeExpression
     | ArrayExpression
     | DictionaryExpression
@@ -332,6 +334,7 @@ UnlabeledArgument ::= ExpressionWithoutAssignment
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 MemberAccessExpression ::= Expression DOT (IDENTIFIER | DECIMAL_LITERAL)
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
+FieldAccessExpression ::= DOT Expression
 RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
 
 ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
@@ -397,8 +400,8 @@ private PrefixOp ::=
     | NOT
     | TILDE
     | AMPERSAND RAW_KEYWORD
-    | <<isModeOn "UNSAFE">> ASTERISK
-private PostfixOp ::= PLUS_PLUS | MINUS_MINUS
+    | ASTERISK
+private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | EXCLAMATION_POINT
 
 /*************************************
  *             LITERALS              *
