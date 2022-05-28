@@ -14,6 +14,7 @@ interface JaktC : Library {
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
         private val INSTANCE = Native.load("/libjakt.so", JaktC::class.java) as JaktC
+        private val serde = Serde()
 
         fun typecheck(file: File): TypecheckResult {
             require(file.exists())
@@ -21,7 +22,7 @@ interface JaktC : Library {
         }
 
         fun typecheck(content: String): TypecheckResult {
-            return Json.decodeFromString(INSTANCE.typecheck(content))
+            return serde.decodeFromString(INSTANCE.typecheck(content))
         }
     }
 }

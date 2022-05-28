@@ -15,7 +15,7 @@ use jakt::{
 #[derive(Serialize)]
 enum TypecheckResult {
     ParseError(JaktError),
-    TypeError(JaktError),
+    TypeError(Project, JaktError),
     Ok(Project),
 }
 
@@ -35,9 +35,10 @@ fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
         return TypecheckResult::ParseError(error)
     }
 
-    match typecheck_namespace(&namespace, 0, &mut project) {
-        Some(error) => TypecheckResult::TypeError(error),
-        _ => TypecheckResult::Ok(project)
+    if let Some(error) = typecheck_namespace(&namespace, 0, &mut project) {
+        TypecheckResult::TypeError(project, error)
+    } else {
+        TypecheckResult::Ok(project)
     }
 }
 

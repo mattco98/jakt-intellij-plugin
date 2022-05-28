@@ -1,6 +1,7 @@
+@file:Suppress("CanSealedSubClassBeObject")
+
 package org.serenityos.jakt.bindings
 
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,25 +17,31 @@ enum class SafetyMode {
     Unsafe,
 }
 
-@Serializable(with = Type.Serializer::class)
+@Serializable
 sealed class Type {
-    object Serializer : KSerializer<Type> by rustEnumSerializer()
+    @Serializable @UnitVariant
+    class Builtin : Type()
 
-    object Builtin : Type()
-
+    @Serializable @NewTypeVariant
     data class TypeVariable(val name: String) : Type()
 
+    @Serializable @TupleVariant
     data class GenericInstance(val id: StructId, val types: List<TypeId>) : Type()
 
+    @Serializable @TupleVariant
     data class GenericEnumInstance(val id: EnumId, val types: List<TypeId>) : Type()
 
+    @Serializable @NewTypeVariant
     data class Struct(val id: StructId) : Type()
 
+    @Serializable @NewTypeVariant
     data class Enum(val id: EnumId) : Type()
 
+    @Serializable @NewTypeVariant
     data class RawPtr(val id: TypeId) : Type()
 }
 
+// TODO: Figure out how to explicitly ignore certain properties
 @Serializable
 data class Project(
     val functions: List<CheckedFunction>,
@@ -44,10 +51,17 @@ data class Project(
     val types: List<Type>,
 
     // Internal state
-    @SerialName("current_function_index")
-    private val currentFunctionIndex: Int?,
-    @SerialName("inside_defer")
-    private val insideDefer: Boolean,
+    private val current_function_index: Int?,
+    private val current_struct_type_id: TypeId?,
+    private val inside_defer: Boolean,
+    private val cached_array_struct_id: StructId?,
+    private val cached_dictionary_struct_id: StructId?,
+    private val cached_error_struct_id: StructId?,
+    private val cached_optional_struct_id: StructId?,
+    private val cached_range_struct_id: StructId?,
+    private val cached_set_struct_id: StructId?,
+    private val cached_tuple_struct_id: StructId?,
+    private val cached_weakptr_struct_id: StructId?,
 )
 
 @Serializable
@@ -76,30 +90,34 @@ data class CheckedEnum(
     val scopeId: ScopeId,
     @SerialName("definition_linkage")
     val definitionLinkage: DefinitionLinkage,
-    @SerialName("underlying_type")
-    val underlyingType: TypeId?,
+    @SerialName("definition_type")
+    val definitionType: DefinitionType,
+    @SerialName("underlying_type_id")
+    val underlyingTypeId: TypeId?,
     val span: Span,
     @SerialName("type_id")
     val typeId: TypeId,
 )
 
-@Serializable(with = CheckedEnumVariant.Serializer::class)
+@Serializable
 sealed class CheckedEnumVariant {
     abstract val name: String
     abstract val span: Span
 
-    object Serializer : KSerializer<CheckedEnumVariant> by rustEnumSerializer()
-
+    @Serializable @TupleVariant
     data class Untyped(override val name: String, override val span: Span) : CheckedEnumVariant()
 
+    @Serializable @TupleVariant
     data class Typed(override val name: String, val typeId: TypeId, override val span: Span) : CheckedEnumVariant()
 
+    @Serializable @TupleVariant
     data class WithValue(
         override val name: String,
         val value: CheckedExpression,
         override val span: Span,
     ) : CheckedEnumVariant()
 
+    @Serializable @TupleVariant
     data class StructLike(
         override val name: String,
         val declarations: List<CheckedVarDecl>,
@@ -120,16 +138,14 @@ data class CheckedParameter(
     val variable: CheckedVariable,
 )
 
-@Serializable(with = FunctionGenericParameter.Serializer::class)
+@Serializable
 sealed class FunctionGenericParameter {
-    // TODO: Does this apply to the inherited classes?
-    @SerialName("type_id")
     abstract val typeId: TypeId
 
-    object Serializer : KSerializer<FunctionGenericParameter> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class InferenceGuide(override val typeId: TypeId) : FunctionGenericParameter()
 
+    @Serializable @NewTypeVariant
     data class Parameter(override val typeId: TypeId) : FunctionGenericParameter()
 }
 
@@ -183,174 +199,217 @@ data class CheckedVariable(
     val definitionSpan: Span,
 )
 
-@Serializable(with = CheckedStatement.Serializer::class)
+@Serializable
 sealed class CheckedStatement {
-    object Serializer : KSerializer<CheckedStatement> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class Expression(val expression: CheckedExpression) : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class Defer(val statement: CheckedStatement) : CheckedStatement()
 
+    @Serializable @TupleVariant
     data class VarDecl(val varDecl: CheckedVarDecl, val initializer: CheckedExpression) : CheckedStatement()
 
+    @Serializable @TupleVariant
     data class If(
         val condition: CheckedExpression,
         val ifBlock: CheckedBlock,
         val elseBlock: CheckedBlock?,
     ) : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class Block(val body: CheckedBlock) : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class Loop(val body: CheckedBlock) : CheckedStatement()
 
+    @Serializable @TupleVariant
     data class While(val condition: CheckedExpression, val body: CheckedBlock) : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class Return(val value: CheckedExpression) : CheckedStatement()
 
-    object Break : CheckedStatement()
+    @Serializable @UnitVariant
+    class Break : CheckedStatement()
 
-    object Continue : CheckedStatement()
+    @Serializable @UnitVariant
+    class Continue : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class Throw(val target: CheckedExpression) : CheckedStatement()
 
+    @Serializable @TupleVariant
     data class Try(
         val tryBlock: CheckedStatement,
         val errorName: String,
         val catchBlock: CheckedBlock,
     ) : CheckedStatement()
 
+    @Serializable @NewTypeVariant
     data class InlineCpp(val strings: List<String>) : CheckedStatement()
 
-    object Garbage : CheckedStatement()
+    @Serializable @UnitVariant
+    class Garbage : CheckedStatement()
 }
 
-@Serializable(with = NumberConstant.Serializer::class)
+@Serializable
 sealed class NumberConstant {
-    object Serializer : KSerializer<NumberConstant> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class Signed(val value: Long) : NumberConstant()
 
-    data class Unsigned(val value: ULong) : NumberConstant()
+    @Serializable @NewTypeVariant
+    data class Unsigned(val value: Long) : NumberConstant()
 
+    @Serializable @NewTypeVariant
     data class Floating(val value: Double) : NumberConstant()
 }
 
-@Serializable(with = NumericConstant.Serializer::class)
+@Serializable
 sealed class NumericConstant {
-    object Serializer : KSerializer<NumericConstant> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class I8(val value: Byte) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class I16(val value: Short) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class I32(val value: Int) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class I64(val value: Long) : NumericConstant()
 
     // TODO: Somehow use unsigned types here, the serializer doesn't like it ATM
 
+    @Serializable @NewTypeVariant
     data class U8(val value: Byte) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class U16(val value: Short) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class U32(val value: Int) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class U64(val value: Long) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class USize(val value: Long) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class F32(val value: Float) : NumericConstant()
 
+    @Serializable @NewTypeVariant
     data class F64(val value: Double) : NumericConstant()
 }
 
 
-@Serializable(with = CheckedTypeCast.Serializer::class)
+@Serializable
 sealed class CheckedTypeCast {
     abstract val type: TypeId
 
-    object Serializer : KSerializer<CheckedTypeCast> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class Fallible(override val type: TypeId) : CheckedTypeCast()
 
+    @Serializable @NewTypeVariant
     data class Infallible(override val type: TypeId) : CheckedTypeCast()
-
-    data class Saturating(override val type: TypeId) : CheckedTypeCast()
-
-    data class Truncating(override val type: TypeId) : CheckedTypeCast()
 }
 
-@Serializable(with = CheckedUnaryOperator.Serializer::class)
+@Serializable
 sealed class CheckedUnaryOperator {
-    object Serializer : KSerializer<CheckedUnaryOperator> by rustEnumSerializer()
+    @Serializable @UnitVariant
+    class PreIncrement : CheckedUnaryOperator()
 
-    object PreIncrement : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class PostIncrement : CheckedUnaryOperator()
 
-    object PostIncrement : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class PreDecrement : CheckedUnaryOperator()
 
-    object PreDecrement : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class PostDecrement : CheckedUnaryOperator()
 
-    object PostDecrement : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class Negate : CheckedUnaryOperator()
 
-    object Negate : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class Dereference : CheckedUnaryOperator()
 
-    object Dereference : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class RawAddress : CheckedUnaryOperator()
 
-    object RawAddress : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class LogicalNot : CheckedUnaryOperator()
 
-    object LogicalNot : CheckedUnaryOperator()
+    @Serializable @UnitVariant
+    class BitwiseNot : CheckedUnaryOperator()
 
-    object BitwiseNot : CheckedUnaryOperator()
-
+    @Serializable @NewTypeVariant
     data class TypeCast(val cast: CheckedTypeCast) : CheckedUnaryOperator()
 
+    @Serializable @NewTypeVariant
     data class Is(val typeId: TypeId) : CheckedUnaryOperator()
 }
 
-@Serializable(with = CheckedMatchBody.Serializer::class)
+@Serializable
 sealed class CheckedMatchBody {
-    object Serializer : KSerializer<CheckedMatchBody> by rustEnumSerializer()
-
+    @Serializable @NewTypeVariant
     data class Expression(val expression: CheckedExpression) : CheckedMatchBody()
 
+    @Serializable @NewTypeVariant
     data class Block(val block: CheckedBlock) : CheckedMatchBody()
 }
 
-@Serializable(with = CheckedMatchCase.Serializer::class)
+@Serializable
 sealed class CheckedMatchCase {
-    object Serializer : KSerializer<CheckedMatchCase> by rustEnumSerializer()
-
+    @Serializable @StructVariant
     data class EnumVariant(
         @SerialName("variant_name")
-        val name: List<Tuple2<String, Span>>,
+        val name: String,
         @SerialName("variant_arguments")
         val arguments: List<Tuple2<String?, String>>,
         @SerialName("subject_type_id")
         val subjectTypeId: TypeId,
+        @SerialName("variant_index")
+        val variantIndex: Int,
         @SerialName("scope_id")
         val scopeId: ScopeId,
         val body: CheckedMatchBody
     ) : CheckedMatchCase()
+
+    @Serializable @StructVariant
+    data class Expression(
+        val expression: CheckedExpression,
+        val body: CheckedMatchBody,
+    ) : CheckedMatchCase()
+
+    @Serializable @StructVariant
+    data class CatchAll(val body: CheckedMatchBody) : CheckedMatchCase()
 }
 
 typealias TBoolean = Boolean
 typealias TNumericConstant = NumericConstant
 typealias TTuple<A, B> = Tuple2<A, B>
 
-@Serializable(with = CheckedExpression.Serializer::class)
+@Serializable
 sealed class CheckedExpression {
     abstract val span: Span
 
-    object Serializer : KSerializer<CheckedExpression> by rustEnumSerializer()
-
+    @Serializable @TupleVariant
     data class Boolean(val value: TBoolean, override val span: Span) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class NumericConstant(val value: TNumericConstant, override val span: Span, val type: TypeId) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class QuotedString(val value: String, override val span: Span) : CheckedExpression()
 
+    @Serializable @TupleVariant
+    data class ByteConstant(val value: String, override val span: Span) : CheckedExpression()
+
+    @Serializable @TupleVariant
     data class CharacterConstant(val value: Char, override val span: Span) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class UnaryOp(
         val value: CheckedExpression,
         val operator: CheckedUnaryOperator,
@@ -358,6 +417,7 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class BinaryOp(
         val leftValue: CheckedExpression,
         val operator: BinaryOperator,
@@ -366,8 +426,10 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Tuple(val values: List<CheckedExpression>, override val span: Span, val type: TypeId) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Range(
         val from: CheckedExpression,
         val to: CheckedExpression,
@@ -375,6 +437,7 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Array(
         val values: List<CheckedExpression>,
         val fillSize: CheckedExpression?,
@@ -382,18 +445,21 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Dictionary(
         val values: List<TTuple<CheckedExpression, CheckedExpression>>,
         override val span: Span,
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Set(
         val values: List<CheckedExpression>,
         override val span: Span,
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class IndexedExpression(
         val value: CheckedExpression,
         val index: CheckedExpression,
@@ -401,6 +467,7 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class IndexedDictionary(
         val value: CheckedExpression,
         val index: CheckedExpression,
@@ -408,6 +475,7 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class IndexedTuple(
         val expression: CheckedExpression,
         val index: Long,
@@ -415,6 +483,7 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class IndexedStruct(
         val expression: CheckedExpression,
         val name: String,
@@ -422,15 +491,19 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Match(
         val target: CheckedExpression,
         val cases: List<CheckedMatchCase>,
         override val span: Span,
         val typeId: TypeId,
+        val matchValuesAreAllConstant: TBoolean,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Call(val call: CheckedCall, override val span: Span, val type: TypeId) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class MethodCall(
         val receiver: CheckedExpression,
         val call: CheckedCall,
@@ -438,28 +511,34 @@ sealed class CheckedExpression {
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class NamespacedVar(
         val namespace: List<CheckedNamespace>,
         val variable: CheckedVariable,
         override val span: Span,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class Var(val value: CheckedVariable, override val span: Span) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class OptionalNone(override val span: Span, val type: TypeId) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class OptionalSome(
         val expression: CheckedExpression,
         override val span: Span,
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @TupleVariant
     data class ForcedUnwrap(
         val expression: CheckedExpression,
         override val span: Span,
         val typeId: TypeId,
     ) : CheckedExpression()
 
+    @Serializable @NewTypeVariant
     data class Garbage(override val span: Span) : CheckedExpression()
 }
 

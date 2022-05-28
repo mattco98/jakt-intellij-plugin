@@ -3,22 +3,27 @@ package org.serenityos.jakt.bindings
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 
-@Serializable(with = JaktError.Serializer::class)
+@Serializable
 sealed class JaktError {
     abstract val message: String
-    open val span: Span? = null
+    abstract val span: Span?
 
-    object Serializer : KSerializer<JaktError> by rustEnumSerializer()
+    @Serializable @NewTypeVariant
+    data class IOError(override val message: String) : JaktError() {
+        override val span: Span? = null
+    }
 
-    class IOError(override val message: String) : JaktError()
+    @Serializable @TupleVariant
+    data class ParserError(override val message: String, override val span: Span) : JaktError()
 
-    class ParserError(override val message: String, override val span: Span) : JaktError()
+    @Serializable @TupleVariant
+    data class ValidationError(override val message: String, override val span: Span) : JaktError()
 
-    class ValidationError(override val message: String, override val span: Span) : JaktError()
+    @Serializable @TupleVariant
+    data class TypecheckError(override val message: String, override val span: Span) : JaktError()
 
-    class TypecheckError(override val message: String, override val span: Span) : JaktError()
-    
-    class TypecheckErrorWithHint(
+    @Serializable @TupleVariant
+    data class TypecheckErrorWithHint(
         override val message: String,
         override val span: Span,
         val hintMessage: String,
