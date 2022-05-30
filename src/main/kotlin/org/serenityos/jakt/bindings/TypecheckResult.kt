@@ -8,8 +8,8 @@ sealed class TypecheckResult {
     data class ParseError(val error: JaktError) : TypecheckResult()
 
     @Serializable @TupleVariant
-    data class TypeError(val project: Project, val error: JaktError) : TypecheckResult()
+    data class TypeError(val project: JaktProject, val error: JaktError) : TypecheckResult()
 
     @Serializable @NewTypeVariant
-    data class Ok(val project: Project) : TypecheckResult()
+    data class Ok(val project: JaktProject) : TypecheckResult()
 }

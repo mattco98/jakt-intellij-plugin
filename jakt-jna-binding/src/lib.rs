@@ -9,8 +9,10 @@ use jakt::{
     lexer,
     parser,
     compiler::Compiler,
-    typechecker::{Project, typecheck_namespace},
+    typechecker::{Project, typecheck_namespace_declarations},
 };
+use jakt::compiler::check_codegen_preconditions;
+use jakt::typechecker::typecheck_namespace_predecl;
 
 #[derive(Serialize)]
 enum TypecheckResult {
@@ -21,7 +23,8 @@ enum TypecheckResult {
 
 fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
     let mut project = Project::new();
-    if let Some(_err) = Compiler::new().include_prelude(&mut project) {
+    let mut compiler = Compiler::new(vec![]);
+    if let Some(_err) = compiler.include_prelude(&mut project) {
         panic!("Failed to include prelude")
     }
 
@@ -30,16 +33,24 @@ fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
         return TypecheckResult::ParseError(error)
     };
 
-    let (namespace, error) = parser::parse_namespace(tokens.as_slice(), &mut 0);
+    let (namespace, error) = parser::parse_namespace(tokens.as_slice(), &mut 0, &mut compiler);
     if let Some(error) = error {
         return TypecheckResult::ParseError(error)
     }
 
-    if let Some(error) = typecheck_namespace(&namespace, 0, &mut project) {
-        TypecheckResult::TypeError(project, error)
-    } else {
-        TypecheckResult::Ok(project)
+    if let Some(error) = typecheck_namespace_predecl(&namespace, 0, &mut project) {
+        return TypecheckResult::TypeError(project, error)
     }
+
+    if let Some(error) = typecheck_namespace_declarations(&namespace, 0, &mut project) {
+        return TypecheckResult::TypeError(project, error)
+    }
+
+    if let Some(error) = check_codegen_preconditions(&project) {
+        return TypecheckResult::TypeError(project, error)
+    }
+
+    TypecheckResult::Ok(project)
 }
 
 #[no_mangle]
