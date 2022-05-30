@@ -41,5 +41,9 @@
             language="Jakt"
             implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
         />
+        <lang.namesValidator
+            language="Jakt"
+            implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
+        />
     </extensions>
 </idea-plugin>

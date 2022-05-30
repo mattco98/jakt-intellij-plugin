@@ -1,0 +1,55 @@
+package org.serenityos.jakt.plugin
+
+import com.intellij.lang.refactoring.NamesValidator
+import com.intellij.openapi.project.Project
+import org.serenityos.jakt.JaktTypes.*
+
+class JaktNamesValidator : NamesValidator {
+    override fun isKeyword(name: String, project: Project?) = lexerType(name) in KEYWORDS
+
+    override fun isIdentifier(name: String, project: Project?) = lexerType(name) == IDENTIFIER
+
+    companion object {
+        private fun lexerType(text: String) = JaktLexerAdapter().let {
+            it.start(text)
+            if (it.tokenEnd == text.length) it.tokenType else null
+        }
+
+        private val KEYWORDS = mutableSetOf(
+            EXTERN_KEYWORD,
+            NAMESPACE_KEYWORD,
+            CLASS_KEYWORD,
+            STRUCT_KEYWORD,
+            ENUM_KEYWORD,
+            FUNCTION_KEYWORD,
+            PUBLIC_KEYWORD,
+            PRIVATE_KEYWORD,
+            LET_KEYWORD,
+            MATCH_KEYWORD,
+            IF_KEYWORD,
+            ELSE_KEYWORD,
+            WHILE_KEYWORD,
+            LOOP_KEYWORD,
+            FOR_KEYWORD,
+            IN_KEYWORD,
+            UNSAFE_KEYWORD,
+            CPP_KEYWORD,
+            RETURN_KEYWORD,
+            THROW_KEYWORD,
+            DEFER_KEYWORD,
+            TRUE_KEYWORD,
+            FALSE_KEYWORD,
+            REF_KEYWORD,
+            MUTABLE_KEYWORD,
+            ANONYMOUS_KEYWORD,
+            RAW_KEYWORD,
+            WEAK_KEYWORD,
+            THROWS_KEYWORD,
+            SOME_TYPE,
+            NONE_TYPE,
+            AND,
+            OR,
+            NOT,
+        )
+    }
+}
