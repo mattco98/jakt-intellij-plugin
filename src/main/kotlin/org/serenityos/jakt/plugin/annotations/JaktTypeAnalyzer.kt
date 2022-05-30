@@ -9,6 +9,7 @@ import org.serenityos.jakt.plugin.JaktFile
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration
+import org.serenityos.jakt.plugin.psi.declarations.JaktParameterImplMixin
 import org.serenityos.jakt.utils.*
 
 class JaktTypeAnalyzer(private val file: PsiFile, private val jaktProject: JaktProject) {
@@ -95,6 +96,7 @@ class JaktTypeAnalyzer(private val file: PsiFile, private val jaktProject: JaktP
         withScope(checkedType.functionScopeId) {
             (element.parameterList zipSafe checkedType.parameters).forEach { (param, type) ->
                 walkParameter(param, type)
+                (param as JaktParameterImplMixin).owningFunction = element
             }
 
             element.functionReturnType?.also { walkType(it.type, checkedType.returnTypeId) }
