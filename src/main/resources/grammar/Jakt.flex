@@ -1,12 +1,11 @@
 package org.serenityos.jakt.lexer;
 
-import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
+import org.serenityos.jakt.plugin.syntax.JaktLexerBase;
+import com.intellij.lexer.FlexLexer;
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
-import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static org.serenityos.jakt.JaktTypes.*;
-import org.serenityos.jakt.plugin.JaktLexerBase;
 
 %%
 

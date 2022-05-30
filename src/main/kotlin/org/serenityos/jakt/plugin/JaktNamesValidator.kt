@@ -3,6 +3,7 @@ package org.serenityos.jakt.plugin
 import com.intellij.lang.refactoring.NamesValidator
 import com.intellij.openapi.project.Project
 import org.serenityos.jakt.JaktTypes.*
+import org.serenityos.jakt.plugin.syntax.JaktLexerAdapter
 
 class JaktNamesValidator : NamesValidator {
     override fun isKeyword(name: String, project: Project?) = lexerType(name) in KEYWORDS

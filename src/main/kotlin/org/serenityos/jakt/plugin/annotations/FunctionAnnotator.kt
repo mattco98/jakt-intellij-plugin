@@ -8,7 +8,7 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.plugin.Highlights
+import org.serenityos.jakt.plugin.syntax.Highlights
 
 object FunctionAnnotator : JaktAnnotator() {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder) {

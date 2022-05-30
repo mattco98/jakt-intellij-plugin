@@ -6,7 +6,7 @@ import com.intellij.psi.util.parentOfType
 import org.intellij.sdk.language.psi.JaktGenericBounds
 import org.intellij.sdk.language.psi.JaktNamespacedType
 import org.intellij.sdk.language.psi.JaktPlainType
-import org.serenityos.jakt.plugin.Highlights
+import org.serenityos.jakt.plugin.syntax.Highlights
 
 object TypeAnnotator : JaktAnnotator() {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder) {

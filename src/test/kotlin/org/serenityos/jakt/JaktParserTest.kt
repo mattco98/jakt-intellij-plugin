@@ -1,7 +1,7 @@
 package org.serenityos.jakt
 
 import com.intellij.testFramework.ParsingTestCase
-import org.serenityos.jakt.plugin.JaktParserDefinition
+import org.serenityos.jakt.plugin.syntax.JaktParserDefinition
 import java.io.File
 
 /**

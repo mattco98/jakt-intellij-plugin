@@ -1,4 +1,4 @@
-package org.serenityos.jakt.plugin
+package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.lexer.Lexer
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default

@@ -1,4 +1,4 @@
-package org.serenityos.jakt.plugin
+package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
@@ -8,11 +8,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.parser.JaktParser
+import org.serenityos.jakt.plugin.JaktFile
+import org.serenityos.jakt.plugin.JaktLanguage
 
 class JaktParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = JaktLexerAdapter()

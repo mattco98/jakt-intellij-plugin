@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.tree.TokenSet
 import org.intellij.sdk.language.psi.JaktArgument
-import org.intellij.sdk.language.psi.JaktArrayExpression
-import org.intellij.sdk.language.psi.JaktArrayType
-import org.intellij.sdk.language.psi.JaktBinaryExpression
 import org.intellij.sdk.language.psi.JaktCallExpression
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktExternFunctionDeclaration
@@ -22,6 +19,7 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.declarations.JaktParameterImplMixin
+import org.serenityos.jakt.plugin.syntax.JaktLexerAdapter
 
 class JaktFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner {

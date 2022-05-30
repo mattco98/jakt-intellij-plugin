@@ -16,11 +16,11 @@
         />
         <lang.parserDefinition
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktParserDefinition"
+                implementationClass="org.serenityos.jakt.plugin.syntax.JaktParserDefinition"
         />
         <lang.syntaxHighlighterFactory
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktSyntaxHighlighterFactory"
+                implementationClass="org.serenityos.jakt.plugin.syntax.JaktSyntaxHighlighterFactory"
         />
         <lang.commenter
                 language="Jakt"
@@ -35,7 +35,7 @@
                 implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
         />
         <colorSettingsPage
-                implementation="org.serenityos.jakt.plugin.JaktColorSettingsPage"
+                implementation="org.serenityos.jakt.plugin.syntax.JaktColorSettingsPage"
         />
         <annotator
                 language="Jakt"

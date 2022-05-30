@@ -1,8 +1,9 @@
-package org.serenityos.jakt.plugin
+package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
+import org.serenityos.jakt.plugin.JaktLanguage
 
 class JaktColorSettingsPage : ColorSettingsPage {
     override fun getIcon() = JaktLanguage.ICON
