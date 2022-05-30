@@ -12,10 +12,11 @@ import org.serenityos.jakt.plugin.psi.references.JaktPsiReference
 
 abstract class JaktVariableDeclarationStatementImplMixin(
     node: ASTNode
-) : JaktStatementImpl(node), PsiNameIdentifierOwner, JaktDeclaration, JaktVariableDeclarationStatement {
+) : JaktStatementImpl(node), JaktDeclaration, JaktVariableDeclarationStatement {
     override var declarationReferences: MutableList<JaktPsiReference>? = null
 
     override fun getNameIdentifier(): PsiElement? = plainQualifier.identifier
+
     override fun getName() = nameIdentifier?.text
 
     override fun setName(name: String) : PsiElement = apply {
@@ -23,6 +24,4 @@ abstract class JaktVariableDeclarationStatementImplMixin(
     }
 
     override fun getReference() = JaktReference.Decl(this)
-
-    override fun getIdentifyingRange() = plainQualifier.textRangeInParent
 }

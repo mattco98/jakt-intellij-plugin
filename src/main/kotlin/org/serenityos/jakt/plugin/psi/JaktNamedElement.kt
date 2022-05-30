@@ -10,6 +10,7 @@ abstract class JaktNamedElement(
     node: ASTNode
 ) : ASTWrapperPsiElement(node), PsiNameIdentifierOwner {
     override fun getNameIdentifier(): PsiElement? = findNotNullChildByType(JaktTypes.IDENTIFIER)
+
     override fun getName() = nameIdentifier?.text
 
     override fun setName(name: String) : PsiElement = apply {

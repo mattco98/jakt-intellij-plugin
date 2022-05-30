@@ -1,12 +1,8 @@
 package org.serenityos.jakt.plugin.psi.references
 
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration
 
-interface JaktPsiReference : JaktPsiElement {
+interface JaktPsiReference : PsiNameIdentifierOwner {
     var declaration: JaktDeclaration?
-
-    fun getIdentifyingRange(): TextRange
 }

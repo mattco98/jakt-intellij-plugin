@@ -15,35 +15,35 @@
                 extensions="jakt"
         />
         <lang.parserDefinition
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.JaktParserDefinition"
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktParserDefinition"
         />
         <lang.syntaxHighlighterFactory
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.JaktSyntaxHighlighterFactory"
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktSyntaxHighlighterFactory"
         />
         <lang.commenter
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktCommenter"
         />
-        <colorSettingsPage
-            implementation="org.serenityos.jakt.plugin.JaktColorSettingsPage"
-        />
-        <annotator
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.annotations.JaktAnnotator$Impl"
-        />
-        <externalAnnotator
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.annotations.JaktExternalAnnotator"
-        />
         <lang.findUsagesProvider
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
         />
         <lang.namesValidator
-            language="Jakt"
-            implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
+        />
+        <colorSettingsPage
+                implementation="org.serenityos.jakt.plugin.JaktColorSettingsPage"
+        />
+        <annotator
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.annotations.JaktAnnotator$Impl"
+        />
+        <externalAnnotator
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.annotations.JaktExternalAnnotator"
         />
     </extensions>
 </idea-plugin>

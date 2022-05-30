@@ -16,6 +16,4 @@ abstract class JaktParameterImplMixin(
     override var declarationReferences: MutableList<JaktPsiReference>? = null
 
     override fun getReference() = JaktReference.Decl(this)
-
-    override fun getIdentifyingRange() = identifier.textRangeInParent
 }
