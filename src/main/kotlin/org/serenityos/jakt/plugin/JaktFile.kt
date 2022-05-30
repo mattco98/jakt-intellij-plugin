@@ -3,10 +3,14 @@ package org.serenityos.jakt.plugin
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.psi.FileViewProvider
-import org.serenityos.jakt.bindings.Project
+import org.serenityos.jakt.bindings.JaktCheckedType
+import org.serenityos.jakt.bindings.JaktProject
+import org.serenityos.jakt.plugin.psi.JaktElementTypeMap
+import org.serenityos.jakt.plugin.psi.JaktPsiElement
 
-class JaktFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, JaktLanguage) {
-    var project: Project? = null
+class JaktFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, JaktLanguage), JaktPsiElement {
+    lateinit var project: JaktProject
+    lateinit var elementTypeMap: JaktElementTypeMap
 
     override fun getFileType() = Type
 

@@ -11,11 +11,11 @@ class JaktToken(debugName: String) : IElementType(debugName, JaktLanguage) {
     override fun toString() = "JaktToken.${super.toString()}"
 }
 
-class JaktElement(debugName: String) : IElementType(debugName, JaktLanguage)
+class JaktElementType(debugName: String) : IElementType(debugName, JaktLanguage)
 
 abstract class JaktLexerBase : FlexLexer {
     companion object {
         @JvmField
-        val SPACE = JaktElement("SPACE")
+        val SPACE = JaktElementType("SPACE")
     }
 }

@@ -9,7 +9,7 @@
     psiImplPackage="org.intellij.sdk.language.psi.impl"
 
     elementTypeHolderClass="org.serenityos.jakt.JaktTypes"
-    elementTypeClass="org.serenityos.jakt.plugin.JaktElement"
+    elementTypeClass="org.serenityos.jakt.plugin.JaktElementType"
     tokenTypeClass="org.serenityos.jakt.plugin.JaktToken"
 
     parserUtilClass="org.serenityos.jakt.plugin.JaktParserUtil"
@@ -110,6 +110,8 @@
         NEWLINE="regexp:[\r\n]"
     ]
 
+    implements(".*")="org.serenityos.jakt.plugin.psi.JaktPsiElement"
+
     extends(".+BinaryExpression")=BinaryExpression
     extends(".+Expression")=Expression
     extends(".+Statement")=Statement
@@ -175,10 +177,13 @@ private ExpressionLead ::=
 private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader
-private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? PAREN_OPEN ParameterList? PAREN_CLOSE FunctionReturnType?
+private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
-ParameterList ::= <<commaList Parameter>>
-Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
+private ParameterList ::= PAREN_OPEN (Parameter (COMMA Parameter)*)? PAREN_CLOSE
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? {
+    implements="org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declarations.JaktParameterImplMixin"
+}
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
 private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
@@ -242,9 +247,12 @@ Statement ::=
     | ForStatement
     | VariableDeclarationStatement
     | UnsafeStatement
-    | CppStatement
+    | InlineCppStatement
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+    implements="org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declarations.JaktVariableDeclarationStatementImplMixin"
+}
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
 ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
 ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
@@ -255,7 +263,11 @@ LoopStatement ::= LOOP_KEYWORD Block
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
 UnsafeStatement ::= UNSAFE_KEYWORD Block
-CppStatement ::= CPP_KEYWORD Block
+InlineCppStatement ::= CPP_KEYWORD Block
+
+Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
+    extends=Statement
+}
 
 /*************************************
  *               TYPES               *
@@ -306,7 +318,8 @@ Expression ::=
     | PostfixUnaryExpression
     | AssignmentBinaryExpression
     | ParenExpression
-    | MemberAccessExpression
+    | IndexedStructExpression
+    | IndexedTupleExpression
     | IndexedAccessExpression
     | FieldAccessExpression
     | RangeExpression
@@ -318,7 +331,6 @@ Expression ::=
     | Literal
     | NamespacedQualifier
     | PlainQualifier
-    | Block
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
 
@@ -332,10 +344,11 @@ LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
 UnlabeledArgument ::= ExpressionWithoutAssignment
 
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
-MemberAccessExpression ::= Expression DOT (IDENTIFIER | DECIMAL_LITERAL)
+IndexedStructExpression ::= Expression DOT IDENTIFIER
+IndexedTupleExpression ::= Expression DOT DECIMAL_LITERAL
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
 FieldAccessExpression ::= DOT Expression
-RangeExpression ::= NumericLiteral DOT_DOT NumericLiteral
+RangeExpression ::= Expression DOT_DOT Expression
 
 ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE
 SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
@@ -349,17 +362,18 @@ TupleExpression ::= PAREN_OPEN <<commaOrEolList ExpressionWithoutAssignment>> PA
 MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
 private MatchPatterns ::= <<commaOrEolList MatchPattern>>
 MatchPattern ::= PatternHead PatternTrail
-PatternTrail ::= FAT_ARROW Expression
+PatternTrail ::= FAT_ARROW MatchBody
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
+MatchBody ::= Block | Expression
 // TODO: This is incomplete
 IdentPatternHead ::= (IDENTIFIER | NamespacedQualifier) [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
 ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
 NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
-PlainQualifier ::= IDENTIFIER {extends=Expression}
-
-Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
+PlainQualifier ::= IDENTIFIER {
     extends=Expression
+    implements="org.serenityos.jakt.plugin.psi.references.JaktPsiReference"
+    mixin="org.serenityos.jakt.plugin.psi.references.JaktPlainQualifierImplMixin"
 }
 
 /*************************************
@@ -419,8 +433,9 @@ NumericLiteral ::=
       BINARY_LITERAL
     | HEX_LITERAL
     | DECIMAL_LITERAL
+    {extends=Expression}
 
-BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD
+BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD {extends=Expression}
 
 /*************************************
  *             HELPERS               *
