@@ -180,10 +180,7 @@ ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 private ParameterList ::= PAREN_OPEN (Parameter (COMMA Parameter)*)? PAREN_CLOSE
-Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation? {
-    implements="org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration"
-    mixin="org.serenityos.jakt.plugin.psi.declarations.JaktParameterImplMixin"
-}
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
 private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
@@ -249,10 +246,7 @@ Statement ::=
     | UnsafeStatement
     | InlineCppStatement
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
-    implements="org.serenityos.jakt.plugin.psi.declarations.JaktDeclaration"
-    mixin="org.serenityos.jakt.plugin.psi.declarations.JaktVariableDeclarationStatementImplMixin"
-}
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
 ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
 ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
@@ -372,8 +366,6 @@ ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
 PlainQualifier ::= IDENTIFIER {
     extends=Expression
-    implements="org.serenityos.jakt.plugin.psi.references.JaktPsiReference"
-    mixin="org.serenityos.jakt.plugin.psi.references.JaktPlainQualifierImplMixin"
 }
 
 /*************************************
