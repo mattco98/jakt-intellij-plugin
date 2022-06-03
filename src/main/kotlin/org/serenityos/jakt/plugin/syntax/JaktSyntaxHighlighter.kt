@@ -1,34 +1,39 @@
 package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.lexer.Lexer
+import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 import org.serenityos.jakt.JaktTypes.*
+import java.awt.Color
 
+// TODO: Eventually remove the default colors. They are just here because the IDE
+//       launched for testing likes to reset the color scheme pretty often.
 object Highlights {
     val IDENTIFIER = Default.IDENTIFIER.extend("IDENTIFIER")
     val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
 
-    val LITERAL_NUMBER = Default.NUMBER.extend("LITERAL_NUMBER")
-    val LITERAL_STRING = Default.STRING.extend("LITERAL_STRING")
+    val LITERAL_NUMBER = Default.NUMBER.extend("LITERAL_NUMBER", Color.getColor("0xD19A66"))
+    val LITERAL_STRING = Default.STRING.extend("LITERAL_STRING", Color.getColor("0x98C379"))
     val LITERAL_BOOLEAN = Default.NUMBER.extend("LITERAL_BOOLEAN")
     val LITERAL_ARRAY = Default.BRACKETS.extend("LITERAL_ARRAY")
     val LITERAL_DICTIONARY = Default.BRACKETS.extend("LITERAL_DICTIONARY")
     val LITERAL_SET = Default.BRACES.extend("LITERAL_SET")
 
-    val KEYWORD_BASE = Default.KEYWORD.extend("KEYWORD_BASE")
+    val KEYWORD_BASE = Default.KEYWORD.extend("KEYWORD_BASE", Color.getColor("0xC679DD"))
     val KEYWORD_VISIBILITY = KEYWORD_BASE.extend("KEYWORD_VISIBILITY")
     val KEYWORD_DECLARATION = KEYWORD_BASE.extend("KEYWORD_DECLARATION")
     val KEYWORD_CONTROL_FLOW = KEYWORD_BASE.extend("KEYWORD_CONTROL_FLOW")
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
     val KEYWORD_UNSAFE = KEYWORD_BASE.extend("KEYWORD_UNSAFE")
 
-    val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR")
+    val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR", Color.getColor("0x61AFEF"))
     val DELIM_PARENTHESIS = Default.PARENTHESES.extend("DELIM_PARENTHESES")
     val DELIM_BRACE = Default.BRACES.extend("DELIM_BRACE")
     val DELIM_BRACKET = Default.BRACKETS.extend("DELIM_BRACKET")
@@ -40,10 +45,10 @@ object Highlights {
     val SEMICOLON = OPERATOR.extend("SEMICOLON")
     val OPTIONAL_ASSERTION = OPERATOR.extend("OPTIONAL_ASSERTION")
 
-    val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION")
-    val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL")
-    val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW")
-    val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW")
+    val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION", Color.getColor("0x61AEEF"))
+    val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL", Color.getColor("0x61AEEF"))
+    val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW", Color.getColor("0x61AFEF"))
+    val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW", Color.getColor("0x61AFEF"))
     val FUNCTION_PARAMETER_LABEL = IDENTIFIER.extend("FUNCTION_PARAMETER_LABEL")
 
     val TYPE_NAME = IDENTIFIER.extend("TYPE_NAME")
@@ -52,10 +57,12 @@ object Highlights {
     val TYPE_WEAK = KEYWORD_MODIFIER.extend("TYPE_WEAK")
     val TYPE_NAMESPACE_QUALIFIER = IDENTIFIER.extend("TYPE_NAMESPACE_QUALIFIER")
     val TYPE_NAMESPACE_OPERATOR = OPERATOR.extend("TYPE_NAMESPACE_OPERATOR")
-    val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER")
+    val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER", Color.getColor("0x61AFEF"))
     val TYPE_OPTIONAL_TYPE = OPERATOR.extend("TYPE_OPTIONAL_TYPE")
 
-    private fun TextAttributesKey.extend(name: String) = TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
+    private fun TextAttributesKey.extend(name: String, color: Color? = null) = if (color != null) {
+        TextAttributesKey.createTextAttributesKey("JAKT_$name", TextAttributes(color, null, null, null, 0))
+    } else TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
 
 class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
