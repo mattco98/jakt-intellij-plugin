@@ -4,6 +4,7 @@ import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.FileViewProvider
+import com.intellij.psi.PsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary
 import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker

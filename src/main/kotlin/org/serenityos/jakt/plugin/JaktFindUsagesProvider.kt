@@ -35,7 +35,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
             is JaktExternStructDeclaration -> "extern struct"
             is JaktFunctionDeclaration -> "function"
             is JaktNamespaceDeclaration -> "namespace"
-            is JaktStructDeclaration -> if (element.classKeyword != null) "class" else "struct"
+            is JaktStructDeclaration -> if (element.structHeader.classKeyword != null) "class" else "struct"
             is JaktEnumDeclaration -> "enum"
             is JaktParameter -> if (element.anonymousKeyword != null) "anonymous parameter" else "parameter"
             is JaktVariableDeclarationStatement -> "variable declaration"
@@ -47,10 +47,10 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         return when (element) {
             is JaktArgument -> element.labeledArgument!!.identifier.text
             is JaktExternFunctionDeclaration -> element.identifier.text
-            is JaktExternStructDeclaration -> element.identifier.text
+            is JaktExternStructDeclaration -> element.structHeader.identifier.text
             is JaktFunctionDeclaration -> element.identifier.text
             is JaktNamespaceDeclaration -> element.identifier.text
-            is JaktStructDeclaration -> element.identifier.text
+            is JaktStructDeclaration -> element.structHeader.identifier.text
             is JaktEnumDeclaration -> element.identifier.text
             is JaktParameter -> element.identifier.text
             else -> "TODO(getDescriptiveName => ${element::class.simpleName})"

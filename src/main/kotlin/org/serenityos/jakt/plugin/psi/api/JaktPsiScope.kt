@@ -92,5 +92,5 @@ fun JaktPsiElement.findDeclarationInOrAbove(name: String): JaktDeclaration? {
         parent = parent.parent
     }
 
-    return parent.findDeclarationIn(name, element)
+    return parent.findDeclarationInOrAbove(name, element)
 }

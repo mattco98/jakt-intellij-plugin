@@ -43,7 +43,7 @@ tasks {
         withType<KotlinCompile> {
             kotlinOptions {
                 jvmTarget = it
-                freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+                freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn", "-Xjvm-default=all")
             }
         }
     }

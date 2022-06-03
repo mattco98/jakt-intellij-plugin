@@ -47,6 +47,7 @@
         REF_KEYWORD='ref'
         MUTABLE_KEYWORD='mutable'
         ANONYMOUS_KEYWORD='anonymous'
+        THIS_KEYWORD='this'
         RAW_KEYWORD='raw'
         WEAK_KEYWORD='weak'
         THROWS_KEYWORD='throws'
@@ -130,7 +131,7 @@ File ::= NL TopLevelDefinitionList? NL
 
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
 
-private TopLevelDefinition ::=
+TopLevelDefinition ::=
       FunctionDeclaration
     | StructDeclaration
     | EnumDeclaration
@@ -174,18 +175,25 @@ private ExpressionLead ::=
  *       Extern Declarations         *
  *************************************/
 
-private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration
+private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration {
+    extends=TopLevelDefinition
+}
 
-ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader
+ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
+    extends=TopLevelDefinition
+}
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
-private ParameterList ::= PAREN_OPEN (Parameter (COMMA Parameter)*)? PAREN_CLOSE
+private ParameterList ::= PAREN_OPEN ThisParameter? (Parameter (COMMA Parameter)*)? PAREN_CLOSE
+ThisParameter ::= MUTABLE_KEYWORD? THIS_KEYWORD
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation {
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktParameterMixin"
 }
 
-ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
-private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
+ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
+    extends=TopLevelDefinition
+}
+StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
 ExternStructMember ::= StructField | FunctionHeader
@@ -196,12 +204,24 @@ StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation
  *************************************/
 
 FunctionDeclaration ::= FunctionHeader FunctionBody {
+    extends=TopLevelDefinition
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
+        "org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.JaktFunctionDeclarationMixin"
 }
 private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
-NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
-StructDeclaration ::= StructHeader StructBody
+NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
+    extends=TopLevelDefinition
+}
+StructDeclaration ::= StructHeader StructBody {
+    extends=TopLevelDefinition
+    implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+    mixin="org.serenityos.jakt.plugin.psi.JaktStructDeclarationMixin"
+}
 StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 
 // Structs
@@ -212,7 +232,9 @@ StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // Enums
-EnumDeclaration ::= EnumHead EnumBody
+EnumDeclaration ::= EnumHead EnumBody {
+    extends=TopLevelDefinition
+}
 private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
@@ -297,7 +319,7 @@ RawType ::= RAW_KEYWORD Type {extends=Type}
 WeakType ::= WEAK_KEYWORD Type {extends=Type}
 PlainType ::= IDENTIFIER GenericBounds? {extends=Type}
 OptionalType ::= Type QUESTION_MARK {extends=Type}
-GenericBounds ::= LESS_THAN <<commaOrEolList identifier>> GREATER_THAN {extends=Type}
+GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN {extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {extends=Type}

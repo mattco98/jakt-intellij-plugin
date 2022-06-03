@@ -5,7 +5,7 @@ import com.intellij.codeInsight.completion.CompletionType
 
 class JaktCompletionContributor : CompletionContributor() {
     init {
-        extend(JaktIndexedTupleCompletion)
+        extend(JaktAccessExpressionCompletion)
     }
 
     private fun extend(completion: JaktCompletion) =

@@ -80,9 +80,11 @@ sealed interface Type {
         override fun typeRepr() = name + stringifyGenerics(typeParameters)
     }
 
+    // TODO: Variant types
     class Enum(
         override val name: String,
         override val typeParameters: List<String>,
+        val methods: Map<String, Function>,
     ) : Specializable {
         override fun typeRepr() = name + stringifyGenerics(typeParameters)
     }
@@ -98,10 +100,13 @@ sealed interface Type {
     class Function(
         val name: String,
         val typeParameters: List<String>,
+        val thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
     ) : Type {
+
         override fun typeRepr() = buildString {
+            append("function ")
             append(name)
             append(stringifyGenerics(typeParameters))
             append('(')
@@ -109,13 +114,15 @@ sealed interface Type {
                 "${it.name}: ${it.type}"
             })
             append(')')
-
-            if (returnType != Primitive.Void) {
-                append(" -> ")
-                append(returnType)
-            }
+            append(" -> ")
+            append(returnType)
         }
 
-        data class Parameter(val name: String, val type: Type)
+        data class Parameter(
+            val name: String,
+            val type: Type,
+            val isAnonymous: Boolean,
+            val isMutable: Boolean,
+        )
     }
 }
