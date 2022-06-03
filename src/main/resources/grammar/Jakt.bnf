@@ -180,7 +180,9 @@ ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
 private ParameterList ::= PAREN_OPEN (Parameter (COMMA Parameter)*)? PAREN_CLOSE
-Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation?
+Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation {
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktParameterMixin"
+}
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE
 private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL

@@ -2,12 +2,18 @@ package org.serenityos.jakt.plugin.psi.api
 
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiReference
+import com.intellij.psi.PsiReferenceBase
+import com.intellij.psi.search.LocalSearchScope
+import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
+import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin
 import org.serenityos.jakt.plugin.psi.reference.JaktPsiReference
 
 interface JaktPsiScope : JaktPsiElement {
@@ -39,24 +45,26 @@ interface JaktPsiScope : JaktPsiElement {
         return findDeclarationIn(name, from) ?: containingScope?.findDeclarationInOrAbove(name, this)
     }
 
-    fun findReferencesInOrBelow(name: String, from: PsiElement? = null): List<JaktPsiReference> {
+    fun findReferencesInOrBelow(element: PsiElement, name: String, from: PsiElement? = null): List<PsiElement> {
+        val t = this
         val index = from?.let { el ->
             children.indexOf(el).also {
                 require(it != -1)
             }
         } ?: 0
 
-        val references = mutableListOf<JaktPsiReference>()
+        val references = mutableListOf<PsiElement>()
 
-        for (child in children.drop(index)) {
+        for (child in children.drop(index + 1)) {
             // If this shadows the declaration we're looking for, this scope cannot
             // have any more references to the element
             if (child is JaktDeclaration && child.name == name)
                 return references
-            if (child is JaktPsiReference && child.element.name == name)
-                references.add(child)
-            if (child is JaktPsiScope)
-                references.addAll(child.findReferencesInOrBelow(name, null))
+
+            references.addAll(PsiTreeUtil.findChildrenOfType(child, JaktPlainQualifierMixin::class.java)
+                .filter { el ->
+                    el.reference.multiResolve(false).any { it.element == element }
+                })
         }
 
         return references

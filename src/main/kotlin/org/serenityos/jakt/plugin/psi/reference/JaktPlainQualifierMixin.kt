@@ -19,21 +19,5 @@ abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node)
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = object : JaktPsiReference(this) {
-        override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
-            val decl = containingScope?.findDeclarationInOrAbove(element.name!!, from = getSubScopeParent(element)) ?: return emptyArray()
-            return arrayOf(PsiElementResolveResult(decl))
-        }
-    }
-
-    companion object {
-        private fun getSubScopeParent(element: PsiElement): PsiElement {
-            var target = element
-            while (true) {
-                if (target.parent is JaktPsiScope)
-                    return target
-                target = target.parent
-            }
-        }
-    }
+    override fun getReference() = JaktPsiReference.Ident(this)
 }
