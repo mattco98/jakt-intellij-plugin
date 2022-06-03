@@ -4,4 +4,4 @@ import com.intellij.psi.PsiPolyVariantReferenceBase
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 
 abstract class JaktPsiReference(element: JaktNameIdentifierOwner) :
-    PsiPolyVariantReferenceBase<JaktNameIdentifierOwner>(element)
+    PsiPolyVariantReferenceBase<JaktNameIdentifierOwner>(element, element.nameIdentifier!!.textRangeInParent)

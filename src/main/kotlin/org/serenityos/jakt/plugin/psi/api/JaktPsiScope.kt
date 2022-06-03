@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.reference.JaktPsiReference
@@ -19,6 +20,7 @@ interface JaktPsiScope : JaktPsiElement {
     }
 
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
+        val t = this
         val index = from?.let { el ->
             children.indexOf(el).also {
                 require(it != -1)

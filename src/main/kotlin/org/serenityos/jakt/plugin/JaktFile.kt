@@ -2,10 +2,18 @@ package org.serenityos.jakt.plugin
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
+import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.FileViewProvider
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
+import org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary
+import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 
-class JaktFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, JaktLanguage), JaktPsiElement {
+class JaktFile(
+    viewProvider: FileViewProvider,
+) : PsiFileBase(viewProvider, JaktLanguage), JaktModificationBoundary, JaktPsiScope {
+    override val tracker = JaktModificationTracker()
+
     override fun getFileType() = Type
 
     override fun toString() = Type.name

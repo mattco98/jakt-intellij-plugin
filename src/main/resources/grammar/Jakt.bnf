@@ -193,7 +193,9 @@ StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation
  *      Non-Extern Declarations      *
  *************************************/
 
-FunctionDeclaration ::= FunctionHeader FunctionBody
+FunctionDeclaration ::= FunctionHeader FunctionBody {
+    mixin="org.serenityos.jakt.plugin.psi.JaktFunctionDeclarationMixin"
+}
 private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
@@ -263,6 +265,7 @@ InlineCppStatement ::= CPP_KEYWORD Block
 
 Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
     extends=Statement
+    mixin="org.serenityos.jakt.plugin.psi.JaktBlockMixin"
 }
 
 /*************************************
