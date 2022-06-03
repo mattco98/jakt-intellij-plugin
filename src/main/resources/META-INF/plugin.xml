@@ -30,6 +30,10 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
         />
+        <lang.findUsagesProvider
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
+        />
         <colorSettingsPage
                 implementation="org.serenityos.jakt.plugin.syntax.JaktColorSettingsPage"
         />
