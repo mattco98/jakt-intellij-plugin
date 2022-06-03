@@ -315,6 +315,7 @@ GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
 Expression ::=
       OptionalSomeExpression // Must come before CallExpression
     | OptionalNoneExpression // Must come before Qualifier
+    | AccessExpression // Must come before CallExpression
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
     | LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
@@ -329,8 +330,6 @@ Expression ::=
     | PostfixUnaryExpression
     | AssignmentBinaryExpression
     | ParenExpression
-    | IndexedStructExpression
-    | IndexedTupleExpression
     | IndexedAccessExpression
     | FieldAccessExpression
     | RangeExpression
@@ -348,17 +347,23 @@ private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name=
 OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 OptionalNoneExpression ::= NONE_TYPE
 
-CallExpression ::= Expression GenericSpecialization? PAREN_OPEN ArgumentList? PAREN_CLOSE
+CallExpression ::= Expression GenericSpecialization? Call
+private Call ::= PAREN_OPEN ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
 UnlabeledArgument ::= ExpressionWithoutAssignment
 
-ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
-IndexedStructExpression ::= Expression DOT IDENTIFIER
-IndexedTupleExpression ::= Expression DOT DECIMAL_LITERAL
+AccessExpression ::= Expression DOT MethodOrField
+private MethodOrField ::= MethodCall | FieldLookup | TupleLookup
+MethodCall ::= IDENTIFIER Call
+FieldLookup ::= IDENTIFIER
+TupleLookup ::= DECIMAL_LITERAL
+
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
 FieldAccessExpression ::= DOT Expression
+
+ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 RangeExpression ::= Expression DOT_DOT Expression
 
 ArrayExpression ::= BRACKET_OPEN (SizedArrayBody | ElementsArrayBody)? BRACKET_CLOSE

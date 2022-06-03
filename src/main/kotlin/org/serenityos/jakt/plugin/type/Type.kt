@@ -11,7 +11,7 @@ sealed interface Type {
         override fun typeRepr() = "<unknown>"
     }
 
-    enum class Primitive : Type {
+    enum class Primitive(typeName: kotlin.String? = null) : Type {
         Void,
         Bool,
         I8,
@@ -24,12 +24,14 @@ sealed interface Type {
         U64,
         F32,
         F64,
-        CChar,
-        CInt,
+        CChar("c_char"),
+        CInt("c_int"),
         USize,
-        String;
+        String("String");
 
-        override fun typeRepr() = name.lowercase()
+        private val typeName = typeName ?: name.lowercase()
+
+        override fun typeRepr() = typeName
     }
 
     class Plain(val name: String) : Type {

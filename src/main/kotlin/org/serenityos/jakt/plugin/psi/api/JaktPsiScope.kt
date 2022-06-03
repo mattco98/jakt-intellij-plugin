@@ -26,7 +26,6 @@ interface JaktPsiScope : JaktPsiElement {
     }
 
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
-        val t = this
         val index = from?.let { el ->
             children.indexOf(el).also {
                 require(it != -1)
@@ -46,7 +45,6 @@ interface JaktPsiScope : JaktPsiElement {
     }
 
     fun findReferencesInOrBelow(element: PsiElement, name: String, from: PsiElement? = null): List<PsiElement> {
-        val t = this
         val index = from?.let { el ->
             children.indexOf(el).also {
                 require(it != -1)
@@ -82,3 +80,17 @@ val JaktPsiElement.containingScope: JaktPsiScope?
             element = element.parent
         return element as? JaktPsiScope
     }
+
+fun JaktPsiElement.findDeclarationInOrAbove(name: String): JaktDeclaration? {
+    if (this is JaktPsiScope)
+        return findDeclarationInOrAbove(name, null)
+
+    var element: PsiElement = this
+    var parent: PsiElement = parent
+    while (parent !is JaktPsiScope) {
+        element = parent
+        parent = parent.parent
+    }
+
+    return parent.findDeclarationIn(name, element)
+}

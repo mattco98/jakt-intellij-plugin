@@ -1,6 +1,7 @@
 package org.serenityos.jakt.plugin.type
 
 import com.intellij.psi.util.elementType
+import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.intellij.sdk.language.psi.JaktAddBinaryExpression
 import org.intellij.sdk.language.psi.JaktArrayExpression
 import org.intellij.sdk.language.psi.JaktBitwiseAndBinaryExpression
@@ -12,8 +13,7 @@ import org.intellij.sdk.language.psi.JaktDictionaryExpression
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
 import org.intellij.sdk.language.psi.JaktIndexedAccessExpression
-import org.intellij.sdk.language.psi.JaktIndexedStructExpression
-import org.intellij.sdk.language.psi.JaktIndexedTupleExpression
+import org.intellij.sdk.language.psi.JaktLiteral
 import org.intellij.sdk.language.psi.JaktLogicalAndBinaryExpression
 import org.intellij.sdk.language.psi.JaktLogicalOrBinaryExpression
 import org.intellij.sdk.language.psi.JaktMatchExpression
@@ -32,7 +32,8 @@ import org.intellij.sdk.language.psi.JaktSetExpression
 import org.intellij.sdk.language.psi.JaktShiftBinaryExpression
 import org.intellij.sdk.language.psi.JaktTupleExpression
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.plugin.psi.api.containingScope
+import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
+import org.serenityos.jakt.utils.findChildOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 import org.serenityos.jakt.utils.findNotNullChildOfType
 
@@ -71,27 +72,51 @@ object TypeInference {
             }
             is JaktPostfixUnaryExpression -> inferType(element.expression)
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
-            is JaktIndexedStructExpression,
-            is JaktIndexedTupleExpression,
+            is JaktAccessExpression -> getAccessExpressionType(element)
             is JaktIndexedAccessExpression -> Type.Unknown // TODO
             is JaktFieldAccessExpression -> Type.Unknown // TODO
             is JaktRangeExpression -> Type.Unknown // TODO
-            is JaktArrayExpression -> Type.Array(Type.Unknown) // TODO
-            is JaktDictionaryExpression -> Type.Dictionary(Type.Unknown, Type.Unknown) // TODO
-            is JaktSetExpression -> Type.Set(Type.Unknown) // TODO
-            is JaktTupleExpression -> Type.Tuple(listOf(Type.Unknown)) // TODO
+            is JaktArrayExpression -> when {
+                element.sizedArrayBody != null -> Type.Array(inferType(element.sizedArrayBody!!.findNotNullChildOfType()))
+                element.elementsArrayBody != null -> {
+                    val expressions = element.elementsArrayBody!!.findChildrenOfType<JaktExpression>()
+                    Type.Array(expressions.firstOrNull()?.let(::inferType) ?: Type.Unknown)
+                }
+                else -> Type.Array(Type.Unknown)
+            }
+            is JaktDictionaryExpression -> {
+                val kv = element.findChildrenOfType<JaktExpression>()
+                if (kv.size >= 2) {
+                    Type.Dictionary(inferType(kv[0]), inferType(kv[1]))
+                } else Type.Dictionary(Type.Unknown, Type.Unknown)
+            }
+            is JaktSetExpression -> {
+                val expr = element.findChildOfType<JaktExpression>()
+                Type.Set(expr?.let(::inferType) ?: Type.Unknown)
+            }
+            is JaktTupleExpression -> Type.Tuple(element.findChildrenOfType<JaktExpression>().map(::inferType))
             is JaktMatchExpression -> Type.Unknown // TODO
+            is JaktNumericLiteral -> Type.Primitive.I64 // TODO: Proper type
             is JaktBooleanLiteral -> Type.Primitive.Bool
-            is JaktNumericLiteral -> Type.Primitive.I64 // TODO: Correct type
-            is JaktNamespacedQualifier -> Type.Unknown // TODO
-            is JaktPlainQualifier ->
-                element.containingScope?.findDeclarationInOrAbove(element.name!!, element)?.jaktType ?: Type.Unknown
-            else -> when (element.elementType) {
+            is JaktLiteral -> when (element.firstChild.elementType) {
                 JaktTypes.STRING_LITERAL -> Type.Primitive.String
                 JaktTypes.BYTE_CHAR_LITERAL -> Type.Primitive.CInt
                 JaktTypes.CHAR_LITERAL -> Type.Primitive.CChar
-                else -> Type.Unknown
+                else -> error("unreachable")
             }
+            is JaktNamespacedQualifier -> Type.Unknown // TODO
+            is JaktPlainQualifier ->
+                element.findDeclarationInOrAbove(element.name!!)?.jaktType ?: Type.Unknown
+            else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
+    }
+
+    private fun getAccessExpressionType(element: JaktAccessExpression): Type {
+        val baseType = inferType(element.expression)
+
+        return if (baseType is Type.Tuple) {
+            val index = element.tupleLookup?.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
+            baseType.types[index]
+        } else Type.Unknown
     }
 }

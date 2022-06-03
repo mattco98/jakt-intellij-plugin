@@ -35,7 +35,12 @@ object FunctionAnnotator : JaktAnnotator() {
     private fun getCallHighlightTarget(expr: PsiElement): PsiElement? {
         return when (expr) {
             is JaktIndexedAccessExpression -> expr.bracketOpen.nextSibling
-            is JaktIndexedStructExpression -> expr.lastChild
+            is JaktAccessExpression -> when {
+                expr.methodCall != null -> expr.methodCall!!.identifier
+                expr.fieldLookup != null -> expr.fieldLookup!!.identifier
+                expr.tupleLookup != null -> expr.tupleLookup!!.decimalLiteral
+                else -> null
+            }
             is JaktNamespacedQualifier -> expr.lastChild
             is JaktPlainQualifier -> expr.identifier
             else -> if (expr.elementType == JaktTypes.IDENTIFIER) {
