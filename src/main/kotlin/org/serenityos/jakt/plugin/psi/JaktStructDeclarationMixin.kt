@@ -4,12 +4,11 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.intellij.sdk.language.psi.JaktStructField
+import org.intellij.sdk.language.psi.*
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.api.containingScope
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 import org.serenityos.jakt.plugin.type.Type
@@ -17,7 +16,7 @@ import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktStructDeclarationMixin(
     node: ASTNode,
-) : JaktTopLevelDefinitionImpl(node), JaktStructDeclaration, JaktNameIdentifierOwner, JaktDeclaration {
+) : JaktTopLevelDefinitionImpl(node), JaktStructDeclaration, JaktNameIdentifierOwner, JaktDeclaration, JaktPsiScope {
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
             val header = structHeader
@@ -46,6 +45,18 @@ abstract class JaktStructDeclarationMixin(
                 fields,
                 methods,
             )
+
+            // Populate our methods' thisParameters, if necessary
+            methods.values.forEach {
+                if (it.hasThis && it.thisParameter == null) {
+                    it.thisParameter = Type.Function.Parameter(
+                        "this",
+                        type,
+                        false,
+                        it.thisIsMutable,
+                    )
+                }
+            }
 
             // TODO: Better caching
             CachedValueProvider.Result(type, this)

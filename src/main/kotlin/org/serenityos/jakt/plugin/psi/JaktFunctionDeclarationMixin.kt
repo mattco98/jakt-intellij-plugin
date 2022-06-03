@@ -29,24 +29,6 @@ abstract class JaktFunctionDeclarationMixin(
                 }
             } else emptyList()
 
-            val thisParameter = if (thisParameter != null) {
-                val enclosingType = when (val enclosingStruct = containingScope) {
-                    is JaktStructDeclaration,
-                    is JaktExternStructDeclaration,
-                    is JaktEnumDeclaration -> (enclosingStruct as? JaktTypeable)?.jaktType ?: Type.Unknown
-                    else -> null
-                }
-
-                if (enclosingType != null) {
-                    Type.Function.Parameter(
-                        "this",
-                        enclosingType,
-                        false,
-                        thisParameter!!.mutableKeyword != null,
-                    )
-                } else null
-            } else null
-
             val parameters = parameterList.map {
                 Type.Function.Parameter(
                     it.identifier.text,
@@ -61,10 +43,15 @@ abstract class JaktFunctionDeclarationMixin(
             val type = Type.Function(
                 name,
                 typeParameters,
-                thisParameter,
+                null,
                 parameters,
                 returnType
-            )
+            ).also {
+                if (thisParameter != null) {
+                    it.hasThis = true
+                    it.thisIsMutable = thisParameter!!.mutableKeyword != null
+                }
+            }
 
             // TODO: Better caching
             CachedValueProvider.Result(type, this)

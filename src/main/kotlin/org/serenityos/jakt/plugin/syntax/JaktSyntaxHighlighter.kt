@@ -121,6 +121,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             ANONYMOUS_KEYWORD,
             RAW_KEYWORD,
             WEAK_KEYWORD,
+            THIS_KEYWORD,
             THROWS_KEYWORD -> Highlights.KEYWORD_MODIFIER
 
             UNSAFE_KEYWORD,

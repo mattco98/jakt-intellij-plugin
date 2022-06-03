@@ -184,7 +184,9 @@ ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
 }
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
 FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
-private ParameterList ::= PAREN_OPEN ThisParameter? (Parameter (COMMA Parameter)*)? PAREN_CLOSE
+private ParameterList ::= MemberParameterList | FreeParameterList
+private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
+private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
 ThisParameter ::= MUTABLE_KEYWORD? THIS_KEYWORD
 Parameter ::= ANONYMOUS_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation {
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktParameterMixin"

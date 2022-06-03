@@ -28,7 +28,10 @@ interface JaktPsiScope : JaktPsiElement {
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
         val index = from?.let { el ->
             children.indexOf(el).also {
-                require(it != -1)
+                // If this is true, likely the parse tree is completely broken.
+                // This has been observed to happen when typing
+                if (it == -1)
+                    return null
             }
         } ?: 0
 

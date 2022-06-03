@@ -100,10 +100,16 @@ sealed interface Type {
     class Function(
         val name: String,
         val typeParameters: List<String>,
-        val thisParameter: Parameter?,
+        var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
     ) : Type {
+        // We cannot resolve the struct before this to calculate the thisParameter
+        // directly, as resolving the struct requires resolving all of its functions,
+        // so we leave this info here so that the struct can populate the thisParameter
+        // itself.
+        var hasThis = false
+        var thisIsMutable = false
 
         override fun typeRepr() = buildString {
             append("function ")
@@ -114,8 +120,11 @@ sealed interface Type {
                 "${it.name}: ${it.type}"
             })
             append(')')
-            append(" -> ")
-            append(returnType)
+
+            if (returnType != Primitive.Void) {
+                append(" -> ")
+                append(returnType.typeRepr())
+            }
         }
 
         data class Parameter(

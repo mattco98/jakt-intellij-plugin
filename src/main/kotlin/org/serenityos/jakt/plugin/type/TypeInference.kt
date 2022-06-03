@@ -37,6 +37,7 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.intellij.sdk.language.psi.JaktTupleExpression
+import org.intellij.sdk.language.psi.JaktType
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.api.containingScope
 import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
@@ -48,10 +49,15 @@ import org.serenityos.jakt.utils.findNotNullChildOfType
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
-            is JaktOptionalSomeExpression -> Type.Optional(inferType(element.findNotNullChildOfType<JaktExpression>()))
+            is JaktOptionalSomeExpression -> Type.Optional(inferType(element.findNotNullChildOfType()))
             is JaktOptionalNoneExpression -> Type.Optional(Type.Unknown)
             is JaktCallExpression -> when (val baseType = inferType(element.expression)) {
-                is Type.Struct -> baseType
+                is Type.Struct -> Type.Specialization(
+                    baseType,
+                    element.genericSpecialization?.findChildrenOfType<JaktType>()?.map {
+                        it.jaktType
+                    } ?: emptyList(),
+                )
                 is Type.Function -> baseType.returnType
                 else -> Type.Unknown
             }
@@ -83,14 +89,14 @@ object TypeInference {
                 else -> error("unreachable")
             }
             is JaktPostfixUnaryExpression -> inferType(element.expression)
-            is JaktParenExpression -> inferType(element.findNotNullChildOfType<JaktExpression>())
+            is JaktParenExpression -> inferType(element.findNotNullChildOfType())
             is JaktAccessExpression -> getAccessExpressionType(element)
             is JaktIndexedAccessExpression -> Type.Unknown // TODO
             is JaktFieldAccessExpression -> Type.Unknown // TODO
             is JaktRangeExpression -> Type.Unknown // TODO
             is JaktArrayExpression -> when {
                 element.sizedArrayBody != null -> Type.Array(inferType(
-                    element.sizedArrayBody!!.findNotNullChildOfType<JaktExpression>()
+                    element.sizedArrayBody!!.findNotNullChildOfType()
                 ))
                 element.elementsArrayBody != null -> {
                     val expressions = element.elementsArrayBody!!.findChildrenOfType<JaktExpression>()

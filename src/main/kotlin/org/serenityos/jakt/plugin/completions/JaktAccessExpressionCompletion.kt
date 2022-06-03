@@ -47,21 +47,32 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             is Type.Array,
             is Type.Set,
             is Type.Dictionary -> return
-            is Type.Struct -> (type.fields.toList() + type.methods.toList()).map {
-                LookupElementBuilder
-                    .create(it.first)
-                    .bold()
-                    .withTypeText(it.second.typeRepr())
-            }
-            is Type.Enum -> type.methods.toList().map {
-                LookupElementBuilder
-                    .create(it.first)
-                    .bold()
-                    .withTailText(it.second.typeRepr())
+            is Type.Struct -> type
+                .methods
+                .filterValues { it.thisParameter == null }
+                .map { (name, func) -> lookupElementFromType(name, func) }
+            is Type.Enum -> type
+                .methods
+                .filterValues { it.thisParameter == null }
+                .map { (name, func) -> lookupElementFromType(name, func) }
+            is Type.Specialization -> when (val type2 = type.underlyingType) {
+                is Type.Struct -> {
+                    val fields = type2.fields.map { (name, type) -> lookupElementFromType(name, type) }
+                    val methods = type2.methods.filterValues {
+                        it.thisParameter != null
+                    }.map { (name, type) -> lookupElementFromType(name, type) }
+                    fields + methods
+                }
+                is Type.Enum -> type2.methods.map { (name, type) -> lookupElementFromType(name, type) }
             }
             else -> return
         }
 
         result.addAllElements(elements)
     }
+
+    private fun lookupElementFromType(name: String, type: Type) = LookupElementBuilder
+        .create(name)
+        .bold()
+        .withTypeText(type.typeRepr())
 }

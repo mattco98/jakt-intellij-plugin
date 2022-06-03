@@ -66,6 +66,7 @@ COMMENT="//"[^\r\n]*
   "ref"                  { return REF_KEYWORD; }
   "mutable"              { return MUTABLE_KEYWORD; }
   "anonymous"            { return ANONYMOUS_KEYWORD; }
+  "this"                 { return THIS_KEYWORD; }
   "raw"                  { return RAW_KEYWORD; }
   "weak"                 { return WEAK_KEYWORD; }
   "throws"               { return THROWS_KEYWORD; }
