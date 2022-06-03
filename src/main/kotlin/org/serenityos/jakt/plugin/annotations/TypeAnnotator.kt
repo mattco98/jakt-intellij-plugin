@@ -20,10 +20,10 @@ object TypeAnnotator : JaktAnnotator() {
                     .textAttributes(attr)
                     .create()
             }
-            is JaktNamespacedType -> holder.newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.identifier)
-                .textAttributes(Highlights.TYPE_NAMESPACE_QUALIFIER)
-                .create()
+            // is JaktNamespacedType -> holder.newAnnotation(HighlightSeverity.INFORMATION)
+            //     .range(element.identifier)
+            //     .textAttributes(Highlights.TYPE_NAMESPACE_QUALIFIER)
+            //     .create()
         }
     }
 }

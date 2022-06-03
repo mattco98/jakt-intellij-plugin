@@ -246,7 +246,9 @@ Statement ::=
     | UnsafeStatement
     | InlineCppStatement
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment
+VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktVariableDeclarationMixin"
+}
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
 ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
 ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
@@ -267,28 +269,38 @@ Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
  *               TYPES               *
  *************************************/
 
+// TODO: Figure out how to properly restrict this grammar to disallow
+//       invalid productions such as Foo::[String] without using
+//       left-recursion.
+
 Type ::=
       RawType
     | WeakType
+    | OptionalType
     | ArrayType
-    | GenericType
     | DictionaryType
     | SetType
     | TupleType
     | NamespacedType
     | PlainType
+{
+    implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+    mixin="org.serenityos.jakt.plugin.psi.JaktTypeMixin"
+}
 
-RawType ::= RAW_KEYWORD Type
-WeakType ::= WEAK_KEYWORD Type
-PlainType ::= IDENTIFIER QUESTION_MARK?
-GenericType ::= IDENTIFIER GenericBounds
-GenericBounds ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
-ArrayType ::= BRACKET_OPEN IDENTIFIER BRACKET_CLOSE
-DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE
-SetType ::= CURLY_OPEN Type CURLY_CLOSE
-TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE
-NamespacedType ::= IDENTIFIER COLON_COLON Type
-TypeAnnotation ::= COLON Type
+RawType ::= RAW_KEYWORD Type {extends=Type}
+WeakType ::= WEAK_KEYWORD Type {extends=Type}
+PlainType ::= IDENTIFIER GenericBounds? {extends=Type}
+OptionalType ::= Type QUESTION_MARK {extends=Type}
+GenericBounds ::= LESS_THAN <<commaOrEolList identifier>> GREATER_THAN {extends=Type}
+ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
+DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {extends=Type}
+SetType ::= CURLY_OPEN Type CURLY_CLOSE {extends=Type}
+TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {extends=Type}
+NamespacedType ::= Type COLON_COLON Type {extends=Type}
+TypeAnnotation ::= COLON Type {extends=Type}
+
+GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
 
 /*************************************
  *            EXPRESSIONS            *
@@ -331,7 +343,7 @@ private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name=
 OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 OptionalNoneExpression ::= NONE_TYPE
 
-CallExpression ::= Expression GenericBounds? PAREN_OPEN ArgumentList? PAREN_CLOSE
+CallExpression ::= Expression GenericSpecialization? PAREN_OPEN ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
@@ -366,6 +378,8 @@ ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
 PlainQualifier ::= IDENTIFIER {
     extends=Expression
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin"
 }
 
 /*************************************
