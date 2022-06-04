@@ -1,4 +1,4 @@
-package org.serenityos.jakt.plugin.psi
+package org.serenityos.jakt.plugin.psi.misc
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode

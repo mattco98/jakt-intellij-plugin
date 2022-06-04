@@ -212,7 +212,7 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
         "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary"
     ]
-    mixin="org.serenityos.jakt.plugin.psi.JaktFunctionDeclarationMixin"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktFunctionDeclarationMixin"
 }
 private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
@@ -222,7 +222,7 @@ NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefi
 StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
     implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-    mixin="org.serenityos.jakt.plugin.psi.JaktStructDeclarationMixin"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructDeclarationMixin"
 }
 StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 
@@ -291,7 +291,7 @@ InlineCppStatement ::= CPP_KEYWORD Block
 
 Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
     extends=Statement
-    mixin="org.serenityos.jakt.plugin.psi.JaktBlockMixin"
+    mixin="org.serenityos.jakt.plugin.psi.misc.JaktBlockMixin"
 }
 
 /*************************************
@@ -314,7 +314,7 @@ Type ::=
     | PlainType
 {
     implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-    mixin="org.serenityos.jakt.plugin.psi.JaktTypeMixin"
+    mixin="org.serenityos.jakt.plugin.psi.misc.JaktTypeMixin"
 }
 
 RawType ::= RAW_KEYWORD Type {extends=Type}

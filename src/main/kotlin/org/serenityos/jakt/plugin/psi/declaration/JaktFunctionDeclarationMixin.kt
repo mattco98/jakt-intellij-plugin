@@ -1,17 +1,14 @@
-package org.serenityos.jakt.plugin.psi
+package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.*
+import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.*
-import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.plugin.type.TypeInference
 import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktFunctionDeclarationMixin(
