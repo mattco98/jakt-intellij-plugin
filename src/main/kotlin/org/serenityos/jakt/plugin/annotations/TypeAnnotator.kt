@@ -4,7 +4,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import org.intellij.sdk.language.psi.JaktGenericBounds
-import org.intellij.sdk.language.psi.JaktNamespacedType
+import org.intellij.sdk.language.psi.JaktNumericSuffix
 import org.intellij.sdk.language.psi.JaktPlainType
 import org.serenityos.jakt.plugin.syntax.Highlights
 
@@ -20,6 +20,10 @@ object TypeAnnotator : JaktAnnotator() {
                     .textAttributes(attr)
                     .create()
             }
+            is JaktNumericSuffix -> holder.newAnnotation(HighlightSeverity.INFORMATION)
+                .range(element)
+                .textAttributes(Highlights.LITERAL_NUMBER)
+                .create()
             // is JaktNamespacedType -> holder.newAnnotation(HighlightSeverity.INFORMATION)
             //     .range(element.identifier)
             //     .textAttributes(Highlights.TYPE_NAMESPACE_QUALIFIER)

@@ -25,13 +25,13 @@ class JaktColorSettingsPage : ColorSettingsPage {
         
         function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(f: <T>Foo</T><<T>i32</T>, <T>A</T>>, anonymous strings: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
             match f {
-                Bar => [0; 10]
+                Bar => [0<NUMERIC_SUFFIX>f64</NUMERIC_SUFFIX>; 10]
                 Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (string.0 + 1, strings.1))
                 Qux(dict, t) => {
                     for str in strings.1.<FUNC_CALL>iterator</FUNC_CALL>() {
                         let mutable i = 0
                         loop {
-                            if str[i] == b'z' and not (i > 5) {
+                            if str[i] == b'z' and not (i > 5<NUMERIC_SUFFIX>i8</NUMERIC_SUFFIX>) {
                                 continue
                             }
                             i++
@@ -93,6 +93,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
         "T" to Highlights.TYPE_NAME,
         "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
         "OPT_T" to Highlights.TYPE_OPTIONAL_TYPE,
+        "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
     )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
@@ -112,6 +113,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Functions//Fat Arrow" to Highlights.FUNCTION_FAT_ARROW,
 
             "Literals//Numbers" to Highlights.LITERAL_NUMBER,
+            "Literals//Numeric Suffix" to Highlights.LITERAL_NUMBER_SUFFIX,
             "Literals//Strings and Characters" to Highlights.LITERAL_STRING,
             "Literals//Booleans" to Highlights.LITERAL_BOOLEAN,
             "Literals//Arrays" to Highlights.LITERAL_ARRAY,

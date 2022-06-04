@@ -20,6 +20,7 @@ object Highlights {
     val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
 
     val LITERAL_NUMBER = Default.NUMBER.extend("LITERAL_NUMBER", Color.getColor("0xD19A66"))
+    val LITERAL_NUMBER_SUFFIX = LITERAL_NUMBER.extend("LITERAL_NUMBER_SUFFIX", Color.getColor("0xD19A66"))
     val LITERAL_STRING = Default.STRING.extend("LITERAL_STRING", Color.getColor("0x98C379"))
     val LITERAL_BOOLEAN = Default.NUMBER.extend("LITERAL_BOOLEAN")
     val LITERAL_ARRAY = Default.BRACKETS.extend("LITERAL_ARRAY")
@@ -73,7 +74,6 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             IDENTIFIER -> Highlights.IDENTIFIER
             COMMENT -> Highlights.COMMENT
 
-            NUMERIC_LITERAL,
             DECIMAL_LITERAL,
             HEX_LITERAL,
             BINARY_LITERAL -> Highlights.LITERAL_NUMBER
