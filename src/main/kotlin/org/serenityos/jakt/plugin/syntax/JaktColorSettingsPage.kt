@@ -23,12 +23,12 @@ class JaktColorSettingsPage : ColorSettingsPage {
             Qux(a: [<T>String</T>:{<T>U</T>}], b: <T>WithUnderlyingType</T>)
         }
         
-        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(f: <T>Foo</T><<T>i32</T>, <T>A</T>>, anonymous strings: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
-            match f {
+        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anonymous <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
+            match <FUNC_PARAM>f</FUNC_PARAM> {
                 Bar => [0<NUMERIC_SUFFIX>f64</NUMERIC_SUFFIX>; 10]
-                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (string.0 + 1, strings.1))
+                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (<FUNC_PARAM>string</FUNC_PARAM>.0 + 1, <FUNC_PARAM>strings</FUNC_PARAM>.1))
                 Qux(dict, t) => {
-                    for str in strings.1.<FUNC_CALL>iterator</FUNC_CALL>() {
+                    for str in <FUNC_PARAM>strings</FUNC_PARAM>.1.<FUNC_CALL>iterator</FUNC_CALL>() {
                         let mutable i = 0
                         loop {
                             if str[i] == b'z' and not (i > 5<NUMERIC_SUFFIX>i8</NUMERIC_SUFFIX>) {
@@ -47,16 +47,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
         
         namespace E {
             extern struct D {
-                function <FUNC_DECL>invoke</FUNC_DECL>(this, a: weak <T>i32</T>?) -> <T>String</T>
+                function <FUNC_DECL>invoke</FUNC_DECL>(this, <FUNC_PARAM>a</FUNC_PARAM>: weak <T>i32</T>?) -> <T>String</T>
             }
         
             class P {
                 foo: <T>i32</T>
         
                 // Create a new P from the given value
-                function <FUNC_DECL>make</FUNC_DECL>(value: <T>i32</T>) => <FUNC_CALL>P</FUNC_CALL>(foo: value)
+                function <FUNC_DECL>make</FUNC_DECL>(<FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) => <FUNC_CALL>P</FUNC_CALL>(foo: value)
                 function <FUNC_DECL>get_foo</FUNC_DECL>(this) => .foo
-                function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, value: <T>i32</T>) {
+                function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, <FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) {
                     .foo = value
                 }
             }
@@ -89,6 +89,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
     override fun getAdditionalHighlightingTagToDescriptorMap() = mapOf(
         "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
         "FUNC_CALL" to Highlights.FUNCTION_CALL,
+        "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
         "NS_QUAL" to Highlights.TYPE_NAMESPACE_QUALIFIER,
         "T" to Highlights.TYPE_NAME,
         "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
@@ -111,6 +112,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Functions//Call" to Highlights.FUNCTION_CALL,
             "Functions//Arrow" to Highlights.FUNCTION_ARROW,
             "Functions//Fat Arrow" to Highlights.FUNCTION_FAT_ARROW,
+            "Functions//Parameters" to Highlights.FUNCTION_PARAMETER,
 
             "Literals//Numbers" to Highlights.LITERAL_NUMBER,
             "Literals//Numeric Suffix" to Highlights.LITERAL_NUMBER_SUFFIX,

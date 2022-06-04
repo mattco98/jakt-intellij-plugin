@@ -1,7 +1,6 @@
 package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.lexer.Lexer
-import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.TextAttributes
@@ -48,9 +47,10 @@ object Highlights {
 
     val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION", Color.getColor("0x61AEEF"))
     val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL", Color.getColor("0x61AEEF"))
+    val FUNCTION_PARAMETER = IDENTIFIER.extend("FUNCTION_PARAMETER")
     val FUNCTION_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_ARROW", Color.getColor("0x61AFEF"))
     val FUNCTION_FAT_ARROW = Default.OPERATION_SIGN.extend("FUNCTION_FAT_ARROW", Color.getColor("0x61AFEF"))
-    val FUNCTION_PARAMETER_LABEL = IDENTIFIER.extend("FUNCTION_PARAMETER_LABEL")
+    val FUNCTION_LABELED_ARGUMENT = IDENTIFIER.extend("FUNCTION_PARAMETER_LABEL")
 
     val TYPE_NAME = IDENTIFIER.extend("TYPE_NAME")
     val TYPE_GENERIC_NAME = TYPE_NAME.extend("TYPE_GENERIC_NAME")

@@ -18,6 +18,10 @@ object FunctionAnnotator : JaktAnnotator() {
                 .range(element.identifier)
                 .textAttributes(Highlights.FUNCTION_DECLARATION)
                 .create()
+            is JaktParameter -> holder.newAnnotation(HighlightSeverity.INFORMATION)
+                .range(element.identifier)
+                .textAttributes(Highlights.FUNCTION_PARAMETER)
+                .create()
             is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.let {
                 holder.newAnnotation(HighlightSeverity.INFORMATION)
                     .range(it)
@@ -27,7 +31,7 @@ object FunctionAnnotator : JaktAnnotator() {
             is JaktLabeledArgument -> holder
                 .newAnnotation(HighlightSeverity.INFORMATION)
                 .range(TextRange.create(element.identifier.startOffset, element.colon.endOffset))
-                .textAttributes(Highlights.FUNCTION_PARAMETER_LABEL)
+                .textAttributes(Highlights.FUNCTION_LABELED_ARGUMENT)
                 .create()
         }
     }
