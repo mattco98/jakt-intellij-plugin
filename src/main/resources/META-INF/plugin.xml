@@ -34,6 +34,10 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
         />
+        <lang.refactoringSupport
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktRefactoringSupportProvider"
+        />
         <colorSettingsPage
                 implementation="org.serenityos.jakt.plugin.syntax.JaktColorSettingsPage"
         />
