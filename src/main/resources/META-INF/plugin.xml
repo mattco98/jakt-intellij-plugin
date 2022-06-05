@@ -53,5 +53,9 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.completions.JaktCompletionContributor"
         />
+        <lang.braceMatcher
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktBraceMatcher"
+        />
     </extensions>
 </idea-plugin>
