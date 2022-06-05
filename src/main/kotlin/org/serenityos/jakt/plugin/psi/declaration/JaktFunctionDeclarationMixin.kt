@@ -30,12 +30,12 @@ abstract class JaktFunctionDeclarationMixin(
                 Type.Function.Parameter(
                     it.identifier.text,
                     it.typeAnnotation.jaktType,
-                    it.anonymousKeyword != null,
+                    it.anonKeyword != null,
                     it.mutableKeyword != null,
                 )
             }
 
-            val returnType = functionReturnType?.type?.jaktType ?: Type.Primitive.Void
+            val returnType = functionReturnType.type?.jaktType ?: Type.Primitive.Void
 
             val type = Type.Function(
                 name,

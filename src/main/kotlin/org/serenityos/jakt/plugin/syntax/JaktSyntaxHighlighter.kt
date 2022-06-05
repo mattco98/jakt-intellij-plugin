@@ -118,7 +118,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             BOXED_KEYWORD,
             MUTABLE_KEYWORD,
-            ANONYMOUS_KEYWORD,
+            ANON_KEYWORD,
             RAW_KEYWORD,
             WEAK_KEYWORD,
             THIS_KEYWORD,

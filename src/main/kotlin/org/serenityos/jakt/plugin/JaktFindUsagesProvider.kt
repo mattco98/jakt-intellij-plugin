@@ -37,7 +37,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
             is JaktNamespaceDeclaration -> "namespace"
             is JaktStructDeclaration -> if (element.structHeader.classKeyword != null) "class" else "struct"
             is JaktEnumDeclaration -> "enum"
-            is JaktParameter -> if (element.anonymousKeyword != null) "anonymous parameter" else "parameter"
+            is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
             is JaktVariableDeclarationStatement -> "variable declaration"
             else -> "TODO(getType => ${element::class.simpleName})"
         }
