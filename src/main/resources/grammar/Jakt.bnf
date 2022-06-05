@@ -298,37 +298,37 @@ Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
  *               TYPES               *
  *************************************/
 
-// TODO: Figure out how to properly restrict this grammar to disallow
-//       invalid productions such as Foo::[String] without using
-//       left-recursion.
+private BaseType ::=
+      DictionaryType
+    | ArrayType
+    | SetType
+    | TupleType
+    | GenericType
+    | PlainType
+
+PlainType ::= (IDENTIFIER COLON_COLON)* PlainQualifier {extends=Type}
+GenericType ::= PlainType GenericBounds? {extends=Type}
+GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN {pin=1 extends=Type}
+ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
+DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
+SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
+TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
 
 Type ::=
       RawType
     | WeakType
     | OptionalType
-    | DictionaryType
-    | ArrayType
-    | SetType
-    | TupleType
-    | NamespacedType
-    | PlainType
+    | BaseType
 {
     implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
     mixin="org.serenityos.jakt.plugin.psi.misc.JaktTypeMixin"
 }
 
-RawType ::= RAW_KEYWORD Type {extends=Type}
-WeakType ::= WEAK_KEYWORD Type {extends=Type}
-PlainType ::= IDENTIFIER GenericBounds? {extends=Type}
-OptionalType ::= Type QUESTION_MARK {extends=Type}
-GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN {extends=Type}
-ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
-DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {extends=Type}
-SetType ::= CURLY_OPEN Type CURLY_CLOSE {extends=Type}
-TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {extends=Type}
-NamespacedType ::= Type COLON_COLON Type {extends=Type}
-TypeAnnotation ::= COLON Type {extends=Type}
+RawType ::= RAW_KEYWORD BaseType {pin=1 extends=Type}
+WeakType ::= WEAK_KEYWORD BaseType {pin=1 extends=Type}
+OptionalType ::= BaseType QUESTION_MARK {extends=Type}
 
+TypeAnnotation ::= COLON Type {extends=Type}
 GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
 
 /*************************************
