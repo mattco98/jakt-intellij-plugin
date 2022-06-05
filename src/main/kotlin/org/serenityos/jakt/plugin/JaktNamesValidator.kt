@@ -40,7 +40,7 @@ class JaktNamesValidator : NamesValidator {
             DEFER_KEYWORD,
             TRUE_KEYWORD,
             FALSE_KEYWORD,
-            REF_KEYWORD,
+            BOXED_KEYWORD,
             MUTABLE_KEYWORD,
             ANONYMOUS_KEYWORD,
             RAW_KEYWORD,

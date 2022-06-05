@@ -44,7 +44,7 @@
         TRUE_KEYWORD='true'
         FALSE_KEYWORD='false'
 
-        REF_KEYWORD='ref'
+        BOXED_KEYWORD='boxed'
         MUTABLE_KEYWORD='mutable'
         ANONYMOUS_KEYWORD='anonymous'
         THIS_KEYWORD='this'
@@ -237,7 +237,7 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
 }
-private EnumHead ::= REF_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
+private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
 UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE

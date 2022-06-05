@@ -63,7 +63,7 @@ COMMENT="//"[^\r\n]*
   "defer"                { return DEFER_KEYWORD; }
   "true"                 { return TRUE_KEYWORD; }
   "false"                { return FALSE_KEYWORD; }
-  "ref"                  { return REF_KEYWORD; }
+  "boxed"                { return BOXED_KEYWORD; }
   "mutable"              { return MUTABLE_KEYWORD; }
   "anonymous"            { return ANONYMOUS_KEYWORD; }
   "this"                 { return THIS_KEYWORD; }

@@ -116,7 +116,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             MATCH_KEYWORD,
             DEFER_KEYWORD -> Highlights.KEYWORD_CONTROL_FLOW
 
-            REF_KEYWORD,
+            BOXED_KEYWORD,
             MUTABLE_KEYWORD,
             ANONYMOUS_KEYWORD,
             RAW_KEYWORD,
