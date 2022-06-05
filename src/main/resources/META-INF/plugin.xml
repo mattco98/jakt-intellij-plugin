@@ -57,5 +57,9 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktBraceMatcher"
         />
+        <lang.foldingBuilder
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.plugin.JaktFoldingBuilder"
+        />
     </extensions>
 </idea-plugin>
