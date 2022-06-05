@@ -3,20 +3,27 @@ package org.serenityos.jakt.plugin.annotations
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import org.serenityos.jakt.bindings.*
 
-class JaktExternalAnnotator : ExternalAnnotator<String, TypecheckResult>() {
-    override fun collectInformation(file: PsiFile): String {
-        require(file.viewProvider.isPhysical) {
-            "TODO: Support non-physical files"
+class JaktExternalAnnotator : ExternalAnnotator<PsiFile, TypecheckResult>() {
+    override fun collectInformation(file: PsiFile) = file
+
+    override fun doAnnotate(file: PsiFile): TypecheckResult {
+        // Ensure file is flushed to file system
+        val fileDocumentManager = FileDocumentManager.getInstance()
+
+        if (fileDocumentManager.unsavedDocuments.isNotEmpty()) {
+            val application = ApplicationManager.getApplication()
+            application.invokeAndWait(fileDocumentManager::saveAllDocuments, ModalityState.defaultModalityState())
         }
 
-        return file.viewProvider.virtualFile.canonicalPath!!
+        return JaktC.typecheck(file.viewProvider.virtualFile.canonicalPath!!)
     }
-
-    override fun doAnnotate(collectedInfo: String) = JaktC.typecheck(collectedInfo)
 
     override fun apply(file: PsiFile, result: TypecheckResult, holder: AnnotationHolder) {
         val error = (result as? TypecheckResult.Error)?.error ?: return
