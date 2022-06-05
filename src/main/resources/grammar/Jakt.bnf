@@ -182,8 +182,8 @@ private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaratio
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
     extends=TopLevelDefinition
 }
-private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType?
-FunctionReturnType ::= THROWS_KEYWORD? ARROW Type
+private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+FunctionReturnType ::= THROWS_KEYWORD? (ARROW Type)?
 private ParameterList ::= MemberParameterList | FreeParameterList
 private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
 private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
@@ -248,10 +248,10 @@ UnderlyingTypeEnumMember ::= IDENTIFIER [EQUALS Expression]
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
-private NormalEnumMember ::= IDENTIFIER NormalEnumMemberBody?
+NormalEnumMember ::= IDENTIFIER NormalEnumMemberBody?
 private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
-StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
+private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
 StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 
 /*************************************
@@ -306,8 +306,8 @@ Type ::=
       RawType
     | WeakType
     | OptionalType
-    | ArrayType
     | DictionaryType
+    | ArrayType
     | SetType
     | TupleType
     | NamespacedType
