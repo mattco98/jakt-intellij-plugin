@@ -9,9 +9,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 libc = "0.2.126"
-serde = "1.0.137"
-serde_derive = "1.0.137"
-serde_json = "1.0.81"
-
-# TODO: Upstream changes and change this to the main repo
-jakt = { git = "https://github.com/mattco98/jakt.git" }
+json = "0.12.4"
+jakt = { git = "https://github.com/SerenityOS/jakt.git" }

@@ -2,65 +2,86 @@ extern crate libc;
 extern crate core;
 
 use std::ffi::{CStr, CString};
-use serde_derive::Serialize;
+use std::path::Path;
 use libc::c_char;
-use jakt::{
-    JaktError,
-    lexer,
-    parser,
-    compiler::Compiler,
-    typechecker::{Project, typecheck_namespace_declarations},
-};
-use jakt::compiler::check_codegen_preconditions;
-use jakt::typechecker::typecheck_namespace_predecl;
+use jakt::{Project, JaktError, Compiler, Span};
+use json;
 
-#[derive(Serialize)]
-enum TypecheckResult {
-    ParseError(JaktError),
-    TypeError(Project, JaktError),
-    Ok(Project),
+fn span_to_json(span: Span) -> json::JsonValue {
+    json::object!{
+        file_id: span.file_id,
+        start: span.start,
+        end: span.end,
+    }
 }
 
-fn typecheck_result(bytes: &[u8]) -> TypecheckResult {
+fn jakt_error_to_json(error: JaktError) -> json::JsonValue {
+    let mut object = json::JsonValue::new_object();
+
+    match error {
+        JaktError::IOError(err) => {
+            object["type"] = "IOError".into();
+            object["message"] = err.to_string().into();
+        }
+        JaktError::StringError(err) => {
+            object["type"] = "StringError".into();
+            object["message"] = err.into();
+        }
+        JaktError::ParserError(err, span) => {
+            object["type"] = "ParserError".into();
+            object["message"] = err.into();
+            object["span"] = span_to_json(span);
+        }
+        JaktError::ParserErrorWithHint(err_message, err_span, hint_msg, hint_span) => {
+            object["type"] = "ParserErrorWithHint".into();
+            object["message"] = err_message.into();
+            object["span"] = span_to_json(err_span);
+            object["hint_message"] = hint_msg.into();
+            object["hint_span"] = span_to_json(hint_span);
+        }
+        JaktError::ValidationError(err, span) => {
+            object["type"] = "ValidationError".into();
+            object["message"] = err.into();
+            object["span"] = span_to_json(span);
+        }
+        JaktError::TypecheckError(err, span) => {
+            object["type"] = "TypecheckError".into();
+            object["message"] = err.into();
+            object["span"] = span_to_json(span);
+        }
+        JaktError::TypecheckErrorWithHint(err_message, err_span, hint_msg, hint_span) => {
+            object["type"] = "TypecheckErrorWithHint".into();
+            object["message"] = err_message.into();
+            object["span"] = span_to_json(err_span);
+            object["hint_message"] = hint_msg.into();
+            object["hint_span"] = span_to_json(hint_span);
+        }
+    }
+
+    object
+}
+
+fn typecheck_result(path: &Path) -> json::JsonValue {
     let mut project = Project::new();
     let mut compiler = Compiler::new(vec![]);
-    if let Some(_err) = compiler.include_prelude(&mut project) {
-        panic!("Failed to include prelude")
+
+    match compiler.check_project(path, &mut project) {
+        (_, Some(err)) => json::object!{
+            "type": "Error",
+            "error": jakt_error_to_json(err)
+        },
+        _ => json::object! { "type": "Ok" }
     }
-
-    let (tokens, error) = lexer::lex(0, bytes);
-    if let Some(error) = error {
-        return TypecheckResult::ParseError(error)
-    };
-
-    let (namespace, error) = parser::parse_namespace(tokens.as_slice(), &mut 0, &mut compiler);
-    if let Some(error) = error {
-        return TypecheckResult::ParseError(error)
-    }
-
-    if let Some(error) = typecheck_namespace_predecl(&namespace, 0, &mut project) {
-        return TypecheckResult::TypeError(project, error)
-    }
-
-    if let Some(error) = typecheck_namespace_declarations(&namespace, 0, &mut project) {
-        return TypecheckResult::TypeError(project, error)
-    }
-
-    if let Some(error) = check_codegen_preconditions(&project) {
-        return TypecheckResult::TypeError(project, error)
-    }
-
-    TypecheckResult::Ok(project)
 }
 
 #[no_mangle]
-pub fn typecheck(string: *const c_char) -> *mut c_char {
-    let string = unsafe {
-        assert!(!string.is_null());
-        CStr::from_ptr(string)
+pub fn typecheck(path: *const c_char) -> *mut c_char {
+    let path_string = unsafe {
+        assert!(!path.is_null());
+        CStr::from_ptr(path)
     };
 
-    let result = typecheck_result(string.to_bytes());
-    let serialized_result = serde_json::to_string(&result).unwrap();
-    CString::new(serialized_result).unwrap().into_raw()
+    let path = Path::new(path_string.to_str().unwrap());
+    let result = typecheck_result(path);
+    CString::new(json::stringify(result)).unwrap().into_raw()
 }

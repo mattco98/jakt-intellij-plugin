@@ -9,17 +9,17 @@ import org.serenityos.jakt.bindings.*
 
 class JaktExternalAnnotator : ExternalAnnotator<String, TypecheckResult>() {
     override fun collectInformation(file: PsiFile): String {
-        return file.viewProvider.contents.toString()
+        require(file.viewProvider.isPhysical) {
+            "TODO: Support non-physical files"
+        }
+
+        return file.viewProvider.virtualFile.canonicalPath!!
     }
 
     override fun doAnnotate(collectedInfo: String) = JaktC.typecheck(collectedInfo)
 
     override fun apply(file: PsiFile, result: TypecheckResult, holder: AnnotationHolder) {
-        val error = when (result) {
-            is TypecheckResult.ParseError -> result.error
-            is TypecheckResult.TypeError -> result.error
-            is TypecheckResult.Ok -> return
-        }
+        val error = (result as? TypecheckResult.Error)?.error ?: return
 
         val span = error.span!!
         holder.newAnnotation(HighlightSeverity.ERROR, error.message)

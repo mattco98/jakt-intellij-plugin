@@ -8,21 +8,20 @@ import java.io.File
 
 
 interface JaktC : Library {
-    fun typecheck(content: String): String
+    fun typecheck(path: String): String
 
     @Suppress("UnnecessaryOptInAnnotation")
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
         private val INSTANCE = Native.load("/libjakt.so", JaktC::class.java) as JaktC
-        private val serde = Serde()
 
         fun typecheck(file: File): TypecheckResult {
             require(file.exists())
-            return typecheck(file.readText())
+            return typecheck(file.absolutePath)
         }
 
-        fun typecheck(content: String): TypecheckResult {
-            return serde.decodeFromString(INSTANCE.typecheck(content))
+        fun typecheck(path: String): TypecheckResult {
+            return Json.decodeFromString(INSTANCE.typecheck(path))
         }
     }
 }
