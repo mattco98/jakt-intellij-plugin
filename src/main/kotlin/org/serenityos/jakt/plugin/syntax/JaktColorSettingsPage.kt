@@ -17,16 +17,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
             C
         }
         
-        ref enum Foo<<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
+        boxed enum Foo<<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
             Bar
             Baz(<T>Foo</T><<T>i32</T>, <T>T</T>>)
             Qux(a: [<T>String</T>:{<T>U</T>}], b: <T>WithUnderlyingType</T>)
         }
         
-        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anonymous <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
+        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anon <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
             match <FUNC_PARAM>f</FUNC_PARAM> {
                 Bar => [0<NUMERIC_SUFFIX>f64</NUMERIC_SUFFIX>; 10]
-                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (<FUNC_PARAM>string</FUNC_PARAM>.0 + 1, <FUNC_PARAM>strings</FUNC_PARAM>.1))
+                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (<FUNC_PARAM>strings</FUNC_PARAM>.0 + 1, <FUNC_PARAM>strings</FUNC_PARAM>.1))
                 Qux(dict, t) => {
                     for str in <FUNC_PARAM>strings</FUNC_PARAM>.1.<FUNC_CALL>iterator</FUNC_CALL>() {
                         let mutable i = 0
@@ -45,27 +45,25 @@ class JaktColorSettingsPage : ColorSettingsPage {
             }
         }
         
-        namespace E {
-            extern struct D {
-                function <FUNC_DECL>invoke</FUNC_DECL>(this, <FUNC_PARAM>a</FUNC_PARAM>: weak <T>i32</T>?) -> <T>String</T>
-            }
-        
-            class P {
-                foo: <T>i32</T>
-        
-                // Create a new P from the given value
-                function <FUNC_DECL>make</FUNC_DECL>(<FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) => <FUNC_CALL>P</FUNC_CALL>(foo: value)
-                function <FUNC_DECL>get_foo</FUNC_DECL>(this) => .foo
-                function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, <FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) {
-                    .foo = value
-                }
+        extern struct D { 
+            function <FUNC_DECL>invoke</FUNC_DECL>(this, <FUNC_PARAM>a</FUNC_PARAM>: <T>i32</T>) -> <T>String</T>
+        }
+    
+        class P {
+            foo: <T>i32</T>
+    
+            // Create a new P from the given value
+            public function <FUNC_DECL>make</FUNC_DECL>(<FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) throws => <FUNC_CALL>P</FUNC_CALL>(foo: value)
+            public function <FUNC_DECL>get_foo</FUNC_DECL>(this) => .foo
+            public function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, <FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) {
+                .foo = value
             }
         }
 
-        function <FUNC_DECL>get_p</FUNC_DECL>() -> <NS_QUAL>E</NS_QUAL>::<T>P</T>? => <OPT_T>None</OPT_T>
+        function <FUNC_DECL>get_d</FUNC_DECL>() -> <T>D</T>? => <OPT_T>None</OPT_T>
         
         function <FUNC_DECL>main</FUNC_DECL>() {
-            let p = <NS_QUAL>E</NS_QUAL>::<T>P</T>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
+            let mutable p = <T>P</T>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
             <FUNC_CALL>println</FUNC_CALL>("value = {}", p.<FUNC_CALL>get_foo</FUNC_CALL>())
             p.<FUNC_CALL>set_foo</FUNC_CALL>(value: 0x123)
             unsafe {
@@ -74,7 +72,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 }
             }
         
-            <FUNC_CALL>println</FUNC_CALL>("{}", <FUNC_CALL>get_p</FUNC_CALL>()!.<FUNC_CALL>set_foo</FUNC_CALL>(value: 20))
+            <FUNC_CALL>println</FUNC_CALL>("{}", <FUNC_CALL>get_d</FUNC_CALL>()!.<FUNC_CALL>invoke</FUNC_CALL>(a: 20))
         
             let x = 10
             let y = &raw x
