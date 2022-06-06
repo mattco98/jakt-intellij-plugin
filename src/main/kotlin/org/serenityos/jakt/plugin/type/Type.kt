@@ -49,23 +49,23 @@ sealed interface Type {
     }
 
     class Weak(val underlyingType: Type) : Type {
-        override fun typeRepr() = "weak $underlyingType"
+        override fun typeRepr() = "weak ${underlyingType.typeRepr()}"
     }
 
     class Optional(val underlyingType: Type) : Type {
-        override fun typeRepr() = "$underlyingType?"
+        override fun typeRepr() = "${underlyingType.typeRepr()}?"
     }
 
     class Array(val underlyingType: Type) : Type {
-        override fun typeRepr() = "[$underlyingType]"
+        override fun typeRepr() = "[${underlyingType.typeRepr()}]"
     }
 
     class Set(val underlyingType: Type) : Type {
-        override fun typeRepr() = "{$underlyingType}"
+        override fun typeRepr() = "{${underlyingType.typeRepr()}"
     }
 
     class Dictionary(val keyType: Type, val valueType: Type) : Type {
-        override fun typeRepr() = "[$keyType:$valueType]"
+        override fun typeRepr() = "[${keyType.typeRepr()}:${valueType.typeRepr()}]"
     }
 
     class Tuple(val types: List<Type>) : Type {
@@ -105,7 +105,7 @@ sealed interface Type {
     }
 
     class Raw(val underlyingType: Type) : Type {
-        override fun typeRepr() = "raw $underlyingType"
+        override fun typeRepr() = "raw ${underlyingType.typeRepr()}"
     }
 
     class Function(
@@ -130,7 +130,7 @@ sealed interface Type {
             append(stringifyGenerics(typeParameters))
             append('(')
             append(parameters.joinToString {
-                "${it.name}: ${it.type}"
+                "${it.name}: ${it.type.typeRepr()}"
             })
             append(')')
 
