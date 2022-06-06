@@ -317,8 +317,8 @@ private BaseType ::=
     | TupleType
     | PlainType
 
-PlainType ::= (PlainQualifier COLON_COLON)* PlainQualifier GenericBounds? {extends=Type}
-GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN {pin=1 extends=Type}
+PlainType ::= (PlainQualifier COLON_COLON)* PlainQualifier GenericSpecialization? {extends=Type}
+GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {pin=1 extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
@@ -339,7 +339,7 @@ WeakType ::= WEAK_KEYWORD BaseType {pin=1 extends=Type}
 OptionalType ::= BaseType QUESTION_MARK {extends=Type}
 
 TypeAnnotation ::= COLON Type {extends=Type}
-GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN
+GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN
 
 /*************************************
  *            EXPRESSIONS            *
