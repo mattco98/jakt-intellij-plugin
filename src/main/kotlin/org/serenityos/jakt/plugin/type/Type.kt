@@ -38,8 +38,14 @@ sealed interface Type {
         override fun typeRepr() = name
     }
 
-    class Namespaced(val namespace: Type, val underlyingType: Type) : Type {
-        override fun typeRepr() = "$namespace::$underlyingType"
+    sealed interface TopLevelDecl : Type {
+        var namespace: Namespace?
+    }
+
+    class Namespace(val name: String, val members: List<TopLevelDecl>) : TopLevelDecl {
+        override var namespace: Namespace? = null
+
+        override fun typeRepr() = (namespace?.name?.plus("::") ?: "") + name
     }
 
     class Weak(val underlyingType: Type) : Type {
@@ -76,7 +82,9 @@ sealed interface Type {
         override val typeParameters: List<String>,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
-    ) : Specializable {
+    ) : Specializable, TopLevelDecl {
+        override var namespace: Namespace? = null
+
         override fun typeRepr() = name + stringifyGenerics(typeParameters)
     }
 
@@ -84,8 +92,11 @@ sealed interface Type {
     class Enum(
         override val name: String,
         override val typeParameters: List<String>,
+        val underlyingType: Type?,
         val methods: Map<String, Function>,
-    ) : Specializable {
+    ) : Specializable, TopLevelDecl {
+        override var namespace: Namespace? = null
+
         override fun typeRepr() = name + stringifyGenerics(typeParameters)
     }
 
@@ -103,7 +114,9 @@ sealed interface Type {
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
-    ) : Type {
+    ) : TopLevelDecl {
+        override var namespace: Namespace? = null
+
         // We cannot resolve the struct before this to calculate the thisParameter
         // directly, as resolving the struct requires resolving all of its functions,
         // so we leave this info here so that the struct can populate the thisParameter

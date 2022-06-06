@@ -137,6 +137,13 @@ TopLevelDefinition ::=
     | EnumDeclaration
     | ExternDeclaration
     | NamespaceDeclaration
+{
+    implements=[
+        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    ]
+}
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -181,6 +188,7 @@ private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaratio
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
     extends=TopLevelDefinition
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternFunctionDeclarationMixin"
 }
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
 FunctionReturnType ::= THROWS_KEYWORD? (ARROW Type)?
@@ -194,6 +202,7 @@ Parameter ::= ANON_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation {
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
     extends=TopLevelDefinition
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternStructDeclarationMixin"
 }
 StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
@@ -218,6 +227,7 @@ private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
     extends=TopLevelDefinition
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktNamespacedDeclarationMixin"
 }
 StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
@@ -236,6 +246,7 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 // Enums
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktEnumDeclarationMixin"
 }
 private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
