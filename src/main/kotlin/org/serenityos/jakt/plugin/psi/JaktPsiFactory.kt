@@ -13,10 +13,10 @@ import org.serenityos.jakt.plugin.JaktFile
 import org.serenityos.jakt.utils.descendantOfTypeStrict
 
 class JaktPsiFactory(private val project: Project) {
-    fun createFile(text: String) = PsiFileFactory
+    fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory
         .getInstance(project)
         .createFileFromText(
-            "dummy.jakt",
+            fileName,
             JaktFile.Type,
             text,
         ) as JaktFile

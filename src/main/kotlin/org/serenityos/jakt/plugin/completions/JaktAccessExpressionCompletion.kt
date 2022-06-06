@@ -2,11 +2,13 @@ package org.serenityos.jakt.plugin.completions
 
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.template.Template
 import com.intellij.codeInsight.template.TemplateManager
 import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -14,6 +16,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.type.Type
 
@@ -34,15 +37,8 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                     }
                 }))
 
-    override fun addCompletions(
-        parameters: CompletionParameters,
-        context: ProcessingContext,
-        result: CompletionResultSet
-    ) {
-        val type = context[TYPE_FIELD_INFO] ?: return
-        val project = context[PROJECT]!!
-
-        val elements = when (type) {
+    private fun getTypeCompletions(project: Project, type: Type): List<LookupElement> {
+        return when (type) {
             is Type.Tuple -> type.types.mapIndexed { index, t ->
                 // TODO: How can we sort this so it is always [0, 1, ...]?
                 LookupElementBuilder
@@ -51,12 +47,12 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                     .withTypeText(t.typeRepr())
             }
             // TODO: These need the prelude definitions
-            is Type.Namespaced,
-            is Type.Weak,
-            is Type.Optional,
-            is Type.Array,
-            is Type.Set,
-            is Type.Dictionary -> return
+            is Type.Namespace -> emptyList() // Namespaces only have static members
+            is Type.Weak -> getPreludeTypeCompletions(project, "Weak")
+            is Type.Optional -> getPreludeTypeCompletions(project, "Optional")
+            is Type.Array -> getPreludeTypeCompletions(project, "Array")
+            is Type.Set -> getPreludeTypeCompletions(project, "Set")
+            is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary")
             is Type.Struct -> type
                 .methods
                 .filterValues { it.thisParameter == null }
@@ -75,8 +71,25 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 }
                 is Type.Enum -> type2.methods.map { (name, type) -> lookupElementFromType(name, type, project) }
             }
-            else -> return
+            else -> emptyList()
         }
+    }
+
+    private fun getPreludeTypeCompletions(project: Project, preludeType: String): List<LookupElement> {
+        val preludeService = project.service<JaktPreludeService>()
+        val declaration = preludeService.findPreludeType(preludeType) ?: return emptyList()
+        return getTypeCompletions(project, declaration.jaktType)
+    }
+
+    override fun addCompletions(
+        parameters: CompletionParameters,
+        context: ProcessingContext,
+        result: CompletionResultSet
+    ) {
+        val type = context[TYPE_FIELD_INFO] ?: return
+        val project = context[PROJECT]!!
+
+        val elements = getTypeCompletions(project, type)
 
         result.addAllElements(elements)
     }

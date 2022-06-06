@@ -1,14 +1,15 @@
 package org.serenityos.jakt.plugin
 
 import com.intellij.extapi.psi.PsiFileBase
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.LanguageFileType
-import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
+import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary
 import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 
 class JaktFile(
     viewProvider: FileViewProvider,
@@ -18,6 +19,11 @@ class JaktFile(
     override fun getFileType() = Type
 
     override fun toString() = Type.name
+
+    override fun findDeclarationInOrAbove(name: String, from: PsiElement?): JaktDeclaration? {
+        return findDeclarationIn(name, from)
+            ?: project.service<JaktPreludeService>().findPreludeType(name)
+    }
 
     object Type : LanguageFileType(JaktLanguage) {
         override fun getName() = "Jakt file"

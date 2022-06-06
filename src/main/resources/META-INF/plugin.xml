@@ -61,5 +61,9 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktFoldingBuilder"
         />
+        <projectService
+                serviceInterface="org.serenityos.jakt.plugin.project.JaktPreludeService"
+                serviceImplementation="org.serenityos.jakt.plugin.project.JaktPreludeServiceImpl"
+        />
     </extensions>
 </idea-plugin>

@@ -315,11 +315,9 @@ private BaseType ::=
     | ArrayType
     | SetType
     | TupleType
-    | GenericType
     | PlainType
 
-PlainType ::= (IDENTIFIER COLON_COLON)* PlainQualifier {extends=Type}
-GenericType ::= PlainType GenericBounds? {extends=Type}
+PlainType ::= (PlainQualifier COLON_COLON)* PlainQualifier GenericBounds? {extends=Type}
 GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN {pin=1 extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}

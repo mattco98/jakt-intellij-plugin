@@ -8,6 +8,7 @@ import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.JaktArrayType
 import org.intellij.sdk.language.psi.JaktDictionaryType
 import org.intellij.sdk.language.psi.JaktOptionalType
+import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.JaktPlainType
 import org.intellij.sdk.language.psi.JaktRawType
 import org.intellij.sdk.language.psi.JaktSetType
@@ -18,6 +19,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.api.containingScope
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTypeable {
     override val jaktType: Type
@@ -41,12 +43,12 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
 
     companion object {
         private fun resolvePlainType(element: JaktPlainType): Type {
-            val idents = element.children.filter { it.elementType == JaktTypes.IDENTIFIER }
+            val idents = element.findChildrenOfType<JaktPlainQualifier>().map { it.identifier.text }
             require(idents.size == 1) {
                 "TODO: Resolve namespace types"
             }
 
-            val name = idents.last().text
+            val name = idents.last()
 
             val primitive = Type.Primitive.values().find { it.typeRepr() == name }
             if (primitive != null)
