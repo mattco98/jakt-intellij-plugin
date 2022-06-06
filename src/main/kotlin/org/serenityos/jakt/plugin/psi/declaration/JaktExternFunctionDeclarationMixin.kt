@@ -30,7 +30,7 @@ abstract class JaktExternFunctionDeclarationMixin(
                     it.identifier.text,
                     it.typeAnnotation.jaktType,
                     it.anonKeyword != null,
-                    it.mutableKeyword != null,
+                    it.mutKeyword != null,
                 )
             }
 
@@ -45,7 +45,7 @@ abstract class JaktExternFunctionDeclarationMixin(
             ).also {
                 if (thisParameter != null) {
                     it.hasThis = true
-                    it.thisIsMutable = thisParameter!!.mutableKeyword != null
+                    it.thisIsMutable = thisParameter!!.mutKeyword != null
                 }
             }
 

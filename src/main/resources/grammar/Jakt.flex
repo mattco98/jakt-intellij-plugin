@@ -64,7 +64,7 @@ COMMENT="//"[^\r\n]*
   "true"                 { return TRUE_KEYWORD; }
   "false"                { return FALSE_KEYWORD; }
   "boxed"                { return BOXED_KEYWORD; }
-  "mutable"              { return MUTABLE_KEYWORD; }
+  "mut"                  { return MUT_KEYWORD; }
   "anon"                 { return ANON_KEYWORD; }
   "this"                 { return THIS_KEYWORD; }
   "raw"                  { return RAW_KEYWORD; }

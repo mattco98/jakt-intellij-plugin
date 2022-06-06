@@ -45,7 +45,7 @@
         FALSE_KEYWORD='false'
 
         BOXED_KEYWORD='boxed'
-        MUTABLE_KEYWORD='mutable'
+        MUT_KEYWORD='mut'
         ANON_KEYWORD='anon'
         THIS_KEYWORD='this'
         RAW_KEYWORD='raw'
@@ -151,6 +151,7 @@ private StatementLead ::=
     | STRUCT_KEYWORD
     | FUNCTION_KEYWORD
     | LET_KEYWORD
+    | MUT_KEYWORD
     | WHILE_KEYWORD
     | FOR_KEYWORD
     | LOOP_KEYWORD
@@ -195,8 +196,8 @@ FunctionReturnType ::= THROWS_KEYWORD? (ARROW Type)?
 private ParameterList ::= MemberParameterList | FreeParameterList
 private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
 private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
-ThisParameter ::= MUTABLE_KEYWORD? THIS_KEYWORD
-Parameter ::= ANON_KEYWORD? MUTABLE_KEYWORD? IDENTIFIER TypeAnnotation {
+ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
+Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktParameterMixin"
 }
 
@@ -207,8 +208,8 @@ ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStru
 StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
-ExternStructMember ::= StructField | FunctionHeader
-StructField ::= IDENTIFIER MUTABLE_KEYWORD? TypeAnnotation
+ExternStructMember ::= StructField | (StructVisibility? FunctionHeader)
+StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation
 
 /*************************************
  *      Non-Extern Declarations      *
@@ -285,7 +286,7 @@ Statement ::=
     | UnsafeStatement
     | InlineCppStatement
 
-VariableDeclarationStatement ::= LET_KEYWORD MUTABLE_KEYWORD? PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktVariableDeclarationMixin"
 }
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]

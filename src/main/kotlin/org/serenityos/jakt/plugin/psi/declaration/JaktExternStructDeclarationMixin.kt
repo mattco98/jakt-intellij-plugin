@@ -39,7 +39,7 @@ abstract class JaktExternStructDeclarationMixin(
                             it.identifier.text,
                             it.typeAnnotation.jaktType,
                             it.anonKeyword != null,
-                            it.mutableKeyword != null,
+                            it.mutKeyword != null,
                         )
                     },
                     func.functionReturnType?.type?.jaktType ?: Type.Primitive.Void,
