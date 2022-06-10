@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktExternFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktGenericBound
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
@@ -20,9 +21,7 @@ abstract class JaktExternFunctionDeclarationMixin(
             val name = identifier.text
 
             val typeParameters = if (genericBounds != null) {
-                genericBounds!!.findChildrenOfType<JaktPlainQualifier>().map {
-                    it.identifier.text
-                }
+                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
             val parameters = parameterList.map {
@@ -38,7 +37,6 @@ abstract class JaktExternFunctionDeclarationMixin(
 
             val type = Type.Function(
                 name,
-                typeParameters,
                 null,
                 parameters,
                 returnType
@@ -47,11 +45,17 @@ abstract class JaktExternFunctionDeclarationMixin(
                     it.hasThis = true
                     it.thisIsMutable = thisParameter!!.mutKeyword != null
                 }
+            }.let {
+                if (typeParameters.isNotEmpty()) {
+                    Type.Parameterized(it, typeParameters)
+                } else it
             }
 
             // TODO: Better caching
             CachedValueProvider.Result(type, this)
         }
+
+    override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier() = identifier
 

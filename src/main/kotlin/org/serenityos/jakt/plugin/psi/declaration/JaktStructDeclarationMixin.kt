@@ -21,9 +21,7 @@ abstract class JaktStructDeclarationMixin(
             val body = structBody
 
             val typeParameters = if (header.genericBounds != null) {
-                header.genericBounds!!.findChildrenOfType<JaktPlainQualifier>().map {
-                    it.identifier.text
-                }
+                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
             // TODO: Visibility
@@ -39,10 +37,13 @@ abstract class JaktStructDeclarationMixin(
 
             val type = Type.Struct(
                 header.identifier.text,
-                typeParameters,
                 fields,
                 methods,
-            )
+            ).let {
+                if (typeParameters.isNotEmpty()) {
+                    Type.Parameterized(it, typeParameters)
+                } else it
+            }
 
             // Populate our methods' thisParameters, if necessary
             methods.values.forEach {
@@ -59,6 +60,8 @@ abstract class JaktStructDeclarationMixin(
             // TODO: Better caching
             CachedValueProvider.Result(type, this)
         }
+
+    override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier(): PsiElement = structHeader.identifier
 

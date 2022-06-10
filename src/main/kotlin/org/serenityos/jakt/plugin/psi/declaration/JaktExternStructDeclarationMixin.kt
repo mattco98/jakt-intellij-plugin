@@ -6,33 +6,49 @@ import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.*
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.specialize
 import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktExternStructDeclarationMixin(
     node: ASTNode,
-) : JaktTopLevelDefinitionImpl(node), JaktExternStructDeclaration {
+) : JaktTopLevelDefinitionImpl(node), JaktExternStructDeclaration, JaktPsiScope {
     // TODO: Deduplicate with JaktStructDeclarationMixin
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
             val header = structHeader
+            val structName = header.identifier.text
 
             val typeParameters = if (header.genericBounds != null) {
-                header.genericBounds!!.findChildrenOfType<JaktPlainQualifier>().map {
-                    it.identifier.text
-                }
+                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
+            val methods = mutableMapOf<String, Type.Function>()
+
+            val struct = Type.Struct(
+                structName,
+                emptyMap(),
+                methods,
+            ).let {
+                if (typeParameters.isNotEmpty()) {
+                    Type.Parameterized(it, typeParameters)
+                } else it
+            }
+
             // TODO: Visibility
-            val methods = externStructMemberList.mapNotNull { func ->
+            externStructMemberList.mapNotNull { func ->
                 // TODO: Can extern structs have fields?
                 if (func.structField != null)
                     return@mapNotNull null
 
+                // TODO: Stop skipping constructors
+                if (func.identifier!!.text == structName)
+                    return@mapNotNull null
+
                 Type.Function(
                     func.identifier!!.text,
-                    func.genericBounds?.plainQualifierList?.map { it.text!! } ?: emptyList(),
                     null,
                     func.parameterList.map {
                         Type.Function.Parameter(
@@ -44,21 +60,16 @@ abstract class JaktExternStructDeclarationMixin(
                     },
                     func.functionReturnType?.type?.jaktType ?: Type.Primitive.Void,
                 )
-            }.associateBy { it.name }
-
-            val type = Type.Struct(
-                header.identifier.text,
-                typeParameters,
-                emptyMap(),
-                methods,
-            )
+            }.forEach {
+                methods[it.name] = it
+            }
 
             // Populate our methods' thisParameters, if necessary
             methods.values.forEach {
                 if (it.hasThis && it.thisParameter == null) {
                     it.thisParameter = Type.Function.Parameter(
                         "this",
-                        type,
+                        struct,
                         false,
                         it.thisIsMutable,
                     )
@@ -66,8 +77,10 @@ abstract class JaktExternStructDeclarationMixin(
             }
 
             // TODO: Better caching
-            CachedValueProvider.Result(type, this)
+            CachedValueProvider.Result(struct, this)
         }
+
+    override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier() = structHeader.identifier
 

@@ -189,6 +189,7 @@ private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaratio
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
     extends=TopLevelDefinition
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternFunctionDeclarationMixin"
 }
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
@@ -203,6 +204,7 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
     extends=TopLevelDefinition
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternStructDeclarationMixin"
 }
 StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
@@ -221,6 +223,7 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktFunctionDeclarationMixin"
 }
@@ -232,7 +235,10 @@ NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefi
 }
 StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructDeclarationMixin"
 }
 StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
@@ -247,6 +253,7 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 // Enums
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktEnumDeclarationMixin"
 }
 private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
@@ -339,7 +346,11 @@ WeakType ::= WEAK_KEYWORD BaseType {pin=1 extends=Type}
 OptionalType ::= BaseType QUESTION_MARK {extends=Type}
 
 TypeAnnotation ::= COLON Type {extends=Type}
-GenericBounds ::= LESS_THAN <<commaOrEolList PlainQualifier>> GREATER_THAN
+GenericBounds ::= LESS_THAN <<commaOrEolList GenericBound>> GREATER_THAN
+GenericBound ::= IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktGenericBoundMixin"
+}
 
 /*************************************
  *            EXPRESSIONS            *

@@ -19,6 +19,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.specialize
 
 object JaktAccessExpressionCompletion : JaktCompletion() {
     private val TYPE_FIELD_INFO = Key.create<Type>("TYPE_FIELD_INFO")
@@ -46,13 +47,12 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                     .bold()
                     .withTypeText(t.typeRepr())
             }
-            // TODO: These need the prelude definitions
             is Type.Namespace -> emptyList() // Namespaces only have static members
-            is Type.Weak -> getPreludeTypeCompletions(project, "Weak")
-            is Type.Optional -> getPreludeTypeCompletions(project, "Optional")
-            is Type.Array -> getPreludeTypeCompletions(project, "Array")
-            is Type.Set -> getPreludeTypeCompletions(project, "Set")
-            is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary")
+            is Type.Weak -> getPreludeTypeCompletions(project, "Weak", type.underlyingType)
+            is Type.Optional -> getPreludeTypeCompletions(project, "Optional", type.underlyingType)
+            is Type.Array -> getPreludeTypeCompletions(project, "Array", type.underlyingType)
+            is Type.Set -> getPreludeTypeCompletions(project, "Set", type.underlyingType)
+            is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary", type.keyType, type.valueType)
             is Type.Struct -> type
                 .methods
                 .filterValues { it.thisParameter == null }
@@ -61,24 +61,28 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 .methods
                 .filterValues { it.thisParameter == null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
-            is Type.Specialization -> when (val type2 = type.underlyingType) {
-                is Type.Struct -> {
-                    val fields = type2.fields.map { (name, type) -> lookupElementFromType(name, type, project) }
-                    val methods = type2.methods.filterValues {
-                        it.thisParameter != null
-                    }.map { (name, type) -> lookupElementFromType(name, type, project) }
-                    fields + methods
-                }
-                is Type.Enum -> type2.methods.map { (name, type) -> lookupElementFromType(name, type, project) }
-            }
+
             else -> emptyList()
         }
     }
 
-    private fun getPreludeTypeCompletions(project: Project, preludeType: String): List<LookupElement> {
+    private fun getPreludeTypeCompletions(project: Project, preludeType: String, vararg specializations: Type): List<LookupElement> {
         val preludeService = project.service<JaktPreludeService>()
-        val declaration = preludeService.findPreludeType(preludeType) ?: return emptyList()
-        return getTypeCompletions(project, declaration.jaktType)
+        val declType = preludeService.findPreludeType(preludeType)?.jaktType ?: return emptyList()
+
+        val type = when {
+            declType is Type.Parameterized -> if (specializations.size == declType.typeParameters.size) {
+                val m = (declType.typeParameters zip specializations).associate { it.first.name to it.second }
+                declType.specialize(m)
+            } else declType
+            specializations.isNotEmpty() -> {
+                println("Attempt to specialize non-parameterized prelude type $preludeType")
+                declType
+            }
+            else -> declType
+        }
+
+        return getTypeCompletions(project, type)
     }
 
     override fun addCompletions(

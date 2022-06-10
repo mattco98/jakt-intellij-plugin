@@ -14,12 +14,16 @@ object TypeInference {
             is JaktOptionalSomeExpression -> Type.Optional(inferType(element.findNotNullChildOfType()))
             is JaktOptionalNoneExpression -> Type.Optional(Type.Unknown)
             is JaktCallExpression -> when (val baseType = inferType(element.expression)) {
-                is Type.Struct -> Type.Specialization(
-                    baseType,
-                    element.genericSpecialization?.findChildrenOfType<JaktType>()?.map {
+                is Type.Struct -> baseType // TODO: This feels a bit odd
+                is Type.Parameterized -> {
+                    val specializations = element.genericSpecialization?.findChildrenOfType<JaktType>()?.map {
                         it.jaktType
-                    } ?: emptyList(),
-                )
+                    } ?: emptyList()
+                    if (specializations.size == baseType.typeParameters.size) {
+                        val map = (baseType.typeParameters.map { it.name } zip specializations).toMap()
+                        baseType.underlyingType.specialize(map)
+                    } else Type.Unknown
+                }
                 is Type.Function -> baseType.returnType
                 else -> Type.Unknown
             }

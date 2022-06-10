@@ -34,13 +34,11 @@ sealed interface Type {
         override fun typeRepr() = typeName
     }
 
-    class Plain(val name: String) : Type {
-        override fun typeRepr() = name
-    }
-
     sealed interface TopLevelDecl : Type {
         var namespace: Namespace?
     }
+
+    sealed interface Parameterizable : Type
 
     class Namespace(val name: String, val members: List<TopLevelDecl>) : TopLevelDecl {
         override var namespace: Namespace? = null
@@ -50,6 +48,10 @@ sealed interface Type {
 
     class Weak(val underlyingType: Type) : Type {
         override fun typeRepr() = "weak ${underlyingType.typeRepr()}"
+    }
+
+    class Raw(val underlyingType: Type) : Type {
+        override fun typeRepr() = "raw ${underlyingType.typeRepr()}"
     }
 
     class Optional(val underlyingType: Type) : Type {
@@ -72,49 +74,44 @@ sealed interface Type {
         override fun typeRepr() = "(${types.joinToString()})"
     }
 
-    sealed interface Specializable : Type {
-        val name: String
-        val typeParameters: List<String>
+    class TypeVar(val name: String) : Type {
+        override fun typeRepr() = name
+    }
+
+    class Parameterized(
+        val underlyingType: Parameterizable,
+        val typeParameters: List<TypeVar>,
+    ) : Type {
+        override fun typeRepr() = underlyingType.typeRepr() // TODO: Add generic params to name
     }
 
     class Struct(
-        override val name: String,
-        override val typeParameters: List<String>,
+        val name: String,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
-    ) : Specializable, TopLevelDecl {
+    ) : TopLevelDecl, Parameterizable {
         override var namespace: Namespace? = null
 
-        override fun typeRepr() = name + stringifyGenerics(typeParameters)
+        override fun typeRepr() = name
     }
 
     // TODO: Variant types
     class Enum(
-        override val name: String,
-        override val typeParameters: List<String>,
+        val name: String,
         val underlyingType: Type?,
         val methods: Map<String, Function>,
-    ) : Specializable, TopLevelDecl {
+    ) : TopLevelDecl, Parameterizable {
         override var namespace: Namespace? = null
 
-        override fun typeRepr() = name + stringifyGenerics(typeParameters)
-    }
-
-    class Specialization(val underlyingType: Specializable, val typeArguments: List<Type>) : Type {
-        override fun typeRepr() = underlyingType.name + stringifyGenerics(typeArguments)
-    }
-
-    class Raw(val underlyingType: Type) : Type {
-        override fun typeRepr() = "raw ${underlyingType.typeRepr()}"
+        override fun typeRepr() = name
     }
 
     class Function(
         val name: String,
-        val typeParameters: List<String>,
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
-    ) : TopLevelDecl {
+    ) : TopLevelDecl, Parameterizable {
         override var namespace: Namespace? = null
 
         // We cannot resolve the struct before this to calculate the thisParameter
@@ -127,7 +124,6 @@ sealed interface Type {
         override fun typeRepr() = buildString {
             append("function ")
             append(name)
-            append(stringifyGenerics(typeParameters))
             append('(')
             append(parameters.joinToString {
                 "${it.name}: ${it.type.typeRepr()}"

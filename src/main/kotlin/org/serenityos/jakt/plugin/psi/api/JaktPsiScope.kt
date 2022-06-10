@@ -1,30 +1,13 @@
 package org.serenityos.jakt.plugin.psi.api
 
-import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiReference
-import com.intellij.psi.PsiReferenceBase
-import com.intellij.psi.search.LocalSearchScope
-import com.intellij.psi.search.searches.ReferencesSearch
-import com.intellij.psi.util.CachedValue
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
 import org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin
-import org.serenityos.jakt.plugin.psi.reference.JaktPsiReference
 
 interface JaktPsiScope : JaktPsiElement {
-    fun declarations(): List<JaktDeclaration> {
-        return CachedValuesManager.getCachedValue(this, DECLARATIONS_KEY) {
-            val values = children.filterIsInstance<JaktDeclaration>() +
-                children.filterIsInstance<JaktPsiScope>().flatMap(JaktPsiScope::declarations)
-            CachedValueProvider.Result(values, modificationBoundary)
-        }
-    }
-
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
         val index = from?.let { el ->
             children.indexOf(el).also {
@@ -34,6 +17,10 @@ interface JaktPsiScope : JaktPsiElement {
                     return null
             }
         } ?: 0
+
+        if (this is JaktGeneric) {
+            getDeclGenericBounds().find { it.name == name }?.let { return it }
+        }
 
         for (child in children.take(index)) {
             if (child is JaktDeclaration && child.name == name)
@@ -69,10 +56,6 @@ interface JaktPsiScope : JaktPsiElement {
         }
 
         return references
-    }
-
-    companion object {
-        private val DECLARATIONS_KEY = Key.create<CachedValue<List<JaktDeclaration>>>("DECLARATIONS_KEY")
     }
 }
 

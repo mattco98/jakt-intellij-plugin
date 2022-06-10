@@ -21,9 +21,7 @@ abstract class JaktFunctionDeclarationMixin(
             val name = identifier.text
 
             val typeParameters = if (genericBounds != null) {
-                genericBounds!!.findChildrenOfType<JaktPlainQualifier>().map {
-                    it.identifier.text
-                }
+                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
             val parameters = parameterList.map {
@@ -39,7 +37,6 @@ abstract class JaktFunctionDeclarationMixin(
 
             val type = Type.Function(
                 name,
-                typeParameters,
                 null,
                 parameters,
                 returnType
@@ -48,11 +45,17 @@ abstract class JaktFunctionDeclarationMixin(
                     it.hasThis = true
                     it.thisIsMutable = thisParameter!!.mutKeyword != null
                 }
+            }.let {
+                if (typeParameters.isNotEmpty()) {
+                    Type.Parameterized(it, typeParameters)
+                } else it
             }
 
             // TODO: Better caching
             CachedValueProvider.Result(type, this)
         }
+
+    override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier(): PsiElement = identifier
 
