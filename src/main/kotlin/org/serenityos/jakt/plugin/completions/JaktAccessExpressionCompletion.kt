@@ -16,6 +16,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.lexer.JaktLexer
 import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.type.Type
@@ -55,11 +56,11 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary", type.keyType, type.valueType)
             is Type.Struct -> type
                 .methods
-                .filterValues { it.thisParameter == null }
+                .filterValues { it.thisParameter != null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
             is Type.Enum -> type
                 .methods
-                .filterValues { it.thisParameter == null }
+                .filterValues { it.thisParameter != null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
 
             else -> emptyList()

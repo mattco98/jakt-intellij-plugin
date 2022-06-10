@@ -5,6 +5,7 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.*
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
+import org.serenityos.jakt.lexer.JaktLexer
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
@@ -59,7 +60,12 @@ abstract class JaktExternStructDeclarationMixin(
                         )
                     },
                     func.functionReturnType?.type?.jaktType ?: Type.Primitive.Void,
-                )
+                ).also {
+                    if (func.thisParameter != null) {
+                        it.hasThis = true
+                        it.thisIsMutable = func.thisParameter!!.mutKeyword != null
+                    }
+                }
             }.forEach {
                 methods[it.name] = it
             }

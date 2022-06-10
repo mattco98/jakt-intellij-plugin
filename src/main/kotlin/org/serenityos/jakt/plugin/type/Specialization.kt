@@ -42,7 +42,7 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
     )
     is Type.Function -> Type.Function(
         name,
-        thisParameter?.specialize(specializations),
+        thisParameter, // TODO: Specialize?
         parameters.map { it.specialize(specializations) },
         returnType.specialize(specializations),
     )
