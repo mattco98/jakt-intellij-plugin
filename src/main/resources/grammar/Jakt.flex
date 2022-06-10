@@ -23,7 +23,7 @@ import static org.serenityos.jakt.JaktTypes.*;
 %type IElementType
 %unicode
 
-WHITE_SPACE=[\t\f\v ]+
+WHITE_SPACE=[\t ]+
 NEWLINE=[\r\n]
 
 HEX_LITERAL=(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*
