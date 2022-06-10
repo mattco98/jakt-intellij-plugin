@@ -71,9 +71,10 @@ object TypeInference {
                 else -> Type.Array(Type.Unknown)
             }
             is JaktDictionaryExpression -> {
-                val kv = element.findChildrenOfType<JaktExpression>()
-                if (kv.size >= 2) {
-                    Type.Dictionary(inferType(kv[0]), inferType(kv[1]))
+                val els = element.findChildrenOfType<JaktDictionaryElement>()
+                if (els.isNotEmpty()) {
+                    val (k, v) = els[0].expressionList
+                    Type.Dictionary(inferType(k), inferType(v))
                 } else Type.Dictionary(Type.Unknown, Type.Unknown)
             }
             is JaktSetExpression -> {
