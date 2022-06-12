@@ -199,6 +199,7 @@ private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PARE
 private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
 Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktParameterMixin"
 }
 
@@ -293,7 +294,8 @@ Statement ::=
     | UnsafeStatement
     | InlineCppStatement
 
-VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) PlainQualifier TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktVariableDeclarationMixin"
 }
 IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
@@ -324,7 +326,7 @@ private BaseType ::=
     | TupleType
     | PlainType
 
-PlainType ::= (PlainQualifier COLON_COLON)* PlainQualifier GenericSpecialization? {extends=Type}
+PlainType ::= (IDENTIFIER COLON_COLON)* IDENTIFIER GenericSpecialization? {extends=Type}
 GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {pin=1 extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}

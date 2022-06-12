@@ -4,13 +4,15 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktParameter
+import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.reference.JaktPsiReference
+import org.serenityos.jakt.plugin.psi.api.containingScope
+import org.serenityos.jakt.plugin.psi.reference.JaktRef
 import org.serenityos.jakt.plugin.type.Type
 
 abstract class JaktParameterMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktParameter, JaktDeclaration {
+) : ASTWrapperPsiElement(node), JaktParameter {
     override val jaktType: Type
         get() = typeAnnotation.jaktType
 
@@ -21,6 +23,12 @@ abstract class JaktParameterMixin(
     override fun setName(name: String): PsiElement = apply {
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
-    
-    override fun getReference() = JaktPsiReference.Decl(this)
+
+    override fun getReference() = Ref(this)
+
+    class Ref(element: JaktParameter) : JaktRef<JaktParameter>(element) {
+        override fun multiResolve(): List<JaktPsiElement> {
+            return element.containingScope?.findReferencesInOrBelow(element.name!!, element) ?: emptyList()
+        }
+    }
 }

@@ -2,6 +2,8 @@ package org.serenityos.jakt.plugin.psi.api
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import org.intellij.sdk.language.psi.JaktPlainQualifier
+import org.intellij.sdk.language.psi.JaktVisitor
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
@@ -34,26 +36,28 @@ interface JaktPsiScope : JaktPsiElement {
         return findDeclarationIn(name, from) ?: containingScope?.findDeclarationInOrAbove(name, this)
     }
 
-    fun findReferencesInOrBelow(element: PsiElement, name: String, from: PsiElement? = null): List<PsiElement> {
+    fun findReferencesInOrBelow(name: String, from: PsiElement? = null): List<JaktPsiElement> {
         val index = from?.let { el ->
             children.indexOf(el).also {
                 require(it != -1)
             }
         } ?: 0
 
-        val references = mutableListOf<PsiElement>()
+        val references = mutableListOf<JaktPsiElement>()
 
-        for (child in children.drop(index + 1)) {
-            // If this shadows the declaration we're looking for, this scope cannot
-            // have any more references to the element
-            if (child is JaktDeclaration && child.name == name)
-                return references
+        PsiTreeUtil.processElements({
+            when {
+                it is JaktDeclaration && it.name == name -> {
+                    // If this shadows the declaration we're looking for, this scope cannot
+                    // have any more references to the element
+                    return@processElements false
+                }
+                it is JaktPsiScope -> references.addAll(it.findReferencesInOrBelow(name))
+                it is JaktPlainQualifier && it.name == name -> references.add(it)
+            }
 
-            references.addAll(PsiTreeUtil.findChildrenOfType(child, JaktPlainQualifierMixin::class.java)
-                .filter { el ->
-                    el.reference.multiResolve(false).any { it.element == element }
-                })
-        }
+            true
+        }, *children.drop(index + 1).toTypedArray())
 
         return references
     }

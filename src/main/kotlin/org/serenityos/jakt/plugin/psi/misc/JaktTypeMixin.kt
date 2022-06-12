@@ -43,7 +43,7 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
 
     companion object {
         private fun resolvePlainType(element: JaktPlainType): Type {
-            val idents = element.findChildrenOfType<JaktPlainQualifier>().map { it.identifier.text }
+            val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER).map { it.text }
             require(idents.size == 1) {
                 "TODO: Resolve namespace types"
             }

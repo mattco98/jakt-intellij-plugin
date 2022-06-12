@@ -17,7 +17,11 @@ class JaktFindUsagesProvider : FindUsagesProvider {
             JaktLexerAdapter(),
             TokenSet.create(JaktTypes.IDENTIFIER),
             TokenSet.create(JaktTypes.COMMENT),
-            TokenSet.create(JaktTypes.LITERAL),
+            TokenSet.create(
+                JaktTypes.STRING_LITERAL,
+                JaktTypes.CHAR_LITERAL,
+                JaktTypes.BYTE_CHAR_LITERAL,
+            ),
         )
     }
 

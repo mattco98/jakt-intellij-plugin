@@ -22,7 +22,7 @@ object TypeAnnotator : JaktAnnotator() {
                     .create()
             }
             is JaktPlainType -> {
-                val idents = element.findChildrenOfType<JaktPlainQualifier>()
+                val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
                 idents.dropLast(1).forEach {
                     holder.newAnnotation(HighlightSeverity.INFORMATION)
                         .range(it)
