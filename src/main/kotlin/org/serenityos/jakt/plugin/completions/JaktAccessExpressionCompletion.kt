@@ -16,7 +16,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.plugin.project.JaktPreludeService
+import org.serenityos.jakt.plugin.project.JaktProjectService
 import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.specialize
@@ -67,7 +67,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
     }
 
     private fun getPreludeTypeCompletions(project: Project, preludeType: String, vararg specializations: Type): List<LookupElement> {
-        val preludeService = project.service<JaktPreludeService>()
+        val preludeService = project.service<JaktProjectService>()
         val declType = preludeService.findPreludeType(preludeType)?.jaktType ?: return emptyList()
 
         val type = when {

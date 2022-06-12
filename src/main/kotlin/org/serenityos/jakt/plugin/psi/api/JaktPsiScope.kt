@@ -4,11 +4,10 @@ import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.serenityos.jakt.plugin.project.JaktPreludeService
+import org.serenityos.jakt.plugin.project.JaktProjectService
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
-import org.serenityos.jakt.utils.ancestorPairs
 import org.serenityos.jakt.utils.ancestorPairsOfType
 
 interface JaktPsiScope : JaktPsiElement {
@@ -76,5 +75,5 @@ fun JaktPsiElement.findDeclarationInOrAbove(name: String): JaktDeclaration? {
     for ((current, parent) in ancestorPairsOfType<JaktPsiScope>())
         parent.findDeclarationIn(name, current)?.let { return it }
 
-    return project.service<JaktPreludeService>().findPreludeType(name)
+    return project.service<JaktProjectService>().findPreludeType(name)
 }

@@ -1,5 +1,6 @@
 package org.serenityos.jakt.plugin.type
 
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes

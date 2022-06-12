@@ -14,8 +14,8 @@ abstract class JaktNamespacedDeclarationMixin(
 ) : JaktTopLevelDefinitionImpl(node), JaktNamespaceDeclaration {
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            val members = topLevelDefinitionList.map {
-                val t = it.jaktType
+            val members = topLevelDefinitionList.mapNotNull {
+                val t = (it as? JaktDeclaration)?.jaktType ?: return@mapNotNull null
                 require(t is Type.TopLevelDecl)
                 t
             }

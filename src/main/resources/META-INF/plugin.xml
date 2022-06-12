@@ -62,8 +62,8 @@
                 implementationClass="org.serenityos.jakt.plugin.JaktFoldingBuilder"
         />
         <projectService
-                serviceInterface="org.serenityos.jakt.plugin.project.JaktPreludeService"
-                serviceImplementation="org.serenityos.jakt.plugin.project.JaktPreludeServiceImpl"
+                serviceInterface="org.serenityos.jakt.plugin.project.JaktProjectService"
+                serviceImplementation="org.serenityos.jakt.plugin.project.JaktProjectServiceImpl"
         />
     </extensions>
 </idea-plugin>

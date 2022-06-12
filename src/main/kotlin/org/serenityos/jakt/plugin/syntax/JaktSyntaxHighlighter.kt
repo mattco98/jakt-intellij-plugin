@@ -99,7 +99,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             STRUCT_KEYWORD,
             FUNCTION_KEYWORD,
             ENUM_KEYWORD,
-            LET_KEYWORD -> Highlights.KEYWORD_DECLARATION
+            LET_KEYWORD,
+            IMPORT_KEYWORD -> Highlights.KEYWORD_DECLARATION
 
             // RESTRICTED_KEYWORD,
             PRIVATE_KEYWORD,
@@ -161,7 +162,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             NOT,
             EQUALS,
             QUESTION_MARK,
-            DOUBLE_QUESTION_MARK -> Highlights.OPERATOR
+            DOUBLE_QUESTION_MARK,
+            AS -> Highlights.OPERATOR
 
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW

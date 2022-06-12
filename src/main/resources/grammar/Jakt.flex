@@ -48,6 +48,7 @@ COMMENT="//"[^\r\n]*
   "function"             { return FUNCTION_KEYWORD; }
   "public"               { return PUBLIC_KEYWORD; }
   "private"              { return PRIVATE_KEYWORD; }
+  "import"               { return IMPORT_KEYWORD; }
   "let"                  { return LET_KEYWORD; }
   "match"                { return MATCH_KEYWORD; }
   "if"                   { return IF_KEYWORD; }
@@ -114,6 +115,7 @@ COMMENT="//"[^\r\n]*
   "and"                  { return AND; }
   "or"                   { return OR; }
   "not"                  { return NOT; }
+  "as"                   { return AS; }
 
   {HEX_LITERAL}          { return HEX_LITERAL; }
   {BINARY_LITERAL}       { return BINARY_LITERAL; }

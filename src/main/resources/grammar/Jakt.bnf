@@ -24,6 +24,7 @@
         FUNCTION_KEYWORD='function'
         PUBLIC_KEYWORD='public'
         PRIVATE_KEYWORD='private'
+        IMPORT_KEYWORD='import'
 
         LET_KEYWORD='let'
         MATCH_KEYWORD='match'
@@ -97,6 +98,7 @@
         AND='and'
         OR='or'
         NOT='not'
+        AS='as'
 
         HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*"
         BINARY_LITERAL="regexp:(0b|0B)[01](_?[01])*"
@@ -137,13 +139,7 @@ TopLevelDefinition ::=
     | EnumDeclaration
     | ExternDeclaration
     | NamespaceDeclaration
-{
-    implements=[
-        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
-    ]
-}
+    | ImportStatement
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -185,11 +181,20 @@ private ExpressionLead ::=
 
 private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration {
     extends=TopLevelDefinition
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
 }
 
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternFunctionDeclarationMixin"
 }
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
@@ -205,7 +210,11 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternStructDeclarationMixin"
 }
 StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
@@ -221,6 +230,7 @@ StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation
 FunctionDeclaration ::= FunctionHeader FunctionBody {
     extends=TopLevelDefinition
     implements=[
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary"
@@ -232,6 +242,10 @@ private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
     extends=TopLevelDefinition
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktNamespacedDeclarationMixin"
 }
 StructDeclaration ::= StructHeader StructBody {
@@ -239,6 +253,7 @@ StructDeclaration ::= StructHeader StructBody {
     implements=[
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructDeclarationMixin"
 }
@@ -254,7 +269,11 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 // Enums
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktEnumDeclarationMixin"
 }
 private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
@@ -273,6 +292,15 @@ private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumM
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
 StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
+
+// Import Statement
+ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+    extends=TopLevelDefinition
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.misc.JaktImportStatementMixin"
+}
+ImportAs ::= AS IDENTIFIER
+ImportBraceList ::= CURLY_OPEN <<commaOrEolList IDENTIFIER>> CURLY_CLOSE
 
 /*************************************
  *            STATEMENTS             *
