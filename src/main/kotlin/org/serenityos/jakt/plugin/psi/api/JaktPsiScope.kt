@@ -3,11 +3,9 @@ package org.serenityos.jakt.plugin.psi.api
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktVisitor
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
-import org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin
 
 interface JaktPsiScope : JaktPsiElement {
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {

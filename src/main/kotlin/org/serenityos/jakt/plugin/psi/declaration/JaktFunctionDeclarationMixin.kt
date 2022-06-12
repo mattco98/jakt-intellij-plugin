@@ -5,11 +5,11 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import org.intellij.sdk.language.psi.*
+import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.api.*
+import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktFunctionDeclarationMixin(
     node: ASTNode,

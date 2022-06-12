@@ -3,15 +3,12 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.lang.ASTNode
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import org.intellij.sdk.language.psi.*
+import org.intellij.sdk.language.psi.JaktExternStructDeclaration
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
-import org.serenityos.jakt.lexer.JaktLexer
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.plugin.type.specialize
-import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktExternStructDeclarationMixin(
     node: ASTNode,

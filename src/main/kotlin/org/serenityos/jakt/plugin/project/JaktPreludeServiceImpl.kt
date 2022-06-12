@@ -2,12 +2,10 @@ package org.serenityos.jakt.plugin.project
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
-import org.intellij.sdk.language.psi.JaktExternStructDeclaration
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.plugin.JaktFile
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.findChildrenOfType
 import java.io.IOException
 import java.net.URL

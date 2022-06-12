@@ -16,7 +16,6 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.lexer.JaktLexer
 import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.type.Type

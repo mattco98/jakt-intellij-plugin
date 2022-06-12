@@ -8,7 +8,8 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import org.serenityos.jakt.bindings.*
+import org.serenityos.jakt.bindings.JaktC
+import org.serenityos.jakt.bindings.TypecheckResult
 
 class JaktExternalAnnotator : ExternalAnnotator<PsiFile, TypecheckResult>() {
     override fun collectInformation(file: PsiFile) = file

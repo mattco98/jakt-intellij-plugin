@@ -3,12 +3,7 @@ package org.serenityos.jakt.plugin.psi
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
-import org.intellij.sdk.language.psi.JaktBlock
-import org.intellij.sdk.language.psi.JaktExpression
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
-import org.intellij.sdk.language.psi.JaktReturnStatement
-import org.intellij.sdk.language.psi.JaktStatement
+import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.plugin.JaktFile
 import org.serenityos.jakt.utils.descendantOfTypeStrict
 

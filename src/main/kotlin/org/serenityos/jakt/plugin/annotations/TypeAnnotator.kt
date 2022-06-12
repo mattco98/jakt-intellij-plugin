@@ -2,7 +2,6 @@ package org.serenityos.jakt.plugin.annotations
 
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import org.intellij.sdk.language.psi.JaktGenericBounds
 import org.intellij.sdk.language.psi.JaktNumericSuffix

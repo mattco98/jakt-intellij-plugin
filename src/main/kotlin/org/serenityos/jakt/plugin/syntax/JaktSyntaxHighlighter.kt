@@ -1,7 +1,6 @@
 package org.serenityos.jakt.plugin.syntax
 
 import com.intellij.lexer.Lexer
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
@@ -11,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 import org.serenityos.jakt.JaktTypes.*
 import java.awt.Color
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 
 // TODO: Eventually remove the default colors. They are just here because the IDE
 //       launched for testing likes to reset the color scheme pretty often.

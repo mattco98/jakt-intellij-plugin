@@ -1,11 +1,12 @@
-extern crate libc;
 extern crate core;
+extern crate libc;
 
 use std::ffi::{CStr, CString};
 use std::path::Path;
-use libc::c_char;
-use jakt::{Project, JaktError, Compiler, Span};
+
+use jakt::{Compiler, JaktError, Project, Span};
 use json;
+use libc::c_char;
 
 fn span_to_json(span: Span) -> json::JsonValue {
     json::object!{

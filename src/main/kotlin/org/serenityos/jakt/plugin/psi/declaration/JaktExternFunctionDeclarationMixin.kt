@@ -4,13 +4,10 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktExternFunctionDeclaration
-import org.intellij.sdk.language.psi.JaktGenericBound
-import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktExternFunctionDeclarationMixin(
     node: ASTNode,
