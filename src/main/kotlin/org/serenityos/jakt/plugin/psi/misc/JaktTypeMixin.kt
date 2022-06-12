@@ -8,6 +8,7 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.api.containingScope
+import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.findChildrenOfType
 
@@ -44,7 +45,7 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
             if (primitive != null)
                 return primitive
 
-            return element.containingScope?.findDeclarationInOrAbove(name, null)?.jaktType ?: return Type.Unknown
+            return element.findDeclarationInOrAbove(name)?.jaktType ?: return Type.Unknown
         }
     }
 }

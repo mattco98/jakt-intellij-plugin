@@ -20,11 +20,6 @@ class JaktFile(
 
     override fun toString() = Type.name
 
-    override fun findDeclarationInOrAbove(name: String, from: PsiElement?): JaktDeclaration? {
-        return findDeclarationIn(name, from)
-            ?: project.service<JaktPreludeService>().findPreludeType(name)
-    }
-
     object Type : LanguageFileType(JaktLanguage) {
         override fun getName() = "Jakt file"
 

@@ -7,6 +7,7 @@ import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 
 abstract class JaktRef<T : JaktNameIdentifierOwner>(
@@ -31,5 +32,17 @@ abstract class JaktRef<T : JaktNameIdentifierOwner>(
         }
 
         return super.handleElementRename(newElementName)
+    }
+
+    companion object {
+        @JvmStatic
+        protected fun getSubScopeParent(element: PsiElement): PsiElement {
+            var target = element
+            while (true) {
+                if (target.parent is JaktPsiScope)
+                    return target
+                target = target.parent
+            }
+        }
     }
 }

@@ -3,7 +3,10 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktGenericBound
+import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.api.containingScope
+import org.serenityos.jakt.plugin.psi.reference.JaktRef
 import org.serenityos.jakt.plugin.type.Type
 
 abstract class JaktGenericBoundMixin(
@@ -18,5 +21,13 @@ abstract class JaktGenericBoundMixin(
 
     override fun setName(name: String) = apply {
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
+    }
+
+    override fun getReference() = Ref(this)
+
+    class Ref(element: JaktGenericBound) : JaktRef<JaktGenericBound>(element) {
+        override fun multiResolve(): List<JaktPsiElement> {
+            return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
+        }
     }
 }

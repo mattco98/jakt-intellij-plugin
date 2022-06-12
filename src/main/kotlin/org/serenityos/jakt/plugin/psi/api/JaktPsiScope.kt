@@ -1,11 +1,15 @@
 package org.serenityos.jakt.plugin.psi.api
 
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import org.intellij.sdk.language.psi.JaktPlainQualifier
+import org.serenityos.jakt.plugin.project.JaktPreludeService
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
+import org.serenityos.jakt.utils.ancestorPairs
+import org.serenityos.jakt.utils.ancestorPairsOfType
 
 interface JaktPsiScope : JaktPsiElement {
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
@@ -28,10 +32,6 @@ interface JaktPsiScope : JaktPsiElement {
         }
 
         return null
-    }
-
-    fun findDeclarationInOrAbove(name: String, from: PsiElement?): JaktDeclaration? {
-        return findDeclarationIn(name, from) ?: containingScope?.findDeclarationInOrAbove(name, this)
     }
 
     fun findReferencesInOrBelow(name: String, from: PsiElement? = null): List<JaktPsiElement> {
@@ -71,14 +71,10 @@ val JaktPsiElement.containingScope: JaktPsiScope?
 
 fun JaktPsiElement.findDeclarationInOrAbove(name: String): JaktDeclaration? {
     if (this is JaktPsiScope)
-        return findDeclarationInOrAbove(name, null)
+        findDeclarationIn(name, null)?.let { return it }
 
-    var element: PsiElement = this
-    var parent: PsiElement = parent
-    while (parent !is JaktPsiScope) {
-        element = parent
-        parent = parent.parent
-    }
+    for ((current, parent) in ancestorPairsOfType<JaktPsiScope>())
+        parent.findDeclarationIn(name, current)?.let { return it }
 
-    return parent.findDeclarationInOrAbove(name, element)
+    return project.service<JaktPreludeService>().findPreludeType(name)
 }
