@@ -9,7 +9,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileType
                 name="Jakt file"
-                implementationClass="org.serenityos.jakt.plugin.JaktFile$Type"
+                implementationClass="org.serenityos.jakt.plugin.JaktFile$FileType"
                 fieldName="INSTANCE"
                 language="Jakt"
                 extensions="jakt"

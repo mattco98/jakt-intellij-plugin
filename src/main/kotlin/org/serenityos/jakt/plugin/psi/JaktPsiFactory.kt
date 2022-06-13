@@ -12,7 +12,7 @@ class JaktPsiFactory(private val project: Project) {
         .getInstance(project)
         .createFileFromText(
             fileName,
-            JaktFile.Type,
+            JaktFile.FileType,
             text,
         ) as JaktFile
 

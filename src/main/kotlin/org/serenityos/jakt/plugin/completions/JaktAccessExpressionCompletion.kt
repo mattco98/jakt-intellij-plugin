@@ -61,7 +61,6 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 .methods
                 .filterValues { it.thisParameter != null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
-
             else -> emptyList()
         }
     }

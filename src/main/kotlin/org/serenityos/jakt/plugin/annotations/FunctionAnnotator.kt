@@ -45,7 +45,6 @@ object FunctionAnnotator : JaktAnnotator() {
                 expr.tupleLookup != null -> expr.tupleLookup!!.decimalLiteral
                 else -> null
             }
-            is JaktNamespacedQualifier -> expr.lastChild
             is JaktPlainQualifier -> expr.identifier
             else -> if (expr.elementType == JaktTypes.IDENTIFIER) {
                 expr

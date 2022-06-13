@@ -35,13 +35,18 @@ sealed interface Type {
     }
 
     sealed interface TopLevelDecl : Type {
+        val name: String
         var namespace: Namespace?
     }
 
     sealed interface Parameterizable : Type
 
-    class Namespace(val name: String, val members: List<TopLevelDecl>) : TopLevelDecl {
+    class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl {
         override var namespace: Namespace? = null
+
+        init {
+            members.forEach { it.namespace = this }
+        }
 
         override fun typeRepr() = (namespace?.name?.plus("::") ?: "") + name
     }
@@ -86,7 +91,7 @@ sealed interface Type {
     }
 
     class Struct(
-        val name: String,
+        override val name: String,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
     ) : TopLevelDecl, Parameterizable {
@@ -97,7 +102,7 @@ sealed interface Type {
 
     // TODO: Variant types
     class Enum(
-        val name: String,
+        override val name: String,
         val underlyingType: Type?,
         val methods: Map<String, Function>,
     ) : TopLevelDecl, Parameterizable {
@@ -107,7 +112,7 @@ sealed interface Type {
     }
 
     class Function(
-        val name: String,
+        override val name: String,
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,

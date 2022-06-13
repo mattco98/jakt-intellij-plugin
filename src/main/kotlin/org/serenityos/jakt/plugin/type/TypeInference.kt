@@ -92,9 +92,7 @@ object TypeInference {
                 JaktTypes.CHAR_LITERAL -> Type.Primitive.CChar
                 else -> error("unreachable")
             }
-            is JaktNamespacedQualifier -> Type.Unknown // TODO
-            is JaktPlainQualifier ->
-                element.findDeclarationInOrAbove(element.name!!)?.jaktType ?: Type.Unknown
+            is JaktPlainQualifier -> resolvePlainQualifier(element)
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }
@@ -106,5 +104,12 @@ object TypeInference {
             val index = element.tupleLookup?.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
             baseType.types[index]
         } else Type.Unknown
+    }
+
+    private fun resolvePlainQualifier(qualifier: JaktPlainQualifier): Type {
+        if (qualifier.namespaceQualifierList.isNotEmpty())
+            return Type.Unknown
+
+        return qualifier.findDeclarationInOrAbove(qualifier.name!!)?.jaktType ?: Type.Unknown
     }
 }

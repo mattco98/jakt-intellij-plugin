@@ -139,7 +139,9 @@ TopLevelDefinition ::=
     | EnumDeclaration
     | ExternDeclaration
     | NamespaceDeclaration
-    | ImportStatement
+    | ImportStatement {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+}
 
 private StatementLead ::=
       EXTERN_KEYWORD
@@ -296,7 +298,7 @@ StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 // Import Statement
 ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.misc.JaktImportStatementMixin"
 }
 ImportAs ::= AS IDENTIFIER
@@ -418,7 +420,6 @@ Expression ::=
     | TupleExpression
     | MatchExpression
     | Literal
-    | NamespacedQualifier
     | PlainQualifier
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
@@ -461,11 +462,14 @@ PatternTrail ::= FAT_ARROW MatchBody
 PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionPatternHead
 MatchBody ::= Block | Expression
 // TODO: This is incomplete
-IdentPatternHead ::= (IDENTIFIER | NamespacedQualifier) [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
+IdentPatternHead ::= PlainQualifier [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
 ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
-NamespacedQualifier ::= IDENTIFIER (COLON_COLON IDENTIFIER)+ {extends=Expression}
-PlainQualifier ::= IDENTIFIER {
+NamespaceQualifier ::= IDENTIFIER COLON_COLON {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktNamespaceQualifierMixin"
+}
+PlainQualifier ::= NamespaceQualifier* IDENTIFIER {
     extends=Expression
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin"
