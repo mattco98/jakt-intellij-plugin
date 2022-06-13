@@ -301,7 +301,7 @@ ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.misc.JaktImportStatementMixin"
 }
-ImportAs ::= AS IDENTIFIER
+private ImportAs ::= AS IDENTIFIER
 ImportBraceList ::= CURLY_OPEN <<commaOrEolList IDENTIFIER>> CURLY_CLOSE
 
 /*************************************
