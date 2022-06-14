@@ -15,74 +15,34 @@ import org.serenityos.jakt.utils.findChildrenOfType
 import org.serenityos.jakt.utils.findNotNullChildOfType
 
 object BasicAnnotator : JaktAnnotator() {
-    override fun annotate(element: PsiElement, holder: JaktAnnotationHolder) {
+    override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {
         when (element) {
-            is JaktFunctionDeclaration -> holder
-                .newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.identifier)
-                .textAttributes(Highlights.FUNCTION_DECLARATION)
-                .create()
-            is JaktParameter -> holder.newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.identifier)
-                .textAttributes(Highlights.FUNCTION_PARAMETER)
-                .create()
-            is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.let {
-                holder.newAnnotation(HighlightSeverity.INFORMATION)
-                    .range(it)
-                    .textAttributes(Highlights.FUNCTION_CALL)
-                    .create()
-            }
-            is JaktLabeledArgument -> holder
-                .newAnnotation(HighlightSeverity.INFORMATION)
-                .range(TextRange.create(element.identifier.startOffset, element.colon.endOffset))
-                .textAttributes(Highlights.FUNCTION_LABELED_ARGUMENT)
-                .create()
+            is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
+            is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
+            is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
+            is JaktLabeledArgument -> TextRange.create(element.identifier.startOffset, element.colon.endOffset)
+                .highlight(Highlights.FUNCTION_LABELED_ARGUMENT)
             is JaktPlainQualifier -> if (element.parentOfType<JaktGenericBounds>() != null) {
-                holder.newAnnotation(HighlightSeverity.INFORMATION)
-                    .range(element)
-                    .textAttributes(Highlights.TYPE_GENERIC_NAME)
-                    .create()
+                element.highlight(Highlights.TYPE_GENERIC_NAME)
             }
             is JaktPlainType -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
                 idents.dropLast(1).forEach {
-                    holder.newAnnotation(HighlightSeverity.INFORMATION)
-                        .range(it)
-                        .textAttributes(Highlights.TYPE_NAMESPACE_QUALIFIER)
-                        .create()
+                    it.highlight(Highlights.TYPE_NAMESPACE_QUALIFIER)
                 }
-                holder.newAnnotation(HighlightSeverity.INFORMATION)
-                    .range(idents.last())
-                    .textAttributes(Highlights.TYPE_NAME)
-                    .create()
+                idents.last().highlight(Highlights.TYPE_NAME)
             }
-            is JaktNumericSuffix -> holder.newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element)
-                .textAttributes(Highlights.LITERAL_NUMBER)
-                .create()
-            is JaktImportBraceEntry -> holder.newAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.identifier)
-                .textAttributes(Highlights.IMPORT_ENTRY)
-                .create()
+            is JaktNumericSuffix -> element.highlight(Highlights.LITERAL_NUMBER)
+            is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
             is JaktImportStatement -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
-                holder.newAnnotation(HighlightSeverity.INFORMATION)
-                    .range(idents.first())
-                    .textAttributes(Highlights.IMPORT_MODULE)
-                    .create()
+                idents.first().highlight(Highlights.IMPORT_MODULE)
 
                 if (idents.size > 1) {
                     // The 'as' keyword will be highlighted as an operator here without
                     // the annotation
-                    holder.newAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element.`as`!!)
-                        .textAttributes(Highlights.KEYWORD_IMPORT)
-                        .create()
-
-                    holder.newAnnotation(HighlightSeverity.INFORMATION)
-                        .range(idents[1])
-                        .textAttributes(Highlights.IMPORT_ALIAS)
-                        .create()
+                    element.`as`!!.highlight(Highlights.KEYWORD_IMPORT)
+                    idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
         }
