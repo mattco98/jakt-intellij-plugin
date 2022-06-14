@@ -15,7 +15,7 @@ abstract class JaktEnumDeclarationMixin(
 ) : JaktTopLevelDefinitionImpl(node), JaktEnumDeclaration {
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.name!!) }
+            val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.name) }
 
             // TODO: Variants
             val type = Type.Enum(

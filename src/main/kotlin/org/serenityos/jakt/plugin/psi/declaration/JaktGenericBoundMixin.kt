@@ -27,7 +27,7 @@ abstract class JaktGenericBoundMixin(
 
     class Ref(element: JaktGenericBound) : JaktRef<JaktGenericBound>(element) {
         override fun multiResolve(): List<PsiElement> {
-            return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
+            return element.containingScope?.findReferencesInOrBelow(element.name, getSubScopeParent(element)) ?: emptyList()
         }
     }
 }

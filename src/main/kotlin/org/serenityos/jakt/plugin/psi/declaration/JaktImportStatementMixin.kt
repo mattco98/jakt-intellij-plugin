@@ -44,7 +44,7 @@ abstract class JaktImportStatementMixin(
 
     class Ref(element: JaktImportStatement) : JaktRef<JaktImportStatement>(element) {
         override fun multiResolve(): List<PsiElement> {
-            val file = element.jaktProject.resolveImportedFile(element.containingFile.virtualFile, element.name!!)
+            val file = element.jaktProject.resolveImportedFile(element.containingFile.virtualFile, element.name)
             return listOfNotNull(file)
         }
     }

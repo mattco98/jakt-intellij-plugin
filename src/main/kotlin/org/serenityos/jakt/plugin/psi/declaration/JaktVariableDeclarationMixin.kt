@@ -42,7 +42,7 @@ abstract class JaktVariableDeclarationMixin(
 
     class Ref(element: JaktVariableDeclarationStatement) : JaktRef<JaktVariableDeclarationStatement>(element) {
         override fun multiResolve(): List<PsiElement> {
-            return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
+            return element.containingScope?.findReferencesInOrBelow(element.name, getSubScopeParent(element)) ?: emptyList()
         }
     }
 }

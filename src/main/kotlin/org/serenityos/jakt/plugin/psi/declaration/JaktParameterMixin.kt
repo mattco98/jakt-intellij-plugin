@@ -27,7 +27,7 @@ abstract class JaktParameterMixin(
 
     class Ref(element: JaktParameter) : JaktRef<JaktParameter>(element) {
         override fun multiResolve(): List<PsiElement> {
-            return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
+            return element.containingScope?.findReferencesInOrBelow(element.name, getSubScopeParent(element)) ?: emptyList()
         }
     }
 }

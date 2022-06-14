@@ -35,7 +35,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
                 prelude = file
 
                 file.findChildrenOfType<JaktTopLevelDefinition>().filterIsInstance<JaktDeclaration>().forEach {
-                    preludeTypes[it.name!!] = it
+                    preludeTypes[it.name] = it
                 }
             }
         }

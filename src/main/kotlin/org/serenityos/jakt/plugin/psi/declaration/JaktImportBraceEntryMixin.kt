@@ -40,7 +40,7 @@ abstract class JaktImportBraceEntryMixin(
     class Ref(element: JaktImportBraceEntry) : JaktRef<JaktImportBraceEntry>(element) {
         override fun multiResolve(): List<PsiElement> {
             val file = element.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
-            return listOfNotNull(file?.findDeclarationIn(element.name!!, null))
+            return listOfNotNull(file?.findDeclarationIn(element.name, null))
         }
     }
 }
