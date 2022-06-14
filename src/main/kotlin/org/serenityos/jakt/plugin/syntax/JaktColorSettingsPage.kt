@@ -13,16 +13,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
     override fun getDemoText() = """
         import <IMPORT_MOD>my_file</IMPORT_MOD> <KW_IMPORT>as</KW_IMPORT> <IMPORT_ALIAS>file</IMPORT_ALIAS> { <IMPORT_ENTRY>a</IMPORT_ENTRY>, <IMPORT_ENTRY>b</IMPORT_ENTRY>, <IMPORT_ENTRY>c</IMPORT_ENTRY> }
         
-        enum WithUnderlyingType: <T>i32</T> {
-            A
-            B = 2
-            C
+        enum <EN_NAME>WithUnderlyingType</EN_NAME>: <T>i32</T> {
+            <EN_VAR_NAME>A</EN_VAR_NAME>
+            <EN_VAR_NAME>B</EN_VAR_NAME> = 2
+            <EN_VAR_NAME>C</EN_VAR_NAME>
         }
         
-        boxed enum Foo<<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
-            Bar
-            Baz(<T>Foo</T><<T>i32</T>, <T>T</T>>)
-            Qux(a: [<T>String</T>:{<T>U</T>}], b: <T>WithUnderlyingType</T>)
+        boxed enum <EN_NAME>Foo</EN_NAME><<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
+            <EN_VAR_NAME>Bar</EN_VAR_NAME>
+            <EN_VAR_NAME>Baz</EN_VAR_NAME>(<T>Foo</T><<T>i32</T>, <T>T</T>>)
+            <EN_VAR_NAME>Qux</EN_VAR_NAME>(<EN_STR_LBL>a</EN_STR_LBL>: [<T>String</T>:{<T>U</T>}], <EN_STR_LBL>b</EN_STR_LBL>: <T>WithUnderlyingType</T>)
         }
         
         function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anon <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
@@ -99,6 +99,9 @@ class JaktColorSettingsPage : ColorSettingsPage {
         "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
         "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
         "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
+        "EN_NAME" to Highlights.ENUM_NAME,
+        "EN_VAR_NAME" to Highlights.ENUM_VARIANT_NAME,
+        "EN_STR_LBL" to Highlights.ENUM_STRUCT_LABEL,
     )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
@@ -111,6 +114,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
         private val DESCRIPTORS = mapOf(
             "Identifiers" to Highlights.IDENTIFIER,
             "Comments" to Highlights.COMMENT,
+
+            "Enums//Name" to Highlights.ENUM_NAME,
+            "Enums//Variant Name" to Highlights.ENUM_VARIANT_NAME,
+            "Enums//Struct Label" to Highlights.ENUM_STRUCT_LABEL,
 
             "Functions//Declaration" to Highlights.FUNCTION_DECLARATION,
             "Functions//Call" to Highlights.FUNCTION_CALL,

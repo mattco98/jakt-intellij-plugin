@@ -66,6 +66,10 @@ object Highlights {
     val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER", Color.getColor("0x61AFEF"))
     val TYPE_OPTIONAL_TYPE = OPERATOR.extend("TYPE_OPTIONAL_TYPE")
 
+    val ENUM_NAME = IDENTIFIER.extend("ENUM_NAME")
+    val ENUM_VARIANT_NAME = IDENTIFIER.extend("ENUM_VARIANT_NAME")
+    val ENUM_STRUCT_LABEL = FUNCTION_PARAMETER.extend("ENUM_STRUCT_LABEL")
+
     private fun TextAttributesKey.extend(name: String, color: Color? = null) = if (color != null) {
         @Suppress("DEPRECATION")
         TextAttributesKey.createTextAttributesKey("JAKT_$name", TextAttributes(color, null, null, null, 0))

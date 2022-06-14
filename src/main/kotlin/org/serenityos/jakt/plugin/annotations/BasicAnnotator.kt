@@ -45,6 +45,18 @@ object BasicAnnotator : JaktAnnotator() {
                     idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
+            is JaktEnumDeclaration -> {
+                element.identifier.highlight(Highlights.ENUM_NAME)
+                element.underlyingTypeEnumBody?.underlyingTypeEnumMemberList?.forEach {
+                    it.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
+                }
+                element.normalEnumBody?.normalEnumMemberList?.forEach {
+                    it.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
+                    it.structEnumMemberBodyPartList.forEach { part ->
+                        part.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
+                    }
+                }
+            }
         }
     }
 
