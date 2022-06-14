@@ -1,4 +1,4 @@
-package org.serenityos.jakt.plugin.psi.misc
+package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.util.CachedValueProvider
@@ -32,6 +32,10 @@ abstract class JaktImportStatementMixin(
 
     override fun setName(name: String) = apply {
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
+    }
+
+    override fun resolveName(name: String): JaktDeclaration? {
+        return importBraceEntryList.firstOrNull { it.name == name } ?: super.resolveName(name)
     }
 
     fun resolveFile(): JaktFile? = jaktProject.resolveImportedFile(containingFile.virtualFile, nameIdent.text)

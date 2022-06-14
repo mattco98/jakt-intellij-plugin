@@ -299,10 +299,14 @@ StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
 ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     extends=TopLevelDefinition
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.plugin.psi.misc.JaktImportStatementMixin"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin"
 }
 private ImportAs ::= AS IDENTIFIER
-ImportBraceList ::= CURLY_OPEN <<commaOrEolList IDENTIFIER>> CURLY_CLOSE
+private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>> CURLY_CLOSE
+ImportBraceEntry ::= IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktImportBraceEntryMixin"
+}
 
 /*************************************
  *            STATEMENTS             *

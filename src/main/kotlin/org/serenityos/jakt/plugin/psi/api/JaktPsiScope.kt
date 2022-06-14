@@ -19,15 +19,14 @@ interface JaktPsiScope : JaktPsiElement {
                 if (it == -1)
                     return null
             }
-        } ?: 0
+        } ?: children.size
 
         if (this is JaktGeneric) {
             getDeclGenericBounds().find { it.name == name }?.let { return it }
         }
 
         for (child in children.take(index)) {
-            if (child is JaktDeclaration && child.name == name)
-                return child
+            (child as? JaktDeclaration)?.resolveName(name)?.let { return it }
         }
 
         return null
