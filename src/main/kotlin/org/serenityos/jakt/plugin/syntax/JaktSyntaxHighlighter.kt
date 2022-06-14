@@ -32,6 +32,7 @@ object Highlights {
     val KEYWORD_CONTROL_FLOW = KEYWORD_BASE.extend("KEYWORD_CONTROL_FLOW")
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
     val KEYWORD_UNSAFE = KEYWORD_BASE.extend("KEYWORD_UNSAFE")
+    val KEYWORD_IMPORT = KEYWORD_BASE.extend("KEYWORD_IMPORT")
 
     val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR", Color.getColor("0x61AFEF"))
     val DELIM_PARENTHESIS = Default.PARENTHESES.extend("DELIM_PARENTHESES")
@@ -44,6 +45,10 @@ object Highlights {
     val RANGE = OPERATOR.extend("RANGE")
     val SEMICOLON = OPERATOR.extend("SEMICOLON")
     val OPTIONAL_ASSERTION = OPERATOR.extend("OPTIONAL_ASSERTION")
+
+    val IMPORT_MODULE = IDENTIFIER.extend("IMPORT_MODULE", Color.getColor("0xE5C17C"))
+    val IMPORT_ALIAS = IDENTIFIER.extend("IMPORT_ALIAS", Color.getColor("0xE5C17C"))
+    val IMPORT_ENTRY = IDENTIFIER.extend("IMPORT_ENTRY", Color.getColor("0xE5C17C"))
 
     val FUNCTION_DECLARATION = IDENTIFIER.extend("FUNCTION_DECLARATION", Color.getColor("0x61AEEF"))
     val FUNCTION_CALL = IDENTIFIER.extend("FUNCTION_CALL", Color.getColor("0x61AEEF"))
@@ -62,6 +67,7 @@ object Highlights {
     val TYPE_OPTIONAL_TYPE = OPERATOR.extend("TYPE_OPTIONAL_TYPE")
 
     private fun TextAttributesKey.extend(name: String, color: Color? = null) = if (color != null) {
+        @Suppress("DEPRECATION")
         TextAttributesKey.createTextAttributesKey("JAKT_$name", TextAttributes(color, null, null, null, 0))
     } else TextAttributesKey.createTextAttributesKey("JAKT_$name", this)
 }
@@ -99,8 +105,9 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             STRUCT_KEYWORD,
             FUNCTION_KEYWORD,
             ENUM_KEYWORD,
-            LET_KEYWORD,
-            IMPORT_KEYWORD -> Highlights.KEYWORD_DECLARATION
+            LET_KEYWORD -> Highlights.KEYWORD_DECLARATION
+
+            IMPORT_KEYWORD -> Highlights.KEYWORD_IMPORT
 
             // RESTRICTED_KEYWORD,
             PRIVATE_KEYWORD,

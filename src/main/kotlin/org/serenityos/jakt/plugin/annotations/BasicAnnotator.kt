@@ -10,7 +10,9 @@ import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.syntax.Highlights
+import org.serenityos.jakt.utils.findChildOfType
 import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.utils.findNotNullChildOfType
 
 object BasicAnnotator : JaktAnnotator() {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder) {
@@ -58,6 +60,31 @@ object BasicAnnotator : JaktAnnotator() {
                 .range(element)
                 .textAttributes(Highlights.LITERAL_NUMBER)
                 .create()
+            is JaktImportBraceEntry -> holder.newAnnotation(HighlightSeverity.INFORMATION)
+                .range(element.identifier)
+                .textAttributes(Highlights.IMPORT_ENTRY)
+                .create()
+            is JaktImportStatement -> {
+                val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
+                holder.newAnnotation(HighlightSeverity.INFORMATION)
+                    .range(idents.first())
+                    .textAttributes(Highlights.IMPORT_MODULE)
+                    .create()
+
+                if (idents.size > 1) {
+                    // The 'as' keyword will be highlighted as an operator here without
+                    // the annotation
+                    holder.newAnnotation(HighlightSeverity.INFORMATION)
+                        .range(element.`as`!!)
+                        .textAttributes(Highlights.KEYWORD_IMPORT)
+                        .create()
+
+                    holder.newAnnotation(HighlightSeverity.INFORMATION)
+                        .range(idents[1])
+                        .textAttributes(Highlights.IMPORT_ALIAS)
+                        .create()
+                }
+            }
         }
     }
 

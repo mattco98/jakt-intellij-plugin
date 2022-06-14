@@ -11,6 +11,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
     override fun getHighlighter() = JaktSyntaxHighlighter()
 
     override fun getDemoText() = """
+        import <IMPORT_MOD>my_file</IMPORT_MOD> <KW_IMPORT>as</KW_IMPORT> <IMPORT_ALIAS>file</IMPORT_ALIAS> { <IMPORT_ENTRY>a</IMPORT_ENTRY>, <IMPORT_ENTRY>b</IMPORT_ENTRY>, <IMPORT_ENTRY>c</IMPORT_ENTRY> }
+        
         enum WithUnderlyingType: <T>i32</T> {
             A
             B = 2
@@ -93,6 +95,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
         "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
         "OPT_T" to Highlights.TYPE_OPTIONAL_TYPE,
         "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
+        "IMPORT_MOD" to Highlights.IMPORT_MODULE,
+        "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
+        "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
+        "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
     )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
@@ -112,6 +118,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Functions//Fat Arrow" to Highlights.FUNCTION_FAT_ARROW,
             "Functions//Parameters" to Highlights.FUNCTION_PARAMETER,
 
+            "Imports//Module" to Highlights.IMPORT_MODULE,
+            "Imports//Alias" to Highlights.IMPORT_ALIAS,
+            "Imports//Entry" to Highlights.IMPORT_ENTRY,
+
             "Literals//Numbers" to Highlights.LITERAL_NUMBER,
             "Literals//Numeric Suffix" to Highlights.LITERAL_NUMBER_SUFFIX,
             "Literals//Strings and Characters" to Highlights.LITERAL_STRING,
@@ -121,11 +131,12 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Literals//Sets" to Highlights.LITERAL_SET,
 
             "Keywords//Base" to Highlights.KEYWORD_BASE,
-            "Keywords//Declaration" to Highlights.KEYWORD_DECLARATION,
-            "Keywords//Visibility" to Highlights.KEYWORD_VISIBILITY,
             "Keywords//Control Flow" to Highlights.KEYWORD_CONTROL_FLOW,
+            "Keywords//Declaration" to Highlights.KEYWORD_DECLARATION,
+            "Keywords//Import" to Highlights.KEYWORD_IMPORT,
             "Keywords//Modifiers" to Highlights.KEYWORD_MODIFIER,
             "Keywords//unsafe and cpp" to Highlights.KEYWORD_UNSAFE,
+            "Keywords//Visibility" to Highlights.KEYWORD_VISIBILITY,
 
             "Operators and Delimiters//Braces" to Highlights.DELIM_BRACE,
             "Operators and Delimiters//Brackets" to Highlights.DELIM_BRACKET,
