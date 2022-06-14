@@ -16,7 +16,7 @@ import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktNamespaceQualifierMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktNamespaceQualifier, JaktTypeable {
+) : ASTWrapperPsiElement(node), JaktNamespaceQualifier {
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
             val namespace = prevSibling?.reference?.resolve()?.let {

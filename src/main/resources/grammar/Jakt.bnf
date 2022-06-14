@@ -467,7 +467,10 @@ IdentPatternHead ::= PlainQualifier [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_C
 ExpressionPatternHead ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 
 NamespaceQualifier ::= IDENTIFIER COLON_COLON {
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktNamespaceQualifierMixin"
 }
 PlainQualifier ::= NamespaceQualifier* IDENTIFIER {
