@@ -7,7 +7,6 @@ import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.intellij.sdk.language.psi.impl.JaktStatementImpl
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.api.containingScope
@@ -42,7 +41,7 @@ abstract class JaktVariableDeclarationMixin(
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktVariableDeclarationStatement) : JaktRef<JaktVariableDeclarationStatement>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
         }
     }

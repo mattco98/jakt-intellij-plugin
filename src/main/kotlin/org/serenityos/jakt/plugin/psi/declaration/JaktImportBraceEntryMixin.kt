@@ -2,12 +2,12 @@ package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktImportBraceEntry
 import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.plugin.JaktFile
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
@@ -38,7 +38,7 @@ abstract class JaktImportBraceEntryMixin(
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktImportBraceEntry) : JaktRef<JaktImportBraceEntry>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             val file = element.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
             return listOfNotNull(file?.findDeclarationIn(element.name!!, null))
         }

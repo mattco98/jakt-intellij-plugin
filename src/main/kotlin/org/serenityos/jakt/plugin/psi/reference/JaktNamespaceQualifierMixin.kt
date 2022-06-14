@@ -7,7 +7,6 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktNamespaceQualifier
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.api.containingScope
@@ -47,7 +46,7 @@ abstract class JaktNamespaceQualifierMixin(
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktNamespaceQualifier) : JaktRef<JaktNamespaceQualifier>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             if (element.prevSibling == null)
                 return listOfNotNull(resolvePlainQualifier(element))
 

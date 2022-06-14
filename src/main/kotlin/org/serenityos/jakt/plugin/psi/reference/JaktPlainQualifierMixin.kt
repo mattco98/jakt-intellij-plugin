@@ -26,7 +26,7 @@ abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node)
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktPlainQualifier) : JaktRef<JaktPlainQualifier>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             val nsRef = element.namespaceQualifierList.lastOrNull()?.reference?.resolve()
             return if (nsRef != null) {
                 listOfNotNull(nsRef.findChildrenOfType<JaktTopLevelDefinition>().firstOrNull {

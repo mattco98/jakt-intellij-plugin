@@ -4,7 +4,6 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktParameter
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.containingScope
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
@@ -27,7 +26,7 @@ abstract class JaktParameterMixin(
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktParameter) : JaktRef<JaktParameter>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             return element.containingScope?.findReferencesInOrBelow(element.name!!, getSubScopeParent(element)) ?: emptyList()
         }
     }

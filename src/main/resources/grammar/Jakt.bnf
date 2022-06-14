@@ -184,7 +184,6 @@ private ExpressionLead ::=
 private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -193,7 +192,6 @@ private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaratio
 ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -213,7 +211,6 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -223,7 +220,10 @@ StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
 ExternStructMember ::= StructField | (StructVisibility? FunctionHeader)
-StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation
+StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructFieldMixin"
+}
 
 /*************************************
  *      Non-Extern Declarations      *
@@ -233,7 +233,6 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
@@ -244,16 +243,12 @@ private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
     extends=TopLevelDefinition
-    implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
-    ]
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktNamespacedDeclarationMixin"
 }
 StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     ]
@@ -272,7 +267,6 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -445,7 +439,10 @@ FieldLookup ::= IDENTIFIER
 TupleLookup ::= DECIMAL_LITERAL
 
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
-FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER
+FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktFieldAccessExpressionMixin"
+}
 
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 RangeExpression ::= Expression DOT_DOT Expression

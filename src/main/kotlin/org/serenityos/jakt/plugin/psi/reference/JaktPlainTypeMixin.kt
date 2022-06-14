@@ -5,7 +5,6 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktPlainType
 import org.intellij.sdk.language.psi.impl.JaktTypeImpl
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.utils.ancestorPairsOfType
@@ -23,7 +22,7 @@ abstract class JaktPlainTypeMixin(node: ASTNode) : JaktTypeImpl(node), JaktPlain
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktPlainType) : JaktRef<JaktPlainType>(element) {
-        override fun multiResolve(): List<JaktPsiElement> {
+        override fun multiResolve(): List<PsiElement> {
             for ((current, parent) in element.ancestorPairsOfType<JaktPsiScope>()) {
                 val result = parent.findDeclarationIn(element.name!!, current) ?: continue
                 return listOf(result)
