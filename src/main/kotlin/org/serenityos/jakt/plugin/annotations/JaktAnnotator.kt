@@ -18,6 +18,6 @@ abstract class JaktAnnotator {
     }
 
     companion object {
-        private val annotators = listOf(FunctionAnnotator, TypeAnnotator)
+        private val annotators = listOf(BasicAnnotator)
     }
 }
