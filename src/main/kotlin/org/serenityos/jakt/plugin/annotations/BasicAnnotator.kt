@@ -57,6 +57,14 @@ object BasicAnnotator : JaktAnnotator() {
                     }
                 }
             }
+            is JaktStructDeclaration -> {
+                element.structHeader.identifier.highlight(Highlights.STRUCT_NAME)
+                element.structBody.structMemberList.forEach {
+                    it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
+                }
+            }
+            is JaktFieldAccessExpression -> TextRange.create(element.dot.startOffset, element.identifier.endOffset)
+                .highlight(Highlights.STRUCT_FIELD_REFERENCE)
         }
     }
 

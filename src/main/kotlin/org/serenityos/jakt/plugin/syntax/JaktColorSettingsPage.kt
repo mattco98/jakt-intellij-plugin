@@ -22,7 +22,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
         boxed enum <EN_NAME>Foo</EN_NAME><<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
             <EN_VAR_NAME>Bar</EN_VAR_NAME>
             <EN_VAR_NAME>Baz</EN_VAR_NAME>(<T>Foo</T><<T>i32</T>, <T>T</T>>)
-            <EN_VAR_NAME>Qux</EN_VAR_NAME>(<EN_STR_LBL>a</EN_STR_LBL>: [<T>String</T>:{<T>U</T>}], <EN_STR_LBL>b</EN_STR_LBL>: <T>WithUnderlyingType</T>)
+            <EN_VAR_NAME>Qux</EN_VAR_NAME>(<EN_STRUCT_LBL>a</EN_STRUCT_LBL>: [<T>String</T>:{<T>U</T>}], <EN_STRUCT_LBL>b</EN_STRUCT_LBL>: <T>WithUnderlyingType</T>)
         }
         
         function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anon <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
@@ -47,18 +47,18 @@ class JaktColorSettingsPage : ColorSettingsPage {
             }
         }
         
-        extern struct D { 
+        extern struct <STRUCT_NAME>D</STRUCT_NAME> { 
             function <FUNC_DECL>invoke</FUNC_DECL>(this, <FUNC_PARAM>a</FUNC_PARAM>: <T>i32</T>) -> <T>String</T>
         }
     
-        class P {
-            foo: <T>i32</T>
+        class <STRUCT_NAME>P</STRUCT_NAME> {
+            <STRUCT_FIELD>foo</STRUCT_FIELD>: <T>i32</T>
     
             // Create a new P from the given value
             public function <FUNC_DECL>make</FUNC_DECL>(<FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) throws => <FUNC_CALL>P</FUNC_CALL>(foo: value)
-            public function <FUNC_DECL>get_foo</FUNC_DECL>(this) => .foo
+            public function <FUNC_DECL>get_foo</FUNC_DECL>(this) => <STRUCT_FIELD_REF>.foo</STRUCT_FIELD_REF>
             public function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, <FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) {
-                .foo = value
+                <STRUCT_FIELD_REF>.foo</STRUCT_FIELD_REF> = value
             }
         }
 
@@ -101,7 +101,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
         "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
         "EN_NAME" to Highlights.ENUM_NAME,
         "EN_VAR_NAME" to Highlights.ENUM_VARIANT_NAME,
-        "EN_STR_LBL" to Highlights.ENUM_STRUCT_LABEL,
+        "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
+        "STRUCT_NAME" to Highlights.STRUCT_NAME,
+        "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
+        "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
     )
 
     override fun getAttributeDescriptors() = DESCRIPTORS
@@ -156,6 +159,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Operators and Delimiters//Operator Sign" to Highlights.OPERATOR,
             "Operators and Delimiters//Parenthesis" to Highlights.DELIM_PARENTHESIS,
             "Operators and Delimiters//Optional Assertion" to Highlights.OPTIONAL_ASSERTION,
+
+            "Structs//Name" to Highlights.STRUCT_NAME,
+            "Structs//Field Name" to Highlights.STRUCT_FIELD,
+            "Structs//Field Reference" to Highlights.STRUCT_FIELD_REFERENCE,
 
             "Types//Type Name" to Highlights.TYPE_NAME,
             "Types//Generic Type Name" to Highlights.TYPE_GENERIC_NAME,

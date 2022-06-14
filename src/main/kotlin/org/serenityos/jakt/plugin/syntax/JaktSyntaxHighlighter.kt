@@ -70,6 +70,10 @@ object Highlights {
     val ENUM_VARIANT_NAME = IDENTIFIER.extend("ENUM_VARIANT_NAME")
     val ENUM_STRUCT_LABEL = FUNCTION_PARAMETER.extend("ENUM_STRUCT_LABEL")
 
+    val STRUCT_NAME = IDENTIFIER.extend("STRUCT_NAME")
+    val STRUCT_FIELD = IDENTIFIER.extend("STRUCT_FIELD")
+    val STRUCT_FIELD_REFERENCE = Default.INSTANCE_FIELD.extend("STRUCT_FIELD_REFERENCE")
+
     private fun TextAttributesKey.extend(name: String, color: Color? = null) = if (color != null) {
         @Suppress("DEPRECATION")
         TextAttributesKey.createTextAttributesKey("JAKT_$name", TextAttributes(color, null, null, null, 0))

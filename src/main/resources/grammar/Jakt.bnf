@@ -445,7 +445,7 @@ FieldLookup ::= IDENTIFIER
 TupleLookup ::= DECIMAL_LITERAL
 
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
-FieldAccessExpression ::= DOT Expression
+FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER
 
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 RangeExpression ::= Expression DOT_DOT Expression
