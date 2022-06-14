@@ -8,13 +8,19 @@ import org.intellij.sdk.language.psi.impl.JaktExpressionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin
+import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.TypeInference
 import org.serenityos.jakt.utils.ancestorPairsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node), JaktPlainQualifier {
+    override val jaktType: Type
+        get() = (reference.resolve() as? JaktTypeable)?.jaktType ?: Type.Unknown
+
     override fun getNameIdentifier(): PsiElement = identifier
 
     override fun getName(): String = nameIdentifier.text

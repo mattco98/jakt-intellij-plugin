@@ -17,6 +17,7 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 object Highlights {
     val IDENTIFIER = Default.IDENTIFIER.extend("IDENTIFIER")
     val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
+    val NAMESPACE_NAME = IDENTIFIER.extend("NAMESPACE_NAME")
 
     val LITERAL_NUMBER = Default.NUMBER.extend("LITERAL_NUMBER", Color.getColor("0xD19A66"))
     val LITERAL_NUMBER_SUFFIX = LITERAL_NUMBER.extend("LITERAL_NUMBER_SUFFIX", Color.getColor("0xD19A66"))
@@ -61,7 +62,6 @@ object Highlights {
     val TYPE_GENERIC_NAME = TYPE_NAME.extend("TYPE_GENERIC_NAME")
     val TYPE_RAW = KEYWORD_MODIFIER.extend("TYPE_RAW")
     val TYPE_WEAK = KEYWORD_MODIFIER.extend("TYPE_WEAK")
-    val TYPE_NAMESPACE_QUALIFIER = IDENTIFIER.extend("TYPE_NAMESPACE_QUALIFIER")
     val TYPE_NAMESPACE_OPERATOR = OPERATOR.extend("TYPE_NAMESPACE_OPERATOR")
     val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER", Color.getColor("0x61AFEF"))
     val TYPE_OPTIONAL_TYPE = OPERATOR.extend("TYPE_OPTIONAL_TYPE")

@@ -65,7 +65,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
         function <FUNC_DECL>get_d</FUNC_DECL>() -> <T>D</T>? => <OPT_T>None</OPT_T>
         
         function <FUNC_DECL>main</FUNC_DECL>() {
-            let mutable p = <T>P</T>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
+            let mutable p = <STRUCT_NAME>P</STRUCT_NAME>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
             <FUNC_CALL>println</FUNC_CALL>("value = {}", p.<FUNC_CALL>get_foo</FUNC_CALL>())
             p.<FUNC_CALL>set_foo</FUNC_CALL>(value: 0x123)
             unsafe {
@@ -90,7 +90,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
         "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
         "FUNC_CALL" to Highlights.FUNCTION_CALL,
         "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
-        "NS_QUAL" to Highlights.TYPE_NAMESPACE_QUALIFIER,
         "T" to Highlights.TYPE_NAME,
         "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
         "OPT_T" to Highlights.TYPE_OPTIONAL_TYPE,
@@ -117,6 +116,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
         private val DESCRIPTORS = mapOf(
             "Identifiers" to Highlights.IDENTIFIER,
             "Comments" to Highlights.COMMENT,
+            "Namespace Name" to Highlights.NAMESPACE_NAME,
 
             "Enums//Name" to Highlights.ENUM_NAME,
             "Enums//Variant Name" to Highlights.ENUM_VARIANT_NAME,
@@ -168,7 +168,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Types//Generic Type Name" to Highlights.TYPE_GENERIC_NAME,
             "Types//Raw Qualifier" to Highlights.TYPE_RAW,
             "Types//Weak Qualifier" to Highlights.TYPE_WEAK,
-            "Types//Namespace Qualifier" to Highlights.TYPE_NAMESPACE_QUALIFIER,
             "Types//Namespace Operator" to Highlights.TYPE_NAMESPACE_OPERATOR,
             "Types//Optional Qualifier" to Highlights.TYPE_OPTIONAL_QUALIFIER,
             "Types//Optional Type" to Highlights.TYPE_OPTIONAL_TYPE,

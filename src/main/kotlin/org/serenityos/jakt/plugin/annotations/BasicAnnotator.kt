@@ -1,20 +1,19 @@
 package org.serenityos.jakt.plugin.annotations
 
-import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import com.intellij.psi.util.parentOfType
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.syntax.Highlights
-import org.serenityos.jakt.utils.findChildOfType
+import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.findChildrenOfType
-import org.serenityos.jakt.utils.findNotNullChildOfType
 
-object BasicAnnotator : JaktAnnotator() {
+object BasicAnnotator : JaktAnnotator(), DumbAware {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {
         when (element) {
             is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
@@ -22,15 +21,33 @@ object BasicAnnotator : JaktAnnotator() {
             is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
             is JaktLabeledArgument -> TextRange.create(element.identifier.startOffset, element.colon.endOffset)
                 .highlight(Highlights.FUNCTION_LABELED_ARGUMENT)
-            is JaktPlainQualifier -> if (element.parentOfType<JaktGenericBounds>() != null) {
-                element.highlight(Highlights.TYPE_GENERIC_NAME)
+            is JaktPlainQualifier -> {
+                val elementsToHighlight = element.namespaceQualifierList + element
+                val isDumb = DumbService.isDumb(element.project)
+                elementsToHighlight.forEach {
+                    val attr = if (!isDumb) {
+                        when (it.jaktType) {
+                            is Type.Struct -> Highlights.STRUCT_NAME
+                            is Type.Enum -> Highlights.ENUM_NAME
+                            is Type.Function -> Highlights.FUNCTION_DECLARATION
+                            is Type.Namespace -> Highlights.NAMESPACE_NAME
+                            else -> return@forEach
+                        }
+                    } else Highlights.NAMESPACE_NAME
+
+                    it.nameIdentifier!!.highlight(attr)
+                }
             }
             is JaktPlainType -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
-                idents.dropLast(1).forEach {
-                    it.highlight(Highlights.TYPE_NAMESPACE_QUALIFIER)
-                }
                 idents.last().highlight(Highlights.TYPE_NAME)
+
+                idents.dropLast(1).forEach {
+                    // In a type context, a namespace qualifier can only ever refer to an actual
+                    // namespace, since enums/structs cannot contain sub-types (such as "using ..."
+                    // in C++). This may change in the future.
+                    it.highlight(Highlights.NAMESPACE_NAME)
+                }
             }
             is JaktNumericSuffix -> element.highlight(Highlights.LITERAL_NUMBER)
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
@@ -65,6 +82,7 @@ object BasicAnnotator : JaktAnnotator() {
             }
             is JaktFieldAccessExpression -> TextRange.create(element.dot.startOffset, element.identifier.endOffset)
                 .highlight(Highlights.STRUCT_FIELD_REFERENCE)
+            is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
         }
     }
 

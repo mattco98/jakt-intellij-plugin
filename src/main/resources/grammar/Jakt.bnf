@@ -475,7 +475,10 @@ NamespaceQualifier ::= IDENTIFIER COLON_COLON {
 }
 PlainQualifier ::= NamespaceQualifier* IDENTIFIER {
     extends=Expression
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    ]
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin"
 }
 
