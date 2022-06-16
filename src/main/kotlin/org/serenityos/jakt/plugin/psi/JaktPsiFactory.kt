@@ -5,6 +5,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.plugin.JaktFile
+import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
+import org.serenityos.jakt.utils.allChildren
 import org.serenityos.jakt.utils.descendantOfTypeStrict
 
 class JaktPsiFactory(private val project: Project) {
@@ -15,6 +17,10 @@ class JaktPsiFactory(private val project: Project) {
             JaktFile.FileType,
             text,
         ) as JaktFile
+
+    fun createDefinition(text: String): JaktTopLevelDefinition {
+        return createFile(text).children.first() as JaktTopLevelDefinition
+    }
 
     fun createStatement(text: String): JaktStatement {
         return createFromText<JaktFunctionDeclaration>("function a() {$text}")!!.block!!.children[1] as JaktStatement

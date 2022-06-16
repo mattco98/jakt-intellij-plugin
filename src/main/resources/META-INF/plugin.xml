@@ -65,5 +65,14 @@
                 serviceInterface="org.serenityos.jakt.plugin.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.plugin.project.JaktProjectServiceImpl"
         />
+
+        <intentionAction>
+            <className>org.serenityos.jakt.plugin.intentions.StructClassKeywordIntention$Class2Struct</className>
+            <category>Jakt</category>
+        </intentionAction>
+        <intentionAction>
+            <className>org.serenityos.jakt.plugin.intentions.StructClassKeywordIntention$Struct2Class</className>
+            <category>Jakt</category>
+        </intentionAction>
     </extensions>
 </idea-plugin>
