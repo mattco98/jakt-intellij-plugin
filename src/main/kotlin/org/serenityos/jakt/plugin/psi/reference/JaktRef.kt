@@ -19,7 +19,7 @@ abstract class JaktRef<T : JaktNameIdentifierOwner>(
     }
 
     final override fun calculateDefaultRangeInElement(): TextRange {
-        val identifier = element.identifyingElement ?: return TextRange.EMPTY_RANGE
+        val identifier = element.nameIdentifier ?: return TextRange.EMPTY_RANGE
         check(identifier.parent == element)
         return TextRange.from(identifier.startOffsetInParent, identifier.textLength)
     }
