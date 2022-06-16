@@ -429,7 +429,10 @@ CallExpression ::= Expression GenericSpecialization? Call
 private Call ::= PAREN_OPEN ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
-LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment
+LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktLabeledArgumentMixin"
+}
 UnlabeledArgument ::= ExpressionWithoutAssignment
 
 AccessExpression ::= Expression DOT MethodOrField
