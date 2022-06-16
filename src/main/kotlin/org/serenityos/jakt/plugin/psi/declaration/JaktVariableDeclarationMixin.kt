@@ -38,6 +38,8 @@ abstract class JaktVariableDeclarationMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
+    override fun getTextOffset(): Int = nameIdentifier.textOffset
+
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktVariableDeclarationStatement) : JaktRef<JaktVariableDeclarationStatement>(element) {

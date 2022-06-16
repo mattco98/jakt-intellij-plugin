@@ -61,4 +61,6 @@ abstract class JaktExternFunctionDeclarationMixin(
     override fun setName(name: String) = apply {
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
+
+    override fun getTextOffset(): Int = nameIdentifier.textOffset
 }
