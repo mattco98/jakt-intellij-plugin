@@ -12,6 +12,8 @@ import org.serenityos.jakt.utils.ancestorPairsOfType
 
 interface JaktPsiScope : JaktPsiElement {
     fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
+        (this as? JaktDeclaration)?.resolveName(name)?.let { return it }
+
         val index = from?.let { el ->
             children.indexOf(el).also {
                 // If this is true, likely the parse tree is completely broken.
