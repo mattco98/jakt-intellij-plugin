@@ -1,32 +1,26 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktExternStructDeclaration
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktExternStructDeclarationMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktExternStructDeclaration, JaktPsiScope {
-    // TODO: Deduplicate with JaktStructDeclarationMixin
-    override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            val header = structHeader
-            val structName = header.identifier.text
+    override val jaktType by recursivelyGuarded<Type> {
+        val methods = mutableMapOf<String, Type.Function>()
 
-            val typeParameters = if (header.genericBounds != null) {
+        producer {
+            val typeParameters = if (structHeader.genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
-            val methods = mutableMapOf<String, Type.Function>()
-
-            val struct = Type.Struct(
-                structName,
+            Type.Struct(
+                structHeader.identifier.text,
                 emptyMap(),
                 methods,
             ).let {
@@ -34,15 +28,13 @@ abstract class JaktExternStructDeclarationMixin(
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
+        }
 
+        initializer {
             // TODO: Visibility
             externStructMemberList.mapNotNull { func ->
                 // TODO: Can extern structs have fields?
                 if (func.structField != null)
-                    return@mapNotNull null
-
-                // TODO: Stop skipping constructors
-                if (func.identifier!!.text == structName)
                     return@mapNotNull null
 
                 Type.Function(
@@ -72,16 +64,14 @@ abstract class JaktExternStructDeclarationMixin(
                 if (it.hasThis && it.thisParameter == null) {
                     it.thisParameter = Type.Function.Parameter(
                         "this",
-                        struct,
+                        it,
                         false,
                         it.thisIsMutable,
                     )
                 }
             }
-
-            // TODO: Better caching
-            CachedValueProvider.Result(struct, this)
         }
+    }
 
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 

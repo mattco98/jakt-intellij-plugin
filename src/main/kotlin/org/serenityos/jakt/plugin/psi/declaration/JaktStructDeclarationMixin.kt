@@ -12,32 +12,22 @@ import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktStructDeclaration, JaktNameIdentifierOwner, JaktDeclaration, JaktPsiScope {
-    override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            val header = structHeader
-            val body = structBody
+    override val jaktType by recursivelyGuarded<Type> {
+        val fields = mutableMapOf<String, Type>()
+        val methods = mutableMapOf<String, Type.Function>()
 
-            val typeParameters = if (header.genericBounds != null) {
+        producer {
+            val typeParameters = if (structHeader.genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
-            // TODO: Visibility
-            val members = body.structMemberList.map { it.functionDeclaration ?: it.structField }
-            val fields = members.filterIsInstance<JaktStructField>().associate {
-                it.identifier.text to it.typeAnnotation.jaktType
-            }
-            val methods = members.filterIsInstance<JaktFunctionDeclaration>().associate {
-                val type = it.jaktType
-                require(type is Type.Function)
-                it.identifier.text to type
-            }
-
-            val type = Type.Struct(
-                header.identifier.text,
+            Type.Struct(
+                structHeader.identifier.text,
                 fields,
                 methods,
             ).let {
@@ -45,22 +35,33 @@ abstract class JaktStructDeclarationMixin(
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
+        }
 
-            // Populate our methods' thisParameters, if necessary
-            methods.values.forEach {
-                if (it.hasThis && it.thisParameter == null) {
-                    it.thisParameter = Type.Function.Parameter(
-                        "this",
-                        type,
-                        false,
-                        it.thisIsMutable,
-                    )
-                }
+        initializer { struct ->
+            // TODO: Visibility
+            val members = structBody.structMemberList.map { it.functionDeclaration ?: it.structField }
+
+            members.filterIsInstance<JaktStructField>().forEach {
+                fields[it.identifier.text] = it.typeAnnotation.jaktType
             }
 
-            // TODO: Better caching
-            CachedValueProvider.Result(type, this)
+            members.filterIsInstance<JaktFunctionDeclaration>().forEach {
+                val type = it.jaktType
+                require(type is Type.Function)
+
+                if (type.hasThis && type.thisParameter == null) {
+                    type.thisParameter = Type.Function.Parameter(
+                        "this",
+                        struct,
+                        false,
+                        type.thisIsMutable,
+                    )
+                }
+
+                methods[it.identifier.text] = type
+            }
         }
+    }
 
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
