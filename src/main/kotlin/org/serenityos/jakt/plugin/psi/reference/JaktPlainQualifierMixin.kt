@@ -1,6 +1,7 @@
 package org.serenityos.jakt.plugin.psi.reference
 
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.JaktAccessExpression
@@ -9,10 +10,12 @@ import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.intellij.sdk.language.psi.impl.JaktExpressionImpl
+import org.serenityos.jakt.plugin.project.JaktProjectService
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin
@@ -37,9 +40,9 @@ abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node)
 
     class Ref(element: JaktPlainQualifier) : JaktRef<JaktPlainQualifier>(element) {
         override fun multiResolve(): List<PsiElement> {
-            val nsRef = element.namespaceQualifierList.lastOrNull()?.reference?.resolve()
+            val nsRef = element.namespaceQualifierList.lastOrNull()?.reference?.resolve() as? JaktPsiScope
             return if (nsRef != null) {
-                listOfNotNull(nsRef.findTopLevelDecls().firstOrNull {
+                listOfNotNull(nsRef.getDeclarations().firstOrNull {
                     it.name == element.name
                 })
             } else {
@@ -47,11 +50,6 @@ abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node)
             }
         }
     }
-}
-
-private fun PsiElement.findTopLevelDecls(): List<JaktTopLevelDefinition> = when (this) {
-    is JaktStructDeclaration -> structBody.structMemberList.mapNotNull { it.functionDeclaration }
-    else -> findChildrenOfType()
 }
 
 private fun PsiElement.unwrapImport(): PsiElement = when (this) {
@@ -65,5 +63,5 @@ fun resolvePlainQualifier(element: JaktNameIdentifierOwner): PsiElement? {
         it.findDeclarationIn(element.name!!)?.unwrapImport()
     }.find {
         it != null && it.startOffset < element.startOffset
-    }
+    } ?: element.project.service<JaktProjectService>().findPreludeType(element.name!!)
 }

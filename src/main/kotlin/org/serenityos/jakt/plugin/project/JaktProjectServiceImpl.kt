@@ -1,20 +1,22 @@
 package org.serenityos.jakt.plugin.project
 
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScopes
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.plugin.JaktFile
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.utils.runInReadAction
 import java.io.IOException
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.concurrent.CompletableFuture
+import kotlin.io.path.deleteIfExists
 
 class JaktProjectServiceImpl(private val project: Project) : JaktProjectService {
     @Volatile
@@ -24,19 +26,29 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
 
     init {
         CompletableFuture.supplyAsync {
-            val preludeContent = try {
-                URL(PRELUDE_URL).readText()
+            val preludePath = Paths.get(project.workspaceFile!!.parent.path, "prelude.jakt")
+            preludePath.deleteIfExists()
+
+            try {
+                URL(PRELUDE_URL).openStream().use {
+                    Files.copy(it, preludePath)
+                }
             } catch (e: IOException) {
                 error("Unable to load prelude; did its location in the repository change?")
             }
 
-            ReadAction.run<Throwable> {
-                val file = JaktPsiFactory(project).createFile(preludeContent, "prelude.jakt")
-                prelude = file
+            val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(preludePath)
+                ?: error("Unable to get VirtualFile from prelude.jakt at $preludePath")
 
-                file.findChildrenOfType<JaktTopLevelDefinition>().filterIsInstance<JaktDeclaration>().forEach {
-                    preludeTypes[it.name] = it
-                }
+            runInReadAction {
+                prelude = PsiManager.getInstance(project).findFile(virtualFile) as? JaktFile
+                    ?: error("Unable to get JaktFile from prelude.jakt at $preludePath")
+
+                prelude!!.findChildrenOfType<JaktTopLevelDefinition>()
+                    .filterIsInstance<JaktDeclaration>()
+                    .forEach {
+                        preludeTypes[it.name] = it
+                    }
             }
         }
     }

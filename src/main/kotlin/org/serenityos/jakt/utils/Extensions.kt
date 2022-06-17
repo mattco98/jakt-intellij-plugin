@@ -1,5 +1,6 @@
 package org.serenityos.jakt.utils
 
+import com.intellij.openapi.application.ReadAction
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.search.PsiElementProcessor
@@ -59,3 +60,9 @@ inline fun <reified T : PsiElement> PsiElement.ancestorPairsOfType(): Sequence<A
     ancestorPairs().filter { it.parent is T } as Sequence<AncestorPair<T>>
 
 data class AncestorPair<T : PsiElement>(val current: PsiElement, val parent: T)
+
+fun runInReadAction(block: () -> Unit) = ReadAction.run<Throwable>(block)
+
+inline fun <reified T> runInReadAction(crossinline block: () -> T): T {
+    return ReadAction.compute<T, Throwable> { block() }
+}

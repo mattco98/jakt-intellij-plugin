@@ -101,9 +101,6 @@ object TypeInference {
     }
 
     fun getDeclaration(project: Project, type: Type): JaktDeclaration? {
-        // TODO: This doesn't actually work as intended, since the prelude file from
-        //       JaktProjectService isn't actually in `project`, so the IDE doesn't
-        //       open anything. Figure out how to add the prelude file to the project.
         fun getPreludeDeclaration(project: Project, preludeType: String): JaktDeclaration? =
             project.service<JaktProjectService>().findPreludeType(preludeType)
 
