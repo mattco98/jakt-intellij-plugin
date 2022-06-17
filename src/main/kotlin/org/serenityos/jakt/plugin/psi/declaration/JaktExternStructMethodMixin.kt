@@ -27,6 +27,8 @@ abstract class JaktExternStructMethodMixin(
                 },
                 functionReturnType.type?.jaktType ?: Type.Primitive.Void,
             ).also {
+                it.declaration = this
+
                 if (thisParameter != null) {
                     it.hasThis = true
                     it.thisIsMutable = thisParameter!!.mutKeyword != null

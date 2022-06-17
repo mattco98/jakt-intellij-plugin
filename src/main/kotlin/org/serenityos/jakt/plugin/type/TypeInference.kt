@@ -1,11 +1,13 @@
 package org.serenityos.jakt.plugin.type
 
-import com.intellij.psi.PsiElement
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.plugin.project.JaktProjectService
 import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
-import org.serenityos.jakt.utils.allChildren
+import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.utils.findChildOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 import org.serenityos.jakt.utils.findNotNullChildOfType
@@ -97,6 +99,26 @@ object TypeInference {
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }
+
+    fun getDeclaration(project: Project, type: Type): JaktDeclaration? {
+        // TODO: This doesn't actually work as intended, since the prelude file from
+        //       JaktProjectService isn't actually in `project`, so the IDE doesn't
+        //       open anything. Figure out how to add the prelude file to the project.
+        fun getPreludeDeclaration(project: Project, preludeType: String): JaktDeclaration? =
+            project.service<JaktProjectService>().findPreludeType(preludeType)
+
+        return when (type) {
+            is Type.TopLevelDecl -> type.declaration
+            is Type.Tuple -> getPreludeDeclaration(project, "Tuple")
+            is Type.Weak -> getPreludeDeclaration(project, "Weak")
+            is Type.Optional -> getPreludeDeclaration(project, "Optional")
+            is Type.Array -> getPreludeDeclaration(project, "Array")
+            is Type.Set -> getPreludeDeclaration(project, "Set")
+            is Type.Dictionary -> getPreludeDeclaration(project, "Dictionary")
+            else -> null
+        }
+    }
+
 
     private fun getAccessExpressionType(element: JaktAccessExpression): Type {
         val baseType = inferType(element.expression)

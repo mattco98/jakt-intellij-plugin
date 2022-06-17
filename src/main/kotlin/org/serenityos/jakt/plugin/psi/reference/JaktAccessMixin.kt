@@ -13,6 +13,7 @@ import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.TypeInference
 import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.descendantOfType
 
@@ -34,23 +35,11 @@ abstract class JaktAccessMixin(
 
     class Ref(element: JaktAccess) : JaktRef<JaktAccess>(element) {
         override fun multiResolve(): List<PsiElement> {
-            // TODO: This is far from perfect. For example, in the following code:
-            //
-            //     function main() {
-            //         let f = Foo()
-            //         let Foo = 2
-            //         f.bar()
-            //     }
-            //
-            // f.bar(), assuming it is a valid reference, will never be resolved because
-            // this code finds the local declaration of "Foo".
-
             val name = element.name ?: return emptyList()
             val accessExpr = element.ancestorOfType<JaktAccessExpression>() ?: return emptyList()
             val baseType = (accessExpr.expression.reference?.resolve() as? JaktTypeable)?.jaktType ?: return emptyList()
-            val baseTypeName = (baseType as? Type.TopLevelDecl)?.name ?: return emptyList()
-            val decl = element.findDeclarationInOrAbove(baseTypeName) ?: return emptyList()
-            return listOfNotNull((decl as? JaktPsiScope)?.getDeclarations()?.find { it.name == name })
+            val baseDecl = TypeInference.getDeclaration(element.project, baseType) ?: return emptyList()
+            return listOfNotNull((baseDecl as? JaktPsiScope)?.getDeclarations()?.find { it.name == name })
         }
     }
 }

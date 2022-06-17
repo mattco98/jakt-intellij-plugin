@@ -1,5 +1,7 @@
 package org.serenityos.jakt.plugin.type
 
+import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
+
 sealed interface Type {
     fun typeRepr(): String
 
@@ -30,14 +32,15 @@ sealed interface Type {
         override fun typeRepr() = typeName
     }
 
-    sealed interface TopLevelDecl : Type {
-        val name: String
-        var namespace: Namespace?
+    sealed class TopLevelDecl : Type {
+        abstract val name: String
+        abstract var namespace: Namespace?
+        var declaration: JaktDeclaration? = null
     }
 
     sealed interface Parameterizable : Type
 
-    class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl {
+    class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
         init {
@@ -90,7 +93,7 @@ sealed interface Type {
         override val name: String,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
-    ) : TopLevelDecl, Parameterizable {
+    ) : TopLevelDecl(), Parameterizable {
         override var namespace: Namespace? = null
 
         override fun typeRepr() = name
@@ -101,7 +104,7 @@ sealed interface Type {
         override val name: String,
         val underlyingType: Type?,
         val methods: Map<String, Function>,
-    ) : TopLevelDecl, Parameterizable {
+    ) : TopLevelDecl(), Parameterizable {
         override var namespace: Namespace? = null
 
         override fun typeRepr() = name
@@ -112,7 +115,7 @@ sealed interface Type {
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
-    ) : TopLevelDecl, Parameterizable {
+    ) : TopLevelDecl(), Parameterizable {
         override var namespace: Namespace? = null
 
         // We cannot resolve the struct before this to calculate the thisParameter

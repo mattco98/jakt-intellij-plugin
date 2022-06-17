@@ -31,6 +31,8 @@ abstract class JaktStructDeclarationMixin(
                 fields,
                 methods,
             ).let {
+                it.declaration = this@JaktStructDeclarationMixin
+
                 if (typeParameters.isNotEmpty()) {
                     Type.Parameterized(it, typeParameters)
                 } else it

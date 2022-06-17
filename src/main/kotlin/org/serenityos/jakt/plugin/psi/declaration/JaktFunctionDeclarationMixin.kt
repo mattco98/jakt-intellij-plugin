@@ -40,12 +40,14 @@ abstract class JaktFunctionDeclarationMixin(
                 null,
                 parameters,
                 returnType
-            ).also {
+            ).let {
+                it.declaration = this
+
                 if (thisParameter != null) {
                     it.hasThis = true
                     it.thisIsMutable = thisParameter!!.mutKeyword != null
                 }
-            }.let {
+
                 if (typeParameters.isNotEmpty()) {
                     Type.Parameterized(it, typeParameters)
                 } else it

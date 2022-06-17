@@ -58,8 +58,8 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
     }
 
     private fun getPreludeTypeCompletions(project: Project, preludeType: String, vararg specializations: Type): List<LookupElement> {
-        val preludeService = project.service<JaktProjectService>()
-        val declType = preludeService.findPreludeType(preludeType)?.jaktType ?: return emptyList()
+        val projectService = project.service<JaktProjectService>()
+        val declType = projectService.findPreludeType(preludeType)?.jaktType ?: return emptyList()
 
         val type = when {
             declType is Type.Parameterized -> if (specializations.size == declType.typeParameters.size) {

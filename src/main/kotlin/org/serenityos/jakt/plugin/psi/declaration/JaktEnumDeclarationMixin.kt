@@ -23,6 +23,8 @@ abstract class JaktEnumDeclarationMixin(
                 underlyingTypeEnumBody?.typeAnnotation?.jaktType,
                 emptyMap(),
             ).let {
+                it.declaration = this
+
                 if (typeParameters.isNotEmpty()) {
                     Type.Parameterized(it, typeParameters)
                 } else it

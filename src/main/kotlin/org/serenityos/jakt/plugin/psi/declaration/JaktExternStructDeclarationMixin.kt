@@ -24,6 +24,8 @@ abstract class JaktExternStructDeclarationMixin(
                 emptyMap(),
                 methods,
             ).let {
+                it.declaration = this@JaktExternStructDeclarationMixin
+
                 if (typeParameters.isNotEmpty()) {
                     Type.Parameterized(it, typeParameters)
                 } else it
