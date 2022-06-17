@@ -19,14 +19,13 @@ abstract class JaktImportStatementMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktImportStatement {
     private val nameIdent = findChildrenOfType(JaktTypes.IDENTIFIER).first()
-    private val aliasIdent = findChildrenOfType(JaktTypes.IDENTIFIER).getOrNull(1)
 
     override val jaktType: Type
         get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
             CachedValueProvider.Result(resolveFile()?.jaktType ?: Type.Unknown, this)
         }
 
-    override fun getNameIdentifier() = aliasIdent ?: nameIdent
+    override fun getNameIdentifier() = nameIdent
 
     override fun getName(): String = nameIdentifier.text
 
