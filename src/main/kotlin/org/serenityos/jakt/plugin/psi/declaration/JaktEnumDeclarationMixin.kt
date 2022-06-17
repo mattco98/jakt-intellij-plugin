@@ -1,8 +1,6 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktGenericBound
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
@@ -14,11 +12,11 @@ abstract class JaktEnumDeclarationMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktEnumDeclaration {
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get() {
             val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.name) }
 
             // TODO: Variants
-            val type = Type.Enum(
+            return Type.Enum(
                 name,
                 underlyingTypeEnumBody?.typeAnnotation?.jaktType,
                 emptyMap(),
@@ -29,8 +27,6 @@ abstract class JaktEnumDeclarationMixin(
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
-
-            CachedValueProvider.Result(type, this)
         }
 
     override fun getDeclGenericBounds(): List<JaktGenericBound> = normalEnumBody?.genericBounds?.genericBoundList ?: emptyList()

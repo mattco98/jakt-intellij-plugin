@@ -2,8 +2,6 @@ package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktImportStatement
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.JaktTypes
@@ -21,9 +19,7 @@ abstract class JaktImportStatementMixin(
     private val nameIdent = findChildrenOfType(JaktTypes.IDENTIFIER).first()
 
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            CachedValueProvider.Result(resolveFile()?.jaktType ?: Type.Unknown, this)
-        }
+        get() = resolveFile()?.jaktType ?: Type.Unknown
 
     override fun getNameIdentifier() = nameIdent
 

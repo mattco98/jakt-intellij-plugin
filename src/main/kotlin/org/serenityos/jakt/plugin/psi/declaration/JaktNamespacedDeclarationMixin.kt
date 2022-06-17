@@ -1,8 +1,6 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
@@ -13,20 +11,18 @@ abstract class JaktNamespacedDeclarationMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktNamespaceDeclaration {
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get() {
             val members = topLevelDefinitionList.mapNotNull {
                 val t = (it as? JaktDeclaration)?.jaktType ?: return@mapNotNull null
                 require(t is Type.TopLevelDecl)
                 t
             }
 
-            val type = Type.Namespace(name, members)
-
-            type.members.forEach {
-                it.namespace = type
+            return Type.Namespace(name, members).also { ns ->
+                ns.members.forEach {
+                    it.namespace = ns
+                }
             }
-
-            CachedValueProvider.Result(type, this)
         }
 
     override fun getNameIdentifier() = identifier

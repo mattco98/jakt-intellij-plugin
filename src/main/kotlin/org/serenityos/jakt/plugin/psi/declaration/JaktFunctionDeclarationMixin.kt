@@ -3,8 +3,6 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
@@ -17,7 +15,7 @@ abstract class JaktFunctionDeclarationMixin(
     override val tracker = JaktModificationTracker()
 
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get() {
             val name = identifier.text
 
             val typeParameters = if (genericBounds != null) {
@@ -35,7 +33,7 @@ abstract class JaktFunctionDeclarationMixin(
 
             val returnType = functionReturnType.type?.jaktType ?: Type.Primitive.Void
 
-            val type = Type.Function(
+            return Type.Function(
                 name,
                 null,
                 parameters,
@@ -52,9 +50,6 @@ abstract class JaktFunctionDeclarationMixin(
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
-
-            // TODO: Better caching
-            CachedValueProvider.Result(type, this)
         }
 
     override fun getDeclarations(): List<JaktDeclaration> = parameterList

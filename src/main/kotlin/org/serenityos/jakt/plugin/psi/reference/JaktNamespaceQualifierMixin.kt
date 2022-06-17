@@ -3,8 +3,6 @@ package org.serenityos.jakt.plugin.psi.reference
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktNamespaceQualifier
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
@@ -18,7 +16,7 @@ abstract class JaktNamespaceQualifierMixin(
     node: ASTNode,
 ) : ASTWrapperPsiElement(node), JaktNamespaceQualifier {
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get() {
             val namespace = prevSibling?.reference?.resolve()?.let {
                 check(it is JaktTypeable)
                 val type = it.jaktType
@@ -26,13 +24,11 @@ abstract class JaktNamespaceQualifierMixin(
                 type
             }
 
-            val result = if (namespace != null) {
+            return if (namespace != null) {
                 namespace.members.firstOrNull { it.name == name }
             } else {
                 containingScope?.findDeclarationInOrAbove(name)?.jaktType
             } ?: Type.Unknown
-
-            CachedValueProvider.Result(result, this)
         }
 
     override fun getNameIdentifier(): PsiElement = identifier

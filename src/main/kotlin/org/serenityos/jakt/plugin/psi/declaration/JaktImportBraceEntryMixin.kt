@@ -3,8 +3,6 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktImportBraceEntry
 import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.plugin.JaktFile
@@ -18,11 +16,9 @@ abstract class JaktImportBraceEntryMixin(
     node: ASTNode,
 ) : ASTWrapperPsiElement(node), JaktImportBraceEntry {
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get()  {
             val importType = ancestorOfType<JaktImportStatement>()?.jaktType as? Type.Namespace
-            val member = importType?.members?.firstOrNull { it.name == name }
-
-            CachedValueProvider.Result(member ?: Type.Unknown, this)
+            return importType?.members?.firstOrNull { it.name == name } ?: Type.Unknown
         }
 
     override fun getNameIdentifier() = identifier

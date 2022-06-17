@@ -1,8 +1,6 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktExternFunctionDeclaration
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
@@ -14,7 +12,7 @@ abstract class JaktExternFunctionDeclarationMixin(
 ) : JaktTopLevelDefinitionImpl(node), JaktExternFunctionDeclaration {
     // TODO: Deduplicate with JaktFunctionDeclarationMixin
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
+        get() {
             val name = identifier.text
 
             val typeParameters = if (genericBounds != null) {
@@ -32,7 +30,7 @@ abstract class JaktExternFunctionDeclarationMixin(
 
             val returnType = functionReturnType.type?.jaktType ?: Type.Primitive.Void
 
-            val type = Type.Function(
+            return Type.Function(
                 name,
                 null,
                 parameters,
@@ -49,9 +47,6 @@ abstract class JaktExternFunctionDeclarationMixin(
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
-
-            // TODO: Better caching
-            CachedValueProvider.Result(type, this)
         }
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()

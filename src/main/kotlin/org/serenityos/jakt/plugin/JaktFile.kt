@@ -3,8 +3,6 @@ package org.serenityos.jakt.plugin
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.psi.FileViewProvider
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
 import org.serenityos.jakt.plugin.project.jaktProject
@@ -20,13 +18,10 @@ class JaktFile(
     viewProvider: FileViewProvider,
 ) : PsiFileBase(viewProvider, JaktLanguage), JaktModificationBoundary, JaktPsiScope, JaktTypeable {
     override val jaktType: Type
-        get() = CachedValuesManager.getCachedValue(this, JaktTypeable.TYPE_KEY) {
-            val members = findChildrenOfType<JaktTypeable>()
-                .map { it.jaktType }
-                .filterIsInstance<Type.TopLevelDecl>()
-
-            CachedValueProvider.Result(Type.Namespace(name, members), this)
-        }
+        get() = findChildrenOfType<JaktTypeable>()
+            .map { it.jaktType }
+            .filterIsInstance<Type.TopLevelDecl>()
+            .let { Type.Namespace(name, it) }
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType()
 
