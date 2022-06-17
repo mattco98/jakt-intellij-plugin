@@ -6,6 +6,8 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktCallExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktLabeledArgument
+import org.intellij.sdk.language.psi.JaktStructDeclaration
+import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.utils.ancestorOfType
 
@@ -24,12 +26,15 @@ abstract class JaktLabeledArgumentMixin(
 
     class Ref(element: JaktLabeledArgument) : JaktRef<JaktLabeledArgument>(element) {
         override fun multiResolve(): List<PsiElement> {
-            val function =
-                element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve() as? JaktFunctionDeclaration
-                    ?: return emptyList()
+            val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()
 
-            val parameter = function.parameterList.firstOrNull { it.name == element.name } ?: return emptyList()
-            return listOf(parameter)
+            return when (callTarget) {
+                is JaktFunctionDeclaration -> callTarget.parameterList.firstOrNull { it.name == element.name }
+                is JaktStructDeclaration -> callTarget.structBody.structMemberList
+                    .mapNotNull { it.structField }
+                    .firstOrNull { it.name == element.name }
+                else -> null
+            }.let(::listOfNotNull)
         }
 
         override fun isReferenceTo(element: PsiElement): Boolean {
