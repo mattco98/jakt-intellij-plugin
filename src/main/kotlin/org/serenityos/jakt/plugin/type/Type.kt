@@ -1,9 +1,5 @@
 package org.serenityos.jakt.plugin.type
 
-private fun <T> stringifyGenerics(generics: List<T>) = if (generics.isNotEmpty()) {
-    "<${generics.joinToString()}>"
-} else ""
-
 sealed interface Type {
     fun typeRepr(): String
 

@@ -1,10 +1,11 @@
 package org.serenityos.jakt.plugin.type
 
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
+import org.serenityos.jakt.utils.allChildren
 import org.serenityos.jakt.utils.findChildOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 import org.serenityos.jakt.utils.findNotNullChildOfType
@@ -101,7 +102,7 @@ object TypeInference {
         val baseType = inferType(element.expression)
 
         return if (baseType is Type.Tuple) {
-            val index = element.tupleLookup?.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
+            val index = element.access.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
             baseType.types[index]
         } else Type.Unknown
     }

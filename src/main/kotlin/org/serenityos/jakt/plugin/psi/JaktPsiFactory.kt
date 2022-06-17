@@ -3,11 +3,10 @@ package org.serenityos.jakt.plugin.psi
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.util.descendantsOfType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.plugin.JaktFile
-import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.utils.allChildren
-import org.serenityos.jakt.utils.descendantOfTypeStrict
+import org.serenityos.jakt.utils.descendantOfType
 
 class JaktPsiFactory(private val project: Project) {
     fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory
@@ -47,6 +46,5 @@ class JaktPsiFactory(private val project: Project) {
         createFromText<JaktNamespaceDeclaration>("namespace $name {}")
             ?: error("Failed to create namespace")
 
-    private inline fun <reified T : PsiElement> createFromText(text: String): T? =
-        createFile(text).descendantOfTypeStrict()
+    private inline fun <reified T : PsiElement> createFromText(text: String): T? = createFile(text).descendantOfType()
 }

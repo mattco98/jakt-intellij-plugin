@@ -2,6 +2,7 @@ package org.serenityos.jakt.utils
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.search.PsiElementProcessor
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
@@ -24,8 +25,23 @@ fun PsiElement.findChildOfType(type: IElementType) = findChildrenOfType(type).si
 
 inline fun <reified T : PsiElement> PsiElement.findNotNullChildOfType(): T = findChildrenOfType<T>().single()
 
-inline fun <reified T : PsiElement> PsiElement.descendantOfTypeStrict(): T? =
-    PsiTreeUtil.findChildOfType(this, T::class.java, true)
+inline fun <reified T : PsiElement> PsiElement.descendantOfType(strict: Boolean = true): T? =
+    PsiTreeUtil.findChildOfType(this, T::class.java, strict)
+
+fun PsiElement.descendantOfType(type: IElementType, strict: Boolean = true): PsiElement? {
+    val processor = object : PsiElementProcessor.FindElement<PsiElement>() {
+            override fun execute(each: PsiElement): Boolean {
+                if (strict && each === this@descendantOfType)
+                    return true
+                if (each.elementType != type)
+                    return true
+                return setFound(each)
+            }
+        }
+
+    PsiTreeUtil.processElements(this, processor)
+    return processor.foundElement
+}
 
 fun PsiElement.ancestors() = generateSequence(this.parent) { if (it is PsiFile) null else it.parent }
 

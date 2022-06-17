@@ -445,11 +445,16 @@ LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
 }
 UnlabeledArgument ::= ExpressionWithoutAssignment
 
-AccessExpression ::= Expression DOT MethodOrField
-private MethodOrField ::= MethodCall | FieldLookup | TupleLookup
-MethodCall ::= IDENTIFIER Call
-FieldLookup ::= IDENTIFIER
-TupleLookup ::= DECIMAL_LITERAL
+AccessExpression ::= Expression DOT Access
+Access ::= FieldLookup | TupleLookup {
+    implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    ]
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktAccessMixin"
+}
+private FieldLookup ::= IDENTIFIER
+private TupleLookup ::= DECIMAL_LITERAL
 
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
 FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {

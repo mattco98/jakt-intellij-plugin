@@ -8,7 +8,6 @@ import org.serenityos.jakt.plugin.project.JaktProjectService
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
-import org.serenityos.jakt.utils.ancestorPairsOfType
 import org.serenityos.jakt.utils.ancestorsOfType
 
 interface JaktPsiScope : JaktPsiElement {
@@ -21,7 +20,7 @@ interface JaktPsiScope : JaktPsiElement {
             getDeclGenericBounds().find { it.name == name }?.let { return it }
 
         for (decl in getDeclarations())
-            decl.resolveName(name)?.resolveName(name)?.let { return it }
+            decl.resolveName(name)?.let { return it }
 
         return null
     }

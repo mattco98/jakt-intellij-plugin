@@ -2,6 +2,8 @@ package org.serenityos.jakt.plugin.psi.reference
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import org.intellij.sdk.language.psi.JaktAccessExpression
+import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
@@ -14,8 +16,7 @@ import org.serenityos.jakt.plugin.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.plugin.type.TypeInference
-import org.serenityos.jakt.utils.ancestorPairsOfType
+import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.ancestorsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
