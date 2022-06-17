@@ -25,7 +25,7 @@ class JaktFile(
                 .map { it.jaktType }
                 .filterIsInstance<Type.TopLevelDecl>()
 
-            CachedValueProvider.Result(Type.Namespace(name, members))
+            CachedValueProvider.Result(Type.Namespace(name, members), this)
         }
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType()

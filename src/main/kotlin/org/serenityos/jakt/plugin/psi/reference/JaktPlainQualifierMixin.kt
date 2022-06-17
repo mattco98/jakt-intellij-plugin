@@ -2,6 +2,7 @@ package org.serenityos.jakt.plugin.psi.reference
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktPlainQualifier
@@ -60,9 +61,9 @@ private fun PsiElement.unwrapImport(): PsiElement = when (this) {
 }
 
 fun resolvePlainQualifier(element: JaktNameIdentifierOwner): PsiElement? {
-    for (parent in element.ancestorsOfType<JaktPsiScope>()) {
-        return parent.findDeclarationIn(element.name!!)?.unwrapImport() ?: continue
+    return element.ancestorsOfType<JaktPsiScope>().map {
+        it.findDeclarationIn(element.name!!)?.unwrapImport()
+    }.find {
+        it != null && it.startOffset < element.startOffset
     }
-
-    return null
 }
