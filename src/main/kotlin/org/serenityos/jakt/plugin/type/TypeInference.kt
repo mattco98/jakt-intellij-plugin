@@ -66,7 +66,7 @@ object TypeInference {
             is JaktRangeExpression -> Type.Unknown // TODO
             is JaktArrayExpression -> when {
                 element.sizedArrayBody != null -> Type.Array(inferType(
-                    element.sizedArrayBody!!.findNotNullChildOfType()
+                    element.sizedArrayBody!!.findChildrenOfType<JaktExpression>().first()
                 ))
                 element.elementsArrayBody != null -> {
                     val expressions = element.elementsArrayBody!!.findChildrenOfType<JaktExpression>()
