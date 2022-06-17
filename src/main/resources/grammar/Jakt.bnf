@@ -539,7 +539,7 @@ private PrefixOp ::=
     | TILDE
     | AMPERSAND RAW_KEYWORD
     | ASTERISK
-private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | EXCLAMATION_POINT
+private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | AS (QUESTION_MARK | EXCLAMATION_POINT) Type
 
 /*************************************
  *             LITERALS              *
