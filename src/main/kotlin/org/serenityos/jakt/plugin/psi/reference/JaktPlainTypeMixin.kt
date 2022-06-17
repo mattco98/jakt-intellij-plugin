@@ -8,6 +8,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.utils.ancestorPairsOfType
+import org.serenityos.jakt.utils.ancestorsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktPlainTypeMixin(node: ASTNode) : JaktTypeImpl(node), JaktPlainType {
@@ -23,8 +24,8 @@ abstract class JaktPlainTypeMixin(node: ASTNode) : JaktTypeImpl(node), JaktPlain
 
     class Ref(element: JaktPlainType) : JaktRef<JaktPlainType>(element) {
         override fun multiResolve(): List<PsiElement> {
-            for ((current, parent) in element.ancestorPairsOfType<JaktPsiScope>()) {
-                val result = parent.findDeclarationIn(element.name!!, current) ?: continue
+            for (parent in element.ancestorsOfType<JaktPsiScope>()) {
+                val result = parent.findDeclarationIn(element.name!!) ?: continue
                 return listOf(result)
             }
 

@@ -63,6 +63,10 @@ abstract class JaktStructDeclarationMixin(
         }
     }
 
+    override fun getDeclarations(): List<JaktDeclaration> {
+        return structBody.structMemberList.mapNotNull { it.structField ?: it.functionDeclaration }
+    }
+
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier(): PsiElement = structHeader.identifier

@@ -32,29 +32,9 @@ abstract class JaktExternStructDeclarationMixin(
 
         initializer {
             // TODO: Visibility
-            externStructMemberList.mapNotNull { func ->
+            externStructMemberList.mapNotNull { member ->
                 // TODO: Can extern structs have fields?
-                if (func.structField != null)
-                    return@mapNotNull null
-
-                Type.Function(
-                    func.identifier!!.text,
-                    null,
-                    func.parameterList.map {
-                        Type.Function.Parameter(
-                            it.identifier.text,
-                            it.typeAnnotation.jaktType,
-                            it.anonKeyword != null,
-                            it.mutKeyword != null,
-                        )
-                    },
-                    func.functionReturnType?.type?.jaktType ?: Type.Primitive.Void,
-                ).also {
-                    if (func.thisParameter != null) {
-                        it.hasThis = true
-                        it.thisIsMutable = func.thisParameter!!.mutKeyword != null
-                    }
-                }
+                member.externStructMethod?.jaktType as? Type.Function
             }.forEach {
                 methods[it.name] = it
             }
@@ -71,6 +51,10 @@ abstract class JaktExternStructDeclarationMixin(
                 }
             }
         }
+    }
+
+    override fun getDeclarations(): List<JaktDeclaration> {
+        return externStructMemberList.mapNotNull { it.structField ?: it.externStructMethod }
     }
 
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()

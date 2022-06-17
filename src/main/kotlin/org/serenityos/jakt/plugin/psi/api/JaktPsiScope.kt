@@ -9,27 +9,19 @@ import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
 import org.serenityos.jakt.utils.ancestorPairsOfType
+import org.serenityos.jakt.utils.ancestorsOfType
 
 interface JaktPsiScope : JaktPsiElement {
-    fun findDeclarationIn(name: String, from: PsiElement?): JaktDeclaration? {
+    fun getDeclarations(): List<JaktDeclaration>
+
+    fun findDeclarationIn(name: String): JaktDeclaration? {
         (this as? JaktDeclaration)?.resolveName(name)?.let { return it }
 
-        val index = from?.let { el ->
-            children.indexOf(el).also {
-                // If this is true, likely the parse tree is completely broken.
-                // This has been observed to happen when typing
-                if (it == -1)
-                    return null
-            }
-        } ?: children.size
-
-        if (this is JaktGeneric) {
+        if (this is JaktGeneric)
             getDeclGenericBounds().find { it.name == name }?.let { return it }
-        }
 
-        for (child in children.take(index)) {
-            (child as? JaktDeclaration)?.resolveName(name)?.let { return it }
-        }
+        for (decl in getDeclarations())
+            decl.resolveName(name)?.resolveName(name)?.let { return it }
 
         return null
     }
@@ -71,10 +63,10 @@ val JaktPsiElement.containingScope: JaktPsiScope?
 
 fun JaktPsiElement.findDeclarationInOrAbove(name: String): JaktDeclaration? {
     if (this is JaktPsiScope)
-        findDeclarationIn(name, null)?.let { return it }
+        findDeclarationIn(name)?.let { return it }
 
-    for ((current, parent) in ancestorPairsOfType<JaktPsiScope>())
-        parent.findDeclarationIn(name, current)?.let { return it }
+    for (scope in ancestorsOfType<JaktPsiScope>())
+        scope.findDeclarationIn(name)?.let { return it }
 
     return project.service<JaktProjectService>().findPreludeType(name)
 }

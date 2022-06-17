@@ -33,14 +33,14 @@ abstract class JaktImportBraceEntryMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    fun resolveElement() = ancestorOfType<JaktImportStatementMixin>()?.resolveFile()?.findDeclarationIn(name, null)
+    fun resolveElement() = ancestorOfType<JaktImportStatementMixin>()?.resolveFile()?.findDeclarationIn(name)
 
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktImportBraceEntry) : JaktRef<JaktImportBraceEntry>(element) {
         override fun multiResolve(): List<PsiElement> {
             val file = element.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
-            return listOfNotNull(file?.findDeclarationIn(element.name, null))
+            return listOfNotNull(file?.findDeclarationIn(element.name))
         }
     }
 }

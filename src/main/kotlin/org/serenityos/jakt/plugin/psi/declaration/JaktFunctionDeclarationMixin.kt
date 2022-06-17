@@ -55,6 +55,8 @@ abstract class JaktFunctionDeclarationMixin(
             CachedValueProvider.Result(type, this)
         }
 
+    override fun getDeclarations(): List<JaktDeclaration> = parameterList
+
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier(): PsiElement = identifier

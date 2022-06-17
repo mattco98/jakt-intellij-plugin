@@ -12,6 +12,7 @@ import org.serenityos.jakt.plugin.psi.api.JaktModificationBoundary
 import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.findChildrenOfType
 
@@ -26,6 +27,8 @@ class JaktFile(
 
             CachedValueProvider.Result(Type.Namespace(name, members))
         }
+
+    override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType()
 
     override val tracker = JaktModificationTracker()
 

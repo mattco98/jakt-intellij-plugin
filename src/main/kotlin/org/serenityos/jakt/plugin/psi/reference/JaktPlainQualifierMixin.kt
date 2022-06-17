@@ -16,6 +16,7 @@ import org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.TypeInference
 import org.serenityos.jakt.utils.ancestorPairsOfType
+import org.serenityos.jakt.utils.ancestorsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
 abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node), JaktPlainQualifier {
@@ -58,8 +59,8 @@ private fun PsiElement.unwrapImport(): PsiElement = when (this) {
 }
 
 fun resolvePlainQualifier(element: JaktNameIdentifierOwner): PsiElement? {
-    for ((current, parent) in element.ancestorPairsOfType<JaktPsiScope>()) {
-        return parent.findDeclarationIn(element.name!!, current)?.unwrapImport() ?: continue
+    for (parent in element.ancestorsOfType<JaktPsiScope>()) {
+        return parent.findDeclarationIn(element.name!!)?.unwrapImport() ?: continue
     }
 
     return null

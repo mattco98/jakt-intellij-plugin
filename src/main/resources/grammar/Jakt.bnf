@@ -141,6 +141,9 @@ TopLevelDefinition ::=
     | NamespaceDeclaration
     | ImportStatement {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    // For some reason this gets a getExternKeyword() function which conflicts
+    // with ExternStructDeclaration
+    generateTokenAccessors=false
 }
 
 private StatementLead ::=
@@ -219,10 +222,17 @@ ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStru
 StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
 private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
-ExternStructMember ::= StructField | (StructVisibility? FunctionHeader)
+ExternStructMember ::= StructVisibility? (StructField | ExternStructMethod)
 StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructFieldMixin"
+}
+ExternStructMethod ::= FunctionHeader {
+    implements=[
+        "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
+    ]
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktExternStructMethodMixin"
 }
 
 /*************************************
