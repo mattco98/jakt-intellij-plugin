@@ -336,7 +336,7 @@ VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnno
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktVariableDeclarationMixin"
 }
-IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ ELSE_KEYWORD Block ]
+IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ELSE_KEYWORD (IfStatement | Block)]
 ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
 ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
 DeferStatement ::= DEFER_KEYWORD Statement
