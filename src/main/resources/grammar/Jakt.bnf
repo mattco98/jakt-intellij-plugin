@@ -406,6 +406,7 @@ Expression ::=
     | OptionalNoneExpression // Must come before Qualifier
     | AccessExpression // Must come before CallExpression
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
+    | AssignmentBinaryExpression // Must come before other binary expressions
     | LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
     | BitwiseOrBinaryExpression
@@ -417,7 +418,6 @@ Expression ::=
     | MultiplyBinaryExpression
     | PrefixUnaryExpression
     | PostfixUnaryExpression
-    | AssignmentBinaryExpression
     | ParenExpression
     | IndexedAccessExpression
     | FieldAccessExpression
