@@ -11,6 +11,7 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.syntax.Highlights
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
 object BasicAnnotator : JaktAnnotator(), DumbAware {
@@ -19,8 +20,18 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
             is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
-            is JaktLabeledArgument -> TextRange.create(element.identifier.startOffset, element.colon.endOffset)
-                .highlight(Highlights.FUNCTION_LABELED_ARGUMENT)
+            is JaktLabeledArgument -> {
+                val isCtorLabel = if (!DumbService.isDumb(element.project)) {
+                    element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve() is JaktStructDeclaration
+                } else false
+
+                val highlight = if (isCtorLabel) {
+                    Highlights.STRUCT_FIELD
+                } else Highlights.FUNCTION_LABELED_ARGUMENT
+
+                TextRange.create(element.identifier.startOffset, element.colon.endOffset)
+                    .highlight(highlight)
+            }
             is JaktPlainQualifier -> {
                 val elementsToHighlight = element.namespaceQualifierList + element
                 val isDumb = DumbService.isDumb(element.project)
