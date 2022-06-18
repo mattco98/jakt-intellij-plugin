@@ -50,9 +50,11 @@ class JaktNamesValidator : NamesValidator {
             RAW_KEYWORD,
             WEAK_KEYWORD,
             THROWS_KEYWORD,
-            AND,
-            OR,
-            NOT,
+            KEYWORD_AND,
+            KEYWORD_OR,
+            KEYWORD_NOT,
+            KEYWORD_AS,
+            KEYWORD_IS,
         )
     }
 }

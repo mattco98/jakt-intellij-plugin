@@ -177,13 +177,14 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             LESS_THAN_EQUALS,
             GREATER_THAN,
             GREATER_THAN_EQUALS,
-            AND,
-            OR,
-            NOT,
+            KEYWORD_AND,
+            KEYWORD_OR,
+            KEYWORD_NOT,
             EQUALS,
             QUESTION_MARK,
             DOUBLE_QUESTION_MARK,
-            AS -> Highlights.OPERATOR
+            KEYWORD_AS,
+            KEYWORD_IS -> Highlights.OPERATOR
 
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW

@@ -84,7 +84,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 if (idents.size > 1) {
                     // The 'as' keyword will be highlighted as an operator here without
                     // the annotation
-                    element.`as`!!.highlight(Highlights.KEYWORD_IMPORT)
+                    element.keywordAs!!.highlight(Highlights.KEYWORD_IMPORT)
                     idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }

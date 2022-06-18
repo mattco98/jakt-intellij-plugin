@@ -76,6 +76,11 @@ COMMENT="//"[^\r\n]*
   "raw"                  { return RAW_KEYWORD; }
   "weak"                 { return WEAK_KEYWORD; }
   "throws"               { return THROWS_KEYWORD; }
+  "and"                  { return KEYWORD_AND; }
+  "or"                   { return KEYWORD_OR; }
+  "not"                  { return KEYWORD_NOT; }
+  "as"                   { return KEYWORD_AS; }
+  "is"                   { return KEYWORD_IS; }
   "("                    { return PAREN_OPEN; }
   ")"                    { return PAREN_CLOSE; }
   "{"                    { return CURLY_OPEN; }
@@ -115,10 +120,6 @@ COMMENT="//"[^\r\n]*
   "|"                    { return PIPE; }
   "^"                    { return CARET; }
   "~"                    { return TILDE; }
-  "and"                  { return AND; }
-  "or"                   { return OR; }
-  "not"                  { return NOT; }
-  "as"                   { return AS; }
 
   {HEX_LITERAL}          { return HEX_LITERAL; }
   {DECIMAL_LITERAL}      { return DECIMAL_LITERAL; }

@@ -55,6 +55,11 @@
         RAW_KEYWORD='raw'
         WEAK_KEYWORD='weak'
         THROWS_KEYWORD='throws'
+        KEYWORD_AND='and'
+        KEYWORD_OR='or'
+        KEYWORD_NOT='not'
+        KEYWORD_AS='as'
+        KEYWORD_IS='is'
 
         PAREN_OPEN='('
         PAREN_CLOSE=')'
@@ -95,10 +100,6 @@
         PIPE='|'
         CARET='^'
         TILDE='~'
-        AND='and'
-        OR='or'
-        NOT='not'
-        AS='as'
 
         HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*"
         DECIMAL_LITERAL="regexp:\d[_\d]*"
@@ -307,7 +308,7 @@ ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin"
 }
-private ImportAs ::= AS IDENTIFIER
+private ImportAs ::= KEYWORD_AS IDENTIFIER
 private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>> CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
@@ -508,7 +509,7 @@ fake BinaryExpression ::= Expression+ {
 }
 
 LogicalOrBinaryExpression ::= Expression LogicalOrOp NL Expression
-LogicalAndBinaryExpression ::= Expression AND NL Expression
+LogicalAndBinaryExpression ::= Expression KEYWORD_AND NL Expression
 // &ExpressionLead helps disambiguate rules in PatternHead production
 BitwiseOrBinaryExpression ::= Expression PIPE NL &ExpressionLead Expression
 BitwiseXorBinaryExpression ::= Expression CARET NL Expression
@@ -529,17 +530,22 @@ private AddOp ::= PLUS | MINUS
 private MultiplyOp ::= ASTERISK | SLASH | PERCENT
 private ShiftOp ::= ARITH_LEFT_SHIFT | LEFT_SHIFT | ARITH_RIGHT_SHIFT | RIGHT_SHIFT
 private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GREATER_THAN | DOUBLE_EQUALS | NOT_EQUALS
-private LogicalOrOp ::= OR | DOUBLE_QUESTION_MARK
+private LogicalOrOp ::= KEYWORD_OR | DOUBLE_QUESTION_MARK
 private AssignmentOp ::= [AddOp | MultiplyOp | ShiftOp] EQUALS
 private PrefixOp ::=
       PLUS_PLUS
     | MINUS_MINUS
     | MINUS
-    | NOT
+    | KEYWORD_NOT
     | TILDE
     | AMPERSAND RAW_KEYWORD
     | ASTERISK
-private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | EXCLAMATION_POINT | AS (QUESTION_MARK | EXCLAMATION_POINT) Type
+private PostfixOp ::=
+      PLUS_PLUS
+    | MINUS_MINUS
+    | EXCLAMATION_POINT
+    | KEYWORD_AS (QUESTION_MARK | EXCLAMATION_POINT) Type
+    | KEYWORD_IS Type
 
 /*************************************
  *             LITERALS              *

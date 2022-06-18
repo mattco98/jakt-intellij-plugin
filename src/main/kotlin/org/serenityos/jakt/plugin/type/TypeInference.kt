@@ -45,12 +45,15 @@ object TypeInference {
                 element.plusPlus != null ||
                 element.minusMinus != null ||
                 element.minus != null ||
-                element.not != null ||
                 element.tilde != null -> inferType(element.expression)
                 element.rawKeyword != null -> Type.Raw(inferType(element.expression))
                 element.asterisk != null -> inferType(element.expression).let {
                     if (it is Type.Raw) it.underlyingType else Type.Unknown
                 }
+                element.keywordIs != null || element.keywordNot != null -> Type.Primitive.Bool
+                element.keywordAs != null -> element.type?.jaktType?.let {
+                    if (element.questionMark != null) Type.Optional(it) else it
+                } ?: Type.Unknown
                 else -> error("unreachable")
             }
             is JaktPostfixUnaryExpression -> inferType(element.expression)
