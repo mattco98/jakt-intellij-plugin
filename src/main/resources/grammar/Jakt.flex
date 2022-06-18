@@ -56,6 +56,8 @@ COMMENT="//"[^\r\n]*
   "while"                { return WHILE_KEYWORD; }
   "loop"                 { return LOOP_KEYWORD; }
   "for"                  { return FOR_KEYWORD; }
+  "try"                  { return TRY_KEYWORD; }
+  "catch"                { return CATCH_KEYWORD; }
   "in"                   { return IN_KEYWORD; }
   "unsafe"               { return UNSAFE_KEYWORD; }
   "cpp"                  { return CPP_KEYWORD; }

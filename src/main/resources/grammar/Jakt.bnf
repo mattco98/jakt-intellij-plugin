@@ -30,10 +30,11 @@
         MATCH_KEYWORD='match'
         IF_KEYWORD='if'
         ELSE_KEYWORD='else'
-
         WHILE_KEYWORD='while'
         LOOP_KEYWORD='loop'
         FOR_KEYWORD='for'
+        TRY_KEYWORD='try'
+        CATCH_KEYWORD='catch'
         IN_KEYWORD='in'
         UNSAFE_KEYWORD='unsafe'
         CPP_KEYWORD='cpp'
@@ -326,6 +327,7 @@ Statement ::=
     | LoopStatement
     | ForStatement
     | VariableDeclarationStatement
+    | TryStatement
     | UnsafeStatement
     | InlineCppStatement
     | Block
@@ -340,6 +342,7 @@ ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
 DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
 LoopStatement ::= LOOP_KEYWORD Block
+TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD IDENTIFIER Statement
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 
