@@ -21,18 +21,8 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         when (element) {
             is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
-            is JaktCallExpression -> {
-                val highlightColor = if (DumbService.isDumb(element.project)) {
-                    Highlights.FUNCTION_CALL
-                } else when (element.jaktType) {
-                    is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
-                    is Type.Struct -> Highlights.STRUCT_NAME
-                    is Type.Enum -> Highlights.ENUM_NAME
-                    is Type.Namespace -> Highlights.NAMESPACE
-                    else -> Highlights.FUNCTION_CALL
-                }
-
-                getCallHighlightTarget(element.firstChild)?.highlight(highlightColor)
+            is JaktCallExpression -> if (DumbService.isDumb(element.project)) {
+                getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
             }
             is JaktLabeledArgument -> {
                 val isCtorLabel = if (!DumbService.isDumb(element.project)) {
@@ -54,6 +44,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                         when (it.jaktType) {
                             is Type.Struct -> Highlights.STRUCT_NAME
                             is Type.Enum -> Highlights.ENUM_NAME
+                            is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
                             is Type.Function -> Highlights.FUNCTION_DECLARATION
                             is Type.Namespace -> Highlights.NAMESPACE_NAME
                             is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
@@ -89,7 +80,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 }
             }
             is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
-            is JaktUnderlyingTypeEnumMember -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
+            is JaktUnderlyingTypeEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktNormalEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktStructEnumMemberBodyPart -> element.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktStructDeclaration -> {

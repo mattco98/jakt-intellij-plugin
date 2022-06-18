@@ -216,6 +216,7 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
     extends=TopLevelDefinition
     implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -280,6 +281,7 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
     implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
     ]
@@ -290,14 +292,20 @@ private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
 UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE
 
-private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumMember>>
-UnderlyingTypeEnumMember ::= IDENTIFIER [EQUALS Expression]
+private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>
+UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktUnderlyingTypeEnumVariantMixin"
+}
 
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? FunctionDeclaration)
-NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody?
+NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktNormalEnumVariantMixin"
+}
 private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>

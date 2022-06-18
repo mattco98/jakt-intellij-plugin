@@ -108,10 +108,21 @@ sealed interface Type {
     class Enum(
         override val name: String,
         val underlyingType: Primitive?,
+        val variants: Map<String, EnumVariant>,
         val methods: Map<String, Function>,
     ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
+        override fun typeRepr() = name
+    }
+
+    class EnumVariant(
+        val parent: Enum,
+        val name: String,
+        val value: Int?,
+        val members: List<Pair<String?, Type>>,
+    ) : Type {
+        // TODO: Improve
         override fun typeRepr() = name
     }
 

@@ -13,6 +13,7 @@ object TypeInference {
         return when (element) {
             is JaktCallExpression -> when (val baseType = inferType(element.expression)) {
                 is Type.Struct -> baseType // TODO: This feels a bit odd
+                is Type.EnumVariant -> baseType.parent
                 is Type.Parameterized -> {
                     val specializations = element.genericSpecialization?.findChildrenOfType<JaktType>()?.map {
                         it.jaktType

@@ -27,7 +27,7 @@ abstract class JaktRef<T : JaktNameIdentifierOwner>(
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        element.identifyingElement?.let {
+        element.nameIdentifier?.let {
             it.replace(JaktPsiFactory(it.project).createIdentifier(newElementName))
             return it
         }
