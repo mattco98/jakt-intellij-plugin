@@ -3,12 +3,9 @@ package org.serenityos.jakt.plugin.psi.misc
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.*
-import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
-import org.serenityos.jakt.plugin.psi.api.containingScope
-import org.serenityos.jakt.plugin.psi.api.findDeclarationInOrAbove
 import org.serenityos.jakt.plugin.type.Type
-import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.plugin.type.resolvePlainType
 
 abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTypeable {
     override val jaktType: Type
@@ -24,21 +21,4 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
             is JaktTypeAnnotation -> type.jaktType
             else -> error("Unknown Type class ${this::class.simpleName}")
         }
-
-    companion object {
-        private fun resolvePlainType(element: JaktPlainType): Type {
-            val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER).map { it.text }
-            require(idents.size == 1) {
-                "TODO: Resolve namespace types"
-            }
-
-            val name = idents.last()
-
-            val primitive = Type.Primitive.values().find { it.typeRepr() == name }
-            if (primitive != null)
-                return primitive
-
-            return element.findDeclarationInOrAbove(name)?.jaktType ?: return Type.Unknown
-        }
-    }
 }

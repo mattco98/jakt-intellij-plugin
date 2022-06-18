@@ -5,9 +5,10 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktGenericBound
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.api.containingScope
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.resolveReferencesIn
+import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktGenericBoundMixin(
     node: ASTNode,
@@ -27,7 +28,7 @@ abstract class JaktGenericBoundMixin(
 
     class Ref(element: JaktGenericBound) : JaktRef<JaktGenericBound>(element) {
         override fun multiResolve(): List<PsiElement> {
-            return element.containingScope?.findReferencesInOrBelow(element.name, getSubScopeParent(element)) ?: emptyList()
+            return resolveReferencesIn(element.ancestorOfType<JaktGeneric>() ?: return emptyList(), element.name)
         }
     }
 }

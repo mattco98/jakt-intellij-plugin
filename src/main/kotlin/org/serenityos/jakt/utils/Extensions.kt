@@ -12,15 +12,15 @@ infix fun <T, R> Collection<T>.zipSafe(other: Collection<R>) = this.zip(other).a
     require(this.size == other.size)
 }
 
-val PsiElement.allChildren: List<PsiElement>
-    get() = generateSequence(firstChild) { it.nextSibling }.toList()
+val PsiElement.allChildren: Sequence<PsiElement>
+    get() = generateSequence(firstChild) { it.nextSibling }
 
-inline fun <reified T : PsiElement> PsiElement.findChildrenOfType(): List<T> = allChildren.filterIsInstance<T>()
+inline fun <reified T : PsiElement> PsiElement.findChildrenOfType(): List<T> = allChildren.filterIsInstance<T>().toList()
 
 inline fun <reified T : PsiElement> PsiElement.findChildOfType(): T? = findChildrenOfType<T>().singleOrNull()
 
 fun PsiElement.findChildrenOfType(type: IElementType): List<PsiElement> =
-    allChildren.filter { it.elementType == type }
+    allChildren.filter { it.elementType == type }.toList()
 
 fun PsiElement.findChildOfType(type: IElementType) = findChildrenOfType(type).singleOrNull()
 
@@ -44,9 +44,13 @@ fun PsiElement.descendantOfType(type: IElementType, strict: Boolean = true): Psi
     return processor.foundElement
 }
 
+fun PsiElement.selfAndAncestors() = generateSequence(this) { if (it is PsiFile) null else it.parent }
+
 fun PsiElement.ancestors() = generateSequence(this.parent) { if (it is PsiFile) null else it.parent }
 
 inline fun <reified T : PsiElement> PsiElement.ancestorsOfType() = ancestors().filterIsInstance<T>()
+
+inline fun <reified T : PsiElement> PsiElement.selfAndAncestorsOfType() = selfAndAncestors().filterIsInstance<T>()
 
 inline fun <reified T : PsiElement> PsiElement.ancestorOfType() = ancestorsOfType<T>().firstOrNull()
 

@@ -30,11 +30,7 @@ abstract class JaktImportStatementMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    fun resolveName(name: String): JaktDeclaration {
-        return importBraceEntryList.firstOrNull { it.name == name } ?: this
-    }
-
-    private fun resolveFile(): JaktFile? =
+    fun resolveFile(): JaktFile? =
         jaktProject.resolveImportedFile(containingFile.originalFile.virtualFile, nameIdent.text)
 
     override fun getReference() = Ref(this)

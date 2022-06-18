@@ -10,6 +10,7 @@ import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.resolveDeclarationIn
 import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktImportBraceEntryMixin(
@@ -29,14 +30,17 @@ abstract class JaktImportBraceEntryMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    fun resolveElement() = ancestorOfType<JaktImportStatementMixin>()?.resolveFile()?.findDeclarationIn(name)
+    fun resolveElement() = ancestorOfType<JaktImportStatementMixin>()?.resolveFile()?.let {
+        resolveDeclarationIn(it, name)
+    }
 
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktImportBraceEntry) : JaktRef<JaktImportBraceEntry>(element) {
         override fun multiResolve(): List<PsiElement> {
             val file = element.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
-            return listOfNotNull(file?.findDeclarationIn(element.name))
+                ?: return emptyList()
+            return listOfNotNull(resolveDeclarationIn(file, element.name))
         }
     }
 }

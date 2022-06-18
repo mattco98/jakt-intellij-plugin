@@ -1,5 +1,6 @@
 package org.serenityos.jakt.plugin.type
 
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 
 sealed interface Type {
@@ -148,3 +149,6 @@ sealed interface Type {
         )
     }
 }
+
+// val JaktTypeable?.jaktTypeOrNull: Type
+//     get() = this?.jaktType ?: Type.Unknown

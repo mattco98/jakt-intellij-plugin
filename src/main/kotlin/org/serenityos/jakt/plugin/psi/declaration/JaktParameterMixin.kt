@@ -3,11 +3,15 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktParameter
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.api.containingScope
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
 import org.serenityos.jakt.plugin.type.Type
+import org.serenityos.jakt.plugin.type.resolveDeclarationIn
+import org.serenityos.jakt.plugin.type.resolveReferencesIn
+import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktParameterMixin(
     node: ASTNode,
@@ -27,7 +31,7 @@ abstract class JaktParameterMixin(
 
     class Ref(element: JaktParameter) : JaktRef<JaktParameter>(element) {
         override fun multiResolve(): List<PsiElement> {
-            return element.containingScope?.findReferencesInOrBelow(element.name, getSubScopeParent(element)) ?: emptyList()
+            return resolveReferencesIn(element.ancestorOfType<JaktPsiScope>() ?: return emptyList(), element.name)
         }
     }
 }

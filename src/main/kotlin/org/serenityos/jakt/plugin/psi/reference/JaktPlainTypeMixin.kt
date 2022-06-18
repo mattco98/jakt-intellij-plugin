@@ -7,6 +7,7 @@ import org.intellij.sdk.language.psi.impl.JaktTypeImpl
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.type.resolveDeclarationAbove
 import org.serenityos.jakt.utils.ancestorPairsOfType
 import org.serenityos.jakt.utils.ancestorsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
@@ -24,12 +25,7 @@ abstract class JaktPlainTypeMixin(node: ASTNode) : JaktTypeImpl(node), JaktPlain
 
     class Ref(element: JaktPlainType) : JaktRef<JaktPlainType>(element) {
         override fun multiResolve(): List<PsiElement> {
-            for (parent in element.ancestorsOfType<JaktPsiScope>()) {
-                val result = parent.findDeclarationIn(element.name!!) ?: continue
-                return listOf(result)
-            }
-
-            return emptyList()
+            return listOfNotNull(resolveDeclarationAbove(element))
         }
     }
 }
