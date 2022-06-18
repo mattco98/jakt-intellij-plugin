@@ -3,6 +3,7 @@ package org.serenityos.jakt.plugin.type
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.utils.allChildren
 import org.serenityos.jakt.utils.findChildOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 import org.serenityos.jakt.utils.findNotNullChildOfType
@@ -10,8 +11,6 @@ import org.serenityos.jakt.utils.findNotNullChildOfType
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
-            is JaktOptionalSomeExpression -> Type.Optional(inferType(element.findNotNullChildOfType()))
-            is JaktOptionalNoneExpression -> Type.Optional(Type.Unknown)
             is JaktCallExpression -> when (val baseType = inferType(element.expression)) {
                 is Type.Struct -> baseType // TODO: This feels a bit odd
                 is Type.Parameterized -> {
@@ -24,6 +23,7 @@ object TypeInference {
                     } else Type.Unknown
                 }
                 is Type.Function -> baseType.returnType
+                is Type.Unknown -> tryConstructOptionalType(element) ?: Type.Unknown
                 else -> Type.Unknown
             }
             is JaktLogicalOrBinaryExpression,
@@ -106,5 +106,23 @@ object TypeInference {
         }
 
         return resolveDeclarationIn(baseType, element.access.identifier!!.text)
+    }
+
+    private fun tryConstructOptionalType(call: JaktCallExpression): Type? {
+        val ident = (call.expression as? JaktPlainQualifier) ?: return null
+        if (ident.namespaceQualifierList.isNotEmpty())
+            return null
+
+        val name = ident.name
+        val args = call.argumentList?.argumentList ?: emptyList()
+
+        return when (name) {
+            "Some" -> if (args.size == 1) {
+                val arg = args[0].unlabeledArgument?.allChildren?.firstOrNull() as? JaktExpression ?: return null
+                Type.Optional(inferType(arg))
+            } else Type.Unknown
+            "None" -> Type.Optional(Type.Unknown)
+            else -> null
+        }
     }
 }

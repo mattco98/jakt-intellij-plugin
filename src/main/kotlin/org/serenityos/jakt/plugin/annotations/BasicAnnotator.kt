@@ -9,6 +9,8 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.syntax.Highlights
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
@@ -19,7 +21,19 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         when (element) {
             is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
-            is JaktCallExpression -> getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
+            is JaktCallExpression -> {
+                val highlightColor = if (DumbService.isDumb(element.project)) {
+                    Highlights.FUNCTION_CALL
+                } else when (element.jaktType) {
+                    is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
+                    is Type.Struct -> Highlights.STRUCT_NAME
+                    is Type.Enum -> Highlights.ENUM_NAME
+                    is Type.Namespace -> Highlights.NAMESPACE
+                    else -> Highlights.FUNCTION_CALL
+                }
+
+                getCallHighlightTarget(element.firstChild)?.highlight(highlightColor)
+            }
             is JaktLabeledArgument -> {
                 val isCtorLabel = if (!DumbService.isDumb(element.project)) {
                     element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve() is JaktStructDeclaration
@@ -42,6 +56,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                             is Type.Enum -> Highlights.ENUM_NAME
                             is Type.Function -> Highlights.FUNCTION_DECLARATION
                             is Type.Namespace -> Highlights.NAMESPACE_NAME
+                            is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
                             else -> return@forEach
                         }
                     } else Highlights.NAMESPACE_NAME
@@ -99,7 +114,6 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
 
     private fun getCallHighlightTarget(expr: PsiElement): PsiElement? {
         return when (expr) {
-            is JaktIndexedAccessExpression -> expr.bracketOpen.nextSibling
             is JaktAccessExpression -> expr.access.identifier ?: expr.access.decimalLiteral
             is JaktPlainQualifier -> expr.identifier
             else -> if (expr.elementType == JaktTypes.IDENTIFIER) {

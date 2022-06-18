@@ -1,5 +1,6 @@
 package org.serenityos.jakt.plugin.psi.api
 
+import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktExpression
 import org.serenityos.jakt.plugin.psi.JaktPsiElement
 import org.serenityos.jakt.plugin.type.Type
@@ -15,3 +16,4 @@ val JaktExpression.jaktType: Type
     } else {
         TypeInference.inferType(this)
     }
+

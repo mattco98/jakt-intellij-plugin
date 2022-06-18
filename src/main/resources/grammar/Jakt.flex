@@ -71,8 +71,6 @@ COMMENT="//"[^\r\n]*
   "raw"                  { return RAW_KEYWORD; }
   "weak"                 { return WEAK_KEYWORD; }
   "throws"               { return THROWS_KEYWORD; }
-  "Some"                 { return SOME_TYPE; }
-  "None"                 { return NONE_TYPE; }
   "("                    { return PAREN_OPEN; }
   ")"                    { return PAREN_CLOSE; }
   "{"                    { return CURLY_OPEN; }

@@ -187,8 +187,6 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             WEAK_KEYWORD -> Highlights.TYPE_WEAK
             QUESTION_MARK -> Highlights.TYPE_OPTIONAL_QUALIFIER
             COLON_COLON -> Highlights.TYPE_NAMESPACE_OPERATOR
-            SOME_TYPE -> Highlights.TYPE_OPTIONAL_TYPE
-            NONE_TYPE -> Highlights.TYPE_OPTIONAL_TYPE
 
             NEWLINE -> return emptyArray()
 

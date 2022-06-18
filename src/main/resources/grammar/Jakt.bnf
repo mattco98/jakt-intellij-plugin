@@ -53,9 +53,6 @@
         WEAK_KEYWORD='weak'
         THROWS_KEYWORD='throws'
 
-        SOME_TYPE='Some'
-        NONE_TYPE='None'
-
         PAREN_OPEN='('
         PAREN_CLOSE=')'
         CURLY_OPEN='{'
@@ -403,9 +400,7 @@ GenericBound ::= IDENTIFIER {
 
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
-      OptionalSomeExpression // Must come before CallExpression
-    | OptionalNoneExpression // Must come before Qualifier
-    | AccessExpression // Must come before CallExpression
+      AccessExpression // Must come before CallExpression
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
     | AssignmentBinaryExpression // Must come before other binary expressions
     | IndexedAccessExpression
@@ -432,9 +427,6 @@ Expression ::=
     | PlainQualifier
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
-
-OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
-OptionalNoneExpression ::= NONE_TYPE
 
 CallExpression ::= Expression GenericSpecialization? Call
 private Call ::= PAREN_OPEN NL ArgumentList? PAREN_CLOSE
