@@ -10,101 +10,93 @@ class JaktColorSettingsPage : ColorSettingsPage {
 
     override fun getHighlighter() = JaktSyntaxHighlighter()
 
-    override fun getDemoText() = """
-        import <IMPORT_MOD>my_file</IMPORT_MOD> <KW_IMPORT>as</KW_IMPORT> <IMPORT_ALIAS>file</IMPORT_ALIAS> { <IMPORT_ENTRY>a</IMPORT_ENTRY>, <IMPORT_ENTRY>b</IMPORT_ENTRY>, <IMPORT_ENTRY>c</IMPORT_ENTRY> }
-        
-        enum <EN_NAME>WithUnderlyingType</EN_NAME>: <T>i32</T> {
-            <EN_VAR_NAME>A</EN_VAR_NAME>
-            <EN_VAR_NAME>B</EN_VAR_NAME> = 2
-            <EN_VAR_NAME>C</EN_VAR_NAME>
-        }
-        
-        boxed enum <EN_NAME>Foo</EN_NAME><<GENERIC_T>T</GENERIC_T>, <GENERIC_T>U</GENERIC_T>> {
-            <EN_VAR_NAME>Bar</EN_VAR_NAME>
-            <EN_VAR_NAME>Baz</EN_VAR_NAME>(<T>Foo</T><<T>i32</T>, <T>T</T>>)
-            <EN_VAR_NAME>Qux</EN_VAR_NAME>(<EN_STRUCT_LBL>a</EN_STRUCT_LBL>: [<T>String</T>:{<T>U</T>}], <EN_STRUCT_LBL>b</EN_STRUCT_LBL>: <T>WithUnderlyingType</T>)
-        }
-        
-        function <FUNC_DECL>my_function</FUNC_DECL><<GENERIC_T>A</GENERIC_T>>(<FUNC_PARAM>f</FUNC_PARAM>: <T>Foo</T><<T>i32</T>, <T>A</T>>, anon <FUNC_PARAM>strings</FUNC_PARAM>: (<T>u8</T>, {<T>String</T>})) -> [<T>i32</T>] {
-            match <FUNC_PARAM>f</FUNC_PARAM> {
-                Bar => [0<NUMERIC_SUFFIX>f64</NUMERIC_SUFFIX>; 10]
-                Baz(f_) => <FUNC_CALL>my_function</FUNC_CALL><<GENERIC_T>A</GENERIC_T>>(f: f_, (<FUNC_PARAM>strings</FUNC_PARAM>.0 + 1, <FUNC_PARAM>strings</FUNC_PARAM>.1))
-                Qux(dict, t) => {
-                    for str in <FUNC_PARAM>strings</FUNC_PARAM>.1.<FUNC_CALL>iterator</FUNC_CALL>() {
-                        let mutable i = 0
-                        loop {
-                            if str[i] == b'z' and not (i > 5<NUMERIC_SUFFIX>i8</NUMERIC_SUFFIX>) {
-                                continue
-                            }
-                            i++
-                            if i == 10 {
-                                return [i; 0b1010]
+    override fun getDemoText(): String {
+        val text = """
+            import IMPORT_MOD{my_file} KW_IMPORT{as} IMPORT_ALIAS{file} { IMPORT_ENTRY{a}, IMPORT_ENTRY{b}, IMPORT_ENTRY{c} }
+            
+            enum EN_NAME{WithUnderlyingType}: TY{i32} {
+                EN_VAR_NAME{A}
+                EN_VAR_NAME{B} = 2
+                EN_VAR_NAME{C}
+            }
+
+            boxed enum EN_NAME{Foo}<GENERIC_TY{T}, GENERIC_TY{U}> {
+                EN_VAR_NAME{Bar}
+                EN_VAR_NAME{Baz}(TY{Foo}<TY{i32}, TY{T}>)
+                EN_VAR_NAME{Qux}(EN_STRUCT_LBL{a}: [TY{String}:{TY{U}}], EN_STRUCT_LBL{b}: TY{WithUnderlyingType})
+            }
+            
+            function FUNC_DECL{my_function}<GENERIC_TY{A}>(FUNC_PARAM{f}: TY{Foo}<TY{i32}, TY{A}>, anon FUNC_PARAM{strings}: (TY{u8}, {TY{String}})) -> [TY{i32}] {
+                match FUNC_PARAM{f} {
+                    Bar => [0NUMERIC_SUFFIX{f64}; 10]
+                    Baz(f_) => FUNC_CALL{my_function}<GENERIC_TY{A}>(f: f_, (FUNC_PARAM{strings}.0 + 1, FUNC_PARAM{strings}.1))
+                    Qux(dict, t) => {
+                        for str in FUNC_PARAM{strings}.1.FUNC_CALL{iterator}() {
+                            mut i = 0
+                            loop {
+                                if str[LV{i}] == b'z' and not (LV{i} > 5NUMERIC_SUFFIX{i8}) {
+                                    continue
+                                }
+                                
+                                LV{i}++
+                                if LV{i} == 10 {
+                                    return [LV{i}; 0b1010]
+                                }
                             }
                         }
                     }
-                    [1, 0o27_7, 3 << 9]
                 }
             }
-        }
-        
-        extern struct <STRUCT_NAME>D</STRUCT_NAME> { 
-            function <FUNC_DECL>invoke</FUNC_DECL>(this, <FUNC_PARAM>a</FUNC_PARAM>: <T>i32</T>) -> <T>String</T>
-        }
-    
-        class <STRUCT_NAME>P</STRUCT_NAME> {
-            <STRUCT_FIELD>foo</STRUCT_FIELD>: <T>i32</T>
-    
-            // Create a new P from the given value
-            public function <FUNC_DECL>make</FUNC_DECL>(<FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) throws => <FUNC_CALL>P</FUNC_CALL>(foo: value)
-            public function <FUNC_DECL>get_foo</FUNC_DECL>(this) => <STRUCT_FIELD_REF>.foo</STRUCT_FIELD_REF>
-            public function <FUNC_DECL>set_foo</FUNC_DECL>(mutable this, <FUNC_PARAM>value</FUNC_PARAM>: <T>i32</T>) {
-                <STRUCT_FIELD_REF>.foo</STRUCT_FIELD_REF> = value
+            
+            extern struct STRUCT_NAME{D} {
+                function FUNC_DECL{invoke}(this, FUNC_PARAM{a}: TY{i32}) -> TY{String}
             }
-        }
-
-        function <FUNC_DECL>get_d</FUNC_DECL>() -> <T>D</T>? => <OPT_T>None</OPT_T>
-        
-        function <FUNC_DECL>main</FUNC_DECL>() {
-            let mutable p = <STRUCT_NAME>P</STRUCT_NAME>::<FUNC_CALL>make</FUNC_CALL>(value: 12)
-            <FUNC_CALL>println</FUNC_CALL>("value = {}", p.<FUNC_CALL>get_foo</FUNC_CALL>())
-            p.<FUNC_CALL>set_foo</FUNC_CALL>(value: 0x123)
-            unsafe {
-                cpp {
-                    "p.set_foo(98);"
+            
+            class STRUCT_NAME{P} {
+                STRUCT_FIELD{foo}: TY{i32}
+                
+                // Create a new P from the given value
+                public function FUNC_DECL{make}(FUNC_PARAM{value}: TY{i32}) throws => FUNC_CALL{P}(foo: value)
+                public function FUNC_DECL{get_foo}(this) => STRUCT_FIELD_REF{.foo}
+                public function FUNC_DECL{set_foo}(mut this, FUNC_PARAM{value}: TY{i32}) {
+                    STRUCT_FIELD_REF{.foo} = value
                 }
             }
-        
-            <FUNC_CALL>println</FUNC_CALL>("{}", <FUNC_CALL>get_d</FUNC_CALL>()!.<FUNC_CALL>invoke</FUNC_CALL>(a: 20))
-        
-            let x = 10
-            let y = &raw x
-            unsafe {
-                <FUNC_CALL>println</FUNC_CALL>("{}", *y) // 10
+            
+            function FUNC_DECL{get_d}() -> TY{D}? => OPT_TY{None}
+            
+            function FUNC_DECL{main}() {
+                mut p = STRUCT_NAME{P}::FUNC_CALL{make}(value: 12)
+                FUNC_CALL{println}("value = {}", LV{p}.FUNC_CALL{get_foo}())
+                LV{p}.FUNC_CALL{set_foo}(value: 0x123)
+                unsafe {
+                    cpp {
+                        "p.set_foo(98);"
+                    }
+                }
+                
+                FUNC_CALL{println}("{}", FUNC_CALL{get_d}()!.FUNC_CALL{invoke}(a: 20))
+                
+                let x = 10
+                let y = &raw LV{x}
+                unsafe {
+                    FUNC_CALL{println}("{}", *y) // 10
+                }
+                
+                return 0
             }
-        
-            return 0
-        }
-    """.trimIndent()
+        """.trimIndent()
 
-    override fun getAdditionalHighlightingTagToDescriptorMap() = mapOf(
-        "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
-        "FUNC_CALL" to Highlights.FUNCTION_CALL,
-        "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
-        "T" to Highlights.TYPE_NAME,
-        "GENERIC_T" to Highlights.TYPE_GENERIC_NAME,
-        "OPT_T" to Highlights.TYPE_OPTIONAL_TYPE,
-        "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
-        "IMPORT_MOD" to Highlights.IMPORT_MODULE,
-        "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
-        "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
-        "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
-        "EN_NAME" to Highlights.ENUM_NAME,
-        "EN_VAR_NAME" to Highlights.ENUM_VARIANT_NAME,
-        "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
-        "STRUCT_NAME" to Highlights.STRUCT_NAME,
-        "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
-        "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
-    )
+        val regex = """([A-Z_]+)\{([^)]+?)}""".toRegex()
+        return text.replace(regex) {
+            val tag = it.groups[1]!!.value
+            check(tag in EXTRA_HIGHLIGHT_TAGS)
+            val content = it.groups[2]!!.value
+            "<$tag>$content</$tag>"
+        }
+    }
+
+    override fun getAdditionalHighlightingTagToDescriptorMap() = EXTRA_HIGHLIGHT_TAGS
 
     override fun getAttributeDescriptors() = DESCRIPTORS
 
@@ -172,5 +164,25 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Types//Optional Qualifier" to Highlights.TYPE_OPTIONAL_QUALIFIER,
             "Types//Optional Type" to Highlights.TYPE_OPTIONAL_TYPE,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
+
+        private val EXTRA_HIGHLIGHT_TAGS = mapOf(
+            "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
+            "FUNC_CALL" to Highlights.FUNCTION_CALL,
+            "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
+            "TY" to Highlights.TYPE_NAME,
+            "GENERIC_TY" to Highlights.TYPE_GENERIC_NAME,
+            "OPT_TY" to Highlights.TYPE_OPTIONAL_TYPE,
+            "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
+            "IMPORT_MOD" to Highlights.IMPORT_MODULE,
+            "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
+            "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
+            "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
+            "EN_NAME" to Highlights.ENUM_NAME,
+            "EN_VAR_NAME" to Highlights.ENUM_VARIANT_NAME,
+            "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
+            "STRUCT_NAME" to Highlights.STRUCT_NAME,
+            "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
+            "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
+        )
     }
 }
