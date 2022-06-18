@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner
 
 abstract class JaktRef<T : JaktNameIdentifierOwner>(
     element: T,

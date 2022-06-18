@@ -6,19 +6,17 @@ import com.intellij.util.IncorrectOperationException
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktThisExpression
-import org.intellij.sdk.language.psi.impl.JaktExpressionImpl
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
-import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.utils.ancestorsOfType
 
-// TODO: It feels weird to inherit from JaktNameIdentifierOwner here,
+// TODO: It feels weird to inherit from JaktNamedElement here,
 //       but JaktRef requires it
 abstract class JaktThisExpressionMixin(
     node: ASTNode,
-) : JaktExpressionImpl(node), JaktThisExpression, JaktNameIdentifierOwner {
+) : JaktNamedElement(node), JaktThisExpression, JaktNameIdentifierOwner {
     override fun getNameIdentifier(): PsiElement = thisKeyword
-
-    override fun getName(): String = nameIdentifier.text
 
     override fun setName(name: String): PsiElement = throw IncorrectOperationException()
 

@@ -45,7 +45,7 @@ TopLevelDefinition ::=
     | ExternDeclaration
     | NamespaceDeclaration
     | ImportStatement {
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     // For some reason this gets a getExternKeyword() function which conflicts
     // with ExternStructDeclaration
     generateTokenAccessors=false
@@ -291,7 +291,7 @@ SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
 PlainType ::= (IDENTIFIER COLON_COLON)* IDENTIFIER GenericSpecialization? {
     extends=Type
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainTypeMixin"
 }
 
@@ -356,7 +356,7 @@ private Call ::= PAREN_OPEN NL ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktLabeledArgumentMixin"
 }
 UnlabeledArgument ::= ExpressionWithoutAssignment
@@ -365,7 +365,7 @@ AccessExpression ::= Expression DOT Access
 Access ::= FieldLookup | TupleLookup {
     implements=[
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+        "org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktAccessMixin"
 }
@@ -374,7 +374,7 @@ private TupleLookup ::= DECIMAL_LITERAL
 
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
 FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktFieldAccessExpressionMixin"
 }
 ThisExpression ::= THIS_KEYWORD {
@@ -405,7 +405,7 @@ MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | ExpressionWithoutAss
 MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>> PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
-    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktDestructuringLabelMixin"
 }
 DestructuringBinding ::= IDENTIFIER {
@@ -416,7 +416,7 @@ DestructuringBinding ::= IDENTIFIER {
 NamespaceQualifier ::= IDENTIFIER COLON_COLON {
     implements=[
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+        "org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktNamespaceQualifierMixin"
 }
@@ -424,7 +424,7 @@ PlainQualifier ::= NamespaceQualifier* IDENTIFIER {
     extends=Expression
     implements=[
         "org.serenityos.jakt.plugin.psi.api.JaktTypeable"
-        "org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+        "org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainQualifierMixin"
 }

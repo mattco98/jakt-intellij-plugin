@@ -1,27 +1,17 @@
 package org.serenityos.jakt.plugin.psi.reference
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktCallExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktLabeledArgument
 import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.intellij.sdk.language.psi.JaktStructField
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktLabeledArgumentMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktLabeledArgument {
-    override fun getNameIdentifier(): PsiElement = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
+) : JaktNamedElement(node), JaktLabeledArgument {
     override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
         override fun singleResolve(): PsiElement? {
             return when (val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()) {

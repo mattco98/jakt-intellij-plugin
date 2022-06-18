@@ -1,17 +1,15 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktNormalEnumVariant
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktNormalEnumVariantMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktNormalEnumVariant {
+) : JaktNamedElement(node), JaktNormalEnumVariant {
     override val jaktType: Type
         get() {
             val members = if (structEnumMemberBodyPartList.isNotEmpty()) {
@@ -29,12 +27,4 @@ abstract class JaktNormalEnumVariantMixin(
                 members,
             )
         }
-
-    override fun getNameIdentifier(): PsiElement = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String): PsiElement = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
 }

@@ -2,14 +2,12 @@ package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktExternFunctionDeclaration
-import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 
 abstract class JaktExternFunctionDeclarationMixin(
     node: ASTNode,
-) : JaktTopLevelDefinitionImpl(node), JaktExternFunctionDeclaration {
+) : JaktNamedElement(node), JaktExternFunctionDeclaration {
     // TODO: Deduplicate with JaktFunctionDeclarationMixin
     override val jaktType: Type
         get() {
@@ -50,14 +48,4 @@ abstract class JaktExternFunctionDeclarationMixin(
         }
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
-
-    override fun getNameIdentifier() = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
-    override fun getTextOffset(): Int = nameIdentifier.textOffset
 }

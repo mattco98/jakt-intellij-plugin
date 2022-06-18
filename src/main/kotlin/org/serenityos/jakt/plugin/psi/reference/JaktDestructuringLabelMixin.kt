@@ -1,24 +1,15 @@
 package org.serenityos.jakt.plugin.psi.reference
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktDestructuringLabel
 import org.intellij.sdk.language.psi.JaktMatchPattern
 import org.intellij.sdk.language.psi.JaktNormalEnumVariant
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktDestructuringLabelMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktDestructuringLabel {
-    override fun getNameIdentifier() = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
+) : JaktNamedElement(node), JaktDestructuringLabel {
     override fun getReference() = singleRef {
         val head = ancestorOfType<JaktMatchPattern>()?.plainQualifier ?: return@singleRef null
         val resolved = head.reference?.resolve() as? JaktNormalEnumVariant

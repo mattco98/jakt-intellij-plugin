@@ -1,14 +1,13 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktExternStructMethod
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 
 abstract class JaktExternStructMethodMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktExternStructMethod {
+) : JaktNamedElement(node), JaktExternStructMethod {
     override val jaktType: Type
         get() = Type.Function(
             identifier.text,
@@ -32,12 +31,4 @@ abstract class JaktExternStructMethodMixin(
         }
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
-
-    override fun getNameIdentifier() = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
 }

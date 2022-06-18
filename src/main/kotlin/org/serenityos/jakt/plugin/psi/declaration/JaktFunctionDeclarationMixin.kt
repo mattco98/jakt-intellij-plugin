@@ -1,17 +1,15 @@
 package org.serenityos.jakt.plugin.psi.declaration
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktModificationTracker
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 
 abstract class JaktFunctionDeclarationMixin(
     node: ASTNode,
-) : ASTWrapperPsiElement(node), JaktFunctionDeclaration, JaktNameIdentifierOwner, JaktDeclaration {
+) : JaktNamedElement(node), JaktFunctionDeclaration, JaktNameIdentifierOwner, JaktDeclaration {
     override val tracker = JaktModificationTracker()
 
     override val jaktType: Type
@@ -55,14 +53,4 @@ abstract class JaktFunctionDeclarationMixin(
     override fun getDeclarations(): List<JaktDeclaration> = parameterList
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
-
-    override fun getNameIdentifier(): PsiElement = identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
-    override fun getTextOffset(): Int = nameIdentifier.textOffset
 }

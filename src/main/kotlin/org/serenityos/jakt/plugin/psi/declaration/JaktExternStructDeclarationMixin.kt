@@ -2,15 +2,14 @@ package org.serenityos.jakt.plugin.psi.declaration
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktExternStructDeclaration
-import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktExternStructDeclarationMixin(
     node: ASTNode,
-) : JaktTopLevelDefinitionImpl(node), JaktExternStructDeclaration, JaktPsiScope {
+) : JaktNamedElement(node), JaktExternStructDeclaration, JaktPsiScope {
     override val jaktType by recursivelyGuarded<Type> {
         val methods = mutableMapOf<String, Type.Function>()
 
@@ -62,12 +61,4 @@ abstract class JaktExternStructDeclarationMixin(
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier() = structHeader.identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
-    override fun getTextOffset(): Int = nameIdentifier.textOffset
 }

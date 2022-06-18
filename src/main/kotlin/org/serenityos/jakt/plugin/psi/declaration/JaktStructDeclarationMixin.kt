@@ -5,16 +5,14 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
-import org.intellij.sdk.language.psi.impl.JaktTopLevelDefinitionImpl
-import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
     node: ASTNode,
-) : JaktTopLevelDefinitionImpl(node), JaktStructDeclaration, JaktNameIdentifierOwner, JaktDeclaration, JaktPsiScope {
+) : JaktNamedElement(node), JaktStructDeclaration, JaktPsiScope {
     override val jaktType by recursivelyGuarded<Type> {
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, Type.Function>()
@@ -70,12 +68,4 @@ abstract class JaktStructDeclarationMixin(
     override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
 
     override fun getNameIdentifier(): PsiElement = structHeader.identifier
-
-    override fun getName(): String = nameIdentifier.text
-
-    override fun setName(name: String) = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
-    }
-
-    override fun getTextOffset(): Int = nameIdentifier.textOffset
 }
