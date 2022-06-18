@@ -37,15 +37,15 @@ abstract class JaktNamespaceQualifierMixin(
     override fun getReference() = Ref(this)
 
     class Ref(element: JaktNamespaceQualifier) : JaktRef<JaktNamespaceQualifier>(element) {
-        override fun multiResolve(): List<PsiElement> {
+        override fun singleResolve(): PsiElement? {
             return if (element.prevSibling == null) {
                 resolveDeclarationAbove(element)
             } else {
                 resolveDeclarationIn(
-                    element.prevSibling.reference?.resolve() ?: return emptyList(),
+                    element.prevSibling.reference?.resolve() ?: return null,
                     element.name!!,
                 )
-            }.let(::listOfNotNull)
+            }
         }
     }
 }

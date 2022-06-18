@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktGenericBound
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.multiRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.resolveReferencesIn
 import org.serenityos.jakt.utils.ancestorOfType
@@ -24,11 +25,8 @@ abstract class JaktGenericBoundMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktGenericBound) : JaktRef<JaktGenericBound>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            return resolveReferencesIn(element.ancestorOfType<JaktGeneric>() ?: return emptyList(), element.name)
-        }
+    override fun getReference() = multiRef {
+        val owner = it.ancestorOfType<JaktGeneric>() ?: return@multiRef emptyList()
+        resolveReferencesIn(owner, it.name)
     }
 }

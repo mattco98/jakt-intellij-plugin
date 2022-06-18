@@ -9,6 +9,7 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.multiRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
 
@@ -26,22 +27,18 @@ abstract class JaktStructFieldMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
+    override fun getReference() = multiRef { field ->
+        val references = mutableListOf<PsiElement>()
 
-    class Ref(element: JaktStructField) : JaktRef<JaktStructField>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            val references = mutableListOf<PsiElement>()
-
-            element.ancestorOfType<JaktStructDeclaration>()!!.structBody.structMemberList.forEach {
-                val function = it.functionDeclaration ?: return@forEach
-                PsiTreeUtil.processElements(function) { el ->
-                    if (el is JaktFieldAccessExpression && el.name == element.name)
-                        references.add(el)
-                    true
-                }
+        field.ancestorOfType<JaktStructDeclaration>()!!.structBody.structMemberList.forEach {
+            val function = it.functionDeclaration ?: return@forEach
+            PsiTreeUtil.processElements(function) { el ->
+                if (el is JaktFieldAccessExpression && el.name == field.name)
+                    references.add(el)
+                true
             }
-
-            return references
         }
+
+        references
     }
 }

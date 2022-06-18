@@ -22,19 +22,15 @@ abstract class JaktLabeledArgumentMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktLabeledArgument) : JaktRef<JaktLabeledArgument>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()
-
-            return when (callTarget) {
+    override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
+        override fun singleResolve(): PsiElement? {
+            return when (val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()) {
                 is JaktFunctionDeclaration -> callTarget.parameterList.firstOrNull { it.name == element.name }
                 is JaktStructDeclaration -> callTarget.structBody.structMemberList
                     .mapNotNull { it.structField }
                     .firstOrNull { it.name == element.name }
                 else -> null
-            }.let(::listOfNotNull)
+            }
         }
 
         override fun isReferenceTo(element: PsiElement): Boolean {

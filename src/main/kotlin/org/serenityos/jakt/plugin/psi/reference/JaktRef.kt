@@ -11,7 +11,10 @@ import org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner
 abstract class JaktRef<T : JaktNameIdentifierOwner>(
     element: T,
 ) : PsiPolyVariantReferenceBase<T>(element) {
-    abstract fun multiResolve(): List<PsiElement>
+    open fun multiResolve(): List<PsiElement> = listOfNotNull(singleResolve())
+
+    open fun singleResolve(): PsiElement? =
+        error("No implementation of singleResolve() for ref ${this::class.simpleName}")
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         return multiResolve().map(::PsiElementResolveResult).toTypedArray()
@@ -32,3 +35,13 @@ abstract class JaktRef<T : JaktNameIdentifierOwner>(
         return super.handleElementRename(newElementName)
     }
 }
+
+inline fun <T : JaktNameIdentifierOwner> T.singleRef(crossinline producer: (T) -> PsiElement?) =
+    object : JaktRef<T>(this) {
+        override fun singleResolve() = producer(element)
+    }
+
+inline fun <T : JaktNameIdentifierOwner> T.multiRef(crossinline producer: (T) -> List<PsiElement>) =
+    object : JaktRef<T>(this) {
+        override fun multiResolve() = producer(element)
+    }

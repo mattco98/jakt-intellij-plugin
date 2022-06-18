@@ -21,11 +21,5 @@ abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktExpressionImpl(node)
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktPlainQualifier) : JaktRef<JaktPlainQualifier>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            return listOfNotNull(resolvePlainQualifier(element))
-        }
-    }
+    override fun getReference() = singleRef(::resolvePlainQualifier)
 }

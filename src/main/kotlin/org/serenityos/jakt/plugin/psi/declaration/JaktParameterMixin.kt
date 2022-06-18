@@ -8,6 +8,7 @@ import org.intellij.sdk.language.psi.JaktParameter
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.multiRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.resolveDeclarationIn
 import org.serenityos.jakt.plugin.type.resolveReferencesIn
@@ -27,11 +28,8 @@ abstract class JaktParameterMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktParameter) : JaktRef<JaktParameter>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            return resolveReferencesIn(element.ancestorOfType<JaktPsiScope>() ?: return emptyList(), element.name)
-        }
+    override fun getReference() = multiRef {
+        val owner = it.ancestorOfType<JaktPsiScope>() ?: return@multiRef emptyList()
+        resolveReferencesIn(owner, it.name)
     }
 }

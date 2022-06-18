@@ -19,18 +19,14 @@ abstract class JaktFieldAccessExpressionMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktFieldAccessExpression) : JaktRef<JaktFieldAccessExpression>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            for (decl in element.ancestorsOfType<JaktStructDeclaration>()) {
-                decl.structBody.structMemberList.mapNotNull { member ->
-                    if (member.structField?.identifier?.text == element.name)
-                        return listOf(member.structField!!.identifier)
-                }
+    override fun getReference() = singleRef {
+        for (decl in it.ancestorsOfType<JaktStructDeclaration>()) {
+            decl.structBody.structMemberList.mapNotNull { member ->
+                if (member.structField?.identifier?.text == it.name)
+                    return@singleRef member.structField!!.identifier
             }
-
-            return emptyList()
         }
+
+        null
     }
 }

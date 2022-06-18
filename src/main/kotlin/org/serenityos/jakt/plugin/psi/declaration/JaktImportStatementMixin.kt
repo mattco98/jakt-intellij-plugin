@@ -10,6 +10,7 @@ import org.serenityos.jakt.plugin.project.jaktProject
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.singleRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.findChildrenOfType
 
@@ -33,12 +34,7 @@ abstract class JaktImportStatementMixin(
     fun resolveFile(): JaktFile? =
         jaktProject.resolveImportedFile(containingFile.originalFile.virtualFile, nameIdent.text)
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktImportStatement) : JaktRef<JaktImportStatement>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            val file = element.jaktProject.resolveImportedFile(element.containingFile.virtualFile, element.name)
-            return listOfNotNull(file)
-        }
+    override fun getReference() = singleRef {
+        it.jaktProject.resolveImportedFile(it.containingFile.virtualFile, it.name)
     }
 }

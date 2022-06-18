@@ -25,11 +25,5 @@ abstract class JaktAccessMixin(
         nameIdentifier?.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktAccess) : JaktRef<JaktAccess>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            return listOfNotNull(resolveAccess(element))
-        }
-    }
+    override fun getReference() = singleRef(::resolveAccess)
 }

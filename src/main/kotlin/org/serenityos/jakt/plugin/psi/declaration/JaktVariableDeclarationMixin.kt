@@ -7,7 +7,7 @@ import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.intellij.sdk.language.psi.impl.JaktStatementImpl
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
-import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.multiRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.TypeInference
 import org.serenityos.jakt.plugin.type.resolveReferencesIn
@@ -34,11 +34,8 @@ abstract class JaktVariableDeclarationMixin(
 
     override fun getTextOffset(): Int = nameIdentifier.textOffset
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktVariableDeclarationStatement) : JaktRef<JaktVariableDeclarationStatement>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            return resolveReferencesIn(element.ancestorOfType<JaktPsiScope>() ?: return emptyList(), element.name)
-        }
+    override fun getReference() = multiRef {
+        val owner = it.ancestorOfType<JaktPsiScope>() ?: return@multiRef emptyList()
+        resolveReferencesIn(owner, it.name)
     }
 }

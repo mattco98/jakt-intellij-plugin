@@ -9,6 +9,7 @@ import org.serenityos.jakt.plugin.JaktFile
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.reference.JaktRef
+import org.serenityos.jakt.plugin.psi.reference.singleRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.resolveDeclarationIn
 import org.serenityos.jakt.utils.ancestorOfType
@@ -34,13 +35,9 @@ abstract class JaktImportBraceEntryMixin(
         resolveDeclarationIn(it, name)
     }
 
-    override fun getReference() = Ref(this)
-
-    class Ref(element: JaktImportBraceEntry) : JaktRef<JaktImportBraceEntry>(element) {
-        override fun multiResolve(): List<PsiElement> {
-            val file = element.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
-                ?: return emptyList()
-            return listOfNotNull(resolveDeclarationIn(file, element.name))
-        }
+    override fun getReference() = singleRef {
+            val file = it.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
+                ?: return@singleRef null
+            resolveDeclarationIn(file, it.name)
     }
 }
