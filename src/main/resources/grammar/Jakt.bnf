@@ -24,6 +24,7 @@
         FUNCTION_KEYWORD='function'
         PUBLIC_KEYWORD='public'
         PRIVATE_KEYWORD='private'
+        RESTRICTED_KEYWORD='restricted'
         IMPORT_KEYWORD='import'
 
         LET_KEYWORD='let'
@@ -270,7 +271,8 @@ StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
 private StructMembers ::= <<commaOrEolList StructMember>>;
 StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
 
-StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD
+StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
+RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>> PAREN_CLOSE
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // Enums

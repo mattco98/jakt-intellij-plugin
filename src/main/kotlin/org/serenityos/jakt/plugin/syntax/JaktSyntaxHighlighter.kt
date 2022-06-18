@@ -120,7 +120,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             // RESTRICTED_KEYWORD,
             PRIVATE_KEYWORD,
-            PUBLIC_KEYWORD -> Highlights.KEYWORD_VISIBILITY
+            PUBLIC_KEYWORD,
+            RESTRICTED_KEYWORD -> Highlights.KEYWORD_VISIBILITY
 
             IF_KEYWORD,
             ELSE_KEYWORD,

@@ -49,6 +49,7 @@ COMMENT="//"[^\r\n]*
   "function"             { return FUNCTION_KEYWORD; }
   "public"               { return PUBLIC_KEYWORD; }
   "private"              { return PRIVATE_KEYWORD; }
+  "restricted"           { return RESTRICTED_KEYWORD; }
   "import"               { return IMPORT_KEYWORD; }
   "let"                  { return LET_KEYWORD; }
   "match"                { return MATCH_KEYWORD; }

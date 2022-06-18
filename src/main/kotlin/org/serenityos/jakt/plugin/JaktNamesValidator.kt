@@ -25,6 +25,7 @@ class JaktNamesValidator : NamesValidator {
             FUNCTION_KEYWORD,
             PUBLIC_KEYWORD,
             PRIVATE_KEYWORD,
+            RESTRICTED_KEYWORD,
             LET_KEYWORD,
             MATCH_KEYWORD,
             IF_KEYWORD,
