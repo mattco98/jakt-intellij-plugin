@@ -16,8 +16,8 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 //       launched for testing likes to reset the color scheme pretty often.
 object Highlights {
     val IDENTIFIER = Default.IDENTIFIER.extend("IDENTIFIER")
-    val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
-    val NAMESPACE_NAME = IDENTIFIER.extend("NAMESPACE_NAME")
+    val LOCAL_VAR = IDENTIFIER.extend("LOCAL_VAR")
+    val LOCAL_VAR_MUT = LOCAL_VAR.extend("LOCAL_VAR_MUT")
 
     val LITERAL_NUMBER = Default.NUMBER.extend("LITERAL_NUMBER", Color.getColor("0xD19A66"))
     val LITERAL_NUMBER_SUFFIX = LITERAL_NUMBER.extend("LITERAL_NUMBER_SUFFIX", Color.getColor("0xD19A66"))
@@ -73,6 +73,9 @@ object Highlights {
     val STRUCT_NAME = IDENTIFIER.extend("STRUCT_NAME")
     val STRUCT_FIELD = IDENTIFIER.extend("STRUCT_FIELD")
     val STRUCT_FIELD_REFERENCE = Default.INSTANCE_FIELD.extend("STRUCT_FIELD_REFERENCE")
+
+    val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
+    val NAMESPACE_NAME = IDENTIFIER.extend("NAMESPACE_NAME")
 
     private fun TextAttributesKey.extend(name: String, color: Color? = null) = if (color != null) {
         @Suppress("DEPRECATION")

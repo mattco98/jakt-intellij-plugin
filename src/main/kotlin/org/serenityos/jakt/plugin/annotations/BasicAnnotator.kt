@@ -1,5 +1,6 @@
 package org.serenityos.jakt.plugin.annotations
 
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
@@ -9,6 +10,7 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.syntax.Highlights
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
@@ -19,8 +21,10 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         when (element) {
             is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
-            is JaktCallExpression -> if (DumbService.isDumb(element.project)) {
-                getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
+            is JaktCallExpression -> {
+                if (DumbService.isDumb(element.project) || (element.firstChild as? JaktTypeable)?.jaktType == Type.Unknown) {
+                    getCallHighlightTarget(element.firstChild)?.highlight(Highlights.FUNCTION_CALL)
+                }
             }
             is JaktLabeledArgument -> {
                 val isCtorLabel = if (!DumbService.isDumb(element.project)) {
@@ -35,23 +39,34 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     .highlight(highlight)
             }
             is JaktPlainQualifier -> {
-                val elementsToHighlight = element.namespaceQualifierList + element
                 val isDumb = DumbService.isDumb(element.project)
-                elementsToHighlight.forEach {
+
+                element.namespaceQualifierList.forEach {
                     val attr = if (!isDumb) {
-                        when (it.jaktType) {
-                            is Type.Struct -> Highlights.STRUCT_NAME
-                            is Type.Enum -> Highlights.ENUM_NAME
-                            is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
-                            is Type.Function -> Highlights.FUNCTION_DECLARATION
-                            is Type.Namespace -> Highlights.NAMESPACE_NAME
-                            is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
-                            else -> return@forEach
-                        }
+                        getIdentHighlightColor(it) ?: return@forEach
                     } else Highlights.NAMESPACE_NAME
 
                     it.nameIdentifier!!.highlight(attr)
                 }
+
+                var identHighlight: TextAttributesKey? = null
+
+                if (!isDumb) {
+                    identHighlight = when (val decl = element.reference?.resolve()) {
+                        is JaktVariableDeclarationStatement -> if (decl.mutKeyword != null) {
+                            Highlights.LOCAL_VAR_MUT
+                        } else Highlights.LOCAL_VAR
+                        is JaktNormalEnumVariant, is JaktUnderlyingTypeEnumVariant -> Highlights.ENUM_VARIANT_NAME
+                        else -> getIdentHighlightColor(element)
+                    }
+                }
+
+                // Don't collide highlighting with JaktCallExpression
+                if (identHighlight == null && element.ancestorOfType<JaktCallExpression>() == null)
+                    identHighlight = Highlights.IDENTIFIER
+
+                if (identHighlight != null)
+                    element.nameIdentifier!!.highlight(identHighlight)
             }
             is JaktPlainType -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
@@ -91,6 +106,26 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 .highlight(Highlights.STRUCT_FIELD_REFERENCE)
             is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
             is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktVariableDeclarationStatement -> {
+                val color = if (element.mutKeyword != null) {
+                    Highlights.LOCAL_VAR_MUT
+                } else Highlights.LOCAL_VAR
+                element.identifier.highlight(color)
+            }
+            is JaktForStatement -> element.identifier.highlight(Highlights.LOCAL_VAR)
+        }
+    }
+
+    // Must not be called when Dumb
+    private fun getIdentHighlightColor(ident: JaktTypeable): TextAttributesKey? {
+        return when (ident.jaktType) {
+            is Type.Struct -> Highlights.STRUCT_NAME
+            is Type.Enum -> Highlights.ENUM_NAME
+            is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
+            is Type.Function -> Highlights.FUNCTION_DECLARATION
+            is Type.Namespace -> Highlights.NAMESPACE_NAME
+            is Type.Optional -> Highlights.TYPE_OPTIONAL_TYPE
+            else -> null
         }
     }
 
@@ -98,9 +133,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         return when (expr) {
             is JaktAccessExpression -> expr.access.identifier ?: expr.access.decimalLiteral
             is JaktPlainQualifier -> expr.identifier
-            else -> if (expr.elementType == JaktTypes.IDENTIFIER) {
-                expr
-            } else null
+            else -> expr.takeIf { it.elementType == JaktTypes.IDENTIFIER }
         }
     }
 }

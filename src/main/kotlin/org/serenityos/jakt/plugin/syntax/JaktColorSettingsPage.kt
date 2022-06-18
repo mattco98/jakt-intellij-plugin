@@ -15,32 +15,32 @@ class JaktColorSettingsPage : ColorSettingsPage {
             import IMPORT_MOD{my_file} KW_IMPORT{as} IMPORT_ALIAS{file} { IMPORT_ENTRY{a}, IMPORT_ENTRY{b}, IMPORT_ENTRY{c} }
             
             enum EN_NAME{WithUnderlyingType}: TY{i32} {
-                EN_VAR_NAME{A}
-                EN_VAR_NAME{B} = 2
-                EN_VAR_NAME{C}
+                EN_VARIANT{A}
+                EN_VARIANT{B} = 2
+                EN_VARIANT{C}
             }
 
             boxed enum EN_NAME{Foo}<GENERIC_TY{T}, GENERIC_TY{U}> {
-                EN_VAR_NAME{Bar}
-                EN_VAR_NAME{Baz}(TY{Foo}<TY{i32}, TY{T}>)
-                EN_VAR_NAME{Qux}(EN_STRUCT_LBL{a}: [TY{String}:{TY{U}}], EN_STRUCT_LBL{b}: TY{WithUnderlyingType})
+                EN_VARIANT{Bar}
+                EN_VARIANT{Baz}(TY{Foo}<TY{i32}, TY{T}>)
+                EN_VARIANT{Qux}(EN_STRUCT_LBL{a}: [TY{String}:{TY{U}}], EN_STRUCT_LBL{b}: TY{WithUnderlyingType})
             }
             
             function FUNC_DECL{my_function}<GENERIC_TY{A}>(FUNC_PARAM{f}: TY{Foo}<TY{i32}, TY{A}>, anon FUNC_PARAM{strings}: (TY{u8}, {TY{String}})) -> [TY{i32}] {
                 match FUNC_PARAM{f} {
-                    Bar => [0NUMERIC_SUFFIX{f64}; 10]
-                    Baz(f_) => FUNC_CALL{my_function}<GENERIC_TY{A}>(f: f_, (FUNC_PARAM{strings}.0 + 1, FUNC_PARAM{strings}.1))
-                    Qux(dict, t) => {
-                        for str in FUNC_PARAM{strings}.1.FUNC_CALL{iterator}() {
-                            mut i = 0
+                    EN_VARIANT{Bar} => [0NUMERIC_SUFFIX{f64}; 10]
+                    EN_VARIANT{Baz}(f_) => FUNC_CALL{my_function}<GENERIC_TY{A}>(f: f_, (FUNC_PARAM{strings}.0 + 1, FUNC_PARAM{strings}.1))
+                    EN_VARIANT{Qux}(dict, t) => {
+                        for LV{str} in FUNC_PARAM{strings}.1.FUNC_CALL{iterator}() {
+                            mut LV_MUT{i} = 0
                             loop {
-                                if str[LV{i}] == b'z' and not (LV{i} > 5NUMERIC_SUFFIX{i8}) {
+                                if LV{str}[LV_MUT{i}] == b'z' and not (LV_MUT{i} > 5NUMERIC_SUFFIX{i8}) {
                                     continue
                                 }
                                 
-                                LV{i}++
-                                if LV{i} == 10 {
-                                    return [LV{i}; 0b1010]
+                                LV_MUT{i}++
+                                if LV_MUT{i} == 10 {
+                                    return [LV_MUT{i}; 0b1010]
                                 }
                             }
                         }
@@ -67,8 +67,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
             
             function FUNC_DECL{main}() {
                 mut p = STRUCT_NAME{P}::FUNC_CALL{make}(value: 12)
-                FUNC_CALL{println}("value = {}", LV{p}.FUNC_CALL{get_foo}())
-                LV{p}.FUNC_CALL{set_foo}(value: 0x123)
+                FUNC_CALL{println}("value = {}", LV_MUT{p}.FUNC_CALL{get_foo}())
+                LV_MUT{p}.FUNC_CALL{set_foo}(value: 0x123)
                 unsafe {
                     cpp {
                         "p.set_foo(98);"
@@ -80,7 +80,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 let x = 10
                 let y = &raw LV{x}
                 unsafe {
-                    FUNC_CALL{println}("{}", *y) // 10
+                    FUNC_CALL{println}("{}", *LV{y}) // 10
                 }
                 
                 return 0
@@ -106,9 +106,12 @@ class JaktColorSettingsPage : ColorSettingsPage {
 
     companion object {
         private val DESCRIPTORS = mapOf(
-            "Identifiers" to Highlights.IDENTIFIER,
             "Comments" to Highlights.COMMENT,
             "Namespace Name" to Highlights.NAMESPACE_NAME,
+
+            "Identifiers//Default" to Highlights.IDENTIFIER,
+            "Identifiers//Local Mutable Variable" to Highlights.LOCAL_VAR_MUT,
+            "Identifiers//Local Immutable Variable" to Highlights.LOCAL_VAR,
 
             "Enums//Name" to Highlights.ENUM_NAME,
             "Enums//Variant Name" to Highlights.ENUM_VARIANT_NAME,
@@ -178,11 +181,13 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
             "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
             "EN_NAME" to Highlights.ENUM_NAME,
-            "EN_VAR_NAME" to Highlights.ENUM_VARIANT_NAME,
+            "EN_VARIANT" to Highlights.ENUM_VARIANT_NAME,
             "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
             "STRUCT_NAME" to Highlights.STRUCT_NAME,
             "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
             "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
+            "LV" to Highlights.LOCAL_VAR,
+            "LV_MUT" to Highlights.LOCAL_VAR_MUT,
         )
     }
 }
