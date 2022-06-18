@@ -26,9 +26,10 @@ import static org.serenityos.jakt.JaktTypes.*;
 WHITE_SPACE=[\t ]+
 NEWLINE=[\r\n]
 
-HEX_LITERAL=(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*
-BINARY_LITERAL=(0b|0B)[01](_?[01])*
-DECIMAL_LITERAL=[0-9](_?[0-9])*
+HEX_LITERAL=(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*
+DECIMAL_LITERAL=\d[_\d]*
+OCTAL_LITERAL=(0o|0O)[0-7][_0-7]*
+BINARY_LITERAL=(0b|0B)[01][_01]*
 STRING_LITERAL=\"([^\"\\]|\\.)*\"
 CHAR_LITERAL='([^'\\]|\\.)*'
 BYTE_CHAR_LITERAL=b'([^'\\]|\\.)*'
@@ -119,8 +120,9 @@ COMMENT="//"[^\r\n]*
   "as"                   { return AS; }
 
   {HEX_LITERAL}          { return HEX_LITERAL; }
-  {BINARY_LITERAL}       { return BINARY_LITERAL; }
   {DECIMAL_LITERAL}      { return DECIMAL_LITERAL; }
+  {OCTAL_LITERAL}        { return OCTAL_LITERAL; }
+  {BINARY_LITERAL}       { return BINARY_LITERAL; }
   {STRING_LITERAL}       { return STRING_LITERAL; }
   {CHAR_LITERAL}         { return CHAR_LITERAL; }
   {BYTE_CHAR_LITERAL}    { return BYTE_CHAR_LITERAL; }

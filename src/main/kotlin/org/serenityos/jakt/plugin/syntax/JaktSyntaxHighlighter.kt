@@ -88,8 +88,9 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             IDENTIFIER -> Highlights.IDENTIFIER
             COMMENT -> Highlights.COMMENT
 
-            DECIMAL_LITERAL,
             HEX_LITERAL,
+            DECIMAL_LITERAL,
+            OCTAL_LITERAL,
             BINARY_LITERAL -> Highlights.LITERAL_NUMBER
             STRING_LITERAL,
             CHAR_LITERAL,

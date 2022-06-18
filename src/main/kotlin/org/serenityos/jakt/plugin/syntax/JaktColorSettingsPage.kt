@@ -42,7 +42,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
                             }
                         }
                     }
-                    [1, 2, 3 << 9]
+                    [1, 0o27_7, 3 << 9]
                 }
             }
         }

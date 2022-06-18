@@ -20,7 +20,9 @@ import java.nio.file.Files
  * Runs through all Jakt files in the jakt/samples directory and tests that
  * each of them lex/parse successfully.
  */
-class JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
+object JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
+    private val IGNORED_TESTS = setOf("basics/error.jakt")
+
     @TestFactory
     fun getSampleTests(): Collection<DynamicNode> {
         val jaktDirectoryEnv = System.getenv("JAKT_REPO")
@@ -37,7 +39,7 @@ class JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
 
         // return File(jaktDirectory, "samples").listFiles()?.map(::getTest) ?: emptyList()
 
-        return File(jaktDirectory, "samples").walk().filter { !it.isDirectory }.map(::makeTest).toList()
+        return File(jaktDirectory, "samples").walk().filter { !it.isDirectory }.mapNotNull(::makeTest).toList()
     }
 
     // TODO: Figure out why the display names are so broken in IntelliJ using DynamicContainers
@@ -47,8 +49,12 @@ class JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
     //     return DynamicContainer.dynamicContainer(file.name, file.listFiles()?.map(::getTest) ?: emptyList())
     // }
 
-    private fun makeTest(file: File): DynamicTest {
-        return DynamicTest.dynamicTest(file.parentFile.name + File.separator + file.name) {
+    private fun makeTest(file: File): DynamicTest? {
+        val name = file.parentFile.name + File.separator + file.name
+        if (name in IGNORED_TESTS)
+            return null
+
+        return DynamicTest.dynamicTest(name) {
             // Print a clickable link in test output
             println("File path: file://${file.absolutePath}")
 

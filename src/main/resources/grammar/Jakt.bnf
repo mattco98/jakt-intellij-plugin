@@ -99,9 +99,10 @@
         NOT='not'
         AS='as'
 
-        HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f](_?[\dA-Fa-f])*"
-        BINARY_LITERAL="regexp:(0b|0B)[01](_?[01])*"
-        DECIMAL_LITERAL="regexp:\d(_?\d)*"
+        HEX_LITERAL="regexp:(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*"
+        DECIMAL_LITERAL="regexp:\d[_\d]*"
+        OCTAL_LITERAL="regexp:(0o|0O)[0-7][_0-7]*"
+        BINARY_LITERAL="regexp:(0b|0B)[01][_01]*"
 
         STRING_LITERAL="regexp:\"([^\"\\]|\\.)*\""
         BYTE_CHAR_LITERAL="regexp:b'([^'\\]|\\.)*'"
@@ -550,7 +551,7 @@ Literal ::=
     | BooleanLiteral
     {extends=Expression}
 
-NumericLiteral ::= (BINARY_LITERAL | HEX_LITERAL | DECIMAL_LITERAL) NumericSuffix?
+NumericLiteral ::= (BINARY_LITERAL | OCTAL_LITERAL | HEX_LITERAL | DECIMAL_LITERAL) NumericSuffix?
     {extends=Expression}
 
 NumericSuffix ::= 'uz' | 'f32' | 'f64' | 'u8' | 'u16' | 'u32' | 'u64' | 'i8' | 'i16' | 'i32' | 'i64'
