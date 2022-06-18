@@ -1,5 +1,7 @@
 package org.serenityos.jakt.plugin.type
 
+import com.intellij.openapi.project.Project
+import org.serenityos.jakt.plugin.project.jaktProject
 import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 
@@ -36,10 +38,8 @@ sealed interface Type {
     sealed class TopLevelDecl : Type {
         abstract val name: String
         abstract var namespace: Namespace?
-        var declaration: JaktDeclaration? = null
+        open var declaration: JaktDeclaration? = null
     }
-
-    sealed interface Parameterizable : Type
 
     class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl() {
         override var namespace: Namespace? = null
@@ -84,9 +84,13 @@ sealed interface Type {
     }
 
     class Parameterized(
-        val underlyingType: Parameterizable,
+        val underlyingType: TopLevelDecl,
         val typeParameters: List<TypeVar>,
-    ) : Type {
+    ) : TopLevelDecl() {
+        override val name = underlyingType.name
+        override var namespace = underlyingType.namespace
+        override var declaration by underlyingType::declaration
+
         override fun typeRepr() = underlyingType.typeRepr() // TODO: Add generic params to name
     }
 
@@ -94,7 +98,7 @@ sealed interface Type {
         override val name: String,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
-    ) : TopLevelDecl(), Parameterizable {
+    ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
         override fun typeRepr() = name
@@ -103,9 +107,9 @@ sealed interface Type {
     // TODO: Variant types
     class Enum(
         override val name: String,
-        val underlyingType: Type?,
+        val underlyingType: Primitive?,
         val methods: Map<String, Function>,
-    ) : TopLevelDecl(), Parameterizable {
+    ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
         override fun typeRepr() = name
@@ -116,7 +120,7 @@ sealed interface Type {
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
-    ) : TopLevelDecl(), Parameterizable {
+    ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
         // We cannot resolve the struct before this to calculate the thisParameter
@@ -147,6 +151,21 @@ sealed interface Type {
             val isAnonymous: Boolean,
             val isMutable: Boolean,
         )
+    }
+}
+
+private fun getPreludeType(project: Project, type: String) =
+    project.jaktProject.findPreludeType(type)?.jaktType ?: Type.Unknown
+
+fun Type.resolveToBuiltinType(project: Project): Type {
+    return when (this) {
+        is Type.Array -> getPreludeType(project, "Array")
+        is Type.Dictionary -> getPreludeType(project, "Dictionary")
+        is Type.Optional -> getPreludeType(project, "Optional")
+        is Type.Set -> getPreludeType(project, "Set")
+        is Type.Tuple -> getPreludeType(project, "Tuple")
+        is Type.Weak -> getPreludeType(project, "Weak")
+        else -> this
     }
 }
 

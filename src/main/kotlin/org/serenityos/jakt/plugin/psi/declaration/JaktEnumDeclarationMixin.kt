@@ -18,7 +18,7 @@ abstract class JaktEnumDeclarationMixin(
             // TODO: Variants
             return Type.Enum(
                 name,
-                underlyingTypeEnumBody?.typeAnnotation?.jaktType,
+                underlyingTypeEnumBody?.typeAnnotation?.jaktType as? Type.Primitive,
                 emptyMap(),
             ).let {
                 it.declaration = this

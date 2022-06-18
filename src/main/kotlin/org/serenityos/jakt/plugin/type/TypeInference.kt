@@ -98,9 +98,13 @@ object TypeInference {
     private fun getAccessExpressionType(element: JaktAccessExpression): Type {
         val baseType = inferType(element.expression)
 
-        return if (baseType is Type.Tuple) {
+        if (element.access.decimalLiteral != null) {
+            if (baseType !is Type.Tuple)
+                return Type.Unknown
             val index = element.access.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
-            baseType.types[index]
-        } else Type.Unknown
+            return baseType.types[index]
+        }
+
+        return resolveDeclarationIn(baseType, element.access.identifier!!.text)
     }
 }

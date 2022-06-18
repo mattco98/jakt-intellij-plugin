@@ -22,7 +22,7 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
     is Type.Tuple -> Type.Tuple(types.map { it.specialize(specializations) })
     is Type.TypeVar -> specializations[name] ?: this
     is Type.Parameterized -> {
-        val specializedType = underlyingType.specialize(specializations) as Type.Parameterizable
+        val specializedType = underlyingType.specialize(specializations) as Type.TopLevelDecl
         val remainingTypeParams = typeParameters.filter { it.name !in specializations }
         if (remainingTypeParams.isEmpty()) {
             specializedType
@@ -37,7 +37,7 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
     )
     is Type.Enum -> Type.Enum(
         name,
-        underlyingType, // This is always primitive, so it doesn't need specialization
+        underlyingType,
         methods.mapValues { it.value.specialize(specializations) as Type.Function },
     )
     is Type.Function -> Type.Function(

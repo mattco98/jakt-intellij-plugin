@@ -85,7 +85,7 @@ fun resolvePlainType(plainType: JaktPlainType): Type {
 
 fun resolveAccess(access: JaktAccess): JaktDeclaration? {
     val accessExpr = access.ancestorOfType<JaktAccessExpression>()!!
-    val baseType = TypeInference.inferType(accessExpr.expression)
+    val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(access.project)
     val baseDecl = (baseType as? Type.TopLevelDecl)?.declaration ?: return null
     return resolveDeclarationIn(baseDecl, access.name!!)
 }
