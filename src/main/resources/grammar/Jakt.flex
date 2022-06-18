@@ -63,6 +63,7 @@ COMMENT="//"[^\r\n]*
   "cpp"                  { return CPP_KEYWORD; }
   "return"               { return RETURN_KEYWORD; }
   "throw"                { return THROW_KEYWORD; }
+  "yield"                { return YIELD_KEYWORD; }
   "defer"                { return DEFER_KEYWORD; }
   "true"                 { return TRUE_KEYWORD; }
   "false"                { return FALSE_KEYWORD; }

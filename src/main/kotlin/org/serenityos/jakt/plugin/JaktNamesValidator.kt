@@ -34,6 +34,7 @@ class JaktNamesValidator : NamesValidator {
             FOR_KEYWORD,
             TRY_KEYWORD,
             CATCH_KEYWORD,
+            YIELD_KEYWORD,
             IN_KEYWORD,
             UNSAFE_KEYWORD,
             CPP_KEYWORD,

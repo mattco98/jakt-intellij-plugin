@@ -38,10 +38,11 @@
         IN_KEYWORD='in'
         UNSAFE_KEYWORD='unsafe'
         CPP_KEYWORD='cpp'
+        DEFER_KEYWORD='defer'
 
         RETURN_KEYWORD='return'
         THROW_KEYWORD='throw'
-        DEFER_KEYWORD='defer'
+        YIELD_KEYWORD='yield'
 
         TRUE_KEYWORD='true'
         FALSE_KEYWORD='false'
@@ -328,6 +329,7 @@ Statement ::=
     | ForStatement
     | VariableDeclarationStatement
     | TryStatement
+    | YieldStatement
     | UnsafeStatement
     | InlineCppStatement
     | Block
@@ -343,6 +345,7 @@ DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
 LoopStatement ::= LOOP_KEYWORD Block
 TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD IDENTIFIER Statement
+YieldStatement ::= YIELD_KEYWORD ExpressionWithoutAssignment
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
 

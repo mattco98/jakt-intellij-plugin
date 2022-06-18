@@ -132,6 +132,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             MATCH_KEYWORD,
             TRY_KEYWORD,
             CATCH_KEYWORD,
+            YIELD_KEYWORD,
             DEFER_KEYWORD -> Highlights.KEYWORD_CONTROL_FLOW
 
             BOXED_KEYWORD,
