@@ -296,7 +296,8 @@ UnderlyingTypeEnumMember ::= IDENTIFIER [EQUALS Expression]
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
-NormalEnumMember ::= IDENTIFIER NormalEnumMemberBody?
+NormalEnumMember ::= NormalEnumVariant | (StructVisibility? FunctionDeclaration)
+NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody?
 private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
