@@ -3,13 +3,9 @@ package org.serenityos.jakt.plugin.psi.declaration
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
-import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
 import org.serenityos.jakt.plugin.psi.named.JaktNamedElement
-import org.serenityos.jakt.plugin.psi.reference.multiRef
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.plugin.type.TypeInference
-import org.serenityos.jakt.plugin.type.resolveReferencesIn
-import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.findChildOfType
 
 abstract class JaktVariableDeclarationMixin(
@@ -23,9 +19,4 @@ abstract class JaktVariableDeclarationMixin(
         }
 
     override fun getExpression() = findChildOfType<JaktExpression>()
-
-    override fun getReference() = multiRef {
-        val owner = it.ancestorOfType<JaktPsiScope>() ?: return@multiRef emptyList()
-        resolveReferencesIn(owner, it.name)
-    }
 }

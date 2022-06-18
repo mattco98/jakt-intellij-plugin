@@ -17,10 +17,6 @@ import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.ancestorsOfType
 import org.serenityos.jakt.utils.findChildrenOfType
 
-//////////////////////////////
-// Reference -> Declaration //
-//////////////////////////////
-
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
     is JaktImportStatementMixin -> resolveFile()
     is JaktImportBraceEntryMixin -> resolveElement()
@@ -88,28 +84,4 @@ fun resolveAccess(access: JaktAccess): JaktDeclaration? {
     val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(access.project)
     val baseDecl = (baseType as? Type.TopLevelDecl)?.declaration ?: return null
     return resolveDeclarationIn(baseDecl, access.name!!)
-}
-
-///////////////////////////////
-// Declaration -> References //
-///////////////////////////////
-
-// TODO: This needs some work
-fun resolveReferencesIn(scope: PsiElement, name: String): List<PsiElement> {
-    val references = mutableListOf<PsiElement>()
-
-    walkPsiElement(scope) {
-        when {
-            it is JaktDeclaration && it.name == name -> {
-                // If this shadows the declaration we're looking for, this
-                // scope cannot have any more references to the element
-                return@walkPsiElement WalkResult.SkipSiblings
-            }
-            it is JaktPlainQualifier && it.name == name -> references.add(it)
-        }
-
-        WalkResult.Continue
-    }
-
-    return references
 }
