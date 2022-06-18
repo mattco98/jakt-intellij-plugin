@@ -29,7 +29,7 @@ class JaktParserDefinition : ParserDefinition {
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
     companion object {
-        private val FILE = IFileElementType(JaktLanguage)
+        val FILE = IFileElementType(JaktLanguage)
 
         private val WHITE_SPACES = TokenSet.create(JaktLexerBase.SPACE)
         private val COMMENTS = TokenSet.create(JaktTypes.COMMENT)
