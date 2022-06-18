@@ -490,12 +490,25 @@ DictionaryElement ::= Expression COLON NL Expression
 SetExpression ::= CURLY_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>>? NL CURLY_CLOSE
 TupleExpression ::= PAREN_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>> NL PAREN_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
-private MatchPatterns ::= <<commaOrEolList MatchPattern>>
-MatchPattern ::= PatternHead PatternTrail
-PatternTrail ::= FAT_ARROW MatchBody
-PatternHead ::= <<pipeList (ELSE_KEYWORD | ExpressionWithoutAssignment)>>
-MatchBody ::= Block | Expression
+MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
+private MatchCases ::= <<commaOrEolList MatchCase>>
+MatchCase ::= MatchCaseHead MatchCaseTrail {
+    implements="org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktMatchCaseMixin"
+}
+MatchCaseTrail ::= FAT_ARROW Block | Expression
+MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | ExpressionWithoutAssignment)>>
+
+MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>> PAREN_CLOSE]
+DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
+DestructuringLabel ::= IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktDestructuringLabelMixin"
+}
+DestructuringBinding ::= IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktDestructuringBindingMixin"
+}
 
 NamespaceQualifier ::= IDENTIFIER COLON_COLON {
     implements=[

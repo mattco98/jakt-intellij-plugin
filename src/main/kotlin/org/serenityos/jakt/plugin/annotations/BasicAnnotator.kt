@@ -92,6 +92,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktFieldAccessExpression -> TextRange.create(element.dot.startOffset, element.identifier.endOffset)
                 .highlight(Highlights.STRUCT_FIELD_REFERENCE)
             is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
+            is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
         }
     }
 
