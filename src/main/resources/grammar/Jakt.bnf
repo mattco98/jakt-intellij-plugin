@@ -249,7 +249,7 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
     ]
     mixin="org.serenityos.jakt.plugin.psi.declaration.JaktFunctionDeclarationMixin"
 }
-private FunctionBody ::= Block | FAT_ARROW ExpressionWithoutAssignment
+private FunctionBody ::= Block | FAT_ARROW NL ExpressionWithoutAssignment
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
     extends=TopLevelDefinition
@@ -331,6 +331,7 @@ Statement ::=
     | VariableDeclarationStatement
     | UnsafeStatement
     | InlineCppStatement
+    | Block
 
 VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
@@ -348,7 +349,7 @@ ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment B
 UnsafeStatement ::= UNSAFE_KEYWORD Block
 InlineCppStatement ::= CPP_KEYWORD Block
 
-Block ::= CURLY_OPEN NL <<withOff StatementList? "NO_ASSIGN">> NL CURLY_CLOSE {
+Block ::= NL CURLY_OPEN NLSEMI <<withOff StatementList? "NO_ASSIGN">> NLSEMI CURLY_CLOSE {
     extends=Statement
     mixin="org.serenityos.jakt.plugin.psi.misc.JaktBlockMixin"
 }
@@ -386,7 +387,7 @@ Type ::=
 }
 
 RawType ::= RAW_KEYWORD BaseType {pin=1 extends=Type}
-WeakType ::= WEAK_KEYWORD BaseType {pin=1 extends=Type}
+WeakType ::= WEAK_KEYWORD BaseType QUESTION_MARK {pin=1 extends=Type}
 OptionalType ::= BaseType QUESTION_MARK {extends=Type}
 
 TypeAnnotation ::= COLON Type {extends=Type}
@@ -436,7 +437,7 @@ OptionalSomeExpression ::= SOME_TYPE PAREN_OPEN ExpressionWithoutAssignment PARE
 OptionalNoneExpression ::= NONE_TYPE
 
 CallExpression ::= Expression GenericSpecialization? Call
-private Call ::= PAREN_OPEN ArgumentList? PAREN_CLOSE
+private Call ::= PAREN_OPEN NL ArgumentList? PAREN_CLOSE
 ArgumentList ::= <<commaOrEolList Argument>>
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
@@ -465,23 +466,21 @@ FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
 RangeExpression ::= Expression DOT_DOT Expression
 
-ArrayExpression ::= BRACKET_OPEN [SizedArrayBody | ElementsArrayBody] BRACKET_CLOSE
+ArrayExpression ::= BRACKET_OPEN NL [SizedArrayBody | ElementsArrayBody] NL BRACKET_CLOSE
 SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
 ElementsArrayBody ::= <<commaOrEolList ExpressionWithoutAssignment>>
 
-DictionaryExpression ::= BRACKET_OPEN [<<commaOrEolList DictionaryElement>> | COLON] BRACKET_CLOSE
-DictionaryElement ::= Expression COLON Expression
-SetExpression ::= CURLY_OPEN <<commaOrEolList ExpressionWithoutAssignment>>? CURLY_CLOSE
-TupleExpression ::= PAREN_OPEN <<commaOrEolList ExpressionWithoutAssignment>> PAREN_CLOSE
+DictionaryExpression ::= BRACKET_OPEN NL [<<commaOrEolList DictionaryElement>> | COLON] NL BRACKET_CLOSE
+DictionaryElement ::= Expression COLON NL Expression
+SetExpression ::= CURLY_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>>? NL CURLY_CLOSE
+TupleExpression ::= PAREN_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>> NL PAREN_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchPatterns? NL CURLY_CLOSE
 private MatchPatterns ::= <<commaOrEolList MatchPattern>>
 MatchPattern ::= PatternHead PatternTrail
 PatternTrail ::= FAT_ARROW MatchBody
-PatternHead ::= ELSE_KEYWORD | IdentPatternHead | ExpressionWithoutAssignment
+PatternHead ::= <<pipeList (ELSE_KEYWORD | ExpressionWithoutAssignment)>>
 MatchBody ::= Block | Expression
-// TODO: This is incomplete
-IdentPatternHead ::= PlainQualifier [PAREN_OPEN <<commaList IDENTIFIER>> PAREN_CLOSE]
 
 NamespaceQualifier ::= IDENTIFIER COLON_COLON {
     implements=[
@@ -509,7 +508,8 @@ fake BinaryExpression ::= Expression+ {
 
 LogicalOrBinaryExpression ::= Expression LogicalOrOp NL Expression
 LogicalAndBinaryExpression ::= Expression AND NL Expression
-BitwiseOrBinaryExpression ::= Expression PIPE NL Expression
+// &ExpressionLead helps disambiguate rules in PatternHead production
+BitwiseOrBinaryExpression ::= Expression PIPE NL &ExpressionLead Expression
 BitwiseXorBinaryExpression ::= Expression CARET NL Expression
 BitwiseAndBinaryExpression ::= Expression AMPERSAND NL Expression
 RelationalBinaryExpression ::= Expression RelationalOp NL Expression
@@ -538,7 +538,7 @@ private PrefixOp ::=
     | TILDE
     | AMPERSAND RAW_KEYWORD
     | ASTERISK
-private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | AS (QUESTION_MARK | EXCLAMATION_POINT) Type
+private PostfixOp ::= PLUS_PLUS | MINUS_MINUS | EXCLAMATION_POINT | AS (QUESTION_MARK | EXCLAMATION_POINT) Type
 
 /*************************************
  *             LITERALS              *
@@ -564,5 +564,7 @@ BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD {extends=Expression}
  *************************************/
 
 private NL ::= NEWLINE*
+private NLSEMI ::= (NEWLINE | SEMICOLON)*
 private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
+private meta pipeList ::= <<p>> (PIPE <<p>>)*
 private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
