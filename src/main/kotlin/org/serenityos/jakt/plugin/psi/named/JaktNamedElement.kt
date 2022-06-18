@@ -7,7 +7,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.psi.JaktPsiFactory
 
 abstract class JaktNamedElement(node: ASTNode) : ASTWrapperPsiElement(node), JaktNameIdentifierOwner {
-    open override fun getNameIdentifier(): PsiElement = findNotNullChildByType(JaktTypes.IDENTIFIER)
+    override fun getNameIdentifier(): PsiElement = findNotNullChildByType(JaktTypes.IDENTIFIER)
 
     override fun getName(): String = nameIdentifier.text
 

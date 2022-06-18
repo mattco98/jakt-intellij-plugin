@@ -94,6 +94,7 @@ fun resolveAccess(access: JaktAccess): JaktDeclaration? {
 // Declaration -> References //
 ///////////////////////////////
 
+// TODO: This needs some work
 fun resolveReferencesIn(scope: PsiElement, name: String): List<PsiElement> {
     val references = mutableListOf<PsiElement>()
 

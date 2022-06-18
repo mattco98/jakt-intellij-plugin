@@ -212,7 +212,11 @@ NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {
 private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
-StructEnumMemberBodyPart ::= IDENTIFIER TypeAnnotation
+StructEnumMemberBodyPart ::= StructEnumMemberLabel TypeAnnotation
+StructEnumMemberLabel ::= IDENTIFIER {
+    implements="org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.plugin.psi.declaration.JaktStructEnumMemberLabelMixin"
+}
 
 // Import Statement
 ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {

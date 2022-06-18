@@ -9,8 +9,6 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
-import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.syntax.Highlights
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
@@ -82,7 +80,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
             is JaktUnderlyingTypeEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktNormalEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
-            is JaktStructEnumMemberBodyPart -> element.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktStructDeclaration -> {
                 element.structHeader.identifier.highlight(Highlights.STRUCT_NAME)
                 element.structBody.structMemberList.forEach {

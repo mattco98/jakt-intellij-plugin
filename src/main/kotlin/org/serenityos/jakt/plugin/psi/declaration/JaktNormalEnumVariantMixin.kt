@@ -14,7 +14,7 @@ abstract class JaktNormalEnumVariantMixin(
         get() {
             val members = if (structEnumMemberBodyPartList.isNotEmpty()) {
                 structEnumMemberBodyPartList.map {
-                    it.identifier.text to it.typeAnnotation.jaktType
+                    it.structEnumMemberLabel.name to it.typeAnnotation.jaktType
                 }
             } else {
                 typeEnumMemberBody!!.typeList.map { null to it.jaktType }

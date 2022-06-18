@@ -22,7 +22,7 @@ abstract class JaktDestructuringLabelMixin(
         }
 
         resolved.structEnumMemberBodyPartList.find {
-            it.identifier.text == name
+            it.structEnumMemberLabel.name == name
         }
     }
 }
