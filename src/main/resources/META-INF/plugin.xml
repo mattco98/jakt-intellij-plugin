@@ -67,11 +67,11 @@
         />
 
         <intentionAction>
-            <className>org.serenityos.jakt.plugin.intentions.StructClassKeywordIntention$Class2Struct</className>
+            <className>org.serenityos.jakt.plugin.intentions.ClassToStructKeywordIntention</className>
             <category>Jakt</category>
         </intentionAction>
         <intentionAction>
-            <className>org.serenityos.jakt.plugin.intentions.StructClassKeywordIntention$Struct2Class</className>
+            <className>org.serenityos.jakt.plugin.intentions.StructToClassKeywordIntention</className>
             <category>Jakt</category>
         </intentionAction>
     </extensions>

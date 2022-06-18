@@ -12,7 +12,7 @@ import org.serenityos.jakt.utils.ancestorOfType
 /**
  * Converts the "class" keyword to "struct" and vice-versa
  */
-sealed class StructClassKeywordIntention(private val isClass: Boolean) : JaktIntention<JaktStructDeclaration>(
+sealed class StructClassKeywordIntentionBase(private val isClass: Boolean) : JaktIntention<JaktStructDeclaration>(
     if (isClass) "Change to \"struct\"" else "Change to \"class\""
 ) {
     override fun getContext(project: Project, editor: Editor, element: PsiElement): JaktStructDeclaration? {
@@ -31,6 +31,7 @@ sealed class StructClassKeywordIntention(private val isClass: Boolean) : JaktInt
         }
     }
 
-    object Class2Struct : StructClassKeywordIntention(true)
-    object Struct2Class : StructClassKeywordIntention(false)
 }
+
+object ClassToStructKeywordIntention : StructClassKeywordIntentionBase(true)
+object StructToClassKeywordIntention : StructClassKeywordIntentionBase(false)
