@@ -16,7 +16,8 @@ import org.serenityos.jakt.utils.findChildrenOfType
 abstract class JaktImportStatementMixin(
     node: ASTNode,
 ) : JaktTopLevelDefinitionImpl(node), JaktImportStatement {
-    private val nameIdent = findChildrenOfType(JaktTypes.IDENTIFIER).first()
+    private val nameIdent: PsiElement
+        get() = originalElement.findChildrenOfType(JaktTypes.IDENTIFIER).first()
 
     override val jaktType: Type
         get() = resolveFile()?.jaktType ?: Type.Unknown
@@ -29,11 +30,12 @@ abstract class JaktImportStatementMixin(
         nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun resolveName(name: String): JaktDeclaration? {
-        return importBraceEntryList.firstOrNull { it.name == name } ?: super.resolveName(name)
+    fun resolveName(name: String): JaktDeclaration {
+        return importBraceEntryList.firstOrNull { it.name == name } ?: this
     }
 
-    fun resolveFile(): JaktFile? = jaktProject.resolveImportedFile(containingFile.virtualFile, nameIdent.text)
+    private fun resolveFile(): JaktFile? =
+        jaktProject.resolveImportedFile(containingFile.originalFile.virtualFile, nameIdent.text)
 
     override fun getReference() = Ref(this)
 
