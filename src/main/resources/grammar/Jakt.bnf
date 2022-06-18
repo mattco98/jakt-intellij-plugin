@@ -435,7 +435,8 @@ Expression ::=
     | PrefixUnaryExpression
     | PostfixUnaryExpression
     | ParenExpression
-    | FieldAccessExpression
+    | FieldAccessExpression // Must come before ThisExpression
+    | ThisExpression
     | RangeExpression
     | ArrayExpression
     | DictionaryExpression
@@ -472,6 +473,9 @@ IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
 FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {
     implements="org.serenityos.jakt.plugin.psi.declaration.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktFieldAccessExpressionMixin"
+}
+ThisExpression ::= THIS_KEYWORD {
+    mixin="org.serenityos.jakt.plugin.psi.reference.JaktThisExpressionMixin"
 }
 
 ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
