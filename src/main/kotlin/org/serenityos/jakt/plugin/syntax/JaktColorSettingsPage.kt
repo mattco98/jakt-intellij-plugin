@@ -57,16 +57,16 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 
                 // Create a new P from the given value
                 public function FUNC_DECL{make}(FUNC_PARAM{value}: TY{i32}) throws => STRUCT_NAME{P}(foo: value)
-                public function FUNC_DECL{get_foo}(this) => STRUCT_FIELD_REF{.foo}
+                public function FUNC_DECL{get_foo}(this) => STRUCT_FIELD{.foo}
                 public function FUNC_DECL{set_foo}(mut this, FUNC_PARAM{value}: TY{i32}) {
-                    STRUCT_FIELD_REF{.foo} = value
+                    STRUCT_FIELD{.foo} = value
                 }
             }
             
-            function FUNC_DECL{get_d}() -> TY{D}? => None
+            function FUNC_DECL{get_d}() -> TY{D}? => EN_VARIANT{None}
             
             function FUNC_DECL{main}() {
-                mut p = STRUCT_NAME{P}::STATIC_CALL{make}(value: 12)
+                mut LV_MUT{p} = STRUCT_NAME{P}::STATIC_CALL{make}(value: 12)
                 FUNC_CALL{println}("value = {}", LV_MUT{p}.INSTANCE_CALL{get_foo}())
                 LV_MUT{p}.INSTANCE_CALL{set_foo}(value: 0x123)
                 unsafe {
@@ -77,8 +77,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 
                 FUNC_CALL{println}("{}", FUNC_CALL{get_d}()!.INSTANCE_CALL{invoke}(a: 20))
                 
-                let x = 10
-                let y = &raw LV{x}
+                let LV{x} = 10
+                let LV{y} = &raw LV{x}
                 unsafe {
                     FUNC_CALL{println}("{}", *LV{y}) // 10
                 }
@@ -160,7 +160,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
 
             "Structs//Name" to Highlights.STRUCT_NAME,
             "Structs//Field Name" to Highlights.STRUCT_FIELD,
-            "Structs//Field Reference" to Highlights.STRUCT_FIELD_REFERENCE,
 
             "Types//Type Name" to Highlights.TYPE_NAME,
             "Types//Generic Type Name" to Highlights.TYPE_GENERIC_NAME,
@@ -186,7 +185,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
             "STRUCT_NAME" to Highlights.STRUCT_NAME,
             "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
-            "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
             "INSTANCE_CALL" to Highlights.FUNCTION_INSTANCE_CALL,
             "STATIC_CALL" to Highlights.FUNCTION_STATIC_CALL,
             "LV" to Highlights.LOCAL_VAR,

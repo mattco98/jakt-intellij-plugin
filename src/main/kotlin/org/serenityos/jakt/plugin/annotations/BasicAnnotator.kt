@@ -4,7 +4,6 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.elementType
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
@@ -52,26 +51,38 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
 
                 if (!isDumb) {
-                    val decl = element.reference?.resolve()
+                    val decl = if (element.namespaceQualifierList.isEmpty()) element.reference?.resolve() else null
 
                     if (decl is JaktVariableDeclarationStatement) {
                         identHighlight =  if (decl.mutKeyword != null) {
                             Highlights.LOCAL_VAR_MUT
                         } else Highlights.LOCAL_VAR
                     } else if (isCall) {
-                        identHighlight = when (val type = element.jaktType) {
-                            is Type.Struct -> Highlights.STRUCT_NAME
-                            is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
-                            is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
-                            is Type.Function -> if (type.thisParameter != null) {
-                                Highlights.FUNCTION_INSTANCE_CALL
-                            } else Highlights.FUNCTION_STATIC_CALL
-                            else -> Highlights.FUNCTION_CALL
-                        }
+                        identHighlight = getCallTargetHighlight(element.jaktType)
                     }
                 }
 
                 element.nameIdentifier!!.highlight(identHighlight)
+            }
+            is JaktAccess -> {
+                if (element.identifier != null) {
+                    val isDumb = DumbService.isDumb(element.project)
+                    var identHighlight = Highlights.IDENTIFIER
+                    val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element.parent ||
+                        element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
+
+                    if (!isDumb) {
+                        if (isCall) {
+                            identHighlight = getCallTargetHighlight(element.jaktType)
+                        } else {
+                            val decl = element.reference?.resolve()
+                            if (decl is JaktStructField)
+                                identHighlight = Highlights.STRUCT_FIELD
+                        }
+                    }
+
+                    element.nameIdentifier!!.highlight(identHighlight)
+                }
             }
             is JaktPlainType -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
@@ -108,7 +119,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 }
             }
             is JaktFieldAccessExpression -> TextRange.create(element.dot.startOffset, element.identifier.endOffset)
-                .highlight(Highlights.STRUCT_FIELD_REFERENCE)
+                .highlight(Highlights.STRUCT_FIELD)
             is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
             is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktVariableDeclarationStatement -> {
@@ -121,11 +132,13 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         }
     }
 
-    private fun getCallHighlightTarget(expr: PsiElement): PsiElement? {
-        return when (expr) {
-            is JaktAccessExpression -> expr.access.identifier ?: expr.access.decimalLiteral
-            is JaktPlainQualifier -> expr.identifier
-            else -> expr.takeIf { it.elementType == JaktTypes.IDENTIFIER }
-        }
+    private fun getCallTargetHighlight(type: Type) = when (type) {
+        is Type.Struct -> Highlights.STRUCT_NAME
+        is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
+        is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
+        is Type.Function -> if (type.thisParameter != null) {
+            Highlights.FUNCTION_INSTANCE_CALL
+        } else Highlights.FUNCTION_STATIC_CALL
+        else -> Highlights.FUNCTION_CALL
     }
 }
