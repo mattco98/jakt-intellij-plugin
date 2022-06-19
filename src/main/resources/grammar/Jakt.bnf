@@ -408,7 +408,7 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.api.JaktPsiScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
-MatchCaseTrail ::= FAT_ARROW (Block | Expression)
+MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
 MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | ExpressionWithoutAssignment)>>
 
 MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>> PAREN_CLOSE]
