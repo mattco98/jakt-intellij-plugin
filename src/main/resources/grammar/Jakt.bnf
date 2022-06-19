@@ -511,5 +511,5 @@ BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD {extends=Expression}
 private NL ::= NEWLINE*
 private NLSEMI ::= (NEWLINE | SEMICOLON)*
 private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
-private meta pipeList ::= <<p>> (PIPE <<p>>)*
+private meta pipeList ::= <<p>> (NL PIPE NL <<p>>)*
 private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
