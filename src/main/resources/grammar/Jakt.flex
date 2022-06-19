@@ -2,7 +2,7 @@ package org.serenityos.jakt.lexer;
 
 import com.intellij.psi.tree.IElementType;
 
-import org.serenityos.jakt.plugin.syntax.JaktLexerBase;
+import org.serenityos.jakt.syntax.JaktLexerBase;
 import com.intellij.lexer.FlexLexer;
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static org.serenityos.jakt.JaktTypes.*;

@@ -9,72 +9,72 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileType
                 name="Jakt file"
-                implementationClass="org.serenityos.jakt.plugin.JaktFile$FileType"
+                implementationClass="org.serenityos.jakt.JaktFile$FileType"
                 fieldName="INSTANCE"
                 language="Jakt"
                 extensions="jakt"
         />
         <lang.parserDefinition
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.syntax.JaktParserDefinition"
+                implementationClass="org.serenityos.jakt.syntax.JaktParserDefinition"
         />
         <lang.syntaxHighlighterFactory
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.syntax.JaktSyntaxHighlighterFactory"
+                implementationClass="org.serenityos.jakt.syntax.JaktSyntaxHighlighterFactory"
         />
         <lang.commenter
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktCommenter"
+                implementationClass="org.serenityos.jakt.JaktCommenter"
         />
         <lang.namesValidator
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktNamesValidator"
+                implementationClass="org.serenityos.jakt.JaktNamesValidator"
         />
         <lang.findUsagesProvider
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktFindUsagesProvider"
+                implementationClass="org.serenityos.jakt.JaktFindUsagesProvider"
         />
         <lang.refactoringSupport
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktRefactoringSupportProvider"
+                implementationClass="org.serenityos.jakt.JaktRefactoringSupportProvider"
         />
         <colorSettingsPage
-                implementation="org.serenityos.jakt.plugin.syntax.JaktColorSettingsPage"
+                implementation="org.serenityos.jakt.syntax.JaktColorSettingsPage"
         />
         <annotator
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.annotations.JaktAnnotator$Impl"
+                implementationClass="org.serenityos.jakt.annotations.JaktAnnotator$Impl"
         />
         <externalAnnotator
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.annotations.JaktExternalAnnotator"
+                implementationClass="org.serenityos.jakt.annotations.JaktExternalAnnotator"
         />
         <completion.contributor
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.completions.JaktCompletionContributor"
+                implementationClass="org.serenityos.jakt.completions.JaktCompletionContributor"
         />
         <lang.braceMatcher
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktBraceMatcher"
+                implementationClass="org.serenityos.jakt.JaktBraceMatcher"
         />
         <lang.foldingBuilder
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.plugin.JaktFoldingBuilder"
+                implementationClass="org.serenityos.jakt.JaktFoldingBuilder"
         />
         <typeDeclarationProvider
-                implementation="org.serenityos.jakt.plugin.JaktTypeDeclarationProvider"
+                implementation="org.serenityos.jakt.JaktTypeDeclarationProvider"
         />
         <projectService
-                serviceInterface="org.serenityos.jakt.plugin.project.JaktProjectService"
-                serviceImplementation="org.serenityos.jakt.plugin.project.JaktProjectServiceImpl"
+                serviceInterface="org.serenityos.jakt.project.JaktProjectService"
+                serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"
         />
 
         <intentionAction>
-            <className>org.serenityos.jakt.plugin.intentions.ClassToStructKeywordIntention</className>
+            <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>
             <category>Jakt</category>
         </intentionAction>
         <intentionAction>
-            <className>org.serenityos.jakt.plugin.intentions.StructToClassKeywordIntention</className>
+            <className>org.serenityos.jakt.intentions.StructToClassKeywordIntention</className>
             <category>Jakt</category>
         </intentionAction>
     </extensions>

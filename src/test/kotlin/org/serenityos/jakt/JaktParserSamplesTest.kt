@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import org.serenityos.jakt.parser.JaktParser
-import org.serenityos.jakt.plugin.syntax.JaktLexerAdapter
-import org.serenityos.jakt.plugin.syntax.JaktParserDefinition
+import org.serenityos.jakt.syntax.JaktLexerAdapter
+import org.serenityos.jakt.syntax.JaktParserDefinition
 import java.io.File
 import java.nio.file.Files
 
