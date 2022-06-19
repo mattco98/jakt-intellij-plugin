@@ -57,8 +57,13 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                         identHighlight =  if (decl.mutKeyword != null) {
                             Highlights.LOCAL_VAR_MUT
                         } else Highlights.LOCAL_VAR
-                    } else if (isCall) {
-                        identHighlight = getCallTargetHighlight(element.jaktType)
+                    } else {
+                        val type = element.jaktType
+                        if (isCall) {
+                            identHighlight = getCallTargetHighlight(element.jaktType)
+                        } else if (type is Type.EnumVariant) {
+                            identHighlight = Highlights.ENUM_VARIANT_NAME
+                        }
                     }
                 }
 
