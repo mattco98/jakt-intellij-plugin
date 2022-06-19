@@ -31,7 +31,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
                     EN_VARIANT{Bar} => [0NUMERIC_SUFFIX{f64}; 10]
                     EN_VARIANT{Baz}(f_) => FUNC_CALL{my_function}<GENERIC_TY{A}>(f: f_, (FUNC_PARAM{strings}.0 + 1, FUNC_PARAM{strings}.1))
                     EN_VARIANT{Qux}(dict, t) => {
-                        for LV{str} in FUNC_PARAM{strings}.1.FUNC_CALL{iterator}() {
+                        for LV{str} in FUNC_PARAM{strings}.1.INSTANCE_CALL{iterator}() {
                             mut LV_MUT{i} = 0
                             loop {
                                 if LV{str}[LV_MUT{i}] == b'z' and not (LV_MUT{i} > 5NUMERIC_SUFFIX{i8}) {
@@ -56,26 +56,26 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 STRUCT_FIELD{foo}: TY{i32}
                 
                 // Create a new P from the given value
-                public function FUNC_DECL{make}(FUNC_PARAM{value}: TY{i32}) throws => FUNC_CALL{P}(foo: value)
+                public function FUNC_DECL{make}(FUNC_PARAM{value}: TY{i32}) throws => STRUCT_NAME{P}(foo: value)
                 public function FUNC_DECL{get_foo}(this) => STRUCT_FIELD_REF{.foo}
                 public function FUNC_DECL{set_foo}(mut this, FUNC_PARAM{value}: TY{i32}) {
                     STRUCT_FIELD_REF{.foo} = value
                 }
             }
             
-            function FUNC_DECL{get_d}() -> TY{D}? => OPT_TY{None}
+            function FUNC_DECL{get_d}() -> TY{D}? => None
             
             function FUNC_DECL{main}() {
-                mut p = STRUCT_NAME{P}::FUNC_CALL{make}(value: 12)
-                FUNC_CALL{println}("value = {}", LV_MUT{p}.FUNC_CALL{get_foo}())
-                LV_MUT{p}.FUNC_CALL{set_foo}(value: 0x123)
+                mut p = STRUCT_NAME{P}::STATIC_CALL{make}(value: 12)
+                FUNC_CALL{println}("value = {}", LV_MUT{p}.INSTANCE_CALL{get_foo}())
+                LV_MUT{p}.INSTANCE_CALL{set_foo}(value: 0x123)
                 unsafe {
                     cpp {
                         "p.set_foo(98);"
                     }
                 }
                 
-                FUNC_CALL{println}("{}", FUNC_CALL{get_d}()!.FUNC_CALL{invoke}(a: 20))
+                FUNC_CALL{println}("{}", FUNC_CALL{get_d}()!.INSTANCE_CALL{invoke}(a: 20))
                 
                 let x = 10
                 let y = &raw LV{x}
@@ -118,6 +118,9 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Enums//Struct Label" to Highlights.ENUM_STRUCT_LABEL,
 
             "Functions//Declaration" to Highlights.FUNCTION_DECLARATION,
+            "Functions//Calls//Free Function Calls" to Highlights.FUNCTION_CALL,
+            "Functions//Calls//Instance Method Calls" to Highlights.FUNCTION_INSTANCE_CALL,
+            "Functions//Calls//Static Method Calls" to Highlights.FUNCTION_STATIC_CALL,
             "Functions//Call" to Highlights.FUNCTION_CALL,
             "Functions//Arrow" to Highlights.FUNCTION_ARROW,
             "Functions//Fat Arrow" to Highlights.FUNCTION_FAT_ARROW,
@@ -165,7 +168,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Types//Weak Qualifier" to Highlights.TYPE_WEAK,
             "Types//Namespace Operator" to Highlights.TYPE_NAMESPACE_OPERATOR,
             "Types//Optional Qualifier" to Highlights.TYPE_OPTIONAL_QUALIFIER,
-            "Types//Optional Type" to Highlights.TYPE_OPTIONAL_TYPE,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
 
         private val EXTRA_HIGHLIGHT_TAGS = mapOf(
@@ -174,7 +176,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
             "TY" to Highlights.TYPE_NAME,
             "GENERIC_TY" to Highlights.TYPE_GENERIC_NAME,
-            "OPT_TY" to Highlights.TYPE_OPTIONAL_TYPE,
             "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
             "IMPORT_MOD" to Highlights.IMPORT_MODULE,
             "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
@@ -186,6 +187,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "STRUCT_NAME" to Highlights.STRUCT_NAME,
             "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
             "STRUCT_FIELD_REF" to Highlights.STRUCT_FIELD_REFERENCE,
+            "INSTANCE_CALL" to Highlights.FUNCTION_INSTANCE_CALL,
+            "STATIC_CALL" to Highlights.FUNCTION_STATIC_CALL,
             "LV" to Highlights.LOCAL_VAR,
             "LV_MUT" to Highlights.LOCAL_VAR_MUT,
         )
