@@ -2,14 +2,14 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.serenityos.jakt.psi.api.JaktModificationTracker
-import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
+import org.serenityos.jakt.psi.caching.JaktModificationBoundary
+import org.serenityos.jakt.psi.caching.JaktModificationTracker
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 
 abstract class JaktFunctionDeclarationMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktFunctionDeclaration, JaktNameIdentifierOwner, JaktDeclaration {
+) : JaktNamedElement(node), JaktFunctionDeclaration, JaktModificationBoundary {
     override val tracker = JaktModificationTracker()
 
     override val jaktType: Type

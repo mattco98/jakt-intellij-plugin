@@ -68,6 +68,12 @@
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"
         />
+        <projectService
+                serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager"
+        />
+        <projectService
+                serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache"
+        />
 
         <intentionAction>
             <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>

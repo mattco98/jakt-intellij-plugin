@@ -1,5 +1,7 @@
 package org.serenityos.jakt.utils
 
+import com.intellij.psi.PsiElement
+import org.serenityos.jakt.psi.caching.resolveCache
 import kotlin.reflect.KProperty
 
 /**
@@ -30,26 +32,31 @@ import kotlin.reflect.KProperty
  * Instead, we use this delegator and produce an empty struct type in the producer stage.
  * We only attempt to do resolution in the initialization stage.
  */
-fun <T> recursivelyGuarded(builder: RecursivelyGuardedPropertyBuilder<T>.() -> Unit): RecursivelyGuardedProperty<T> {
+fun <T : Any> recursivelyGuarded(builder: RecursivelyGuardedPropertyBuilder<T>.() -> Unit): RecursivelyGuardedProperty<T> {
     val propertyBuilder = RecursivelyGuardedPropertyBuilder<T>()
     propertyBuilder.builder()
     return RecursivelyGuardedProperty(propertyBuilder.producerBlock, propertyBuilder.initializerBlock)
 }
 
-class RecursivelyGuardedProperty<T>(
-    producer: () -> T,
+class RecursivelyGuardedProperty<T : Any>(
+    private val producer: () -> T,
     private val initializer: (T) -> Unit,
 ) {
-    private val value = producer()
+    private var value = producer()
     private var isInitializing = false
 
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        if (!isInitializing) {
-            isInitializing = true
-            initializer(value)
-        }
+    operator fun getValue(thisRef: PsiElement, property: KProperty<*>): T {
+        if (isInitializing)
+            return value
 
-        return value
+        return thisRef.resolveCache().resolveWithCaching(thisRef) {
+            isInitializing = true
+            value = producer()
+            initializer(value)
+            isInitializing = false
+
+            value
+        }
     }
 }
 

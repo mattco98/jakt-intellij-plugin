@@ -150,7 +150,7 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.api.JaktPsiScope"
-        "org.serenityos.jakt.psi.api.JaktModificationBoundary"
+        "org.serenityos.jakt.psi.caching.JaktModificationBoundary"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktFunctionDeclarationMixin"
