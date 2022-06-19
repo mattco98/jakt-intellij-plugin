@@ -9,7 +9,7 @@ import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.multiRef
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 
 abstract class JaktStructFieldMixin(
     node: ASTNode,

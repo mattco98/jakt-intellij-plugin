@@ -6,7 +6,6 @@ import com.intellij.psi.PsiFileFactory
 import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
-import org.serenityos.jakt.utils.descendantOfType
 
 class JaktPsiFactory(private val project: Project) {
     private fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory

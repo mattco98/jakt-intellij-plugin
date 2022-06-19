@@ -9,7 +9,7 @@ import org.intellij.sdk.language.psi.JaktThisExpression
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.utils.ancestorsOfType
+import org.serenityos.jakt.psi.ancestorsOfType
 
 // TODO: It feels weird to inherit from JaktNamedElement here,
 //       but JaktRef requires it

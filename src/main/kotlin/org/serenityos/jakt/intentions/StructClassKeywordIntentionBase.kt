@@ -7,7 +7,7 @@ import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.JaktPsiFactory
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 
 /**
  * Converts the "class" keyword to "struct" and vice-versa

@@ -6,7 +6,7 @@ import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.type.TypeInference
-import org.serenityos.jakt.utils.findChildOfType
+import org.serenityos.jakt.psi.findChildOfType
 
 abstract class JaktVariableDeclarationMixin(
     node: ASTNode,

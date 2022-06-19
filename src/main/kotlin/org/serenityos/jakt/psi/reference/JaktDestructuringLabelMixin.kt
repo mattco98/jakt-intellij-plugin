@@ -5,7 +5,7 @@ import org.intellij.sdk.language.psi.JaktDestructuringLabel
 import org.intellij.sdk.language.psi.JaktMatchPattern
 import org.intellij.sdk.language.psi.JaktNormalEnumVariant
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 
 abstract class JaktDestructuringLabelMixin(
     node: ASTNode,

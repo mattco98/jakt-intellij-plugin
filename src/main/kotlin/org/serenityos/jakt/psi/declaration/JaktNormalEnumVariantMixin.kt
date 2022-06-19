@@ -5,7 +5,7 @@ import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktNormalEnumVariant
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktNormalEnumVariantMixin(

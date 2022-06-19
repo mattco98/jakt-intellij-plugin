@@ -10,9 +10,9 @@ import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.JaktGeneric
 import org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.psi.declaration.JaktImportStatementMixin
-import org.serenityos.jakt.utils.ancestorOfType
-import org.serenityos.jakt.utils.ancestorsOfType
-import org.serenityos.jakt.utils.findChildOfType
+import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.ancestorsOfType
+import org.serenityos.jakt.psi.findChildOfType
 
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
     is JaktImportStatementMixin -> resolveFile()

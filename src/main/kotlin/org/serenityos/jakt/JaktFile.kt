@@ -9,8 +9,8 @@ import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.JaktImportStatementMixin
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.findChildrenOfType
 
 class JaktFile(
     viewProvider: FileViewProvider,

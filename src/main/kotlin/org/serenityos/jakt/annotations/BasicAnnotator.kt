@@ -9,11 +9,11 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.ancestorOfType
-import org.serenityos.jakt.utils.findChildrenOfType
 
 object BasicAnnotator : JaktAnnotator(), DumbAware {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {

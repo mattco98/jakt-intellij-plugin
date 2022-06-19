@@ -6,8 +6,8 @@ import org.intellij.sdk.language.psi.JaktCallExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktLabeledArgument
 import org.intellij.sdk.language.psi.JaktStructDeclaration
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.utils.ancestorOfType
 
 abstract class JaktLabeledArgumentMixin(
     node: ASTNode,

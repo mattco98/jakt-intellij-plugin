@@ -5,7 +5,7 @@ import org.intellij.sdk.language.psi.JaktStructEnumMemberBodyPart
 import org.intellij.sdk.language.psi.JaktStructEnumMemberLabel
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 
 abstract class JaktStructEnumMemberLabelMixin(
     node: ASTNode,

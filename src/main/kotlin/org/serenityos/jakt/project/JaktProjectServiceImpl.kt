@@ -9,7 +9,7 @@ import com.intellij.psi.search.GlobalSearchScopes
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.utils.runInReadAction
 import java.io.IOException
 import java.net.URL

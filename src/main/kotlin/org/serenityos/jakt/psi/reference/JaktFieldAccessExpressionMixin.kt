@@ -4,7 +4,7 @@ import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.utils.ancestorsOfType
+import org.serenityos.jakt.psi.ancestorsOfType
 
 abstract class JaktFieldAccessExpressionMixin(
     node: ASTNode,

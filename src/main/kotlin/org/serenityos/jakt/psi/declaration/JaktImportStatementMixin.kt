@@ -9,7 +9,7 @@ import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.psi.findChildrenOfType
 
 abstract class JaktImportStatementMixin(
     node: ASTNode,

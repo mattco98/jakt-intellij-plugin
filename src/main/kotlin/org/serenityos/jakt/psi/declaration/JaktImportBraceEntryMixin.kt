@@ -8,7 +8,7 @@ import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.type.resolveDeclarationIn
-import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.psi.ancestorOfType
 
 abstract class JaktImportBraceEntryMixin(
     node: ASTNode,

@@ -3,9 +3,9 @@ package org.serenityos.jakt.type
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.utils.*
 
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
