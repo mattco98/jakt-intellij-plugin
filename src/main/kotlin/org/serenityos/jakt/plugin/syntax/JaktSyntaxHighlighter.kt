@@ -34,6 +34,7 @@ object Highlights {
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
     val KEYWORD_UNSAFE = KEYWORD_BASE.extend("KEYWORD_UNSAFE")
     val KEYWORD_IMPORT = KEYWORD_BASE.extend("KEYWORD_IMPORT")
+    val KEYWORD_OPERATOR = KEYWORD_BASE.extend("KEYWORD_OPERATOR")
 
     val OPERATOR = Default.OPERATION_SIGN.extend("OPERATOR", Color.getColor("0x61AFEF"))
     val DELIM_PARENTHESIS = Default.PARENTHESES.extend("DELIM_PARENTHESES")
@@ -121,7 +122,13 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             IMPORT_KEYWORD -> Highlights.KEYWORD_IMPORT
 
-            // RESTRICTED_KEYWORD,
+            KEYWORD_AND,
+            KEYWORD_OR,
+            KEYWORD_NOT,
+            KEYWORD_AS,
+            KEYWORD_IS -> Highlights.KEYWORD_OPERATOR
+
+            RESTRICTED_KEYWORD,
             PRIVATE_KEYWORD,
             PUBLIC_KEYWORD,
             RESTRICTED_KEYWORD -> Highlights.KEYWORD_VISIBILITY
@@ -182,14 +189,9 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             LESS_THAN_EQUALS,
             GREATER_THAN,
             GREATER_THAN_EQUALS,
-            KEYWORD_AND,
-            KEYWORD_OR,
-            KEYWORD_NOT,
             EQUALS,
             QUESTION_MARK,
-            DOUBLE_QUESTION_MARK,
-            KEYWORD_AS,
-            KEYWORD_IS -> Highlights.OPERATOR
+            DOUBLE_QUESTION_MARK -> Highlights.OPERATOR
 
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
