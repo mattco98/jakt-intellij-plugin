@@ -6,25 +6,33 @@ import org.intellij.sdk.language.psi.JaktNormalEnumVariant
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
+import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktNormalEnumVariantMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktNormalEnumVariant {
-    override val jaktType: Type
-        get() {
-            val members = if (structEnumMemberBodyPartList.isNotEmpty()) {
-                structEnumMemberBodyPartList.map {
-                    it.structEnumMemberLabel.name to it.typeAnnotation.jaktType
-                }
-            } else {
-                typeEnumMemberBody?.typeList?.map { null to it.jaktType } ?: emptyList()
-            }
+    override val jaktType by recursivelyGuarded<Type> {
+        val members = mutableListOf<Pair<String?, Type>>()
 
-            return Type.EnumVariant(
+        producer {
+            Type.EnumVariant(
                 ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
                 name,
                 null,
                 members,
             )
         }
+
+        initializer {
+            if (structEnumMemberBodyPartList.isNotEmpty()) {
+                structEnumMemberBodyPartList.forEach {
+                    members.add(it.structEnumMemberLabel.name to it.typeAnnotation.jaktType)
+                }
+            } else {
+                typeEnumMemberBody?.typeList?.forEach {
+                    members.add(null to it.jaktType)
+                }
+            }
+        }
+    }
 }
