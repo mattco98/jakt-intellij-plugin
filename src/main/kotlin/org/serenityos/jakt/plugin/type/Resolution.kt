@@ -2,10 +2,7 @@ package org.serenityos.jakt.plugin.type
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
-import org.intellij.sdk.language.psi.JaktAccess
-import org.intellij.sdk.language.psi.JaktAccessExpression
-import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktPlainType
+import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.project.jaktProject
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
@@ -64,6 +61,15 @@ fun resolvePlainQualifier(qualifier: JaktPlainQualifier): JaktDeclaration? {
     }
 }
 
+// TODO: This is a bit of a hack to resolve constructor functions, since otherwise the return
+//       type would resolve to the same function
+private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
+    var decl = resolveDeclarationAbove(scope, name)
+    while (decl is JaktFunctionDeclaration || decl is JaktExternStructMethod || decl is JaktExternFunctionDeclaration)
+        decl = resolveDeclarationAbove(decl, name)
+    return decl
+}
+
 fun resolvePlainType(plainType: JaktPlainType): Type {
     val idents = plainType.findChildrenOfType(JaktTypes.IDENTIFIER).map { it.text }
 
@@ -71,7 +77,7 @@ fun resolvePlainType(plainType: JaktPlainType): Type {
         Type.Primitive.values().find { it.typeRepr() == idents[0] }?.let { return it }
     }
 
-    var type = resolveDeclarationAbove(plainType, idents.first())?.jaktType ?: return Type.Unknown
+    var type = resolveTypeDeclarationAbove(plainType, idents.first())?.jaktType ?: return Type.Unknown
 
     for (qualifier in idents.drop(1))
         type = resolveDeclarationIn(type, qualifier)
