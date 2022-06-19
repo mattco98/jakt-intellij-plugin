@@ -250,6 +250,8 @@ Statement ::=
     | VariableDeclarationStatement
     | TryStatement
     | YieldStatement
+    | BreakStatement
+    | ContinueStatement
     | UnsafeStatement
     | InlineCppStatement
     | Block
@@ -265,6 +267,8 @@ DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
 LoopStatement ::= LOOP_KEYWORD Block
 TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD IDENTIFIER Statement
+BreakStatement ::= BREAK_KEYWORD
+ContinueStatement ::= CONTINUE_KEYWORD
 YieldStatement ::= YIELD_KEYWORD ExpressionWithoutAssignment
 
 ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block

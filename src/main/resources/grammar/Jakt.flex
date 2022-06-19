@@ -66,6 +66,8 @@ COMMENT="//"[^\r\n]*
   "return"               { return RETURN_KEYWORD; }
   "throw"                { return THROW_KEYWORD; }
   "yield"                { return YIELD_KEYWORD; }
+  "break"                { return BREAK_KEYWORD; }
+  "continue"             { return CONTINUE_KEYWORD; }
   "defer"                { return DEFER_KEYWORD; }
   "true"                 { return TRUE_KEYWORD; }
   "false"                { return FALSE_KEYWORD; }
