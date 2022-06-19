@@ -13,5 +13,9 @@ abstract class JaktAccessMixin(
     override val jaktType: Type
         get() = (reference.resolve() as? JaktTypeable)?.jaktType ?: Type.Unknown
 
+    // TODO: It's a bit weird to return decimalLiteral here; figure out how to return
+    //       null in a nice way
+    override fun getNameIdentifier() = identifier ?: decimalLiteral!!
+
     override fun getReference() = singleRef(::resolveAccess)
 }

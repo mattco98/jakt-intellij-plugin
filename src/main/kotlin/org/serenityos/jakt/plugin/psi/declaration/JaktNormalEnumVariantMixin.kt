@@ -17,7 +17,7 @@ abstract class JaktNormalEnumVariantMixin(
                     it.structEnumMemberLabel.name to it.typeAnnotation.jaktType
                 }
             } else {
-                typeEnumMemberBody!!.typeList.map { null to it.jaktType }
+                typeEnumMemberBody?.typeList?.map { null to it.jaktType } ?: emptyList()
             }
 
             return Type.EnumVariant(
