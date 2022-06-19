@@ -5,7 +5,6 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
-import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded

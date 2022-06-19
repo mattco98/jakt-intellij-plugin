@@ -14,7 +14,6 @@ import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
-import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.type.Type
 
 abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {

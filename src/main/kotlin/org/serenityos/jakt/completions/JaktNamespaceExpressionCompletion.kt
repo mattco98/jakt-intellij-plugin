@@ -7,7 +7,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.util.ProcessingContext
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.type.Type
 import com.intellij.patterns.PlatformPatterns.psiElement
 import org.intellij.sdk.language.psi.JaktPlainQualifier

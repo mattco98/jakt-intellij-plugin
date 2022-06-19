@@ -1,8 +1,8 @@
 package org.serenityos.jakt.type
 
 import com.intellij.openapi.project.Project
-import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 sealed interface Type {
     fun typeRepr(): String

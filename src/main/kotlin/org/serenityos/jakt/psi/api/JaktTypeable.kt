@@ -1,6 +1,5 @@
 package org.serenityos.jakt.psi.api
 
-import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktExpression
 import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.type.Type
