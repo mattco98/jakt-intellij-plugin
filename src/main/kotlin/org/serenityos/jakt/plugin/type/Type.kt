@@ -2,7 +2,6 @@ package org.serenityos.jakt.plugin.type
 
 import com.intellij.openapi.project.Project
 import org.serenityos.jakt.plugin.project.jaktProject
-import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 
 sealed interface Type {
@@ -176,9 +175,9 @@ fun Type.resolveToBuiltinType(project: Project): Type {
         is Type.Set -> getPreludeType(project, "Set")
         is Type.Tuple -> getPreludeType(project, "Tuple")
         is Type.Weak -> getPreludeType(project, "Weak")
+        is Type.Primitive -> if (this == Type.Primitive.String) {
+            getPreludeType(project, "String")
+        } else this
         else -> this
     }
 }
-
-// val JaktTypeable?.jaktTypeOrNull: Type
-//     get() = this?.jaktType ?: Type.Unknown

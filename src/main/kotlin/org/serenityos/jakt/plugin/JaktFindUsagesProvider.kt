@@ -61,14 +61,5 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         }
     }
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        return when (element) {
-            // is JaktParameter -> buildString {
-            //     append(element.identifier.text)
-            //     append(" of function ")
-            //     append((element as JaktParameterImplMixin).owningFunction?.identifier?.text ?: "<unknown>")
-            // }
-            else -> "TODO(getNodeText => ${element::class.simpleName})"
-        }
-    }
+    override fun getNodeText(element: PsiElement, useFullName: Boolean) = getDescriptiveName(element)
 }

@@ -61,6 +61,9 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.plugin.JaktFoldingBuilder"
         />
+        <typeDeclarationProvider
+                implementation="org.serenityos.jakt.plugin.JaktTypeDeclarationProvider"
+        />
         <projectService
                 serviceInterface="org.serenityos.jakt.plugin.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.plugin.project.JaktProjectServiceImpl"
