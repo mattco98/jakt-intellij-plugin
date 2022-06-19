@@ -330,10 +330,10 @@ GenericBound ::= IDENTIFIER {
 
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
-      AccessExpression // Must come before CallExpression
+      IndexedAccessExpression // Must come before AccessExpression
+    | AccessExpression // Must come before CallExpression
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
     | AssignmentBinaryExpression // Must come before other binary expressions
-    | IndexedAccessExpression
     | LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
     | BitwiseOrBinaryExpression
