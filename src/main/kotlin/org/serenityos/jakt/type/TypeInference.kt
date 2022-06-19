@@ -43,9 +43,9 @@ object TypeInference {
             }
             is JaktPrefixUnaryExpression -> when {
                 element.plusPlus != null ||
-                element.minusMinus != null ||
-                element.minus != null ||
-                element.tilde != null -> inferType(element.expression)
+                    element.minusMinus != null ||
+                    element.minus != null ||
+                    element.tilde != null -> inferType(element.expression)
                 element.rawKeyword != null -> Type.Raw(inferType(element.expression))
                 element.asterisk != null -> inferType(element.expression).let {
                     if (it is Type.Raw) it.underlyingType else Type.Unknown

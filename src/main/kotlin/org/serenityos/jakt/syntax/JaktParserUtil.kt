@@ -14,29 +14,6 @@ object JaktParserUtil : GeneratedParserUtilBase() {
         set(value) = putUserData(MODES_KEY, value)
 
     @JvmStatic
-    fun isModeOn(builder: PsiBuilder, level: Int, mode: String) =
-        builder.parsingModes[mode]?.let { it > 0 } ?: false
-
-    @JvmStatic
-    fun isModeOff(builder: PsiBuilder, level: Int, mode: String) =
-        builder.parsingModes[mode]?.let { it == 0 } ?: true
-
-    @JvmStatic
-    fun enterMode(builder: PsiBuilder, level: Int, mode: String): Boolean {
-        builder.parsingModes[mode] = (builder.parsingModes[mode] ?: 0) + 1
-        return true
-    }
-
-    @JvmStatic
-    fun exitMode(builder: PsiBuilder, level: Int, mode: String): Boolean {
-        when (val value = builder.parsingModes[mode]) {
-            null -> error("Cannot exit from non-entered mode $mode")
-            else -> builder.parsingModes[mode] = value - 1
-        }
-        return true
-    }
-
-    @JvmStatic
     fun withOn(builder: PsiBuilder, level: Int, parser: Parser, vararg modes: String): Boolean {
         val parsingModes = builder.parsingModes
         val parsingModesOld = parsingModes.toMutableMap()

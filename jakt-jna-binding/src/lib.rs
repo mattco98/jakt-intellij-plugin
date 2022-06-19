@@ -9,7 +9,7 @@ use json;
 use libc::c_char;
 
 fn span_to_json(span: Span) -> json::JsonValue {
-    json::object!{
+    json::object! {
         file_id: span.file_id,
         start: span.start,
         end: span.end,
@@ -67,7 +67,7 @@ fn typecheck_result(path: &Path) -> json::JsonValue {
     let mut compiler = Compiler::new(vec![]);
 
     match compiler.check_project(path, &mut project) {
-        (_, Some(err)) => json::object!{
+        (_, Some(err)) => json::object! {
             "type": "Error",
             "error": jakt_error_to_json(err)
         },

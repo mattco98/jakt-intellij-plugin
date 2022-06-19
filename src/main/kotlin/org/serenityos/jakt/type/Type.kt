@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
+@Suppress("unused")
 sealed interface Type {
     fun typeRepr(): String
 

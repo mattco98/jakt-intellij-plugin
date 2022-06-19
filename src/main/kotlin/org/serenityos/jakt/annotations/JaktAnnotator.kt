@@ -11,9 +11,7 @@ abstract class JaktAnnotator {
     class Impl : Annotator, DumbAware {
         override fun annotate(element: PsiElement, holder: AnnotationHolder) {
             val holderWrapper = JaktAnnotationHolder(holder)
-            annotators.forEach {
-                BasicAnnotator.annotate(element, holderWrapper)
-            }
+            annotators.forEach { it.annotate(element, holderWrapper) }
         }
     }
 

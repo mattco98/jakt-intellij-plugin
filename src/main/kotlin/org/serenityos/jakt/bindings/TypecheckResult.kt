@@ -11,25 +11,30 @@ data class Span(
     val end: Int,
 )
 
+@Suppress("unused")
 @Serializable
 sealed class JaktError {
     abstract val message: String
     abstract val span: Span?
 
-    @Serializable @SerialName("IOError")
+    @Serializable
+    @SerialName("IOError")
     data class IOError(override val message: String) : JaktError() {
         override val span: Span? = null
     }
 
-    @Serializable @SerialName("StringError")
+    @Serializable
+    @SerialName("StringError")
     data class StringError(override val message: String) : JaktError() {
         override val span: Span? = null
     }
 
-    @Serializable @SerialName("ParserError")
+    @Serializable
+    @SerialName("ParserError")
     data class ParserError(override val message: String, override val span: Span) : JaktError()
 
-    @Serializable @SerialName("ParserErrorWithHint")
+    @Serializable
+    @SerialName("ParserErrorWithHint")
     data class ParserErrorWithHint(
         override val message: String,
         override val span: Span,
@@ -39,13 +44,16 @@ sealed class JaktError {
         val hintSpan: Span,
     ) : JaktError()
 
-    @Serializable @SerialName("ValidationError")
+    @Serializable
+    @SerialName("ValidationError")
     data class ValidationError(override val message: String, override val span: Span) : JaktError()
 
-    @Serializable @SerialName("TypecheckError")
+    @Serializable
+    @SerialName("TypecheckError")
     data class TypecheckError(override val message: String, override val span: Span) : JaktError()
 
-    @Serializable @SerialName("TypecheckErrorWithHint")
+    @Serializable
+    @SerialName("TypecheckErrorWithHint")
     data class TypecheckErrorWithHint(
         override val message: String,
         override val span: Span,
@@ -56,11 +64,14 @@ sealed class JaktError {
     ) : JaktError()
 }
 
+@Suppress("unused")
 @Serializable
 sealed class TypecheckResult {
-    @Serializable @SerialName("Error")
+    @Serializable
+    @SerialName("Error")
     data class Error(val error: JaktError) : TypecheckResult()
 
-    @Serializable @SerialName("Ok")
+    @Serializable
+    @SerialName("Ok")
     object Ok : TypecheckResult()
 }

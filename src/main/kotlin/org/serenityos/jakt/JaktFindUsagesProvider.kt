@@ -8,7 +8,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.tree.TokenSet
 import org.intellij.sdk.language.psi.*
-import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.syntax.JaktLexerAdapter
 
 class JaktFindUsagesProvider : FindUsagesProvider {

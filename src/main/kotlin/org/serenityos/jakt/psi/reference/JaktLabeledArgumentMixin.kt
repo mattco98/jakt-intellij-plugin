@@ -14,7 +14,9 @@ abstract class JaktLabeledArgumentMixin(
 ) : JaktNamedElement(node), JaktLabeledArgument {
     override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
         override fun singleResolve(): PsiElement? {
-            return when (val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()) {
+            return when (
+                val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()
+            ) {
                 is JaktFunctionDeclaration -> callTarget.parameterList.firstOrNull { it.name == element.name }
                 is JaktStructDeclaration -> callTarget.structBody.structMemberList
                     .mapNotNull { it.structField }

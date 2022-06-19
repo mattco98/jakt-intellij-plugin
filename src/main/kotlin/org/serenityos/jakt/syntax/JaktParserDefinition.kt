@@ -10,10 +10,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.parser.JaktParser
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktLanguage
+import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.parser.JaktParser
 
 class JaktParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = JaktLexerAdapter()

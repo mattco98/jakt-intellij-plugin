@@ -6,7 +6,6 @@ import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.TokenType
 import junit.framework.TestCase
 import org.eclipse.jgit.api.Git
-import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicNode
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -58,7 +57,16 @@ object JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
             // Print a clickable link in test output
             println("File path: file://${file.absolutePath}")
 
-            val builder = PsiBuilderImpl(null, null, JaktParserDefinition(), JaktLexerAdapter(), null, file.readText(), null, null)
+            val builder = PsiBuilderImpl(
+                null,
+                null,
+                JaktParserDefinition(),
+                JaktLexerAdapter(),
+                null,
+                file.readText(),
+                null,
+                null
+            )
             val result = JaktParser().parse(JaktParserDefinition.FILE, builder)
             val errorElement = result.findChildByType(TokenType.ERROR_ELEMENT)
             if (errorElement != null) {

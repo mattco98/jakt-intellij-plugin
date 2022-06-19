@@ -12,6 +12,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.serenityos.jakt.type.Type
@@ -82,7 +83,10 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
     }
 }
 
-inline fun <reified T : PsiElement> psiElement() = PlatformPatterns.psiElement(T::class.java)
+typealias PsiPattern = PsiElementPattern.Capture<PsiElement>
+
+inline fun <reified T : PsiElement> psiElement(): PsiElementPattern.Capture<T> =
+    PlatformPatterns.psiElement(T::class.java)
 
 inline fun <reified T : PsiElement> condition(
     debugName: String,

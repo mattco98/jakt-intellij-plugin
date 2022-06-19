@@ -24,8 +24,8 @@
     extends(".+Expression")=Expression
     extends(".+Statement")=Statement
 
-    name(".+Expression")=expression
-    name(".+Statement")=statement
+    name(".+Expression")="expression"
+    name(".+Statement")="statement"
 
     generateTokenAccessors=true
 }
@@ -51,22 +51,22 @@ TopLevelDefinition ::=
     generateTokenAccessors=false
 }
 
-private StatementLead ::=
-      EXTERN_KEYWORD
-    | CLASS_KEYWORD
-    | STRUCT_KEYWORD
-    | FUNCTION_KEYWORD
-    | LET_KEYWORD
-    | MUT_KEYWORD
-    | WHILE_KEYWORD
-    | FOR_KEYWORD
-    | LOOP_KEYWORD
-    | RETURN_KEYWORD
-    | THROW_KEYWORD
-    | DEFER_KEYWORD
-    | THROWS_KEYWORD
-    | SEMICOLON
-    | ExpressionLead
+//private StatementLead ::=
+//      EXTERN_KEYWORD
+//    | CLASS_KEYWORD
+//    | STRUCT_KEYWORD
+//    | FUNCTION_KEYWORD
+//    | LET_KEYWORD
+//    | MUT_KEYWORD
+//    | WHILE_KEYWORD
+//    | FOR_KEYWORD
+//    | LOOP_KEYWORD
+//    | RETURN_KEYWORD
+//    | THROW_KEYWORD
+//    | DEFER_KEYWORD
+//    | THROWS_KEYWORD
+//    | SEMICOLON
+//    | ExpressionLead
 
 private ExpressionLead ::=
       IF_KEYWORD

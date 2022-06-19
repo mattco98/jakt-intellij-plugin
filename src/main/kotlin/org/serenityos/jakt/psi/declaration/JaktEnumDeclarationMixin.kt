@@ -65,5 +65,6 @@ abstract class JaktEnumDeclarationMixin(
         return declarations
     }
 
-    override fun getDeclGenericBounds(): List<JaktGenericBound> = normalEnumBody?.genericBounds?.genericBoundList ?: emptyList()
+    override fun getDeclGenericBounds(): List<JaktGenericBound> =
+        normalEnumBody?.genericBounds?.genericBoundList ?: emptyList()
 }

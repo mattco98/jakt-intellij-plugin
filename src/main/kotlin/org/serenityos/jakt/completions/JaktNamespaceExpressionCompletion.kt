@@ -5,15 +5,16 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
+import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.type.Type
-import com.intellij.patterns.PlatformPatterns.psiElement
-import org.intellij.sdk.language.psi.JaktPlainQualifier
 
 object JaktNamespaceExpressionCompletion : JaktCompletion() {
-    override val pattern = psiElement(JaktTypes.IDENTIFIER)
-        .withSuperParent(1,
+    override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
+        .withSuperParent(
+            1,
             psiElement<JaktPlainQualifier>()
                 .with(condition("HasNamespace") { element, context ->
                     ProgressManager.checkCanceled()

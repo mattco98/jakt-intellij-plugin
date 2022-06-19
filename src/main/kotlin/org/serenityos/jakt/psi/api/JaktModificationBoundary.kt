@@ -1,7 +1,6 @@
 package org.serenityos.jakt.psi.api
 
 import com.intellij.openapi.util.ModificationTracker
-import com.intellij.psi.PsiElement
 import org.serenityos.jakt.psi.JaktPsiElement
 
 interface JaktModificationBoundary : JaktPsiElement {
@@ -14,11 +13,3 @@ class JaktModificationTracker : ModificationTracker {
         return ModificationTracker.EVER_CHANGED.modificationCount
     }
 }
-
-val JaktPsiElement.modificationBoundary: JaktModificationBoundary
-    get() {
-        var element: PsiElement = this
-        while (element !is JaktModificationBoundary)
-            element = element.parent
-        return element
-    }

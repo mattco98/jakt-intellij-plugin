@@ -14,7 +14,7 @@ abstract class JaktImportBraceEntryMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktImportBraceEntry {
     override val jaktType: Type
-        get()  {
+        get() {
             val importType = ancestorOfType<JaktImportStatement>()?.jaktType as? Type.Namespace
             return importType?.members?.firstOrNull { it.name == name } ?: Type.Unknown
         }
@@ -24,8 +24,8 @@ abstract class JaktImportBraceEntryMixin(
     }
 
     override fun getReference() = singleRef {
-            val file = it.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
-                ?: return@singleRef null
-            resolveDeclarationIn(file, it.name)
+        val file = it.ancestorOfType<JaktImportStatement>()?.reference?.resolve() as? JaktFile
+            ?: return@singleRef null
+        resolveDeclarationIn(file, it.name)
     }
 }
