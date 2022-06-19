@@ -94,6 +94,7 @@ object TypeInference {
                 JaktTypes.CHAR_LITERAL -> Type.Primitive.CChar
                 else -> error("unreachable")
             }
+            is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
             is JaktPlainQualifier -> resolvePlainQualifier(element)?.jaktType ?: Type.Unknown
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }

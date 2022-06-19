@@ -4,10 +4,12 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
 import org.serenityos.jakt.plugin.syntax.Highlights
 import org.serenityos.jakt.plugin.type.Type
 import org.serenityos.jakt.utils.ancestorOfType
@@ -30,45 +32,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 TextRange.create(element.identifier.startOffset, element.colon.endOffset)
                     .highlight(highlight)
             }
-            is JaktPlainQualifier -> {
-                val isDumb = DumbService.isDumb(element.project)
-
-                element.namespaceQualifierList.forEach {
-                    val attr = if (!isDumb) {
-                        when (it.jaktType) {
-                            is Type.Struct -> Highlights.STRUCT_NAME
-                            is Type.Enum -> Highlights.ENUM_NAME
-                            is Type.Namespace -> Highlights.NAMESPACE_NAME
-                            else -> return@forEach
-                        }
-                    } else Highlights.NAMESPACE_NAME
-
-                    it.nameIdentifier!!.highlight(attr)
-                }
-
-                var identHighlight = Highlights.IDENTIFIER
-                val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element ||
-                    element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
-
-                if (!isDumb) {
-                    val decl = if (element.namespaceQualifierList.isEmpty()) element.reference?.resolve() else null
-
-                    if (decl is JaktVariableDeclarationStatement) {
-                        identHighlight =  if (decl.mutKeyword != null) {
-                            Highlights.LOCAL_VAR_MUT
-                        } else Highlights.LOCAL_VAR
-                    } else {
-                        val type = element.jaktType
-                        if (isCall) {
-                            identHighlight = getCallTargetHighlight(element.jaktType)
-                        } else if (type is Type.EnumVariant) {
-                            identHighlight = Highlights.ENUM_VARIANT_NAME
-                        }
-                    }
-                }
-
-                element.nameIdentifier!!.highlight(identHighlight)
-            }
+            is JaktPlainQualifier -> highlightNamespacedQualifier(element, element.namespaceQualifierList, false)
             is JaktAccess -> {
                 if (element.identifier != null) {
                     val isDumb = DumbService.isDumb(element.project)
@@ -89,17 +53,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     element.nameIdentifier!!.highlight(identHighlight)
                 }
             }
-            is JaktPlainType -> {
-                val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
-                idents.last().highlight(Highlights.TYPE_NAME)
-
-                idents.dropLast(1).forEach {
-                    // In a type context, a namespace qualifier can only ever refer to an actual
-                    // namespace, since enums/structs cannot contain sub-types (such as "using ..."
-                    // in C++). This may change in the future.
-                    it.highlight(Highlights.NAMESPACE_NAME)
-                }
-            }
+            is JaktPlainType -> highlightNamespacedQualifier(element, element.namespaceQualifierList, true)
             is JaktNumericSuffix -> element.highlight(Highlights.LITERAL_NUMBER)
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
             is JaktImportStatement -> {
@@ -145,5 +99,55 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             Highlights.FUNCTION_INSTANCE_CALL
         } else Highlights.FUNCTION_STATIC_CALL
         else -> Highlights.FUNCTION_CALL
+    }
+
+    private fun JaktAnnotationHolder.highlightNamespacedQualifier(
+        element: JaktTypeable,
+        namespaces: List<JaktNamespaceQualifier>,
+        isType: Boolean,
+    ) {
+        val isDumb = DumbService.isDumb(element.project)
+
+        namespaces.forEach {
+            val attr = if (!isDumb) {
+                when (it.jaktType) {
+                    is Type.Struct -> Highlights.STRUCT_NAME
+                    is Type.Enum -> Highlights.ENUM_NAME
+                    is Type.Namespace -> Highlights.NAMESPACE_NAME
+                    else -> return@forEach
+                }
+            } else Highlights.NAMESPACE_NAME
+
+            it.nameIdentifier!!.highlight(attr)
+        }
+
+        var identHighlight = Highlights.IDENTIFIER
+        val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element ||
+            element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
+
+        if (!isDumb) {
+            val decl = if (namespaces.isEmpty()) element.reference?.resolve() else null
+
+            identHighlight = if (decl is JaktVariableDeclarationStatement) {
+                if (decl.mutKeyword != null) Highlights.LOCAL_VAR_MUT else Highlights.LOCAL_VAR
+            } else {
+                val type = element.jaktType
+
+                if (isCall) {
+                    getCallTargetHighlight(element.jaktType)
+                } else if (type is Type.EnumVariant) {
+                    Highlights.ENUM_VARIANT_NAME
+                } else if (isType) {
+                    when (type) {
+                        is Type.Struct -> Highlights.STRUCT_NAME
+                        is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
+                        is Type.Primitive -> Highlights.TYPE_NAME
+                        else -> identHighlight
+                    }
+                } else identHighlight
+            }
+        }
+
+        (element as PsiNameIdentifierOwner).nameIdentifier!!.highlight(identHighlight)
     }
 }

@@ -3,16 +3,16 @@ package org.serenityos.jakt.plugin.type
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import org.intellij.sdk.language.psi.*
-import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.plugin.project.jaktProject
 import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.psi.api.jaktType
 import org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.plugin.psi.declaration.JaktGeneric
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.plugin.psi.declaration.JaktImportStatementMixin
 import org.serenityos.jakt.utils.ancestorOfType
 import org.serenityos.jakt.utils.ancestorsOfType
-import org.serenityos.jakt.utils.findChildrenOfType
+import org.serenityos.jakt.utils.findChildOfType
 
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
     is JaktImportStatementMixin -> resolveFile()
@@ -52,12 +52,23 @@ fun resolveDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
     return scope.jaktProject.findPreludeType(name)
 }
 
+private fun resolveEnumShorthand(type: Type, name: String): JaktDeclaration? {
+    val scope = (type as? Type.Enum)?.declaration as? JaktPsiScope
+    return scope?.getDeclarations()?.find { it.name == name }
+}
+
 fun resolvePlainQualifier(qualifier: JaktPlainQualifier): JaktDeclaration? {
     return if (qualifier.namespaceQualifierList.isNotEmpty()) {
         val nsRef = qualifier.namespaceQualifierList.last().reference?.resolve() ?: return null
         resolveDeclarationIn(nsRef, qualifier.name!!)
     } else {
-        resolveDeclarationAbove(qualifier)
+        resolveDeclarationAbove(qualifier) ?: run {
+            // Try to resolve match enum shorthand
+            val matchParent = qualifier.parent as? JaktMatchPattern ?: return@run null
+            val matchExpression = matchParent.ancestorOfType<JaktMatchExpression>()!!
+            val matchTarget = matchExpression.findChildOfType<JaktExpression>()!!
+            resolveEnumShorthand(matchTarget.jaktType, qualifier.name!!)
+        }
     }
 }
 
@@ -70,19 +81,19 @@ private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDe
     return decl
 }
 
-fun resolvePlainType(plainType: JaktPlainType): Type {
-    val idents = plainType.findChildrenOfType(JaktTypes.IDENTIFIER).map { it.text }
-
-    if (idents.size == 1) {
-        Type.Primitive.values().find { it.typeRepr() == idents[0] }?.let { return it }
+fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
+    return if (plainType.namespaceQualifierList.isNotEmpty()) {
+        val nsRef = plainType.namespaceQualifierList.last().reference?.resolve() ?: return null
+        resolveDeclarationIn(nsRef, plainType.name!!)
+    } else {
+        resolveTypeDeclarationAbove(plainType, plainType.name!!) ?: run {
+            // Try to resolve is enum shorthand
+            val postfixParent = plainType.parent as? JaktPostfixUnaryExpression ?: return@run null
+            val exprType = postfixParent.expression.takeIf { postfixParent.keywordIs != null }?.jaktType
+                ?: return@run null
+            resolveEnumShorthand(exprType, plainType.name!!)
+        }
     }
-
-    var type = resolveTypeDeclarationAbove(plainType, idents.first())?.jaktType ?: return Type.Unknown
-
-    for (qualifier in idents.drop(1))
-        type = resolveDeclarationIn(type, qualifier)
-
-    return type
 }
 
 fun resolveAccess(access: JaktAccess): JaktDeclaration? {

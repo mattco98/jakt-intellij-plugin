@@ -297,7 +297,7 @@ ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
-PlainType ::= (IDENTIFIER COLON_COLON)* IDENTIFIER GenericSpecialization? {
+PlainType ::= NamespaceQualifier* IDENTIFIER GenericSpecialization? {
     extends=Type
     implements="org.serenityos.jakt.plugin.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.plugin.psi.reference.JaktPlainTypeMixin"
