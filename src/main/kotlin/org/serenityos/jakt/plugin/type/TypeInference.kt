@@ -3,10 +3,9 @@ package org.serenityos.jakt.plugin.type
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.utils.allChildren
-import org.serenityos.jakt.utils.findChildOfType
-import org.serenityos.jakt.utils.findChildrenOfType
-import org.serenityos.jakt.utils.findNotNullChildOfType
+import org.serenityos.jakt.plugin.psi.api.JaktPsiScope
+import org.serenityos.jakt.plugin.psi.api.JaktTypeable
+import org.serenityos.jakt.utils.*
 
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
@@ -61,7 +60,12 @@ object TypeInference {
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
             is JaktAccessExpression -> getAccessExpressionType(element)
             is JaktIndexedAccessExpression -> Type.Unknown // TODO
-            is JaktFieldAccessExpression -> Type.Unknown // TODO
+            is JaktThisExpression ->
+                (element.ancestorOfType<JaktPsiScope>() as? JaktTypeable)?.jaktType ?: Type.Unknown
+            is JaktFieldAccessExpression -> {
+                val thisDecl = element.ancestorOfType<JaktStructDeclaration>() ?: return Type.Unknown
+                thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: Type.Unknown
+            }
             is JaktRangeExpression -> Type.Unknown // TODO
             is JaktArrayExpression -> when {
                 element.sizedArrayBody != null -> Type.Array(inferType(
@@ -95,7 +99,7 @@ object TypeInference {
                 else -> error("unreachable")
             }
             is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
-            is JaktPlainQualifier -> resolvePlainQualifier(element)?.jaktType ?: Type.Unknown
+            is JaktPlainQualifier -> element.jaktType
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }

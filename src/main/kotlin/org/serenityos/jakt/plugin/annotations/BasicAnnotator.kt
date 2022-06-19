@@ -77,8 +77,15 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
                 }
             }
-            is JaktFieldAccessExpression -> TextRange.create(element.dot.startOffset, element.identifier.endOffset)
-                .highlight(Highlights.STRUCT_FIELD)
+            is JaktFieldAccessExpression -> {
+                val color = when {
+                    DumbService.isDumb(element.project) -> Highlights.STRUCT_FIELD
+                    element.reference?.resolve() is JaktFunctionDeclaration -> Highlights.FUNCTION_DECLARATION
+                    else -> Highlights.STRUCT_FIELD
+                }
+                TextRange.create(element.dot.startOffset, element.identifier.endOffset)
+                    .highlight(color)
+            }
             is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
             is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktVariableDeclarationStatement -> {

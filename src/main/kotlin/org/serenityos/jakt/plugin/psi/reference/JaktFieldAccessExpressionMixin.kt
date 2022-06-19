@@ -11,9 +11,11 @@ abstract class JaktFieldAccessExpressionMixin(
 ) : JaktNamedElement(node), JaktFieldAccessExpression {
     override fun getReference() = singleRef {
         for (decl in it.ancestorsOfType<JaktStructDeclaration>()) {
-            decl.structBody.structMemberList.mapNotNull { member ->
+            decl.structBody.structMemberList.forEach { member ->
                 if (member.structField?.identifier?.text == it.name)
-                    return@singleRef member.structField!!.identifier
+                    return@singleRef member.structField
+                if (member.functionDeclaration?.identifier?.text == it.name)
+                    return@singleRef member.functionDeclaration
             }
         }
 

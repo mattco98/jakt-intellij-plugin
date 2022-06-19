@@ -12,7 +12,7 @@ import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktStructDeclaration, JaktPsiScope {
+) : JaktNamedElement(node), JaktStructDeclaration {
     override val jaktType by recursivelyGuarded<Type> {
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, Type.Function>()

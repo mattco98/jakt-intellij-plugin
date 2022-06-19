@@ -165,6 +165,7 @@ NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefi
 StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
     implements=[
+        "org.serenityos.jakt.plugin.psi.api.JaktPsiScope"
         "org.serenityos.jakt.plugin.psi.declaration.JaktGeneric"
         "org.serenityos.jakt.plugin.psi.declaration.JaktDeclaration"
     ]
