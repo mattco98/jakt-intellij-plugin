@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<list>
+    <option name="JAKT_ENUM_NAME">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_ENUM_VARIANT_NAME">
+      <value>
+        <option name="FOREGROUND" value="e06c75" />
+      </value>
+    </option>
+    <option name="JAKT_FUNCTION_ARROW">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+      </value>
+    </option>
+    <option name="JAKT_FUNCTION_CALL">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+        <option name="FONT_TYPE" value="2" />
+        <option name="EFFECT_TYPE" value="5" />
+      </value>
+    </option>
+    <option name="JAKT_FUNCTION_DECLARATION">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+      </value>
+    </option>
+    <option name="JAKT_FUNCTION_FAT_ARROW">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+      </value>
+    </option>
+    <option name="JAKT_FUNCTION_METHOD_CALL_STATIC">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+      </value>
+    </option>
+    <option name="JAKT_IMPORT_ALIAS">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_IMPORT_ENTRY">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_IMPORT_MODULE">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_KEYWORD_BASE">
+      <value>
+        <option name="FOREGROUND" value="c679dd" />
+      </value>
+    </option>
+    <option name="JAKT_LITERAL_BOOLEAN">
+      <value>
+        <option name="FOREGROUND" value="c679dd" />
+      </value>
+    </option>
+    <option name="JAKT_LITERAL_NUMBER">
+      <value>
+        <option name="FOREGROUND" value="d19a66" />
+      </value>
+    </option>
+    <option name="JAKT_LITERAL_NUMBER_SUFFIX">
+      <value>
+        <option name="FOREGROUND" value="d19a66" />
+      </value>
+    </option>
+    <option name="JAKT_LITERAL_STRING">
+      <value>
+        <option name="FOREGROUND" value="98c379" />
+      </value>
+    </option>
+    <option name="JAKT_LOCAL_VAR">
+      <value>
+        <option name="FOREGROUND" value="d19a66" />
+      </value>
+    </option>
+    <option name="JAKT_LOCAL_VAR_MUT">
+      <value>
+        <option name="FOREGROUND" value="d19a66" />
+        <option name="FONT_TYPE" value="2" />
+      </value>
+    </option>
+    <option name="JAKT_NAMESPACE_NAME">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_OPERATOR">
+      <value>
+        <option name="FOREGROUND" value="61afef" />
+      </value>
+    </option>
+    <option name="JAKT_STRUCT_FIELD">
+      <value>
+        <option name="FOREGROUND" value="e06c75" />
+      </value>
+    </option>
+    <option name="JAKT_STRUCT_FIELD_REFERENCE">
+      <value>
+        <option name="FOREGROUND" value="e06c75" />
+      </value>
+    </option>
+    <option name="JAKT_STRUCT_NAME">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_TYPE_NAME">
+      <value>
+        <option name="FOREGROUND" value="e5c17c" />
+      </value>
+    </option>
+    <option name="JAKT_TYPE_OPTIONAL_QUALIFIER">
+      <value>
+        <option name="FOREGROUND" value="61aeef" />
+      </value>
+    </option>
+</list>

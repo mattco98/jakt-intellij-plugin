@@ -75,6 +75,11 @@
                 serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache"
         />
 
+        <additionalTextAttributes
+                scheme="Darcula"
+                file="colorSchemes/JaktDarcula.xml"
+        />
+
         <intentionAction>
             <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>
             <category>Jakt</category>
