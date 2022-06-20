@@ -76,6 +76,9 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
 
     companion object {
         @JvmStatic
+        protected val ELEMENT = Key.create<PsiElement>("ELEMENT")
+
+        @JvmStatic
         protected val TYPE_FIELD_INFO = Key.create<Type>("TYPE_FIELD_INFO")
 
         @JvmStatic

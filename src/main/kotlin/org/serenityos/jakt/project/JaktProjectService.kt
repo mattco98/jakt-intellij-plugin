@@ -8,6 +8,8 @@ import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 interface JaktProjectService {
+    fun getPreludeTypes(): List<JaktDeclaration>
+
     fun findPreludeType(type: String): JaktDeclaration?
 
     fun resolveImportedFile(from: VirtualFile, name: String): JaktFile?

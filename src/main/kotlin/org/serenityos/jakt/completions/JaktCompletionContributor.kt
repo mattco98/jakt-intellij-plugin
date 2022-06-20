@@ -7,6 +7,7 @@ class JaktCompletionContributor : CompletionContributor() {
     init {
         extend(JaktAccessExpressionCompletion)
         extend(JaktNamespaceExpressionCompletion)
+        extend(JaktPlainQualifierCompletion)
     }
 
     private fun extend(completion: JaktCompletion) =

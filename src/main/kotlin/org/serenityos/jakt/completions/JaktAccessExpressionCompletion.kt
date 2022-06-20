@@ -84,6 +84,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
+        ProgressManager.checkCanceled()
         val type = context[TYPE_FIELD_INFO] ?: return
         val project = context[PROJECT]!!
 
