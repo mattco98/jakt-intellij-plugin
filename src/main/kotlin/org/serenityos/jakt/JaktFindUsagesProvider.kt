@@ -11,6 +11,7 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.declaration.isClass
 import org.serenityos.jakt.psi.declaration.isExtern
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.render.JaktRenderer
 import org.serenityos.jakt.syntax.JaktLexerAdapter
 
 class JaktFindUsagesProvider : FindUsagesProvider {
@@ -64,5 +65,5 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         }
     }
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean) = getDescriptiveName(element)
+    override fun getNodeText(element: PsiElement, useFullName: Boolean) = JaktRenderer.Plain.render(element)
 }

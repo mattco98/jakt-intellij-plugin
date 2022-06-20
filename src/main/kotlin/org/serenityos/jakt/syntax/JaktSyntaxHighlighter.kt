@@ -39,7 +39,7 @@ object Highlights {
     val COLON = OPERATOR.extend("COLON")
     val COMMA = OPERATOR.extend("COMMA")
     val DOT = OPERATOR.extend("DOT")
-    val NAMESPACE = OPERATOR.extend("NAMESPACE")
+    val NAMESPACE_QUALIFIER = OPERATOR.extend("NAMESPACE")
     val RANGE = OPERATOR.extend("RANGE")
     val SEMICOLON = OPERATOR.extend("SEMICOLON")
     val OPTIONAL_ASSERTION = OPERATOR.extend("OPTIONAL_ASSERTION")
@@ -157,7 +157,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             DOT_DOT -> Highlights.RANGE
             COMMA -> Highlights.COMMA
             COLON -> Highlights.COLON
-            COLON_COLON -> Highlights.NAMESPACE
+            COLON_COLON -> Highlights.NAMESPACE_QUALIFIER
             SEMICOLON -> Highlights.SEMICOLON
             EXCLAMATION_POINT -> Highlights.OPTIONAL_ASSERTION
 

@@ -51,7 +51,6 @@ After compiling the bindings, it is as simple as running the `Run IDE for UI Tes
 
 ### TODO (in order of importance)
 
-- [`DocumentationProvider`](https://plugins.jetbrains.com/docs/intellij/documentation.html)
 - Github Actions: Automatically run tests for commits and PRs
 - Grammar
     - Improve parsing errors

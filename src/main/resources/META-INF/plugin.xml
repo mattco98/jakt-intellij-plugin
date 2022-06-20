@@ -38,6 +38,18 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.JaktRefactoringSupportProvider"
         />
+        <lang.braceMatcher
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.JaktBraceMatcher"
+        />
+        <lang.foldingBuilder
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.JaktFoldingBuilder"
+        />
+        <lang.documentationProvider
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.render.JaktDocumentationProvider"
+        />
         <colorSettingsPage
                 implementation="org.serenityos.jakt.syntax.JaktColorSettingsPage"
         />
@@ -52,14 +64,6 @@
         <completion.contributor
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.completions.JaktCompletionContributor"
-        />
-        <lang.braceMatcher
-                language="Jakt"
-                implementationClass="org.serenityos.jakt.JaktBraceMatcher"
-        />
-        <lang.foldingBuilder
-                language="Jakt"
-                implementationClass="org.serenityos.jakt.JaktFoldingBuilder"
         />
         <typeDeclarationProvider
                 implementation="org.serenityos.jakt.JaktTypeDeclarationProvider"
