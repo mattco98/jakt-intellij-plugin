@@ -1,5 +1,6 @@
 package org.serenityos.jakt.annotations
 
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
@@ -98,13 +99,14 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         }
     }
 
-    private fun getCallTargetHighlight(type: Type) = when (type) {
+    private fun getCallTargetHighlight(type: Type): TextAttributesKey = when (type) {
         is Type.Struct -> Highlights.STRUCT_NAME
         is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
         is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
         is Type.Function -> if (type.thisParameter != null) {
             Highlights.FUNCTION_INSTANCE_CALL
         } else Highlights.FUNCTION_STATIC_CALL
+        is Type.Parameterized -> getCallTargetHighlight(type.underlyingType)
         else -> Highlights.FUNCTION_CALL
     }
 
