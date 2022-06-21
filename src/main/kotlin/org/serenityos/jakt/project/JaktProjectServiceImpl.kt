@@ -9,6 +9,7 @@ import com.intellij.psi.search.GlobalSearchScopes
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
+import org.serenityos.jakt.psi.declaration.isTypeDeclaration
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.utils.runInReadAction
 import java.io.IOException
@@ -22,7 +23,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     @Volatile
     private var prelude: JaktFile? = null
 
-    private var preludeTypes = mutableMapOf<String, JaktDeclaration>()
+    private var preludeDeclarations = mutableMapOf<String, JaktDeclaration>()
 
     init {
         CompletableFuture.supplyAsync {
@@ -47,15 +48,19 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
                 prelude!!.findChildrenOfType<JaktTopLevelDefinition>()
                     .filterIsInstance<JaktDeclaration>()
                     .forEach {
-                        preludeTypes[it.name] = it
+                        preludeDeclarations[it.name] = it
                     }
             }
         }
     }
 
-    override fun getPreludeTypes() = preludeTypes.values.toList()
+    override fun getPreludeTypes() = preludeDeclarations.values.toList()
 
-    override fun findPreludeType(type: String): JaktDeclaration? = preludeTypes[type]
+    override fun findPreludeDeclaration(type: String): JaktDeclaration? = preludeDeclarations[type]
+
+    override fun findPreludeTypeDeclaration(type: String): JaktDeclaration? = preludeDeclarations[type]?.takeIf {
+        it.isTypeDeclaration
+    }
 
     override fun resolveImportedFile(from: VirtualFile, name: String): JaktFile? {
         val scope = GlobalSearchScopes.directoryScope(project, from.parent, false)

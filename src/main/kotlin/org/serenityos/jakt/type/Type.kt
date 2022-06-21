@@ -173,7 +173,7 @@ sealed interface Type {
 }
 
 private fun getPreludeType(project: Project, type: String) =
-    project.jaktProject.findPreludeType(type)?.jaktType ?: Type.Unknown
+    project.jaktProject.findPreludeDeclaration(type)?.jaktType ?: Type.Unknown
 
 fun Type.resolveToBuiltinType(project: Project): Type {
     return when (this) {

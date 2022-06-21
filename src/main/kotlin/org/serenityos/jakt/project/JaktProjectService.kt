@@ -10,7 +10,9 @@ import org.serenityos.jakt.psi.declaration.JaktDeclaration
 interface JaktProjectService {
     fun getPreludeTypes(): List<JaktDeclaration>
 
-    fun findPreludeType(type: String): JaktDeclaration?
+    fun findPreludeDeclaration(type: String): JaktDeclaration?
+
+    fun findPreludeTypeDeclaration(type: String): JaktDeclaration?
 
     fun resolveImportedFile(from: VirtualFile, name: String): JaktFile?
 }

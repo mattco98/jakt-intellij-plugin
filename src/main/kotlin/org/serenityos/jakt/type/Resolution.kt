@@ -7,10 +7,7 @@ import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.psi.declaration.JaktGeneric
-import org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin
-import org.serenityos.jakt.psi.declaration.JaktImportStatementMixin
+import org.serenityos.jakt.psi.declaration.*
 import org.serenityos.jakt.psi.findChildOfType
 
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
@@ -18,6 +15,10 @@ fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
     is JaktImportBraceEntryMixin -> resolveElement()
     else -> this
 }
+
+//////////////////
+// DECLARATIONS //
+//////////////////
 
 fun resolveDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
     return when (scope) {
@@ -44,11 +45,8 @@ fun resolveDeclarationAbove(scope: PsiNameIdentifierOwner): JaktDeclaration? =
 
 fun resolveDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
     resolveDeclarationIn(scope, name)?.let { return it }
-
-    for (parent in scope.ancestorsOfType<JaktPsiScope>())
-        resolveDeclarationIn(parent, name)?.let { return it }
-
-    return scope.jaktProject.findPreludeType(name)
+    val parent = scope.ancestorOfType<JaktPsiScope>() ?: return scope.jaktProject.findPreludeDeclaration(name)
+    return resolveDeclarationAbove(parent, name)
 }
 
 private fun resolveEnumShorthand(type: Type, name: String): JaktDeclaration? {
@@ -71,19 +69,36 @@ fun resolvePlainQualifier(qualifier: JaktPlainQualifier): JaktDeclaration? {
     }
 }
 
-// TODO: This is a bit of a hack to resolve constructor functions, since otherwise the return
-//       type would resolve to the same function
+///////////
+// TYPES //
+///////////
+
+// Types have to be treated specially because not all declarations are
+// types (namely, functions).
+
+private fun JaktPsiScope.getTypeDeclarations() = getDeclarations()
+    .mapNotNull(JaktDeclaration::unwrapImport)
+    .filter { it.isTypeDeclaration }
+
+private fun resolveTypeDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
+    return when (scope) {
+        is JaktPsiScope -> scope.getTypeDeclarations().find { it.name == name }?.unwrapImport()
+        is JaktGeneric -> scope.getDeclGenericBounds().find { it.name == name }
+        else -> null
+    }
+}
+
 private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
-    var decl = resolveDeclarationAbove(scope, name)
-    while (decl is JaktFunctionDeclaration)
-        decl = resolveDeclarationAbove(decl, name)
-    return decl
+    resolveTypeDeclarationIn(scope, name)?.let { return it }
+    val parent = scope.ancestorOfType<JaktPsiScope>()
+        ?: return scope.jaktProject.findPreludeTypeDeclaration(name)
+    return resolveTypeDeclarationAbove(parent, name)
 }
 
 fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
     return if (plainType.namespaceQualifierList.isNotEmpty()) {
         val nsRef = plainType.namespaceQualifierList.last().reference?.resolve() ?: return null
-        resolveDeclarationIn(nsRef, plainType.name!!)
+        resolveTypeDeclarationIn(nsRef, plainType.name!!)
     } else {
         resolveTypeDeclarationAbove(plainType, plainType.name!!) ?: run {
             // Try to resolve is enum shorthand
@@ -94,6 +109,10 @@ fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
         }
     }
 }
+
+//////////
+// MISC //
+//////////
 
 fun resolveAccess(access: JaktAccess): JaktDeclaration? {
     val accessExpr = access.ancestorOfType<JaktAccessExpression>()!!
