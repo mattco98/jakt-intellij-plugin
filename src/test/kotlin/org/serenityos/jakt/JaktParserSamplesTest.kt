@@ -38,7 +38,9 @@ object JaktParserSamplesTest : TestCase("JaktParserSamplesTest") {
 
         // return File(jaktDirectory, "samples").listFiles()?.map(::getTest) ?: emptyList()
 
-        return File(jaktDirectory, "samples").walk().filter { !it.isDirectory }.mapNotNull(::makeTest).toList()
+        return File(jaktDirectory, "samples").walk().filter {
+            !it.isDirectory && it.extension == "jakt"
+        }.mapNotNull(::makeTest).toList()
     }
 
     // TODO: Figure out why the display names are so broken in IntelliJ using DynamicContainers
