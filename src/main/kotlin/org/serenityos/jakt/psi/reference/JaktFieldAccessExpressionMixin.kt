@@ -3,8 +3,8 @@ package org.serenityos.jakt.psi.reference
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
 import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.ancestorsOfType
+import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktFieldAccessExpressionMixin(
     node: ASTNode,
@@ -14,8 +14,8 @@ abstract class JaktFieldAccessExpressionMixin(
             decl.structBody.structMemberList.forEach { member ->
                 if (member.structField?.identifier?.text == it.name)
                     return@singleRef member.structField
-                if (member.functionDeclaration?.identifier?.text == it.name)
-                    return@singleRef member.functionDeclaration
+                if (member.structMethod?.functionDeclaration?.identifier?.text == it.name)
+                    return@singleRef member.structMethod
             }
         }
 

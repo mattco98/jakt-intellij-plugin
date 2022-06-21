@@ -39,10 +39,11 @@ File ::= NL TopLevelDefinitionList? NL
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
 
 TopLevelDefinition ::=
-      FunctionDeclaration
-    | StructDeclaration
+      InternalFunctionDeclaration
+    | ExternalFunctionDeclaration
+    | InternalStructDeclaration
+    | ExternalStructDeclaration
     | EnumDeclaration
-    | ExternDeclaration
     | NamespaceDeclaration
     | ImportStatement {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
@@ -85,67 +86,11 @@ private ExpressionLead ::=
     | CHAR_LITERAL
     | Literal
 
-/*************************************
- *       Extern Declarations         *
- *************************************/
+/***************************
+ *       FUNCTIONS         *
+ ***************************/
 
-private ExternDeclaration ::= ExternFunctionDeclaration | ExternStructDeclaration {
-    extends=TopLevelDefinition
-    implements=[
-        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.declaration.JaktGeneric"
-    ]
-}
-
-ExternFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {
-    extends=TopLevelDefinition
-    implements=[
-        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.declaration.JaktGeneric"
-    ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktExternFunctionDeclarationMixin"
-}
-private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
-FunctionReturnType ::= THROWS_KEYWORD? (ARROW Type)?
-private ParameterList ::= MemberParameterList | FreeParameterList
-private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
-private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
-ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
-Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktParameterMixin"
-}
-
-ExternStructDeclaration ::= EXTERN_KEYWORD StructHeader CURLY_OPEN NL ExternStructMembers? NL CURLY_CLOSE {
-    extends=TopLevelDefinition
-    implements=[
-        "org.serenityos.jakt.psi.api.JaktPsiScope"
-        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.declaration.JaktGeneric"
-    ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktExternStructDeclarationMixin"
-}
-StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
-
-private ExternStructMembers ::= <<commaOrEolList ExternStructMember>>
-ExternStructMember ::= StructVisibility? (StructField | ExternStructMethod)
-StructField ::= IDENTIFIER MUT_KEYWORD? TypeAnnotation {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
-}
-ExternStructMethod ::= FunctionHeader {
-    implements=[
-        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.declaration.JaktGeneric"
-    ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktExternStructMethodMixin"
-}
-
-/*************************************
- *      Non-Extern Declarations      *
- *************************************/
-
-FunctionDeclaration ::= FunctionHeader FunctionBody {
+fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -155,31 +100,78 @@ FunctionDeclaration ::= FunctionHeader FunctionBody {
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktFunctionDeclarationMixin"
 }
+
+private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL ExpressionWithoutAssignment
+
+InternalFunctionDeclaration ::= FunctionHeader FunctionBody {elementType=FunctionDeclaration}
+ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {elementType=FunctionDeclaration}
+
+private ParameterList ::= MemberParameterList | FreeParameterList
+private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
+private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
+ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
+Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktParameterMixin"
+}
+
+/*************************
+ *       STRUCTS         *
+ *************************/
+
+fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
+    extends=TopLevelDefinition
+    implements=[
+        "org.serenityos.jakt.psi.api.JaktPsiScope"
+        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
+        "org.serenityos.jakt.psi.declaration.JaktGeneric"
+    ]
+    mixin="org.serenityos.jakt.psi.declaration.JaktStructDeclarationMixin"
+}
+
+private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
+
+fake StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>> NL CURLY_CLOSE
+fake StructMember ::= StructField | StructMethod
+
+StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
+}
+
+fake StructMethod ::= StructVisibility? FunctionDeclaration
+
+StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
+RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>> PAREN_CLOSE
+MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
+
+// INTERNAL
+
+InternalStructDeclaration ::= StructHeader InternalStructBody {elementType=StructDeclaration}
+InternalStructBody ::= CURLY_OPEN NL <<commaOrEolList InternalStructMember>> NL CURLY_CLOSE {elementType=StructBody}
+InternalStructMember ::= StructField | InternalStructMethod {elementType=StructMember}
+InternalStructMethod ::= StructVisibility? InternalFunctionDeclaration {elementType=StructMethod}
+
+// EXTERNAL
+
+ExternalStructDeclaration ::= EXTERN_KEYWORD StructHeader ExternalStructBody {elementType=StructDeclaration}
+ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>> NL CURLY_CLOSE {elementType=StructBody}
+ExternalStructMember ::= StructField | ExternalStructMethod {elementType=StructMember}
+ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {elementType=StructMethod}
+// Has to be different due to not requiring the extern keyword
+ExternalStructFunctionDeclaration ::= FunctionHeader {elementType=FunctionDeclaration}
+
+/*************************************
+ *      Non-Extern Declarations      *
+ *************************************/
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
     extends=TopLevelDefinition
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
 }
-StructDeclaration ::= StructHeader StructBody {
-    extends=TopLevelDefinition
-    implements=[
-        "org.serenityos.jakt.psi.api.JaktPsiScope"
-        "org.serenityos.jakt.psi.declaration.JaktGeneric"
-        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktStructDeclarationMixin"
-}
-StructBody ::= CURLY_OPEN NL StructMembers? NL CURLY_CLOSE
-
-// Structs
-private StructMembers ::= <<commaOrEolList StructMember>>;
-StructMember ::= StructVisibility? (StructField | FunctionDeclaration)
-
-StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
-RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>> PAREN_CLOSE
-MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // Enums
 EnumDeclaration ::= EnumHead EnumBody {
@@ -205,7 +197,7 @@ UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
-NormalEnumMember ::= NormalEnumVariant | (StructVisibility? FunctionDeclaration)
+NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktNormalEnumVariantMixin"
@@ -460,9 +452,9 @@ MultiplyBinaryExpression ::= Expression MultiplyOp NL Expression
 // TODO: Invert Expression{WithoutAssignment} => Expression{WithAssignment}, as this can't be a part
 //       of the expression tree root
 AssignmentBinaryExpression ::= Expression AssignmentOp NL Expression {rightAssociative=true}
-fake UnaryExpression ::= PrefixOp? Expression PostfixOp?
-PrefixUnaryExpression ::= PrefixOp NL Expression {extends=UnaryExpression}
-PostfixUnaryExpression ::= Expression PostfixOp {extends=UnaryExpression}
+fake UnaryExpression ::= PrefixOp? NL Expression PostfixOp?
+PrefixUnaryExpression ::= PrefixOp NL Expression {elementType=UnaryExpression}
+PostfixUnaryExpression ::= Expression PostfixOp {elementType=UnaryExpression}
 
 private AddOp ::= PLUS | MINUS
 private MultiplyOp ::= ASTERISK | SLASH | PERCENT

@@ -4,14 +4,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.JaktGeneric
 import org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin
 import org.serenityos.jakt.psi.declaration.JaktImportStatementMixin
-import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.findChildOfType
 
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
@@ -76,7 +75,7 @@ fun resolvePlainQualifier(qualifier: JaktPlainQualifier): JaktDeclaration? {
 //       type would resolve to the same function
 private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
     var decl = resolveDeclarationAbove(scope, name)
-    while (decl is JaktFunctionDeclaration || decl is JaktExternStructMethod || decl is JaktExternFunctionDeclaration)
+    while (decl is JaktFunctionDeclaration)
         decl = resolveDeclarationAbove(decl, name)
     return decl
 }
@@ -88,7 +87,7 @@ fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
     } else {
         resolveTypeDeclarationAbove(plainType, plainType.name!!) ?: run {
             // Try to resolve is enum shorthand
-            val postfixParent = plainType.parent as? JaktPostfixUnaryExpression ?: return@run null
+            val postfixParent = plainType.parent as? JaktUnaryExpression ?: return@run null
             val exprType = postfixParent.expression.takeIf { postfixParent.keywordIs != null }?.jaktType
                 ?: return@run null
             resolveEnumShorthand(exprType, plainType.name!!)

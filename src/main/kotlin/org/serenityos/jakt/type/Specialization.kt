@@ -37,6 +37,7 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
         name,
         fields.mapValues { it.value.specialize(specializations) },
         methods.mapValues { it.value.specialize(specializations) as Type.Function },
+        linkage,
     )
     is Type.Enum -> Type.Enum(
         name,
@@ -49,5 +50,6 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
         thisParameter, // TODO: Specialize?
         parameters.map { it.specialize(specializations) },
         returnType.specialize(specializations),
+        linkage,
     )
 }

@@ -15,6 +15,7 @@ abstract class JaktFunctionDeclarationMixin(
     override val jaktType: Type
         get() {
             val name = identifier.text
+            val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
 
             val typeParameters = if (genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
@@ -35,7 +36,8 @@ abstract class JaktFunctionDeclarationMixin(
                 name,
                 null,
                 parameters,
-                returnType
+                returnType,
+                linkage,
             ).let {
                 it.declaration = this
 
@@ -54,3 +56,6 @@ abstract class JaktFunctionDeclarationMixin(
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 }
+
+val JaktFunctionDeclaration.isExtern: Boolean
+    get() = externKeyword != null

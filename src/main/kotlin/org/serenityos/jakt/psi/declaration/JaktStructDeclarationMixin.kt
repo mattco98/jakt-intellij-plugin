@@ -1,7 +1,6 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
@@ -16,15 +15,18 @@ abstract class JaktStructDeclarationMixin(
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, Type.Function>()
 
+        val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
+
         producer {
-            val typeParameters = if (structHeader.genericBounds != null) {
+            val typeParameters = if (genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
             Type.Struct(
-                structHeader.identifier.text,
+                identifier.text,
                 fields,
                 methods,
+                linkage,
             ).let {
                 it.declaration = this@JaktStructDeclarationMixin
 
@@ -36,7 +38,7 @@ abstract class JaktStructDeclarationMixin(
 
         initializer { struct ->
             // TODO: Visibility
-            val members = structBody.structMemberList.map { it.functionDeclaration ?: it.structField }
+            val members = structBody.structMemberList.map { it.structMethod ?: it.structField }
 
             members.filterIsInstance<JaktStructField>().forEach {
                 fields[it.identifier.text] = it.typeAnnotation.jaktType
@@ -61,10 +63,14 @@ abstract class JaktStructDeclarationMixin(
     }
 
     override fun getDeclarations(): List<JaktDeclaration> {
-        return structBody.structMemberList.mapNotNull { it.structField ?: it.functionDeclaration }
+        return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.functionDeclaration }
     }
 
-    override fun getDeclGenericBounds() = structHeader.genericBounds?.genericBoundList ?: emptyList()
-
-    override fun getNameIdentifier(): PsiElement = structHeader.identifier
+    override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 }
+
+val JaktStructDeclaration.isExtern: Boolean
+    get() = externKeyword != null
+
+val JaktStructDeclaration.isClass: Boolean
+    get() = classKeyword != null

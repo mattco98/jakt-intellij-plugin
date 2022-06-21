@@ -14,6 +14,8 @@ inline fun <reified T : PsiElement> PsiElement.findChildrenOfType(): List<T> =
 
 inline fun <reified T : PsiElement> PsiElement.findChildOfType(): T? = findChildrenOfType<T>().singleOrNull()
 
+fun PsiElement.findChildOfType(type: IElementType): PsiElement? = findChildrenOfType(type).singleOrNull()
+
 fun PsiElement.findChildrenOfType(type: IElementType): List<PsiElement> =
     allChildren.filter { it.elementType == type }.toList()
 

@@ -73,7 +73,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktNormalEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktStructDeclaration -> {
-                element.structHeader.identifier.highlight(Highlights.STRUCT_NAME)
+                element.identifier.highlight(Highlights.STRUCT_NAME)
                 element.structBody.structMemberList.forEach {
                     it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
                 }

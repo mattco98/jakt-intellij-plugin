@@ -38,8 +38,13 @@ class JaktFoldingBuilder : CustomFoldingBuilder() {
         override fun visitPsiElement(o: JaktPsiElement) {
         }
 
-        override fun visitStructBody(o: JaktStructBody) {
-            descriptors += FoldingDescriptor(o, o.textRange)
+        override fun visitFunctionDeclaration(o: JaktFunctionDeclaration) {
+            val block = o.block ?: return
+            descriptors += FoldingDescriptor(block)
+        }
+
+        override fun visitStructDeclaration(o: JaktStructDeclaration) {
+            descriptors += FoldingDescriptor(o.structBody)
         }
 
         override fun visitEnumDeclaration(o: JaktEnumDeclaration) {
@@ -59,5 +64,7 @@ class JaktFoldingBuilder : CustomFoldingBuilder() {
         override fun visitBlock(o: JaktBlock) {
             descriptors += FoldingDescriptor(o, o.textRange)
         }
+
+        private fun FoldingDescriptor(element: PsiElement) = FoldingDescriptor(element, element.textRange)
     }
 }

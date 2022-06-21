@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.tree.TokenSet
 import org.intellij.sdk.language.psi.*
+import org.serenityos.jakt.psi.declaration.isClass
+import org.serenityos.jakt.psi.declaration.isExtern
+import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.syntax.JaktLexerAdapter
 
 class JaktFindUsagesProvider : FindUsagesProvider {
@@ -34,11 +37,18 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         return when (element) {
             is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else error("unreachable")
             is JaktCallExpression -> "function call"
-            is JaktExternFunctionDeclaration -> "extern function"
-            is JaktExternStructDeclaration -> "extern struct"
-            is JaktFunctionDeclaration -> "function"
+            is JaktFunctionDeclaration -> (if (element.isExtern) "extern " else "") + "function"
             is JaktNamespaceDeclaration -> "namespace"
-            is JaktStructDeclaration -> if (element.structHeader.classKeyword != null) "class" else "struct"
+            is JaktStructDeclaration -> buildString {
+                if (element.isExtern)
+                    append("extern ")
+
+                if (element.isClass) {
+                    append("class")
+                } else {
+                    append("struct")
+                }
+            }
             is JaktEnumDeclaration -> "enum"
             is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
             is JaktVariableDeclarationStatement -> "variable declaration"
@@ -49,13 +59,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
     override fun getDescriptiveName(element: PsiElement): String {
         return when (element) {
             is JaktArgument -> element.labeledArgument!!.identifier.text
-            is JaktExternFunctionDeclaration -> element.identifier.text
-            is JaktExternStructDeclaration -> element.structHeader.identifier.text
-            is JaktFunctionDeclaration -> element.identifier.text
-            is JaktNamespaceDeclaration -> element.identifier.text
-            is JaktStructDeclaration -> element.structHeader.identifier.text
-            is JaktEnumDeclaration -> element.identifier.text
-            is JaktParameter -> element.identifier.text
+            is JaktNamedElement -> element.name
             else -> "TODO(getDescriptiveName => ${element::class.simpleName})"
         }
     }

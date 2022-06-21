@@ -8,6 +8,11 @@ import org.serenityos.jakt.psi.declaration.JaktDeclaration
 sealed interface Type {
     fun typeRepr(): String
 
+    enum class Linkage {
+        Internal,
+        External,
+    }
+
     object Unknown : Type {
         override fun typeRepr() = "<unknown>"
     }
@@ -98,6 +103,7 @@ sealed interface Type {
         override val name: String,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
+        val linkage: Linkage,
     ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 
@@ -131,6 +137,7 @@ sealed interface Type {
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
         val returnType: Type,
+        val linkage: Linkage,
     ) : TopLevelDecl() {
         override var namespace: Namespace? = null
 

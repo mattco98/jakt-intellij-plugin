@@ -6,10 +6,10 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.multiRef
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.psi.ancestorOfType
 
 abstract class JaktStructFieldMixin(
     node: ASTNode,
@@ -21,13 +21,15 @@ abstract class JaktStructFieldMixin(
         val references = mutableListOf<PsiElement>()
 
         field.ancestorOfType<JaktStructDeclaration>()!!.structBody.structMemberList.forEach {
-            val function = it.functionDeclaration ?: return@forEach
+            val function = it.structMethod ?: return@forEach
             PsiTreeUtil.processElements(function) { el ->
                 if (el is JaktFieldAccessExpression && el.name == field.name)
                     references.add(el)
                 true
             }
         }
+
+        // TODO: Search references of parent struct
 
         references
     }

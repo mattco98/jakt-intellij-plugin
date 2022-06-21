@@ -41,9 +41,9 @@ object TypeInference {
                 // The types must be the same. Let the external annotator catch the case where they are not
                 inferType(element.findChildrenOfType<JaktExpression>()[0])
             }
-            is JaktPrefixUnaryExpression -> when {
-                element.plusPlus != null ||
-                    element.minusMinus != null ||
+            is JaktUnaryExpression -> when {
+                element.findChildOfType(JaktTypes.PLUS_PLUS) != null ||
+                    element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
                     element.minus != null ||
                     element.tilde != null -> inferType(element.expression)
                 element.rawKeyword != null -> Type.Raw(inferType(element.expression))
@@ -54,9 +54,11 @@ object TypeInference {
                 element.keywordAs != null -> element.type?.jaktType?.let {
                     if (element.questionMark != null) Type.Optional(it) else it
                 } ?: Type.Unknown
+                element.exclamationPoint != null -> inferType(element.expression).let {
+                    if (it is Type.Optional) it.underlyingType else it
+                }
                 else -> error("unreachable")
             }
-            is JaktPostfixUnaryExpression -> inferType(element.expression)
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
             is JaktAccessExpression -> getAccessExpressionType(element)
             is JaktIndexedAccessExpression -> Type.Unknown // TODO
