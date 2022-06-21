@@ -38,12 +38,12 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
                 when (it) {
                     is JaktStructDeclaration -> it.getDeclarations()
                         .filterNot { decl ->
-                            (decl as? JaktFunctionDeclaration)?.thisParameter != null ||
+                            (decl as? JaktFunctionDeclaration)?.parameterList?.thisParameter != null ||
                                 decl is JaktStructField
                         }
                     is JaktEnumDeclaration -> it.getDeclarations()
                         .filterNot { decl ->
-                            (decl as? JaktFunctionDeclaration)?.thisParameter != null
+                            (decl as? JaktFunctionDeclaration)?.parameterList?.thisParameter != null
                         }
                     else -> it.getDeclarations()
                 }

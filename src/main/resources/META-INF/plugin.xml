@@ -64,6 +64,10 @@
         <typeDeclarationProvider
                 implementation="org.serenityos.jakt.JaktTypeDeclarationProvider"
         />
+        <codeInsight.parameterInfo
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.JaktParameterInfoHandler"
+        />
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"

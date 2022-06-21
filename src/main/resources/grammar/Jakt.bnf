@@ -108,9 +108,7 @@ private FunctionBody ::= Block | FAT_ARROW NL ExpressionWithoutAssignment
 InternalFunctionDeclaration ::= FunctionHeader FunctionBody {elementType=FunctionDeclaration}
 ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {elementType=FunctionDeclaration}
 
-private ParameterList ::= MemberParameterList | FreeParameterList
-private MemberParameterList ::= PAREN_OPEN ThisParameter (COMMA Parameter)* PAREN_CLOSE
-private FreeParameterList ::= PAREN_OPEN [Parameter (COMMA Parameter)*] PAREN_CLOSE
+ParameterList ::= PAREN_OPEN [(ThisParameter | Parameter) (COMMA Parameter)*] PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
 Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -352,9 +350,8 @@ Expression ::=
 
 private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
 
-CallExpression ::= Expression GenericSpecialization? Call
-private Call ::= PAREN_OPEN NL ArgumentList? PAREN_CLOSE
-ArgumentList ::= <<commaOrEolList Argument>>
+CallExpression ::= Expression GenericSpecialization? ArgumentList
+ArgumentList ::= PAREN_OPEN NL  [<<commaOrEolList Argument>>] PAREN_CLOSE
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"

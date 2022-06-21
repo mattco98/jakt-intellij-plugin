@@ -53,7 +53,6 @@ After compiling the bindings, it is as simple as running the `Run IDE for UI Tes
 
 - [`DocumentationProvider`](https://plugins.jetbrains.com/docs/intellij/documentation.html)
 - Github Actions: Automatically run tests for commits and PRs
-- [`ParameterInfoHandler`](https://plugins.jetbrains.com/docs/intellij/parameter-info.html)
 - Grammar
     - Improve parsing errors
     - Implement error recovery (currently highlighting breaks for invalid files)

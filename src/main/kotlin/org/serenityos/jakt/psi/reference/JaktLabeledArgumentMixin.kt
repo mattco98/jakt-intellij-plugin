@@ -17,7 +17,9 @@ abstract class JaktLabeledArgumentMixin(
             return when (
                 val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()
             ) {
-                is JaktFunctionDeclaration -> callTarget.parameterList.firstOrNull { it.name == element.name }
+                is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.firstOrNull {
+                    it.name == element.name
+                }
                 is JaktStructDeclaration -> callTarget.structBody.structMemberList
                     .mapNotNull { it.structField }
                     .firstOrNull { it.name == element.name }

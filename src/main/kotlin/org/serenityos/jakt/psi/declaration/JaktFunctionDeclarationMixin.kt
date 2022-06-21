@@ -21,7 +21,7 @@ abstract class JaktFunctionDeclarationMixin(
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
 
-            val parameters = parameterList.map {
+            val parameters = parameterList.parameterList.map {
                 Type.Function.Parameter(
                     it.identifier.text,
                     it.typeAnnotation.jaktType,
@@ -41,9 +41,9 @@ abstract class JaktFunctionDeclarationMixin(
             ).let {
                 it.declaration = this
 
-                if (thisParameter != null) {
+                if (parameterList.thisParameter != null) {
                     it.hasThis = true
-                    it.thisIsMutable = thisParameter!!.mutKeyword != null
+                    it.thisIsMutable = parameterList.thisParameter!!.mutKeyword != null
                 }
 
                 if (typeParameters.isNotEmpty()) {
@@ -52,7 +52,7 @@ abstract class JaktFunctionDeclarationMixin(
             }
         }
 
-    override fun getDeclarations(): List<JaktDeclaration> = parameterList
+    override fun getDeclarations(): List<JaktDeclaration> = parameterList.parameterList
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 }
