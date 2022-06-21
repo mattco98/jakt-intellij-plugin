@@ -133,7 +133,7 @@ fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
 
 private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
-fake StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>> NL CURLY_CLOSE
+fake StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
 fake StructMember ::= StructField | StructMethod
 
 StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
@@ -144,20 +144,20 @@ StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
 fake StructMethod ::= StructVisibility? FunctionDeclaration
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
-RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>> PAREN_CLOSE
+RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // INTERNAL
 
 InternalStructDeclaration ::= StructHeader InternalStructBody {elementType=StructDeclaration}
-InternalStructBody ::= CURLY_OPEN NL <<commaOrEolList InternalStructMember>> NL CURLY_CLOSE {elementType=StructBody}
+InternalStructBody ::= CURLY_OPEN NL <<commaOrEolList InternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
 InternalStructMember ::= StructField | InternalStructMethod {elementType=StructMember}
 InternalStructMethod ::= StructVisibility? InternalFunctionDeclaration {elementType=StructMethod}
 
 // EXTERNAL
 
 ExternalStructDeclaration ::= EXTERN_KEYWORD StructHeader ExternalStructBody {elementType=StructDeclaration}
-ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>> NL CURLY_CLOSE {elementType=StructBody}
+ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
 ExternalStructMember ::= StructField | ExternalStructMethod {elementType=StructMember}
 ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {elementType=StructMethod}
 // Has to be different due to not requiring the extern keyword
@@ -188,7 +188,7 @@ private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
 UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE
 
-private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>
+private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?
 UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktUnderlyingTypeEnumVariantMixin"
@@ -196,13 +196,13 @@ UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {
 
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
-private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>
+private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>?
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktNormalEnumVariantMixin"
 }
-private NormalEnumMemberBody ::= PAREN_OPEN NL (TypeEnumMemberBody | StructEnumMemberBody) PAREN_CLOSE
+private NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
 StructEnumMemberBodyPart ::= StructEnumMemberLabel TypeAnnotation
@@ -218,7 +218,7 @@ ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
 }
 private ImportAs ::= KEYWORD_AS IDENTIFIER
-private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>> CURLY_CLOSE
+private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
@@ -403,7 +403,7 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
 MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | ExpressionWithoutAssignment)>>
 
-MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>> PAREN_CLOSE]
+MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
