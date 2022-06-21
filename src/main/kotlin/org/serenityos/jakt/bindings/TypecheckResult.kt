@@ -1,3 +1,5 @@
+@file:Suppress("PROVIDED_RUNTIME_TOO_LOW")
+
 package org.serenityos.jakt.bindings
 
 import kotlinx.serialization.SerialName

@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("java")
+    idea
+    kotlin("jvm") version "1.7.0"
+    id("org.jetbrains.intellij") version "1.6.0"
     id("org.jetbrains.grammarkit") version "2021.2.2"
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.serialization") version "1.6.10"
-    id("org.jetbrains.intellij") version "1.4.0"
+    kotlin("plugin.serialization") version "1.7.0"
 }
 
 group = properties("pluginGroup")
@@ -18,8 +18,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("net.java.dev.jna:jna:5.11.0")
     testImplementation(platform("org.junit:junit-bom:5.8.2"))
