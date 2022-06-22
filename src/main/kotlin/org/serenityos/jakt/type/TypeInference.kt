@@ -6,6 +6,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.utils.unreachable
 
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
@@ -57,7 +58,7 @@ object TypeInference {
                 element.exclamationPoint != null -> inferType(element.expression).let {
                     if (it is Type.Optional) it.underlyingType else it
                 }
-                else -> error("unreachable")
+                else -> unreachable()
             }
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
             is JaktAccessExpression -> getAccessExpressionType(element)
@@ -102,7 +103,7 @@ object TypeInference {
                 JaktTypes.STRING_LITERAL -> Type.Primitive.String
                 JaktTypes.BYTE_CHAR_LITERAL -> Type.Primitive.CInt
                 JaktTypes.CHAR_LITERAL -> Type.Primitive.CChar
-                else -> error("unreachable")
+                else -> unreachable()
             }
             is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
             is JaktPlainQualifier -> element.jaktType

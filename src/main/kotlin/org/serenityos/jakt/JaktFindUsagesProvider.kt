@@ -11,8 +11,9 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.declaration.isClass
 import org.serenityos.jakt.psi.declaration.isExtern
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.render.JaktRenderer
+import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.syntax.JaktLexerAdapter
+import org.serenityos.jakt.utils.unreachable
 
 class JaktFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner {
@@ -36,7 +37,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String {
         return when (element) {
-            is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else error("unreachable")
+            is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else unreachable()
             is JaktCallExpression -> "function call"
             is JaktFunctionDeclaration -> (if (element.isExtern) "extern " else "") + "function"
             is JaktNamespaceDeclaration -> "namespace"
@@ -65,5 +66,5 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         }
     }
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean) = JaktRenderer.Plain.render(element)
+    override fun getNodeText(element: PsiElement, useFullName: Boolean) = renderElement(element)
 }
