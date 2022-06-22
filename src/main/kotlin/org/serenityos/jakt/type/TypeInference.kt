@@ -129,7 +129,7 @@ object TypeInference {
             return null
 
         val name = ident.name
-        val args = call.argumentList?.argumentList ?: emptyList()
+        val args = call.argumentList.argumentList
 
         return when (name) {
             "Some" -> if (args.size == 1) {

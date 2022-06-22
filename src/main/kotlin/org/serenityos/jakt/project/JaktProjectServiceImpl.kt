@@ -64,7 +64,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
 
     override fun resolveImportedFile(from: VirtualFile, name: String): JaktFile? {
         val scope = GlobalSearchScopes.directoryScope(project, from.parent, false)
-        val file = FilenameIndex.getFilesByName(project, "$name.jakt", scope)
+        val file = FilenameIndex.getVirtualFilesByName("$name.jakt", scope)
         return file.filterIsInstance<JaktFile>().firstOrNull()
     }
 

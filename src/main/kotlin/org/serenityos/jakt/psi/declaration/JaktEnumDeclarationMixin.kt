@@ -3,6 +3,8 @@ package org.serenityos.jakt.psi.declaration
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktGenericBound
+import org.intellij.sdk.language.psi.JaktNormalEnumBody
+import org.intellij.sdk.language.psi.JaktUnderlyingTypeEnumBody
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
@@ -32,10 +34,10 @@ abstract class JaktEnumDeclarationMixin(
         }
 
         initializer {
-            variants.putAll(underlyingTypeEnumBody?.underlyingTypeEnumVariantList?.associate {
+            variants.putAll(underlyingTypeEnumBody?.enumVariantList?.associate {
                 it.name to it.jaktType as Type.EnumVariant
             } ?: normalEnumBody?.normalEnumMemberList?.mapNotNull {
-                it.normalEnumVariant
+                it.enumVariant
             }?.associate {
                 it.name to it.jaktType as Type.EnumVariant
             } ?: emptyMap())
@@ -49,20 +51,16 @@ abstract class JaktEnumDeclarationMixin(
     }
 
     override fun getDeclarations(): List<JaktDeclaration> {
-        val declarations = mutableListOf<JaktDeclaration>()
-
-        val normalBody = normalEnumBody
-        if (normalBody != null) {
-            normalBody.genericBounds?.genericBoundList?.let(declarations::addAll)
-            normalBody.normalEnumMemberList.forEach {
-                declarations.add(it.normalEnumVariant ?: it.functionDeclaration!!)
+        return when (val body = normalEnumBody ?: underlyingTypeEnumBody) {
+            is JaktNormalEnumBody -> buildList {
+                body.genericBounds?.genericBoundList?.let(::addAll)
+                body.normalEnumMemberList.forEach {
+                    add(it.enumVariant ?: it.functionDeclaration!!)
+                }
             }
-        } else {
-            val typedBody = underlyingTypeEnumBody!!
-            declarations.addAll(typedBody.underlyingTypeEnumVariantList)
+            is JaktUnderlyingTypeEnumBody -> body.enumVariantList
+            else -> emptyList()
         }
-
-        return declarations
     }
 
     override fun getDeclGenericBounds(): List<JaktGenericBound> =

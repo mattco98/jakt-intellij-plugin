@@ -2,15 +2,15 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktNormalEnumVariant
+import org.intellij.sdk.language.psi.JaktEnumVariant
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktNormalEnumVariantMixin(
+abstract class JaktEnumVariantMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktNormalEnumVariant {
+) : JaktNamedElement(node), JaktEnumVariant {
     override val jaktType by recursivelyGuarded<Type> {
         val members = mutableListOf<Pair<String?, Type>>()
 
@@ -18,7 +18,7 @@ abstract class JaktNormalEnumVariantMixin(
             Type.EnumVariant(
                 ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
                 name,
-                null,
+                expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
             )
         }

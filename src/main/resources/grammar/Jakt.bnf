@@ -86,6 +86,25 @@ private ExpressionLead ::=
     | CHAR_LITERAL
     | Literal
 
+NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
+    extends=TopLevelDefinition
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
+}
+
+// Import Statement
+ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+    extends=TopLevelDefinition
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
+}
+private ImportAs ::= KEYWORD_AS IDENTIFIER
+private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
+ImportBraceEntry ::= IDENTIFIER {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
+}
+
 /***************************
  *       FUNCTIONS         *
  ***************************/
@@ -161,17 +180,10 @@ ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {el
 // Has to be different due to not requiring the extern keyword
 ExternalStructFunctionDeclaration ::= FunctionHeader {elementType=FunctionDeclaration}
 
-/*************************************
- *      Non-Extern Declarations      *
- *************************************/
+/*******************
+ *      Enums      *
+ *******************/
 
-NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
-    extends=TopLevelDefinition
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
-}
-
-// Enums
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
     implements=[
@@ -186,20 +198,20 @@ private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
 UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE
 
-private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?
-UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {
+fake EnumVariant ::= IDENTIFIER [(EQUALS Expression) | NormalEnumMemberBody] {
+    name="enum variant"
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktUnderlyingTypeEnumVariantMixin"
+    mixin="org.serenityos.jakt.psi.declaration.JaktEnumVariantMixin"
 }
+
+private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?
+UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {elementType=EnumVariant}
 
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>?
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
-NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktNormalEnumVariantMixin"
-}
+NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {elementType=EnumVariant}
 private NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
@@ -207,19 +219,6 @@ StructEnumMemberBodyPart ::= StructEnumMemberLabel TypeAnnotation
 StructEnumMemberLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktStructEnumMemberLabelMixin"
-}
-
-// Import Statement
-ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
-    extends=TopLevelDefinition
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
-}
-private ImportAs ::= KEYWORD_AS IDENTIFIER
-private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
-ImportBraceEntry ::= IDENTIFIER {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
 }
 
 /*************************************
