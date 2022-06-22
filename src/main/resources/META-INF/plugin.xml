@@ -50,9 +50,7 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.render.JaktDocumentationProvider"
         />
-        <colorSettingsPage
-                implementation="org.serenityos.jakt.syntax.JaktColorSettingsPage"
-        />
+        <colorSettingsPage implementation="org.serenityos.jakt.syntax.JaktColorSettingsPage" />
         <annotator
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.annotations.JaktAnnotator$Impl"
@@ -65,23 +63,22 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.completions.JaktCompletionContributor"
         />
-        <typeDeclarationProvider
-                implementation="org.serenityos.jakt.JaktTypeDeclarationProvider"
-        />
+        <typeDeclarationProvider implementation="org.serenityos.jakt.JaktTypeDeclarationProvider" />
         <codeInsight.parameterInfo
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.JaktParameterInfoHandler"
         />
+        <lang.psiStructureViewFactory
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.structure.JaktStructureViewFactory"
+        />
+<!--        <navbar implementation="org.serenityos.jakt.structure.JaktNavbar" />-->
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"
         />
-        <projectService
-                serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager"
-        />
-        <projectService
-                serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache"
-        />
+        <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager" />
+        <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache" />
 
         <additionalTextAttributes
                 scheme="Darcula"

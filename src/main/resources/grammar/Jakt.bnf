@@ -161,7 +161,7 @@ StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
 fake StructMethod ::= StructVisibility? FunctionDeclaration
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
-RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
+private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
 // INTERNAL
