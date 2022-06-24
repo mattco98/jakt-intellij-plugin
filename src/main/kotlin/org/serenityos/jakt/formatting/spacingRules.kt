@@ -6,9 +6,11 @@ import org.serenityos.jakt.utils.BINARY_OPERATORS
 import org.serenityos.jakt.utils.UNARY_OPERATORS
 
 fun buildJaktSpacingRules(settings: CommonCodeStyleSettings) = JaktSpacingBuilder(settings).apply {
-    // Spacing around standalone binary operators
-    for (op in BINARY_OPERATORS)
-        around(op).spaces(1)
+    simple {
+        // Spacing around standalone binary operators
+        for (op in BINARY_OPERATORS)
+            around(op).spaces(1)
+    }
 
     // Unary operator spacing
     contextual(parent = UNARY_EXPRESSION) { _, left, right ->

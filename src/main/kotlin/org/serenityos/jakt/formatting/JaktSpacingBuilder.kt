@@ -6,32 +6,44 @@ import com.intellij.formatting.Spacing
 import com.intellij.formatting.SpacingBuilder
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.tree.IElementType
-import org.serenityos.jakt.formatting.JaktSpacingBuilder.ContextualRule.Companion.nullishMatch
+import com.intellij.psi.tree.TokenSet
+import org.serenityos.jakt.utils.tokenSetOf
 
-class JaktSpacingBuilder(settings: CommonCodeStyleSettings) : SpacingBuilder(settings) {
-    private val contextualRules = mutableListOf<ContextualRule>()
+interface Builder {
+    fun getSpacing(parent: ASTBlock?, left: ASTBlock?, right: ASTBlock?): Spacing?
+}
+
+// Heavily inspired by the Kotlin plugin's SpacingBuilder system
+class JaktSpacingBuilder(private val settings: CommonCodeStyleSettings) : Builder {
+    private val builders = mutableListOf<Builder>()
     val NO_SPACING = Spacing.createSpacing(0, 0, 0, false, 0)
+
+    fun simple(block: SpacingBuilder.() -> Unit) {
+        builders.add(SimpleBuilder(settings).apply(block))
+    }
 
     fun contextual(
         parent: IElementType? = null,
         left: IElementType? = null,
         right: IElementType? = null,
+        parents: TokenSet = tokenSetOf(parent),
+        lefts: TokenSet = tokenSetOf(left),
+        rights: TokenSet = tokenSetOf(right),
         rule: (ASTBlock?, ASTBlock?, ASTBlock?) -> Spacing?,
     ) {
-        contextualRules.add(ContextualRule(parent, left, right, rule))
+        builders.add(ContextualBuilder(parents, lefts, rights, rule))
     }
 
-    override fun getSpacing(parent: Block?, left: Block?, right: Block?): Spacing? {
+    fun getSpacing(parent: Block?, left: Block?, right: Block?): Spacing? {
         if (parent !is ASTBlock || left !is ASTBlock || right !is ASTBlock)
             return null
+        return getSpacing(parent, left, right)
+    }
 
-        super.getSpacing(parent, left, right)?.let { return it }
-
-        return contextualRules.asSequence().filter {
-            it.parent.nullishMatch(parent) && it.left.nullishMatch(left) && it.right.nullishMatch(right)
-        }.map {
-            it.rule(parent, left, right)
-        }.firstNotNullOfOrNull { it }
+    override fun getSpacing(parent: ASTBlock?, left: ASTBlock?, right: ASTBlock?): Spacing? {
+        for (builder in builders)
+            builder.getSpacing(parent, left, right)?.let { return it }
+        return null
     }
 
     fun makeSpacing(
@@ -42,15 +54,27 @@ class JaktSpacingBuilder(settings: CommonCodeStyleSettings) : SpacingBuilder(set
         keepBlankLines: Int = 1,
     ) = Spacing.createSpacing(minSpaces, maxSpaces, minLineFeeds, keepLineBreaks, keepBlankLines)
 
-    private data class ContextualRule(
-        val parent: IElementType? = null,
-        val left: IElementType? = null,
-        val right: IElementType? = null,
-        val rule: (ASTBlock?, ASTBlock?, ASTBlock?) -> Spacing?,
-    ) {
+    class SimpleBuilder(settings: CommonCodeStyleSettings) : SpacingBuilder(settings), Builder {
+        override fun getSpacing(parent: ASTBlock?, left: ASTBlock?, right: ASTBlock?): Spacing? {
+            return super.getSpacing(parent, left, right)
+        }
+    }
+
+    class ContextualBuilder(
+        private val parents: TokenSet,
+        private val lefts: TokenSet,
+        private val rights: TokenSet,
+        private val rule: (ASTBlock?, ASTBlock?, ASTBlock?) -> Spacing?,
+    ) : Builder {
+        override fun getSpacing(parent: ASTBlock?, left: ASTBlock?, right: ASTBlock?): Spacing? {
+            if (parents.match(parent) && lefts.match(left) && rights.match(right))
+                return rule(parent, left, right)
+            return null
+        }
+
         companion object {
-            fun IElementType?.nullishMatch(block: ASTBlock?) =
-                this == null || block == null || this == block.node?.elementType
+            fun TokenSet.match(block: ASTBlock?) =
+                block == null || types.isEmpty() || this.contains(block.elementType)
         }
     }
 }

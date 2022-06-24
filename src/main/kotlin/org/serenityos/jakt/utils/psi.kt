@@ -1,5 +1,7 @@
 package org.serenityos.jakt.utils
 
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 import org.serenityos.jakt.JaktTypes.*
 
 val DELIMTERS = setOf(
@@ -68,3 +70,5 @@ val BINARY_OPERATORS = setOf(
     NOT_EQUALS,
     EQUALS,
 )
+
+fun tokenSetOf(vararg types: IElementType?) = TokenSet.create(*types.filterNotNull().toTypedArray())
