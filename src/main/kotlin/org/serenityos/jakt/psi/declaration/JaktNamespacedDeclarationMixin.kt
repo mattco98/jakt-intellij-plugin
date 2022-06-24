@@ -2,12 +2,13 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
+import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 
 abstract class JaktNamespacedDeclarationMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktNamespaceDeclaration {
+) : JaktNamedElement(node), JaktNamespaceDeclaration, JaktPsiScope {
     override val jaktType: Type
         get() {
             val members = namespaceBody.topLevelDefinitionList.mapNotNull {
@@ -22,4 +23,6 @@ abstract class JaktNamespacedDeclarationMixin(
                 }
             }
         }
+
+    override fun getDeclarations() = namespaceBody.topLevelDefinitionList.filterIsInstance<JaktDeclaration>()
 }
