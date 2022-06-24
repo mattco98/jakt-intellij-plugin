@@ -28,10 +28,9 @@ fun resolveDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
     }
 }
 
-fun resolveDeclarationIn(type: Type, name: String): Type {
-    return when (type) {
+fun resolveDeclarationIn(type_: Type, name: String): Type {
+    return when (val type = type_.unwrap()) {
         is Type.Namespace -> type.members.find { it.name == name } ?: Type.Unknown
-        is Type.Parameterized -> resolveDeclarationIn(type.underlyingType, name)
         is Type.Struct -> type.fields.entries.find { it.key == name }?.value
             ?: type.methods.entries.find { it.key == name }?.value
             ?: Type.Unknown

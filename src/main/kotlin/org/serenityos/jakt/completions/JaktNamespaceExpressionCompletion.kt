@@ -10,6 +10,7 @@ import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.unwrap
 
 object JaktNamespaceExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
@@ -26,8 +27,8 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
                 })
         )
 
-    private fun getTypeCompletions(project: Project, type: Type): List<LookupElement> {
-        return when (type) {
+    private fun getTypeCompletions(project: Project, type_: Type): List<LookupElement> {
+        return when (val type = type_.unwrap()) {
             is Type.Namespace -> type.members.map {
                 lookupElementFromType(it.name, it, project)
             }
@@ -39,7 +40,6 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
                 .methods
                 .filterValues { it.thisParameter == null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
-            is Type.Parameterized -> getTypeCompletions(project, type.underlyingType)
             else -> emptyList()
         }
     }

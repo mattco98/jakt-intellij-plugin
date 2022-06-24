@@ -15,6 +15,7 @@ import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.unwrap
 
 object BasicAnnotator : JaktAnnotator(), DumbAware {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {
@@ -98,14 +99,13 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         }
     }
 
-    private fun getCallTargetHighlight(type: Type): TextAttributesKey = when (type) {
+    private fun getCallTargetHighlight(type_: Type): TextAttributesKey = when (val type = type_.unwrap()) {
         is Type.Struct -> Highlights.STRUCT_NAME
         is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
         is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
         is Type.Function -> if (type.thisParameter != null) {
             Highlights.FUNCTION_INSTANCE_CALL
         } else Highlights.FUNCTION_STATIC_CALL
-        is Type.Parameterized -> getCallTargetHighlight(type.underlyingType)
         else -> Highlights.FUNCTION_CALL
     }
 
@@ -118,7 +118,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
 
         namespaces.forEach {
             val attr = if (!isDumb) {
-                when (it.jaktType) {
+                when (it.jaktType.unwrap()) {
                     is Type.Struct -> Highlights.STRUCT_NAME
                     is Type.Enum -> Highlights.ENUM_NAME
                     is Type.Namespace -> Highlights.NAMESPACE_NAME

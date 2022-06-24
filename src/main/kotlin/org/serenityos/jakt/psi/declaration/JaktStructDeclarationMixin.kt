@@ -6,6 +6,7 @@ import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.unwrap
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
@@ -45,9 +46,7 @@ abstract class JaktStructDeclarationMixin(
             }
 
             members.filterIsInstance<JaktStructMethod>().forEach { method ->
-                val type = method.functionDeclaration.jaktType?.let {
-                    if (it is Type.Parameterized) it.underlyingType else it
-                }
+                val type = method.functionDeclaration.jaktType.unwrap()
                 require(type is Type.Function)
 
                 if (type.hasThis && type.thisParameter == null) {

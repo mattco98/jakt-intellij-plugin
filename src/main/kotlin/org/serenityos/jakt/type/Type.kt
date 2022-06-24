@@ -189,3 +189,5 @@ fun Type.resolveToBuiltinType(project: Project): Type {
         else -> this
     }
 }
+
+fun Type.unwrap() = if (this is Type.Parameterized) underlyingType else this
