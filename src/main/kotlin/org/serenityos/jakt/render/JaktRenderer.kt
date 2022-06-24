@@ -103,7 +103,6 @@ sealed class JaktRenderer {
             }
             is Type.TypeVar -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
             is Type.Parameterized -> {
-                require(options.asExpression)
                 renderType(type.underlyingType, options)
                 append("<")
                 type.typeParameters.forEachIndexed { index, it ->

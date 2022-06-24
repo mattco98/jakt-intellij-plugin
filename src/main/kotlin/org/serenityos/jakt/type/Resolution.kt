@@ -81,11 +81,11 @@ private fun JaktPsiScope.getTypeDeclarations() = getDeclarations()
     .filter { it.isTypeDeclaration }
 
 private fun resolveTypeDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
-    return when (scope) {
-        is JaktPsiScope -> scope.getTypeDeclarations().find { it.name == name }?.unwrapImport()
-        is JaktGeneric -> scope.getDeclGenericBounds().find { it.name == name }
-        else -> null
-    }
+    if (scope is JaktGeneric)
+        scope.getDeclGenericBounds().find { it.name == name }?.let { return it }
+    if (scope is JaktPsiScope)
+        scope.getTypeDeclarations().find { it.name == name }?.let { return it }
+    return null
 }
 
 private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {

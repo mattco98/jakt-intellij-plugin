@@ -39,6 +39,7 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
                 .methods
                 .filterValues { it.thisParameter == null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
+            is Type.Parameterized -> getTypeCompletions(project, type.underlyingType)
             else -> emptyList()
         }
     }

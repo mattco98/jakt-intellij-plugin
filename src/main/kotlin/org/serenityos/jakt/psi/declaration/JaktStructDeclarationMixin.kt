@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
+import org.intellij.sdk.language.psi.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
@@ -44,8 +44,10 @@ abstract class JaktStructDeclarationMixin(
                 fields[it.identifier.text] = it.typeAnnotation.jaktType
             }
 
-            members.filterIsInstance<JaktFunctionDeclaration>().forEach {
-                val type = it.jaktType
+            members.filterIsInstance<JaktStructMethod>().forEach { method ->
+                val type = method.functionDeclaration.jaktType?.let {
+                    if (it is Type.Parameterized) it.underlyingType else it
+                }
                 require(type is Type.Function)
 
                 if (type.hasThis && type.thisParameter == null) {
@@ -57,7 +59,7 @@ abstract class JaktStructDeclarationMixin(
                     )
                 }
 
-                methods[it.identifier.text] = type
+                methods[type.name] = type
             }
         }
     }
