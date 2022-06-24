@@ -86,11 +86,13 @@ private ExpressionLead ::=
     | CHAR_LITERAL
     | Literal
 
-NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE {
+NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
     extends=TopLevelDefinition
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
 }
+
+NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 
 // Import Statement
 ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
@@ -99,7 +101,7 @@ ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
 }
 private ImportAs ::= KEYWORD_AS IDENTIFIER
-private ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
+ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
@@ -212,7 +214,7 @@ NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
 private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>?
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {elementType=EnumVariant}
-private NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
+NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
 private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
 StructEnumMemberBodyPart ::= StructEnumMemberLabel TypeAnnotation
@@ -390,7 +392,8 @@ DictionaryElement ::= Expression COLON NL Expression
 SetExpression ::= CURLY_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>>? NL CURLY_CLOSE
 TupleExpression ::= PAREN_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>> NL PAREN_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
+MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL MatchBody
+MatchBody ::= CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
 private MatchCases ::= <<commaOrEolList MatchCase>>
 MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.api.JaktPsiScope"
@@ -457,7 +460,17 @@ private MultiplyOp ::= ASTERISK | SLASH | PERCENT
 private ShiftOp ::= ARITH_LEFT_SHIFT | LEFT_SHIFT | ARITH_RIGHT_SHIFT | RIGHT_SHIFT
 private RelationalOp ::= LESS_THAN_EQUALS | LESS_THAN | GREATER_THAN_EQUALS | GREATER_THAN | DOUBLE_EQUALS | NOT_EQUALS
 private LogicalOrOp ::= KEYWORD_OR | DOUBLE_QUESTION_MARK
-private AssignmentOp ::= [AddOp | MultiplyOp | ShiftOp] EQUALS
+private AssignmentOp ::=
+      PLUS_EQUALS
+    | MINUS_EQUALS
+    | ASTERISK_EQUALS
+    | SLASH_EQUALS
+    | PERCENT_EQUALS
+    | ARITH_LEFT_SHIFT_EQUALS
+    | LEFT_SHIFT_EQUALS
+    | ARITH_RIGHT_SHIFT_EQUALS
+    | RIGHT_SHIFT_EQUALS
+    | EQUALS
 private PrefixOp ::=
       PLUS_PLUS
     | MINUS_MINUS

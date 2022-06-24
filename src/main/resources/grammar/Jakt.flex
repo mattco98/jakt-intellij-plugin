@@ -98,26 +98,35 @@ COMMENT="//"[^\r\n]*
   "="                    { return EQUALS; }
   "=="                   { return DOUBLE_EQUALS; }
   "!="                   { return NOT_EQUALS; }
+  "+="                   { return PLUS_EQUALS; }
+  "-="                   { return MINUS_EQUALS; }
+  "*="                   { return ASTERISK_EQUALS; }
+  "/="                   { return SLASH_EQUALS; }
+  "%="                   { return PERCENT_EQUALS; }
+  "<<<="                 { return ARITH_LEFT_SHIFT_EQUALS; }
+  "<<="                  { return LEFT_SHIFT_EQUALS; }
+  ">>>="                 { return ARITH_RIGHT_SHIFT_EQUALS; }
+  ">>="                  { return RIGHT_SHIFT_EQUALS; }
   "+"                    { return PLUS; }
   "-"                    { return MINUS; }
   "*"                    { return ASTERISK; }
   "/"                    { return SLASH; }
   "++"                   { return PLUS_PLUS; }
   "--"                   { return MINUS_MINUS; }
-  "<<"                   { return LEFT_SHIFT; }
-  ">>"                   { return RIGHT_SHIFT; }
   "<<<"                  { return ARITH_LEFT_SHIFT; }
   ">>>"                  { return ARITH_RIGHT_SHIFT; }
+  "<<"                   { return LEFT_SHIFT; }
+  ">>"                   { return RIGHT_SHIFT; }
   "%"                    { return PERCENT; }
   "->"                   { return ARROW; }
   "=>"                   { return FAT_ARROW; }
   "?"                    { return QUESTION_MARK; }
   "??"                   { return DOUBLE_QUESTION_MARK; }
   "!"                    { return EXCLAMATION_POINT; }
-  "<"                    { return LESS_THAN; }
   "<="                   { return LESS_THAN_EQUALS; }
-  ">"                    { return GREATER_THAN; }
+  "<"                    { return LESS_THAN; }
   ">="                   { return GREATER_THAN_EQUALS; }
+  ">"                    { return GREATER_THAN; }
   "&"                    { return AMPERSAND; }
   "|"                    { return PIPE; }
   "^"                    { return CARET; }

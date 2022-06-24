@@ -10,7 +10,7 @@ abstract class JaktNamespacedDeclarationMixin(
 ) : JaktNamedElement(node), JaktNamespaceDeclaration {
     override val jaktType: Type
         get() {
-            val members = topLevelDefinitionList.mapNotNull {
+            val members = namespaceBody.topLevelDefinitionList.mapNotNull {
                 val t = (it as? JaktDeclaration)?.jaktType ?: return@mapNotNull null
                 require(t is Type.TopLevelDecl)
                 t

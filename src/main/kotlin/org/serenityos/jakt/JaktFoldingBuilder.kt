@@ -58,7 +58,8 @@ class JaktFoldingBuilder : CustomFoldingBuilder() {
         }
 
         override fun visitNamespaceDeclaration(o: JaktNamespaceDeclaration) {
-            descriptors += FoldingDescriptor(o, TextRange(o.curlyOpen.startOffset, o.curlyClose.endOffset))
+            val body = o.namespaceBody
+            descriptors += FoldingDescriptor(o, TextRange(body.curlyOpen.startOffset, body.curlyClose.endOffset))
         }
 
         override fun visitBlock(o: JaktBlock) {

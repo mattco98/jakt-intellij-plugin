@@ -21,7 +21,7 @@ class JaktFile(
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType<JaktDeclaration>().flatMap {
         if (it is JaktImportStatementMixin) {
-            listOf(it) + it.importBraceEntryList
+            listOf(it) + it.importBraceList?.importBraceEntryList.orEmpty()
         } else listOf(it)
     }
 

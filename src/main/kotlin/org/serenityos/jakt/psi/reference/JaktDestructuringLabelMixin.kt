@@ -14,6 +14,8 @@ abstract class JaktDestructuringLabelMixin(
         val head = ancestorOfType<JaktMatchPattern>()?.plainQualifier ?: return@singleRef null
         val resolved = head.reference?.resolve() as? JaktEnumVariant ?: return@singleRef null
 
-        resolved.structEnumMemberBodyPartList.find { it.structEnumMemberLabel.name == name }
+        resolved.normalEnumMemberBody?.structEnumMemberBodyPartList?.find {
+            it.structEnumMemberLabel.name == name
+        }
     }
 }

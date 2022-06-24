@@ -72,7 +72,16 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.structure.JaktStructureViewFactory"
         />
-<!--        <navbar implementation="org.serenityos.jakt.structure.JaktNavbar" />-->
+        <lang.formatter
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.formatting.JaktFormattingModelBuilder"
+        />
+        <codeStyleSettingsProvider
+                implementation="org.serenityos.jakt.style.JaktCodeStyleSettingsProvider"
+        />
+        <langCodeStyleSettingsProvider
+                implementation="org.serenityos.jakt.style.JaktLanguageCodeStyleSettingsProvider"
+        />
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"

@@ -24,12 +24,12 @@ abstract class JaktEnumVariantMixin(
         }
 
         initializer {
-            if (structEnumMemberBodyPartList.isNotEmpty()) {
-                structEnumMemberBodyPartList.forEach {
+            if (normalEnumMemberBody?.structEnumMemberBodyPartList?.isNotEmpty() == true) {
+                normalEnumMemberBody?.structEnumMemberBodyPartList?.forEach {
                     members.add(it.structEnumMemberLabel.name to it.typeAnnotation.jaktType)
                 }
             } else {
-                typeEnumMemberBody?.typeList?.forEach {
+                normalEnumMemberBody?.typeEnumMemberBody?.typeList?.forEach {
                     members.add(null to it.jaktType)
                 }
             }
