@@ -1,9 +1,12 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
+import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
 
@@ -30,7 +33,9 @@ abstract class JaktFunctionDeclarationMixin(
                 )
             }
 
-            val returnType = functionReturnType.type?.jaktType ?: Type.Primitive.Void
+            val returnType = functionReturnType.type?.jaktType
+                ?: findChildOfType<JaktExpression>()?.jaktType
+                ?: Type.Unknown
 
             return Type.Function(
                 name,
