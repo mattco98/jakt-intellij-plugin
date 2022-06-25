@@ -20,10 +20,10 @@ fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
 // DECLARATIONS //
 //////////////////
 
-fun resolveDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
-    return when (scope) {
-        is JaktPsiScope -> scope.getDeclarations().find { it.name == name }?.unwrapImport()
-        is JaktGeneric -> scope.getDeclGenericBounds().find { it.name == name }
+fun resolveDeclarationIn(element: PsiElement, name: String): JaktDeclaration? {
+    return when (element) {
+        is JaktPsiScope -> element.getDeclarations().find { it.name == name }?.unwrapImport()
+        is JaktGeneric -> element.getDeclGenericBounds().find { it.name == name }
         else -> null
     }
 }
@@ -39,12 +39,12 @@ fun resolveDeclarationIn(type_: Type, name: String): Type {
     }
 }
 
-fun resolveDeclarationAbove(scope: PsiNameIdentifierOwner): JaktDeclaration? =
-    scope.name?.let { resolveDeclarationAbove(scope, it) }
+fun resolveDeclarationAbove(element: PsiNameIdentifierOwner): JaktDeclaration? =
+    element.name?.let { resolveDeclarationAbove(element, it) }
 
-fun resolveDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
-    resolveDeclarationIn(scope, name)?.let { return it }
-    val parent = scope.ancestorOfType<JaktPsiScope>() ?: return scope.jaktProject.findPreludeDeclaration(name)
+fun resolveDeclarationAbove(element: PsiElement, name: String): JaktDeclaration? {
+    resolveDeclarationIn(element, name)?.let { return it }
+    val parent = element.ancestorOfType<JaktPsiScope>() ?: return element.jaktProject.findPreludeDeclaration(name)
     return resolveDeclarationAbove(parent, name)
 }
 
@@ -53,17 +53,17 @@ private fun resolveEnumShorthand(type: Type, name: String): JaktDeclaration? {
     return scope?.getDeclarations()?.find { it.name == name }
 }
 
-fun resolvePlainQualifier(qualifier: JaktPlainQualifier): JaktDeclaration? {
-    return if (qualifier.namespaceQualifierList.isNotEmpty()) {
-        val nsRef = qualifier.namespaceQualifierList.last().reference?.resolve() ?: return null
-        resolveDeclarationIn(nsRef, qualifier.name!!)
+fun resolvePlainQualifier(element: JaktPlainQualifier): JaktDeclaration? {
+    return if (element.namespaceQualifierList.isNotEmpty()) {
+        val nsRef = element.namespaceQualifierList.last().reference?.resolve() ?: return null
+        resolveDeclarationIn(nsRef, element.name!!)
     } else {
-        resolveDeclarationAbove(qualifier) ?: run {
+        resolveDeclarationAbove(element) ?: run {
             // Try to resolve match enum shorthand
-            val matchParent = qualifier.parent as? JaktMatchPattern ?: return@run null
+            val matchParent = element.parent as? JaktMatchPattern ?: return@run null
             val matchExpression = matchParent.ancestorOfType<JaktMatchExpression>()!!
             val matchTarget = matchExpression.findChildOfType<JaktExpression>()!!
-            resolveEnumShorthand(matchTarget.jaktType, qualifier.name!!)
+            resolveEnumShorthand(matchTarget.jaktType, element.name!!)
         }
     }
 }
@@ -79,32 +79,32 @@ private fun JaktPsiScope.getTypeDeclarations() = getDeclarations()
     .mapNotNull(JaktDeclaration::unwrapImport)
     .filter { it.isTypeDeclaration }
 
-private fun resolveTypeDeclarationIn(scope: PsiElement, name: String): JaktDeclaration? {
-    if (scope is JaktGeneric)
-        scope.getDeclGenericBounds().find { it.name == name }?.let { return it }
-    if (scope is JaktPsiScope)
-        scope.getTypeDeclarations().find { it.name == name }?.let { return it }
+private fun resolveTypeDeclarationIn(element: PsiElement, name: String): JaktDeclaration? {
+    if (element is JaktGeneric)
+        element.getDeclGenericBounds().find { it.name == name }?.let { return it }
+    if (element is JaktPsiScope)
+        element.getTypeDeclarations().find { it.name == name }?.let { return it }
     return null
 }
 
-private fun resolveTypeDeclarationAbove(scope: PsiElement, name: String): JaktDeclaration? {
-    resolveTypeDeclarationIn(scope, name)?.let { return it }
-    val parent = scope.ancestorOfType<JaktPsiScope>()
-        ?: return scope.jaktProject.findPreludeTypeDeclaration(name)
+private fun resolveTypeDeclarationAbove(element: PsiElement, name: String): JaktDeclaration? {
+    resolveTypeDeclarationIn(element, name)?.let { return it }
+    val parent = element.ancestorOfType<JaktPsiScope>()
+        ?: return element.jaktProject.findPreludeTypeDeclaration(name)
     return resolveTypeDeclarationAbove(parent, name)
 }
 
-fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
-    return if (plainType.namespaceQualifierList.isNotEmpty()) {
-        val nsRef = plainType.namespaceQualifierList.last().reference?.resolve() ?: return null
-        resolveTypeDeclarationIn(nsRef, plainType.name!!)
+fun resolvePlainType(element: JaktPlainType): JaktDeclaration? {
+    return if (element.namespaceQualifierList.isNotEmpty()) {
+        val nsRef = element.namespaceQualifierList.last().reference?.resolve() ?: return null
+        resolveTypeDeclarationIn(nsRef, element.name!!)
     } else {
-        resolveTypeDeclarationAbove(plainType, plainType.name!!) ?: run {
+        resolveTypeDeclarationAbove(element, element.name!!) ?: run {
             // Try to resolve is enum shorthand
-            val postfixParent = plainType.parent as? JaktUnaryExpression ?: return@run null
+            val postfixParent = element.parent as? JaktUnaryExpression ?: return@run null
             val exprType = postfixParent.expression.takeIf { postfixParent.keywordIs != null }?.jaktType
                 ?: return@run null
-            resolveEnumShorthand(exprType, plainType.name!!)
+            resolveEnumShorthand(exprType, element.name!!)
         }
     }
 }
@@ -113,9 +113,9 @@ fun resolvePlainType(plainType: JaktPlainType): JaktDeclaration? {
 // MISC //
 //////////
 
-fun resolveAccess(access: JaktAccess): JaktDeclaration? {
-    val accessExpr = access.ancestorOfType<JaktAccessExpression>()!!
-    val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(access.project)
+fun resolveAccess(element: JaktAccess): JaktDeclaration? {
+    val accessExpr = element.ancestorOfType<JaktAccessExpression>()!!
+    val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(element.project)
     val baseDecl = (baseType as? Type.TopLevelDecl)?.declaration ?: return null
-    return resolveDeclarationIn(baseDecl, access.name!!)
+    return resolveDeclarationIn(baseDecl, element.name!!)
 }
