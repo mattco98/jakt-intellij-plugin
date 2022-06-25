@@ -22,6 +22,7 @@ class JaktBraceMatcher : PairedBraceMatcher {
 
         private val ALLOWED_CONTEXT_TOKENS = setOf(
             JaktTypes.COMMENT,
+            JaktTypes.DOC_COMMENT,
             JaktTypes.NEWLINE,
             JaktTypes.SEMICOLON,
             JaktTypes.COMMA,

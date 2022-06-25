@@ -83,7 +83,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> {
         return when (tokenType) {
             IDENTIFIER -> Highlights.IDENTIFIER
-            COMMENT -> Highlights.COMMENT
+            COMMENT, DOC_COMMENT -> Highlights.COMMENT
 
             HEX_LITERAL,
             DECIMAL_LITERAL,

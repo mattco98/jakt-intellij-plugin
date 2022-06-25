@@ -38,7 +38,8 @@ DECIMAL_LITERAL=\d[_\d]*
 OCTAL_LITERAL=(0o|0O)[0-7][_0-7]*
 BINARY_LITERAL=(0b|0B)[01][_01]*
 IDENTIFIER=[A-Za-z_][a-zA-Z_0-9]*
-COMMENT="//"[^\r\n]*
+DOC_COMMENT=(\/\/\/[^\r\n]*)+
+COMMENT=(\/\/[^\r\n]*)+
 STRING_START=b?'|\"
 
 %s STRING
@@ -144,6 +145,7 @@ STRING_START=b?'|\"
   {OCTAL_LITERAL}        { return OCTAL_LITERAL; }
   {BINARY_LITERAL}       { return BINARY_LITERAL; }
   {IDENTIFIER}           { return IDENTIFIER; }
+  {DOC_COMMENT}          { return DOC_COMMENT; }
   {COMMENT}              { return COMMENT; }
 
   {STRING_START}         { zzStrDelim = zzInput;

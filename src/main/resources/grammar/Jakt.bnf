@@ -15,7 +15,8 @@
     parserUtilClass="org.serenityos.jakt.syntax.JaktParserUtil"
 
     tokens=[
-        COMMENT=""
+        DOC_COMMENT="regexp:(///[^\r\n]*)+"
+        COMMENT="regexp:(//[^\r\n]*)+"
     ]
 
     implements(".*")="org.serenityos.jakt.psi.JaktPsiElement"
