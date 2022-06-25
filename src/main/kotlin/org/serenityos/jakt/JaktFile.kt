@@ -3,6 +3,7 @@ package org.serenityos.jakt
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.psi.FileViewProvider
+import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
@@ -15,6 +16,7 @@ class JaktFile(
 ) : PsiFileBase(viewProvider, JaktLanguage), JaktPsiScope, JaktDeclaration {
     override val jaktType: Type
         get() = findChildrenOfType<JaktTypeable>()
+            .filter { it !is JaktImportStatement }
             .map { it.jaktType }
             .filterIsInstance<Type.TopLevelDecl>()
             .let { Type.Namespace(name, it) }
