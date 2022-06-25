@@ -184,7 +184,16 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             GREATER_THAN_EQUALS,
             EQUALS,
             QUESTION_MARK,
-            DOUBLE_QUESTION_MARK -> Highlights.OPERATOR
+            DOUBLE_QUESTION_MARK,
+            PLUS_EQUALS,
+            MINUS_EQUALS,
+            ASTERISK_EQUALS,
+            SLASH_EQUALS,
+            PERCENT_EQUALS,
+            LEFT_SHIFT_EQUALS,
+            RIGHT_SHIFT_EQUALS,
+            ARITH_LEFT_SHIFT_EQUALS,
+            ARITH_RIGHT_SHIFT_EQUALS -> Highlights.OPERATOR
 
             ARROW -> Highlights.FUNCTION_ARROW
             FAT_ARROW -> Highlights.FUNCTION_FAT_ARROW
