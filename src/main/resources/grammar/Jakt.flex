@@ -15,6 +15,13 @@ import static org.serenityos.jakt.JaktTypes.*;
   }
 %}
 
+%{}
+    /**
+     * The delimiter char of the string we are currently parsing
+     */
+    private int zzStrDelim = -1;
+%}
+
 %public
 %class JaktLexer
 %implements FlexLexer
@@ -30,11 +37,11 @@ HEX_LITERAL=(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*
 DECIMAL_LITERAL=\d[_\d]*
 OCTAL_LITERAL=(0o|0O)[0-7][_0-7]*
 BINARY_LITERAL=(0b|0B)[01][_01]*
-STRING_LITERAL=\"([^\"\\]|\\.)*\"
-CHAR_LITERAL='([^'\\]|\\.)*'
-BYTE_CHAR_LITERAL=b'([^'\\]|\\.)*'
 IDENTIFIER=[A-Za-z_][a-zA-Z_0-9]*
 COMMENT="//"[^\r\n]*
+STRING_START=b?'|\"
+
+%s STRING
 
 %%
 <YYINITIAL> {
@@ -136,12 +143,25 @@ COMMENT="//"[^\r\n]*
   {DECIMAL_LITERAL}      { return DECIMAL_LITERAL; }
   {OCTAL_LITERAL}        { return OCTAL_LITERAL; }
   {BINARY_LITERAL}       { return BINARY_LITERAL; }
-  {STRING_LITERAL}       { return STRING_LITERAL; }
-  {CHAR_LITERAL}         { return CHAR_LITERAL; }
-  {BYTE_CHAR_LITERAL}    { return BYTE_CHAR_LITERAL; }
   {IDENTIFIER}           { return IDENTIFIER; }
   {COMMENT}              { return COMMENT; }
 
+  {STRING_START}         { zzStrDelim = zzInput;
+                           yybegin(STRING); }
+}
+
+<STRING> {
+  // Note that we return a valid token here. The external annotator will handle
+  // annotating the parser error, which means we get to keep our BNF file simpler
+  // TODO: Explicit handling for BAD_CHARACTER in the BNF file might be wise
+  [\r\n]                 { yybegin(YYINITIAL);
+                           yypushback(1);
+                           return STRING_LITERAL; }
+  <<EOF>>                { return STRING_LITERAL; }
+  [^]                    { if (zzInput == zzStrDelim && zzBufferL.charAt(zzMarkedPos - 2) != '\\') {
+                               yybegin(YYINITIAL);
+                               return STRING_LITERAL;
+                           } }
 }
 
 [^] { return BAD_CHARACTER; }
