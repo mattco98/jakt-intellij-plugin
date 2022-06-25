@@ -6,10 +6,10 @@ import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.psi.findChildrenOfType
 
 abstract class JaktImportStatementMixin(
     node: ASTNode,
@@ -23,7 +23,5 @@ abstract class JaktImportStatementMixin(
     fun resolveFile(): JaktFile? =
         jaktProject.resolveImportedFile(containingFile.originalFile.virtualFile, nameIdent.text)
 
-    override fun getReference() = singleRef {
-        it.jaktProject.resolveImportedFile(it.containingFile.virtualFile, it.name)
-    }
+    override fun getReference() = singleRef { resolveFile() }
 }
