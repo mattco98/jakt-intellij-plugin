@@ -8,6 +8,7 @@ import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.api.JaktPsiScope
 
@@ -15,12 +16,8 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
         .withSuperParent(
             1, psiElement<JaktPlainQualifier>()
-                .with(condition("PlainQualifier") { element, context ->
-                    if (context == null) false else {
-                        element.namespaceQualifierList.isEmpty().also {
-                            context[ELEMENT] = element
-                        }
-                    }
+                .with(condition("PlainQualifier") { element, _ ->
+                    element.namespaceQualifierList.isEmpty()
                 })
         )
 
@@ -30,7 +27,7 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
         result: CompletionResultSet
     ) {
         ProgressManager.checkCanceled()
-        val element = context[ELEMENT] ?: return
+        val element = parameters.position.ancestorOfType<JaktPlainQualifier>() ?: return
         val project = element.project
 
         element.ancestorsOfType<JaktPsiScope>()

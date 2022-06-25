@@ -6,7 +6,6 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
@@ -20,13 +19,10 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         .withSuperParent(2,
             psiElement<JaktAccessExpression>()
                 .with(condition("AccessExpression") { element, context ->
-                    if (context == null) false else {
-                        ProgressManager.checkCanceled()
-                        val type = element.expression.jaktType
-                        context[TYPE_FIELD_INFO] = type
-                        context[PROJECT] = element.project
-                        type != Type.Unknown
-                    }
+                    ProgressManager.checkCanceled()
+                    val type = element.expression.jaktType
+                    context[TYPE_INFO] = type
+                    type != Type.Unknown
                 })
         )
 
@@ -85,9 +81,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         result: CompletionResultSet
     ) {
         ProgressManager.checkCanceled()
-        val type = context[TYPE_FIELD_INFO] ?: return
-        val project = context[PROJECT]!!
-
-        result.addAllElements(getTypeCompletions(project, type))
+        val type = context[TYPE_INFO] ?: return
+        result.addAllElements(getTypeCompletions(parameters.position.project, type))
     }
 }

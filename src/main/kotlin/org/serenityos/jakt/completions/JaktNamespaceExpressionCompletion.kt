@@ -9,6 +9,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.type.unwrap
 
@@ -17,13 +18,8 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
         .withSuperParent(
             1,
             psiElement<JaktPlainQualifier>()
-                .with(condition("HasNamespace") { element, context ->
-                    ProgressManager.checkCanceled()
-                    if (context != null && element.namespaceQualifierList.isNotEmpty()) {
-                        context[TYPE_FIELD_INFO] = element.namespaceQualifierList.last().jaktType
-                        context[PROJECT] = element.project
-                        true
-                    } else false
+                .with(condition("HasNamespace") { element, _ ->
+                    element.namespaceQualifierList.isNotEmpty()
                 })
         )
 
@@ -50,9 +46,9 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
         result: CompletionResultSet
     ) {
         ProgressManager.checkCanceled()
-        val type = context[TYPE_FIELD_INFO] ?: return
-        val project = context[PROJECT]!!
+        val element = parameters.position.ancestorOfType<JaktPlainQualifier>() ?: return
+        val type = element.namespaceQualifierList.last().jaktType
 
-        result.addAllElements(getTypeCompletions(project, type))
+        result.addAllElements(getTypeCompletions(element.project, type))
     }
 }

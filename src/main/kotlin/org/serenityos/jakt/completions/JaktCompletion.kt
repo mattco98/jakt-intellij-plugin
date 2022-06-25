@@ -76,13 +76,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
 
     companion object {
         @JvmStatic
-        protected val ELEMENT = Key.create<PsiElement>("ELEMENT")
-
-        @JvmStatic
-        protected val TYPE_FIELD_INFO = Key.create<Type>("TYPE_FIELD_INFO")
-
-        @JvmStatic
-        protected val PROJECT = Key.create<Project>("PROJECT")
+        protected val TYPE_INFO = Key.create<Type>("TYPE_FIELD_INFO")
     }
 }
 
@@ -93,9 +87,10 @@ inline fun <reified T : PsiElement> psiElement(): PsiElementPattern.Capture<T> =
 
 inline fun <reified T : PsiElement> condition(
     debugName: String,
-    crossinline block: (element: T, context: ProcessingContext?) -> Boolean,
+    crossinline block: (element: T, context: ProcessingContext) -> Boolean,
 ) = object : PatternCondition<T>(debugName) {
-    override fun accepts(t: T, context: ProcessingContext?) = block(t, context)
+    override fun accepts(t: T, context: ProcessingContext?) =
+        if (context == null) false else block(t, context)
 }
 
 inline operator fun <reified T> ProcessingContext.set(key: Key<T>, value: T) = this.put(key, value)
