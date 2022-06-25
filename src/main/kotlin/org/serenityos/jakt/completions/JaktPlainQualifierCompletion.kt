@@ -10,6 +10,19 @@ import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.type.Type
+
+// TODO: Remove these when they are added to the prelude
+
+private fun makeBuiltinFormattingType(name: String) = Type.Function(
+    name,
+    null,
+    mutableListOf(Type.Function.Parameter("format_string", Type.Primitive.String, isAnonymous = true, isMutable = false)),
+    Type.Primitive.Void,
+    Type.Linkage.External,
+)
+
+val builtinFunctionTypes = listOf("print", "println", "eprint", "eprintln", "format").map(::makeBuiltinFormattingType)
 
 object JaktPlainQualifierCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
@@ -49,6 +62,10 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
 
         project.jaktProject.getPreludeTypes().forEach {
             result.addElement(lookupElementFromType(it.name, it.jaktType, project))
+        }
+
+        builtinFunctionTypes.forEach {
+            result.addElement(lookupElementFromType(it.name, it, project))
         }
     }
 }
