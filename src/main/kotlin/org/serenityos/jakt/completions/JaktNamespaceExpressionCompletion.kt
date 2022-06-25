@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.serenityos.jakt.JaktTypes
@@ -17,10 +16,9 @@ object JaktNamespaceExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
         .withSuperParent(
             1,
-            psiElement<JaktPlainQualifier>()
-                .with(condition("HasNamespace") { element, _ ->
-                    element.namespaceQualifierList.isNotEmpty()
-                })
+            psiElement<JaktPlainQualifier>().with(condition("HasNamespace") { element, _ ->
+                element.namespaceQualifierList.isNotEmpty()
+            })
         )
 
     private fun getTypeCompletions(project: Project, type_: Type): List<LookupElement> {

@@ -9,6 +9,8 @@ class JaktCompletionContributor : CompletionContributor() {
         extend(JaktNamespaceExpressionCompletion)
         extend(JaktPlainQualifierCompletion)
         extend(JaktFieldExpressionCompletion)
+        extend(JaktImportStatementCompletion)
+        extend(JaktImportEntryCompletion)
     }
 
     private fun extend(completion: JaktCompletion) =
