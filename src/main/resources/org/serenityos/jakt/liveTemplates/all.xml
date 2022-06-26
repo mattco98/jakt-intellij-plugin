@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<templateSet group="Jakt">
+    <template name="main"
+              description="main function"
+              toReformat="false"
+              toShortenFQNames="false"
+              value="function main() {&#10;    $END$&#10;}">
+        <context>
+            <option name="JAKT_FILE" value="true" />
+            <option name="JAKT_DECLARATION" value="false" />
+        </context>
+    </template>
+    <template name="rmain"
+              description="main function with return type"
+              toReformat="false"
+              toShortenFQNames="false"
+              value="function main() -> c_int {&#10;    $END$&#10;    return 0&#10;}">
+        <context>
+            <option name="JAKT_FILE" value="true" />
+            <option name="JAKT_DECLARATION" value="false" />
+        </context>
+    </template>
+    <template name="fldbg"
+              description="debug print with file and line info"
+              toReformat="false"
+              toShortenFQNames="false"
+              value="println(&#34;[{}:{}] $END$&#34;, &#34;$FILE_NAME$&#34;, $LINE_NUMBER$)">
+        <context>
+            <option name="JAKT_FILE" value="true" />
+        </context>
+        <variable
+            name="FILE_NAME"
+            expression="fileNameWithoutExtension()"
+            defaultValue=""
+            alwaysStopAt="false"
+            />
+        <variable
+                name="LINE_NUMBER"
+                expression="lineNumber()"
+                defaultValue=""
+                alwaysStopAt="false"
+        />
+    </template>
+</templateSet>

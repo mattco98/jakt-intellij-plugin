@@ -91,8 +91,12 @@
 
         <additionalTextAttributes
                 scheme="Darcula"
-                file="colorSchemes/JaktDarcula.xml"
+                file="org/serenityos/jakt/colorSchemes/JaktDarcula.xml"
         />
+
+        <defaultLiveTemplates file="org/serenityos/jakt/liveTemplates/all" />
+        <liveTemplateContext implementation="org.serenityos.jakt.JaktTemplateContextType$File" />
+        <liveTemplateContext implementation="org.serenityos.jakt.JaktTemplateContextType$Declaration" />
 
         <intentionAction>
             <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>
@@ -106,5 +110,6 @@
             <className>org.serenityos.jakt.intentions.ImportNSDeclarationIntention</className>
             <category>Jakt</category>
         </intentionAction>
+
     </extensions>
 </idea-plugin>
