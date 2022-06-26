@@ -82,6 +82,10 @@
         <langCodeStyleSettingsProvider
                 implementation="org.serenityos.jakt.style.JaktLanguageCodeStyleSettingsProvider"
         />
+        <lang.quoteHandler
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.JaktQuoteHandler"
+        />
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"
