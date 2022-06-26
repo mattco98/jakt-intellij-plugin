@@ -65,7 +65,13 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
         }
 
         builtinFunctionTypes.forEach {
-            result.addElement(lookupElementFromType(it.name, it, project))
+            // No function template since these are vararg functions, and it's kind of annoying
+            result.addElement(lookupElementFromType(
+                it.name,
+                it,
+                project,
+                functionTemplateType = FunctionTemplateType.Reduced,
+            ))
         }
     }
 }

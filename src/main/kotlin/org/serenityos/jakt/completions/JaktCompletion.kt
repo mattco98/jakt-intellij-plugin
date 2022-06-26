@@ -21,11 +21,22 @@ import org.serenityos.jakt.type.Type
 abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
     abstract val pattern: ElementPattern<out PsiElement>
 
+    protected enum class FunctionTemplateType {
+        // Full parameter templating
+        All,
+
+        // Only parens
+        Reduced,
+
+        // Nothing
+        None,
+    }
+
     protected fun lookupElementFromType(
         name: String,
         type: Type,
         project: Project,
-        withFunctionTemplate: Boolean = true,
+        functionTemplateType: FunctionTemplateType = FunctionTemplateType.All,
     ): LookupElementBuilder {
         val tailText = if (type is Type.Function) {
             val paramStr = type.parameters.joinToString {
@@ -43,36 +54,49 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
             .withTypeText(displayType.typeRepr())
             .withIcon(icon)
 
-        if (type is Type.Function && withFunctionTemplate) {
-            builder = builder.withInsertHandler { context, _ ->
-                if (type.parameters.isNotEmpty()) {
-                    val templateManager = TemplateManager.getInstance(project)
-                    val template = templateManager.createTemplate("", "")
+        if (type is Type.Function && functionTemplateType != FunctionTemplateType.None) {
+            if (functionTemplateType == FunctionTemplateType.All) {
+                builder = builder.withInsertHandler { context, _ ->
+                    if (type.parameters.isNotEmpty()) {
+                        val templateManager = TemplateManager.getInstance(project)
+                        val template = templateManager.createTemplate("", "")
 
-                    template.addTextSegment("(")
+                        template.addTextSegment("(")
 
-                    for ((index, parameter) in type.parameters.withIndex()) {
-                        if (index != 0)
-                            template.addTextSegment(", ")
+                        for ((index, parameter) in type.parameters.withIndex()) {
+                            if (index != 0)
+                                template.addTextSegment(", ")
 
-                        if (!parameter.isAnonymous)
-                            template.addTextSegment("${parameter.name}: ")
+                            if (!parameter.isAnonymous)
+                                template.addTextSegment("${parameter.name}: ")
 
-                        template.addVariable(parameter.name, ConstantNode(parameter.type.typeRepr()), null, true)
-                    }
-
-                    template.addEndVariable()
-                    template.addTextSegment(")")
-
-                    templateManager.startTemplate(context.editor, template, object : JaktTemplateEditingListener() {
-                        override fun templateFinished(template: Template, brokenOff: Boolean) {
-                            if (!brokenOff)
-                                context.editor.caretModel.moveCaretRelatively(2, 0, false, false, false)
+                            template.addVariable(parameter.name, ConstantNode(parameter.type.typeRepr()), null, true)
                         }
-                    })
-                } else {
+
+                        template.addEndVariable()
+                        template.addTextSegment(")")
+
+                        templateManager.startTemplate(context.editor, template, object : JaktTemplateEditingListener() {
+                            override fun templateFinished(template: Template, brokenOff: Boolean) {
+                                if (!brokenOff)
+                                    context.editor.caretModel.moveCaretRelatively(2, 0, false, false, false)
+                            }
+                        })
+                    } else {
+                        context.document.insertString(context.selectionEndOffset, "()")
+                        context.editor.caretModel.moveCaretRelatively(2, 0, false, false, false)
+                    }
+                }
+            } else {
+                builder = builder.withInsertHandler { context, _ ->
                     context.document.insertString(context.selectionEndOffset, "()")
-                    context.editor.caretModel.moveCaretRelatively(2, 0, false, false, false)
+                    context.editor.caretModel.moveCaretRelatively(
+                        if (type.parameters.isNotEmpty()) 1 else 2,
+                        0,
+                        false,
+                        false,
+                        false,
+                    )
                 }
             }
         }

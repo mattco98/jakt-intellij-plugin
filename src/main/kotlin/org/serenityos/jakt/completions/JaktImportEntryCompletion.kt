@@ -25,6 +25,11 @@ object JaktImportEntryCompletion : JaktCompletion() {
         val type = importStatement.jaktType as? Type.Namespace ?: return
 
         for (subtype in type.members)
-            result.addElement(lookupElementFromType(subtype.name, subtype, project, withFunctionTemplate = false))
+            result.addElement(lookupElementFromType(
+                subtype.name,
+                subtype,
+                project,
+                functionTemplateType = FunctionTemplateType.None,
+            ))
     }
 }
