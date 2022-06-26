@@ -17,13 +17,12 @@ import org.serenityos.jakt.type.specialize
 object JaktAccessExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
         .withSuperParent(2,
-            psiElement<JaktAccessExpression>()
-                .with(condition("AccessExpression") { element, context ->
-                    ProgressManager.checkCanceled()
-                    val type = element.expression.jaktType
-                    context[TYPE_INFO] = type
-                    type != Type.Unknown
-                })
+            psiElement<JaktAccessExpression>().condition { element, context ->
+                ProgressManager.checkCanceled()
+                val type = element.expression.jaktType
+                context[TYPE_INFO] = type
+                type != Type.Unknown
+            }
         )
 
     private fun getTypeCompletions(project: Project, type: Type): List<LookupElement> {

@@ -9,10 +9,7 @@ import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PatternCondition
-import com.intellij.patterns.PlatformPatterns
-import com.intellij.patterns.PsiElementPattern
+import com.intellij.patterns.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.ProcessingContext
@@ -117,12 +114,15 @@ fun psiElement(type: IElementType) = PlatformPatterns.psiElement(type)
 inline fun <reified T : PsiElement> psiElement(): PsiElementPattern.Capture<T> =
     PlatformPatterns.psiElement(T::class.java)
 
-inline fun <reified T : PsiElement> condition(
-    debugName: String,
+inline fun <T : Any, Self> ObjectPattern<T, Self>.condition(
     crossinline block: (element: T, context: ProcessingContext) -> Boolean,
-) = object : PatternCondition<T>(debugName) {
-    override fun accepts(t: T, context: ProcessingContext?) =
-        if (context == null) false else block(t, context)
+): Self
+    where Self : ObjectPattern<T, Self>
+{
+    return with(object : PatternCondition<T>("condition") {
+        override fun accepts(t: T, context: ProcessingContext?) =
+            if (context == null) false else block(t, context)
+    })
 }
 
 inline operator fun <reified T> ProcessingContext.set(key: Key<T>, value: T) = this.put(key, value)
