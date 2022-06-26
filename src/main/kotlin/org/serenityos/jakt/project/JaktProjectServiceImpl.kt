@@ -63,7 +63,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     }
 
     override fun resolveImportedFile(from: VirtualFile, name: String): JaktFile? {
-        val scope = GlobalSearchScopes.directoryScope(project, from.parent, false)
+        val scope = GlobalSearchScopes.directoryScope(project, from.parent ?: return null, false)
         val virtualFiles = FilenameIndex.getVirtualFilesByName("$name.jakt", scope)
         return virtualFiles.firstOrNull()?.let {
             PsiManager.getInstance(project).findFile(it) as? JaktFile
