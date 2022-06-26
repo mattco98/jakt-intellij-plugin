@@ -20,6 +20,11 @@ import static org.serenityos.jakt.JaktTypes.*;
      * The delimiter char of the string we are currently parsing
      */
     private int zzStrDelim = -1;
+
+    /**
+     * The token type of the string we are currently parsing
+     */
+    private IElementType zzStrType = null;
 %}
 
 %public
@@ -40,7 +45,6 @@ BINARY_LITERAL=(0b|0B)[01][_01]*
 IDENTIFIER=[A-Za-z_][a-zA-Z_0-9]*
 DOC_COMMENT=(\/\/\/[^\r\n]*)+
 COMMENT=(\/\/[^\r\n]*)+
-STRING_START=b?'|\"
 
 %s STRING
 
@@ -148,7 +152,14 @@ STRING_START=b?'|\"
   {DOC_COMMENT}          { return DOC_COMMENT; }
   {COMMENT}              { return COMMENT; }
 
-  {STRING_START}         { zzStrDelim = zzInput;
+  "\""                   { zzStrDelim = zzInput;
+                           zzStrType = STRING_LITERAL;
+                           yybegin(STRING); }
+  "b'"                   { zzStrDelim = zzInput;
+                           zzStrType = BYTE_CHAR_LITERAL;
+                           yybegin(STRING); }
+  "'"                    { zzStrDelim = zzInput;
+                           zzStrType = CHAR_LITERAL;
                            yybegin(STRING); }
 }
 
@@ -158,11 +169,11 @@ STRING_START=b?'|\"
   // TODO: Explicit handling for BAD_CHARACTER in the BNF file might be wise
   [\r\n]                 { yybegin(YYINITIAL);
                            yypushback(1);
-                           return STRING_LITERAL; }
-  <<EOF>>                { return STRING_LITERAL; }
+                           return zzStrType; }
+  <<EOF>>                { return zzStrType; }
   [^]                    { if (zzInput == zzStrDelim && zzBufferL.charAt(zzMarkedPos - 2) != '\\') {
                                yybegin(YYINITIAL);
-                               return STRING_LITERAL;
+                               return zzStrType;
                            } }
 }
 
