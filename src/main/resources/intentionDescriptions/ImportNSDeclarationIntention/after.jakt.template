@@ -1,0 +1,5 @@
+import foo <spot>{ Bar }</spot>
+
+function main() {
+    return <spot>Bar</spot>()
+}

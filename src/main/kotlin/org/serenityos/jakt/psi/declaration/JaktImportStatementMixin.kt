@@ -14,8 +14,11 @@ import org.serenityos.jakt.type.Type
 abstract class JaktImportStatementMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktImportStatement {
-    private val nameIdent: PsiElement
+    val nameIdent: PsiElement
         get() = originalElement.findChildrenOfType(JaktTypes.IDENTIFIER).first()
+
+    val aliasIdent: PsiElement?
+        get() = originalElement.findChildrenOfType(JaktTypes.IDENTIFIER).getOrNull(1)
 
     override val jaktType: Type
         get() = resolveFile()?.jaktType ?: Type.Unknown

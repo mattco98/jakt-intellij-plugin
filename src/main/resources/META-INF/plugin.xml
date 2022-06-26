@@ -102,5 +102,9 @@
             <className>org.serenityos.jakt.intentions.StructToClassKeywordIntention</className>
             <category>Jakt</category>
         </intentionAction>
+        <intentionAction>
+            <className>org.serenityos.jakt.intentions.ImportNSDeclarationIntention</className>
+            <category>Jakt</category>
+        </intentionAction>
     </extensions>
 </idea-plugin>

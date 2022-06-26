@@ -24,9 +24,10 @@ inline fun <reified T : PsiElement> PsiElement.findNotNullChildOfType(): T = fin
 inline fun <reified T : PsiElement> PsiElement.descendantOfType(strict: Boolean = true): T? =
     PsiTreeUtil.findChildOfType(this, T::class.java, strict)
 
-fun PsiElement.ancestors() = generateSequence(this.parent) { if (it is PsiFile) null else it.parent }
+fun PsiElement.ancestors(withSelf: Boolean = false) =
+    generateSequence(if (withSelf) this else this.parent) { if (it is PsiFile) null else it.parent }
 
-inline fun <reified T> PsiElement.ancestorsOfType() = ancestors().filterIsInstance<T>()
+inline fun <reified T> PsiElement.ancestorsOfType(withSelf: Boolean = false) = ancestors(withSelf).filterIsInstance<T>()
 
-inline fun <reified T> PsiElement.ancestorOfType() = ancestorsOfType<T>().firstOrNull()
+inline fun <reified T> PsiElement.ancestorOfType(withSelf: Boolean = false) = ancestorsOfType<T>(withSelf).firstOrNull()
 

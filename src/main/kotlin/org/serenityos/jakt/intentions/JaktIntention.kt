@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 
-abstract class JaktIntention<T>(private val description: String) : BaseElementAtCaretIntentionAction() {
+abstract class JaktIntention<T>(protected var description: String) : BaseElementAtCaretIntentionAction() {
     private var cachedContext: T? = null
 
     // TODO: What is the difference between these methods?
