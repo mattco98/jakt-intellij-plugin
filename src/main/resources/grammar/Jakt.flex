@@ -170,8 +170,9 @@ COMMENT=(\/\/[^\r\n]*)+
   [\r\n]                 { yybegin(YYINITIAL);
                            yypushback(1);
                            return zzStrType; }
+  "\\"                   { zzMarkedPos += 1; }
   <<EOF>>                { return zzStrType; }
-  [^]                    { if (zzInput == zzStrDelim && zzBufferL.charAt(zzMarkedPos - 2) != '\\') {
+  [^]                    { if (zzInput == zzStrDelim) {
                                yybegin(YYINITIAL);
                                return zzStrType;
                            } }
