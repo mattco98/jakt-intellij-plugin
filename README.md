@@ -55,6 +55,7 @@ After compiling the bindings, it is as simple as running the `Run IDE for UI Tes
 - Grammar
     - Improve parsing errors
     - Implement error recovery (currently highlighting breaks for invalid files)
+- More complex tests (completion/intentions)
 - [Nav bar](https://plugins.jetbrains.com/docs/intellij/navbar.html)
 - Inlay hints? Perhaps for local variable whose type isn't obvious (i.e. not `let a = Foo()`)
 - Move left/right handler
@@ -63,6 +64,5 @@ After compiling the bindings, it is as simple as running the `Run IDE for UI Tes
     - Match arrow body to block body
     - etc...
 - Complex refactoring (move/delete)
-- More complex tests (completion/intentions)
 - Most of the features mentioned in the IntelliJ [Custom Language Support tutorial](https://plugins.jetbrains.com/docs/intellij/additional-minor-features.html)
 - Anything required for publishing the plugin to the JetBrains Marketplace (icons, metadata, CLion compat, etc)

@@ -5,7 +5,7 @@ fun properties(key: String) = project.findProperty(key).toString()
 plugins {
     idea
     kotlin("jvm") version "1.7.0"
-    id("org.jetbrains.intellij") version "1.6.0"
+    id("org.jetbrains.intellij") version "1.7.0-SNAPSHOT"
     id("org.jetbrains.grammarkit") version "2021.2.2"
     kotlin("plugin.serialization") version "1.7.0"
 }
@@ -23,8 +23,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("net.java.dev.jna:jna:5.11.0")
-    testImplementation(platform("org.junit:junit-bom:5.8.2"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r")
 }
 
@@ -103,10 +101,6 @@ tasks {
         systemProperty("ide.mac.message.dialogs.as.sheets", "false")
         systemProperty("jb.privacy.policy.text", "<!--999.999-->")
         systemProperty("jb.consents.confirmation.enabled", "false")
-    }
-
-    test {
-        useJUnitPlatform()
     }
 }
 
