@@ -47,8 +47,10 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
 
                 prelude!!.findChildrenOfType<JaktTopLevelDefinition>()
                     .filterIsInstance<JaktDeclaration>()
-                    .forEach {
-                        preludeDeclarations[it.name] = it
+                    .forEach { decl ->
+                        decl.name?.also {
+                            preludeDeclarations[it] = decl
+                        }
                     }
             }
         }

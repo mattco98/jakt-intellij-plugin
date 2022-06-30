@@ -61,7 +61,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
     override fun getDescriptiveName(element: PsiElement): String {
         return when (element) {
             is JaktArgument -> element.labeledArgument!!.identifier.text
-            is JaktNamedElement -> element.name
+            is JaktNamedElement -> element.name ?: return "ERROR"
             else -> "TODO(getDescriptiveName => ${element::class.simpleName})"
         }
     }

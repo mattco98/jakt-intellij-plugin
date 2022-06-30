@@ -107,7 +107,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
     }
 }
 
-typealias PsiPattern = PsiElementPattern.Capture<PsiElement>
+typealias PsiPattern = ElementPattern<PsiElement>
 
 fun psiElement(type: IElementType) = PlatformPatterns.psiElement(type)
 
@@ -122,6 +122,19 @@ inline fun <T : Any, Self> ObjectPattern<T, Self>.condition(
     return with(object : PatternCondition<T>("condition") {
         override fun accepts(t: T, context: ProcessingContext?) =
             if (context == null) false else block(t, context)
+    })
+}
+
+inline fun <T : Any, Self> ObjectPattern<T, Self>.debug(
+    crossinline block: (element: T, context: ProcessingContext?) -> Unit,
+): Self
+    where Self : ObjectPattern<T, Self>
+{
+    return with(object : PatternCondition<T>("debug") {
+        override fun accepts(t: T, context: ProcessingContext?): Boolean {
+            block(t, context)
+            return true
+        }
     })
 }
 

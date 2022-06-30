@@ -17,10 +17,10 @@ abstract class JaktEnumDeclarationMixin(
         val methods = mutableMapOf<String, Type.Function>()
 
         producer {
-            val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.name) }
+            val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.nameNonNull) }
 
             Type.Enum(
-                name,
+                nameNonNull,
                 underlyingTypeEnumBody?.typeAnnotation?.jaktType as? Type.Primitive,
                 variants,
                 methods,
@@ -35,17 +35,17 @@ abstract class JaktEnumDeclarationMixin(
 
         initializer {
             variants.putAll(underlyingTypeEnumBody?.enumVariantList?.associate {
-                it.name to it.jaktType as Type.EnumVariant
+                it.nameNonNull to it.jaktType as Type.EnumVariant
             } ?: normalEnumBody?.normalEnumMemberList?.mapNotNull {
                 it.enumVariant
             }?.associate {
-                it.name to it.jaktType as Type.EnumVariant
+                it.nameNonNull to it.jaktType as Type.EnumVariant
             } ?: emptyMap())
 
             methods.putAll(normalEnumBody?.normalEnumMemberList?.mapNotNull {
                 it.functionDeclaration
             }?.associate {
-                it.name to it.jaktType as Type.Function
+                it.nameNonNull to it.jaktType as Type.Function
             } ?: emptyMap())
         }
     }

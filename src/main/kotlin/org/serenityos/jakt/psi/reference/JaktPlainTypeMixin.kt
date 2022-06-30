@@ -11,13 +11,13 @@ import org.serenityos.jakt.type.resolvePlainType
 abstract class JaktPlainTypeMixin(node: ASTNode) : JaktNamedElement(node), JaktPlainType {
     override val jaktType: Type
         get() {
-            if (namespaceQualifierList.isEmpty())
+            if (!plainQualifier.hasNamespace)
                 Type.Primitive.values().find { it.typeRepr() == name }?.let { return it }
 
             return (reference.resolve() as? JaktTypeable)?.jaktType ?: Type.Unknown
         }
 
-    override fun getNameIdentifier(): PsiElement = identifier
+    override fun getNameIdentifier(): PsiElement = plainQualifier.identifier
 
     override fun getReference() = singleRef(::resolvePlainType)
 }

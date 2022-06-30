@@ -6,6 +6,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
 object TypeInference {
@@ -106,7 +107,7 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
-            is JaktPlainQualifier -> element.jaktType
+            is JaktPlainQualifierExpr -> element.plainQualifier.jaktType
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }
@@ -121,12 +122,12 @@ object TypeInference {
             return baseType.types[index]
         }
 
-        return resolveDeclarationIn(baseType, element.access.identifier!!.text)
+        return resolveDeclarationIn(baseType, element.access.identifier!!.text ?: return Type.Unknown)
     }
 
     private fun tryConstructOptionalType(call: JaktCallExpression): Type? {
         val ident = (call.expression as? JaktPlainQualifier) ?: return null
-        if (ident.namespaceQualifierList.isNotEmpty())
+        if (ident.hasNamespace)
             return null
 
         val name = ident.name

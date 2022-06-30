@@ -7,7 +7,6 @@ import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
-import org.serenityos.jakt.psi.declaration.JaktImportStatementMixin
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.type.Type
 
@@ -22,7 +21,7 @@ class JaktFile(
             .let { Type.Namespace(name, it) }
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType<JaktDeclaration>().flatMap {
-        if (it is JaktImportStatementMixin) {
+        if (it is JaktImportStatement) {
             listOf(it) + it.importBraceList?.importBraceEntryList.orEmpty()
         } else listOf(it)
     }

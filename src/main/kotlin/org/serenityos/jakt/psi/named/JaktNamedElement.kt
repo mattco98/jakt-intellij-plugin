@@ -7,13 +7,13 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.JaktPsiFactory
 
 abstract class JaktNamedElement(node: ASTNode) : ASTWrapperPsiElement(node), JaktNameIdentifierOwner {
-    override fun getNameIdentifier(): PsiElement = findNotNullChildByType(JaktTypes.IDENTIFIER)
+    override fun getNameIdentifier(): PsiElement? = findChildByType(JaktTypes.IDENTIFIER)
 
-    override fun getName(): String = nameIdentifier.text
+    override fun getName(): String? = nameIdentifier?.text
 
     override fun setName(name: String): PsiElement = apply {
-        nameIdentifier.replace(JaktPsiFactory(project).createIdentifier(name))
+        nameIdentifier?.replace(JaktPsiFactory(project).createIdentifier(name))
     }
 
-    override fun getTextOffset() = nameIdentifier.textOffset
+    override fun getTextOffset() = nameIdentifier?.textOffset ?: super.getTextOffset()
 }

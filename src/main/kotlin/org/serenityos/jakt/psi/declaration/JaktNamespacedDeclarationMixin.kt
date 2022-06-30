@@ -17,7 +17,7 @@ abstract class JaktNamespacedDeclarationMixin(
                 t
             }
 
-            return Type.Namespace(name, members).also { ns ->
+            return Type.Namespace(nameNonNull, members).also { ns ->
                 ns.members.forEach {
                     it.namespace = ns
                 }

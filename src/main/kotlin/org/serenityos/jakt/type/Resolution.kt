@@ -9,10 +9,11 @@ import org.serenityos.jakt.psi.api.JaktPsiScope
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.declaration.*
 import org.serenityos.jakt.psi.findChildOfType
+import org.serenityos.jakt.psi.reference.hasNamespace
 
 fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
-    is JaktImportStatementMixin -> resolveFile()
-    is JaktImportBraceEntryMixin -> resolveElement()
+    is JaktImportStatement -> resolveFile()
+    is JaktImportBraceEntry -> resolveElement()
     else -> this
 }
 
@@ -54,17 +55,17 @@ private fun resolveEnumShorthand(type: Type, name: String): JaktDeclaration? {
 }
 
 fun resolvePlainQualifier(element: JaktPlainQualifier): JaktDeclaration? {
-    return if (element.namespaceQualifierList.isNotEmpty()) {
-        val nsRef = element.namespaceQualifierList.last().reference?.resolve() ?: return null
-        resolveDeclarationIn(nsRef, element.name!!)
-    } else {
-        resolveDeclarationAbove(element) ?: run {
-            // Try to resolve match enum shorthand
-            val matchParent = element.parent as? JaktMatchPattern ?: return@run null
-            val matchExpression = matchParent.ancestorOfType<JaktMatchExpression>()!!
-            val matchTarget = matchExpression.findChildOfType<JaktExpression>()!!
-            resolveEnumShorthand(matchTarget.jaktType, element.name!!)
-        }
+    if (element.hasNamespace) {
+        val nsRef = resolvePlainQualifier(element.plainQualifier!!) ?: return null
+        return resolveDeclarationIn(nsRef, element.name!!)
+    }
+
+    return resolveDeclarationAbove(element) ?: run {
+        // Try to resolve match enum shorthand
+        val matchParent = element.parent as? JaktMatchPattern ?: return@run null
+        val matchExpression = matchParent.ancestorOfType<JaktMatchExpression>()!!
+        val matchTarget = matchExpression.findChildOfType<JaktExpression>()!!
+        resolveEnumShorthand(matchTarget.jaktType, element.name!!)
     }
 }
 
@@ -95,9 +96,11 @@ private fun resolveTypeDeclarationAbove(element: PsiElement, name: String): Jakt
 }
 
 fun resolvePlainType(element: JaktPlainType): JaktDeclaration? {
-    return if (element.namespaceQualifierList.isNotEmpty()) {
-        val nsRef = element.namespaceQualifierList.last().reference?.resolve() ?: return null
-        resolveTypeDeclarationIn(nsRef, element.name!!)
+    val qual = element.plainQualifier
+
+    return if (qual.hasNamespace) {
+        val nsRef = qual.plainQualifier!!.reference?.resolve() ?: return null
+        resolveTypeDeclarationIn(nsRef, qual.name!!)
     } else {
         resolveTypeDeclarationAbove(element, element.name!!) ?: run {
             // Try to resolve is enum shorthand

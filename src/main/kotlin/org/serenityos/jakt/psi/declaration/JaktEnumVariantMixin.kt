@@ -17,7 +17,7 @@ abstract class JaktEnumVariantMixin(
         producer {
             Type.EnumVariant(
                 ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
-                name,
+                nameNonNull,
                 expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
             )

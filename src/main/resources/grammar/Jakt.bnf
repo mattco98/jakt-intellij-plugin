@@ -53,22 +53,22 @@ TopLevelDefinition ::=
     generateTokenAccessors=false
 }
 
-//private StatementLead ::=
-//      EXTERN_KEYWORD
-//    | CLASS_KEYWORD
-//    | STRUCT_KEYWORD
-//    | FUNCTION_KEYWORD
-//    | LET_KEYWORD
-//    | MUT_KEYWORD
-//    | WHILE_KEYWORD
-//    | FOR_KEYWORD
-//    | LOOP_KEYWORD
-//    | RETURN_KEYWORD
-//    | THROW_KEYWORD
-//    | DEFER_KEYWORD
-//    | THROWS_KEYWORD
-//    | SEMICOLON
-//    | ExpressionLead
+private StatementLead ::=
+      EXTERN_KEYWORD
+    | CLASS_KEYWORD
+    | STRUCT_KEYWORD
+    | FUNCTION_KEYWORD
+    | LET_KEYWORD
+    | MUT_KEYWORD
+    | WHILE_KEYWORD
+    | FOR_KEYWORD
+    | LOOP_KEYWORD
+    | RETURN_KEYWORD
+    | THROW_KEYWORD
+    | DEFER_KEYWORD
+    | THROWS_KEYWORD
+    | SEMICOLON
+    | ExpressionLead
 
 private ExpressionLead ::=
       IF_KEYWORD
@@ -85,6 +85,7 @@ private ExpressionLead ::=
     | EXCLAMATION_POINT
     | STRING_LITERAL
     | CHAR_LITERAL
+    | IDENTIFIER
     | Literal
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
@@ -125,7 +126,7 @@ fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
 
 private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
-private FunctionBody ::= Block | FAT_ARROW NL ExpressionWithoutAssignment
+private FunctionBody ::= Block | FAT_ARROW NL Expression
 
 InternalFunctionDeclaration ::= FunctionHeader FunctionBody {elementType=FunctionDeclaration}
 ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {elementType=FunctionDeclaration}
@@ -249,22 +250,22 @@ Statement ::=
     | InlineCppStatement
     | Block
 
-VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS ExpressionWithoutAssignment {
+VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS Expression {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclarationMixin"
 }
-IfStatement ::= IF_KEYWORD ExpressionWithoutAssignment Block [ELSE_KEYWORD (IfStatement | Block)]
-ReturnStatement ::= RETURN_KEYWORD ExpressionWithoutAssignment?
-ThrowStatement ::= THROW_KEYWORD ExpressionWithoutAssignment
+IfStatement ::= IF_KEYWORD Expression Block [ELSE_KEYWORD (IfStatement | Block)]
+ReturnStatement ::= RETURN_KEYWORD Expression?
+ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
-WhileStatement ::= WHILE_KEYWORD ExpressionWithoutAssignment Block
+WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD IDENTIFIER Statement
 BreakStatement ::= BREAK_KEYWORD
 ContinueStatement ::= CONTINUE_KEYWORD
-YieldStatement ::= YIELD_KEYWORD ExpressionWithoutAssignment
+YieldStatement ::= YIELD_KEYWORD Expression
 
-ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD ExpressionWithoutAssignment Block
+ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD Expression Block
 
 UnsafeStatement ::= UNSAFE_KEYWORD Block
 InlineCppStatement ::= CPP_KEYWORD Block
@@ -290,7 +291,8 @@ ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
-PlainType ::= NamespaceQualifier* IDENTIFIER GenericSpecialization? {
+
+PlainType ::= PlainQualifierImpl GenericSpecialization? {
     extends=Type
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktPlainTypeMixin"
@@ -338,28 +340,26 @@ Expression ::=
     | MultiplyBinaryExpression
     | PrefixUnaryExpression
     | PostfixUnaryExpression
-    | ParenExpression
     | FieldAccessExpression // Must come before ThisExpression
     | ThisExpression
     | RangeExpression
     | ArrayExpression
     | DictionaryExpression
     | SetExpression
-    | TupleExpression
+    | TupleExpression // Must come before ParenExpression
+    | ParenExpression
     | MatchExpression
     | Literal
-    | PlainQualifier
-
-private ExpressionWithoutAssignment ::= <<withOn Expression "NO_ASSIGN">> {name="expression"}
+    | PlainQualifierExpr
 
 CallExpression ::= Expression GenericSpecialization? ArgumentList
 ArgumentList ::= PAREN_OPEN NL  [<<commaOrEolList Argument>>] PAREN_CLOSE
 Argument ::= LabeledArgument | UnlabeledArgument
-LabeledArgument ::= IDENTIFIER COLON ExpressionWithoutAssignment {
+LabeledArgument ::= IDENTIFIER COLON Expression {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktLabeledArgumentMixin"
 }
-UnlabeledArgument ::= ExpressionWithoutAssignment
+UnlabeledArgument ::= Expression
 
 AccessExpression ::= Expression DOT Access
 Access ::= FieldLookup | TupleLookup {
@@ -381,19 +381,19 @@ ThisExpression ::= THIS_KEYWORD {
     mixin="org.serenityos.jakt.psi.reference.JaktThisExpressionMixin"
 }
 
-ParenExpression ::= PAREN_OPEN ExpressionWithoutAssignment PAREN_CLOSE
+ParenExpression ::= PAREN_OPEN Expression PAREN_CLOSE
 RangeExpression ::= Expression DOT_DOT Expression
 
 ArrayExpression ::= BRACKET_OPEN NL [SizedArrayBody | ElementsArrayBody] NL BRACKET_CLOSE
-SizedArrayBody ::= ExpressionWithoutAssignment SEMICOLON NumericLiteral
-ElementsArrayBody ::= <<commaOrEolList ExpressionWithoutAssignment>>
+SizedArrayBody ::= Expression SEMICOLON NumericLiteral
+ElementsArrayBody ::= <<commaOrEolList Expression>>
 
 DictionaryExpression ::= BRACKET_OPEN NL [<<commaOrEolList DictionaryElement>> | COLON] NL BRACKET_CLOSE
 DictionaryElement ::= Expression COLON NL Expression
-SetExpression ::= CURLY_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>>? NL CURLY_CLOSE
-TupleExpression ::= PAREN_OPEN NL <<commaOrEolList ExpressionWithoutAssignment>> NL PAREN_CLOSE
+SetExpression ::= CURLY_OPEN NL <<commaOrEolList Expression>>? NL CURLY_CLOSE
+TupleExpression ::= PAREN_OPEN NL <<commaOrEolList Expression>> NL PAREN_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD ExpressionWithoutAssignment NL MatchBody
+MatchExpression ::= MATCH_KEYWORD Expression NL MatchBody
 MatchBody ::= CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
 private MatchCases ::= <<commaOrEolList MatchCase>>
 MatchCase ::= MatchCaseHead MatchCaseTrail {
@@ -401,9 +401,9 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
-MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | ExpressionWithoutAssignment)>>
+MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
 
-MatchPattern ::= PlainQualifier [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
+MatchPattern ::= PlainQualifierImpl [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
@@ -414,21 +414,33 @@ DestructuringBinding ::= IDENTIFIER {
     mixin="org.serenityos.jakt.psi.declaration.JaktDestructuringBindingMixin"
 }
 
-NamespaceQualifier ::= IDENTIFIER COLON_COLON {
-    implements=[
-        "org.serenityos.jakt.psi.api.JaktTypeable"
-        "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
-    ]
-    mixin="org.serenityos.jakt.psi.reference.JaktNamespaceQualifierMixin"
-}
-PlainQualifier ::= NamespaceQualifier* IDENTIFIER {
-    extends=Expression
+fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER {
     implements=[
         "org.serenityos.jakt.psi.api.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.psi.reference.JaktPlainQualifierMixin"
 }
+
+PlainQualifierExpr ::= PlainQualifierImpl {
+    extends=Expression
+}
+
+private PlainQualifierImpl ::= PlainQualifierStart PlainQualifierSegment*
+
+PlainQualifierStart ::= IDENTIFIER {elementType=PlainQualifier}
+left PlainQualifierSegment ::= COLON_COLON IDENTIFIER {
+    pin=1
+//    recoverWhile=PlainQualifierSegment_recover
+    elementType=PlainQualifier
+}
+
+//private PlainQualifierSegment_recover ::= !(NEWLINE | <<eof>>)
+
+//private PlainQualifierImpl ::= PlainQualifierNS* PlainQualifierEnd
+//
+//PlainQualifierNS ::= IDENTIFIER COLON_COLON {pin=2 elementType=PlainQualifier}
+//left PlainQualifierEnd ::= IDENTIFIER {elementType=PlainQualifier}
 
 /*************************************
  *        BINARY EXPRESSIONS         *
