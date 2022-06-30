@@ -14,7 +14,10 @@ import org.serenityos.jakt.psi.reference.isType
 class JaktResolver(private val scope: PsiElement) {
     fun findDeclaration(name: String, resolutionStrategy: (PsiElement) -> Boolean): JaktDeclaration? {
         return when (scope) {
-            is JaktVariableDeclarationStatement -> scope // TODO: Resolve to identifier
+            is JaktVariableDeclarationStatement -> {
+                // TODO: Resolve to identifier
+                scope.takeIf { it.name == name && resolutionStrategy(it) }
+            }
             is JaktScope -> scope.getDeclarations().find { it.name == name && resolutionStrategy(it) }
             is JaktGeneric -> scope.getDeclGenericBounds().find { it.name == name && resolutionStrategy(it) }
             else -> null
