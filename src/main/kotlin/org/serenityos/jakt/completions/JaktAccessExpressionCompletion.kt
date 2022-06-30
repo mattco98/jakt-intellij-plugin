@@ -40,14 +40,19 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             is Type.Array -> getPreludeTypeCompletions(project, "Array", type.underlyingType)
             is Type.Set -> getPreludeTypeCompletions(project, "Set", type.underlyingType)
             is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary", type.keyType, type.valueType)
-            is Type.Struct -> type
-                .methods
-                .filterValues { it.thisParameter != null }
-                .map { (name, func) -> lookupElementFromType(name, func, project) }
+            is Type.Struct -> {
+                val fieldLookups = type.fields.map { (name, type) -> lookupElementFromType(name, type, project) }
+                val methodLookups = type
+                    .methods
+                    .filterValues { it.thisParameter != null }
+                    .map { (name, func) -> lookupElementFromType(name, func, project) }
+
+                fieldLookups + methodLookups
+            }
             is Type.Enum -> type
-                .methods
-                .filterValues { it.thisParameter != null }
-                .map { (name, func) -> lookupElementFromType(name, func, project) }
+                    .methods
+                    .filterValues { it.thisParameter != null }
+                    .map { (name, func) -> lookupElementFromType(name, func, project) }
             else -> emptyList()
         }
     }
