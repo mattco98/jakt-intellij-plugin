@@ -71,6 +71,7 @@ class JaktResolver(private val scope: PsiElement) {
             is JaktFunctionDeclaration -> (element.jaktType as Type.Function).thisParameter == null
             is JaktEnumVariant -> true
             is JaktImportStatement, is JaktImportBraceEntry -> true
+            is JaktVariableDeclarationStatement -> true
             else -> false
         }
     }
@@ -79,6 +80,7 @@ class JaktResolver(private val scope: PsiElement) {
         override fun invoke(element: PsiElement) = when (element) {
             is JaktStructField -> true
             is JaktFunctionDeclaration -> (element.jaktType as Type.Function).thisParameter != null
+            is JaktVariableDeclarationStatement -> true
             else -> false
         }
     }
