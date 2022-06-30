@@ -272,7 +272,6 @@ InlineCppStatement ::= CPP_KEYWORD Block
 
 Block ::= NL CURLY_OPEN NLSEMI <<withOff StatementList? "NO_ASSIGN">> NLSEMI CURLY_CLOSE {
     extends=Statement
-    mixin="org.serenityos.jakt.psi.misc.JaktBlockMixin"
 }
 
 /*************************************
