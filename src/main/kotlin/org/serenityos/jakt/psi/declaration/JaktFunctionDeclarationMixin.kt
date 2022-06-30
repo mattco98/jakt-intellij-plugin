@@ -3,24 +3,26 @@ package org.serenityos.jakt.psi.declaration
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktStructDeclaration
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
-import org.serenityos.jakt.psi.caching.resolveCache
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktFunctionDeclarationMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktFunctionDeclaration, JaktModificationBoundary {
     override val tracker = JaktModificationTracker()
 
-    override val jaktType: Type
-        get() = resolveCache().resolveWithCaching(this) {
-            val name = identifier.text
-            val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
+    override val jaktType by recursivelyGuarded<Type> {
+        val name = identifier.text
+        val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
 
+        producer {
             val typeParameters = if (genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
@@ -34,29 +36,44 @@ abstract class JaktFunctionDeclarationMixin(
                 )
             }
 
-            val returnType = functionReturnType.type?.jaktType
-                ?: findChildOfType<JaktExpression>()?.jaktType
-                ?: Type.Unknown
-
             Type.Function(
                 name,
                 null,
                 parameters,
-                returnType,
+                Type.Primitive.Void,
                 linkage,
             ).let {
-                it.declaration = this
-
-                if (parameterList.thisParameter != null) {
-                    it.hasThis = true
-                    it.thisIsMutable = parameterList.thisParameter!!.mutKeyword != null
-                }
+                it.declaration = this@JaktFunctionDeclarationMixin
 
                 if (typeParameters.isNotEmpty()) {
                     Type.Parameterized(it, typeParameters)
                 } else it
             }
         }
+
+        initializer {
+            val func = if (it is Type.Parameterized) {
+                it.underlyingType
+            } else {
+                it
+            } as Type.Function
+
+            func.thisParameter = if (parameterList.thisParameter != null) {
+                ancestorOfType<JaktStructDeclaration>()?.let {
+                    Type.Function.Parameter(
+                        "this",
+                        it.jaktType,
+                        false,
+                        parameterList.thisParameter!!.mutKeyword != null,
+                    )
+                }
+            } else null
+
+            func.returnType = functionReturnType.type?.jaktType
+                ?: findChildOfType<JaktExpression>()?.jaktType
+                ?: Type.Primitive.Void
+        }
+    }
 
     override fun getDeclarations(): List<JaktDeclaration> = parameterList.parameterList
 

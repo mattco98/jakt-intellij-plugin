@@ -139,17 +139,10 @@ sealed interface Type {
         override val name: String,
         var thisParameter: Parameter?,
         val parameters: List<Parameter>,
-        val returnType: Type,
+        var returnType: Type,
         val linkage: Linkage,
     ) : TopLevelDecl() {
         override var namespace: Namespace? = null
-
-        // We cannot resolve the struct before this to calculate the thisParameter
-        // directly, as resolving the struct requires resolving all of its functions,
-        // so we leave this info here so that the struct can populate the thisParameter
-        // itself.
-        var hasThis = false
-        var thisIsMutable = false
 
         override fun typeRepr() = buildString {
             append("function ")

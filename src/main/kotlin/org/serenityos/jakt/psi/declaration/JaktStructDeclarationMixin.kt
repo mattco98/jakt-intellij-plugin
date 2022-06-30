@@ -37,7 +37,7 @@ abstract class JaktStructDeclarationMixin(
             }
         }
 
-        initializer { struct ->
+        initializer {
             // TODO: Visibility
             val members = structBody.structMemberList.map { it.structMethod ?: it.structField }
 
@@ -48,16 +48,6 @@ abstract class JaktStructDeclarationMixin(
             members.filterIsInstance<JaktStructMethod>().forEach { method ->
                 val type = method.functionDeclaration.jaktType.unwrap()
                 require(type is Type.Function)
-
-                if (type.hasThis && type.thisParameter == null) {
-                    type.thisParameter = Type.Function.Parameter(
-                        "this",
-                        struct,
-                        false,
-                        type.thisIsMutable,
-                    )
-                }
-
                 methods[type.name] = type
             }
         }
