@@ -7,16 +7,17 @@ import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktLabeledArgument
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.type.Type
 
 abstract class JaktLabeledArgumentMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktLabeledArgument {
     override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
         override fun singleResolve(): PsiElement? {
-            return when (
-                val callTarget = element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve()
-            ) {
+            val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType as? Type.Decl
+            return when (val callTarget = exprType?.declaration) {
                 is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.firstOrNull {
                     it.name == element.name
                 }
