@@ -38,6 +38,7 @@ class JaktStructResolveTest : JaktResolveTest() {
 
     fun `test struct member function resolution`() = doTest("""
         struct Foo { function bar(this) {} }
+                            //^D
     
         function main() {
             Foo::bar()
@@ -53,7 +54,7 @@ class JaktStructResolveTest : JaktResolveTest() {
           //^D
     
             function baz(this) => .bar
-                                //^R
+                                 //^R
         }
     """)
 

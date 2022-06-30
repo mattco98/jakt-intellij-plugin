@@ -35,7 +35,7 @@ abstract class JaktResolveTest : JaktBaseTest() {
                 name == "U" -> unresolvableElements.addAll(elements.map(::getAncestorOfTypeChecked))
                 name == "N" -> declarationsWithoutRefs.addAll(elements.map(::getAncestorOfTypeChecked))
                 name.startsWith("D") -> {
-                    val index = name.substring(1).ifEmpty { "0" }.toInt()
+                    val index = name.substring(1).ifEmpty { "1" }.toInt() - 1
                     declarations.padWithNulls(index + 1)
 
                     check(declarations[index] == null)
@@ -46,7 +46,7 @@ abstract class JaktResolveTest : JaktBaseTest() {
                     declarations[index] = getAncestorOfTypeChecked<JaktDeclaration>(elements[0])
                 }
                 name.startsWith("R") -> {
-                    val index = name.substring(1).ifEmpty { "0" }.toInt()
+                    val index = name.substring(1).ifEmpty { "1" }.toInt() - 1
                     references.pad(index + 1) { mutableSetOf() }
 
                     check(references[index].isEmpty())
