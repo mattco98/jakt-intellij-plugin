@@ -103,7 +103,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 } else Highlights.LOCAL_VAR
                 element.identifier.highlight(color)
             }
-            is JaktForStatement -> element.identifier.highlight(Highlights.LOCAL_VAR)
+            is JaktForStatement -> element.forDecl.identifier.highlight(Highlights.LOCAL_VAR)
         }
     }
 

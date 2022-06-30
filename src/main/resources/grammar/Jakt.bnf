@@ -265,7 +265,14 @@ BreakStatement ::= BREAK_KEYWORD
 ContinueStatement ::= CONTINUE_KEYWORD
 YieldStatement ::= YIELD_KEYWORD Expression
 
-ForStatement ::= FOR_KEYWORD IDENTIFIER IN_KEYWORD Expression Block
+ForStatement ::= FOR_KEYWORD ForDecl IN_KEYWORD Expression Block {
+    implements="org.serenityos.jakt.psi.api.JaktScope"
+    mixin="org.serenityos.jakt.psi.declaration.JaktForStatementMixin"
+}
+ForDecl ::= IDENTIFIER {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktForDeclMixin"
+}
 
 UnsafeStatement ::= UNSAFE_KEYWORD Block
 InlineCppStatement ::= CPP_KEYWORD Block
