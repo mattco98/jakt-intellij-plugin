@@ -29,24 +29,6 @@ class JaktEnumResolveTest : JaktResolveTest() {
         }
     """)
 
-    fun `test enum match shorthand`() = doTest("""
-        enum Foo { 
-            A
-          //^D1
-            B
-          //^D2
-        }
-    
-        function main() {
-            match Foo::A {
-                A => {}
-              //^R1
-                B => {}
-              //^R2
-            }
-        }
-    """)
-
     fun `test enum struct member resolution`() = doTest("""
         enum Foo {
             A(bar: i32, baz: f32)
@@ -54,11 +36,8 @@ class JaktEnumResolveTest : JaktResolveTest() {
         }
     
         function main() {
-            match Foo::A(bar: 10, baz: 3.4) {
-                       //^R1      ^R2
-                A(bar, baz) => {}
-                //^R1  ^R2
-            }
+            let foo = Foo::A(bar: 10, baz: 3.4)
+                           //^R1      ^R2
         }
     """)
 }
