@@ -127,16 +127,21 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             highlightQualifier(element.plainQualifier!!, isType)
 
         if (DumbService.isDumb(element.project)) {
-            val color = if (element.isBase) {
-                Highlights.IDENTIFIER
-            } else Highlights.NAMESPACE_NAME
+            val color = when {
+                !element.isBase -> Highlights.NAMESPACE_QUALIFIER
+                isType -> Highlights.TYPE_NAME
+                else -> Highlights.IDENTIFIER
+            }
             element.identifier.highlight(color)
             return
         }
 
         var identHighlight = Highlights.IDENTIFIER
-        val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element.exprAncestor ||
-            element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
+        val isCall = element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null || run {
+            val exprAncestor = element.exprAncestor
+            exprAncestor != null && exprAncestor == element.ancestorOfType<JaktCallExpression>()?.expression
+        }
+
 
         val decl = element.reference.resolve()
 
