@@ -37,19 +37,13 @@ class JaktResolver(private val scope: PsiElement) {
             return null
 
         for ((current, parent) in scope.ancestorPairs(withSelf = true)) {
-            if (parent is JaktFunctionDeclaration)
+            if (parent is JaktScope)
                 return parent
 
             if (parent is JaktBlock) {
                 // Return the previous statement in the block, or the block itself if the
                 // current element is the first child
                 return current.prevNonWSSibling() ?: parent
-            }
-
-            if (current is JaktDeclaration) {
-                // We are not in a block, so current must be a function/struct/enum/namespace.
-                // Return the parent
-                return parent
             }
         }
 

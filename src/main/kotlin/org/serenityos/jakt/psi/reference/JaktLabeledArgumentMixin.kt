@@ -2,10 +2,7 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktCallExpression
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.intellij.sdk.language.psi.JaktLabeledArgument
-import org.intellij.sdk.language.psi.JaktStructDeclaration
+import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
@@ -18,12 +15,17 @@ abstract class JaktLabeledArgumentMixin(
         override fun singleResolve(): PsiElement? {
             val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType as? Type.Decl
             return when (val callTarget = exprType?.declaration) {
-                is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.firstOrNull {
+                is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.find {
                     it.name == element.name
                 }
                 is JaktStructDeclaration -> callTarget.structBody.structMemberList
                     .mapNotNull { it.structField }
-                    .firstOrNull { it.name == element.name }
+                    .find { it.name == element.name }
+                is JaktEnumVariant -> callTarget.normalEnumMemberBody?.structEnumMemberBodyPartList?.map {
+                    it.structEnumMemberLabel
+                }?.find {
+                    it.identifier.text == element.name
+                }
                 else -> null
             }
         }
