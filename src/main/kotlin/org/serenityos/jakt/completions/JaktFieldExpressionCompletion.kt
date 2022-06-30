@@ -11,7 +11,7 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
-import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.type.Type
 
@@ -28,7 +28,7 @@ object JaktFieldExpressionCompletion : JaktCompletion() {
         val element = parameters.position.ancestorOfType<JaktFieldAccessExpression>() ?: return
         val project = element.project
 
-        val receiver = element.ancestorsOfType<JaktPsiScope>().find {
+        val receiver = element.ancestorsOfType<JaktScope>().find {
             it is JaktStructDeclaration || it is JaktEnumDeclaration
         } ?: return
 

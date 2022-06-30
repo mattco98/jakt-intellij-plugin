@@ -19,7 +19,7 @@ import com.intellij.util.ReflectionUtil
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.utils.unreachable
@@ -82,7 +82,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
         override fun getChildren(): Array<TreeElement> {
             return when (val psi = psi) {
                 is JaktFunctionDeclaration -> emptyArray()
-                is JaktPsiScope -> psi.getDeclarations().filter(Model::isSuitable).map(::Element).toTypedArray()
+                is JaktScope -> psi.getDeclarations().filter(Model::isSuitable).map(::Element).toTypedArray()
                 else -> emptyArray()
             }
         }

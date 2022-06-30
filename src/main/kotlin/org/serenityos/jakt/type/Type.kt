@@ -40,10 +40,13 @@ sealed interface Type {
         override fun typeRepr() = typeName
     }
 
-    sealed class TopLevelDecl : Type {
+    sealed class Decl : Type {
+        open var declaration: JaktDeclaration? = null
+    }
+
+    sealed class TopLevelDecl : Decl() {
         abstract val name: String
         abstract var namespace: Namespace?
-        open var declaration: JaktDeclaration? = null
     }
 
     class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl() {
@@ -122,12 +125,12 @@ sealed interface Type {
         override fun typeRepr() = name
     }
 
-    class EnumVariant(
+    class EnumVariant constructor(
         val parent: Enum,
         val name: String,
         val value: Int?,
         val members: List<Pair<String?, Type>>,
-    ) : Type {
+    ) : Decl() {
         // TODO: Improve
         override fun typeRepr() = name
     }

@@ -117,7 +117,7 @@ fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.api.JaktPsiScope"
+        "org.serenityos.jakt.psi.api.JaktScope"
         "org.serenityos.jakt.psi.caching.JaktModificationBoundary"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -145,7 +145,7 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.psi.api.JaktPsiScope"
+        "org.serenityos.jakt.psi.api.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -191,7 +191,7 @@ ExternalStructFunctionDeclaration ::= FunctionHeader {elementType=FunctionDeclar
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.psi.api.JaktPsiScope"
+        "org.serenityos.jakt.psi.api.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -397,7 +397,7 @@ MatchExpression ::= MATCH_KEYWORD Expression NL MatchBody
 MatchBody ::= CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
 private MatchCases ::= <<commaOrEolList MatchCase>>
 MatchCase ::= MatchCaseHead MatchCaseTrail {
-    implements="org.serenityos.jakt.psi.api.JaktPsiScope"
+    implements="org.serenityos.jakt.psi.api.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)

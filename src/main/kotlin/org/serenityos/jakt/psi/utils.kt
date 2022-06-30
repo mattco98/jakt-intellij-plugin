@@ -5,6 +5,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
+import org.serenityos.jakt.JaktTypes
 
 val PsiElement.allChildren: Sequence<PsiElement>
     get() = generateSequence(firstChild) { it.nextSibling }
@@ -27,7 +28,15 @@ inline fun <reified T : PsiElement> PsiElement.descendantOfType(strict: Boolean 
 fun PsiElement.ancestors(withSelf: Boolean = false) =
     generateSequence(if (withSelf) this else this.parent) { if (it is PsiFile) null else it.parent }
 
+fun PsiElement.ancestorPairs(withSelf: Boolean = false) = ancestors(withSelf) zip ancestors(withSelf).drop(1)
+
 inline fun <reified T> PsiElement.ancestorsOfType(withSelf: Boolean = false) = ancestors(withSelf).filterIsInstance<T>()
 
 inline fun <reified T> PsiElement.ancestorOfType(withSelf: Boolean = false) = ancestorsOfType<T>(withSelf).firstOrNull()
+
+fun PsiElement.prevSiblings() = generateSequence(prevSibling) { it.prevSibling }
+
+fun PsiElement.prevNonWSSibling() = prevSiblings().find {
+    it is JaktPsiElement && it.elementType != JaktTypes.NEWLINE
+}
 

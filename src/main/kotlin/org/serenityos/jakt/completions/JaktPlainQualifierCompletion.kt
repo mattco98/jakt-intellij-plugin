@@ -12,7 +12,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
-import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.type.unwrap
 
@@ -73,7 +73,7 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
 
         if (element.plainQualifier == null) {
             // Search for all plain identifiers in scope
-            element.ancestorsOfType<JaktPsiScope>()
+            element.ancestorsOfType<JaktScope>()
                 .flatMap {
                     when (it) {
                         is JaktStructDeclaration -> it.getDeclarations()

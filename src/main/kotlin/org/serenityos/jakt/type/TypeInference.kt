@@ -4,8 +4,9 @@ import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.*
-import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
@@ -62,10 +63,10 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
-            is JaktAccessExpression -> getAccessExpressionType(element)
+            is JaktAccessExpression -> (element.reference?.resolve() as? JaktDeclaration)?.jaktType ?: Type.Unknown
             is JaktIndexedAccessExpression -> Type.Unknown // TODO
             is JaktThisExpression ->
-                (element.ancestorOfType<JaktPsiScope>() as? JaktTypeable)?.jaktType ?: Type.Unknown
+                (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: Type.Unknown
             is JaktFieldAccessExpression -> {
                 val thisDecl = element.ancestorOfType<JaktStructDeclaration>() ?: return Type.Unknown
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: Type.Unknown
@@ -110,19 +111,6 @@ object TypeInference {
             is JaktPlainQualifierExpr -> element.plainQualifier.jaktType
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
-    }
-
-    private fun getAccessExpressionType(element: JaktAccessExpression): Type {
-        val baseType = inferType(element.expression)
-
-        if (element.access.decimalLiteral != null) {
-            if (baseType !is Type.Tuple)
-                return Type.Unknown
-            val index = element.access.decimalLiteral?.text?.toIntOrNull() ?: return Type.Unknown
-            return baseType.types[index]
-        }
-
-        return resolveDeclarationIn(baseType, element.access.identifier!!.text ?: return Type.Unknown)
     }
 
     private fun tryConstructOptionalType(call: JaktCallExpression): Type? {

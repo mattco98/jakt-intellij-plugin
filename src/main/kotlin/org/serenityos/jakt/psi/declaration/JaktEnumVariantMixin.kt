@@ -20,7 +20,9 @@ abstract class JaktEnumVariantMixin(
                 nameNonNull,
                 expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
-            )
+            ).also {
+                it.declaration = this@JaktEnumVariantMixin
+            }
         }
 
         initializer {

@@ -23,7 +23,7 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
     is Type.TypeVar -> specializations[name] ?: this
     is Type.EnumVariant -> Type.EnumVariant(this.parent, name, value, members.map {
         it.first to it.second.specialize(specializations)
-    })
+    }).also { it.declaration = declaration }
     is Type.Parameterized -> {
         val specializedType = underlyingType.specialize(specializations) as Type.TopLevelDecl
         val remainingTypeParams = typeParameters.filter { it.name !in specializations }
@@ -38,18 +38,18 @@ fun Type.specialize(specializations: Map<String, Type>): Type = when (this) {
         fields.mapValues { it.value.specialize(specializations) },
         methods.mapValues { it.value.specialize(specializations) as Type.Function },
         linkage,
-    )
+    ).also { it.declaration = declaration }
     is Type.Enum -> Type.Enum(
         name,
         underlyingType,
         variants.mapValues { it.value.specialize(specializations) as Type.EnumVariant },
         methods.mapValues { it.value.specialize(specializations) as Type.Function },
-    )
+    ).also { it.declaration = declaration }
     is Type.Function -> Type.Function(
         name,
         thisParameter, // TODO: Specialize?
         parameters.map { it.specialize(specializations) },
         returnType.specialize(specializations),
         linkage,
-    )
+    ).also { it.declaration = declaration }
 }

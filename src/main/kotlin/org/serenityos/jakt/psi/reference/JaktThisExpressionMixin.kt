@@ -6,7 +6,7 @@ import com.intellij.util.IncorrectOperationException
 import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktThisExpression
-import org.serenityos.jakt.psi.api.JaktPsiScope
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.ancestorsOfType
@@ -21,7 +21,7 @@ abstract class JaktThisExpressionMixin(
     override fun setName(name: String): PsiElement = throw IncorrectOperationException()
 
     override fun getReference() = singleRef {
-        for (decl in it.ancestorsOfType<JaktPsiScope>()) {
+        for (decl in it.ancestorsOfType<JaktScope>()) {
             if (decl is JaktStructDeclaration || decl is JaktEnumDeclaration)
                 return@singleRef decl
         }
