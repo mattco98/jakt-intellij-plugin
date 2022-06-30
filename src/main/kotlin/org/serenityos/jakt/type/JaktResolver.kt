@@ -12,7 +12,7 @@ import org.serenityos.jakt.psi.prevNonWSSibling
 import org.serenityos.jakt.psi.reference.isType
 
 class JaktResolver(private val scope: PsiElement) {
-    fun findDeclaration(name: String, resolutionStrategy: (PsiElement) -> Boolean): JaktDeclaration? {
+    fun findDeclaration(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): JaktDeclaration? {
         return when (scope) {
             is JaktVariableDeclarationStatement -> {
                 // TODO: Resolve to identifier
@@ -24,7 +24,7 @@ class JaktResolver(private val scope: PsiElement) {
         }?.unwrapImport()
     }
 
-    fun resolveReference(name: String, resolutionStrategy: (PsiElement) -> Boolean): PsiElement? {
+    fun resolveReference(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): PsiElement? {
         val decl = findDeclaration(name, resolutionStrategy)
         if (decl != null)
             return decl
@@ -56,37 +56,32 @@ class JaktResolver(private val scope: PsiElement) {
         return null
     }
 
-    sealed interface ResolutionStrategy : (PsiElement) -> Boolean
+    sealed interface ResolutionStrategy : (JaktDeclaration) -> Boolean
 
     private class AndResolutionStrategy(
         private val first: ResolutionStrategy,
         private val second: ResolutionStrategy,
     ) : ResolutionStrategy {
-        override fun invoke(element: PsiElement) = first(element) && second(element)
+        override fun invoke(element: JaktDeclaration) = first(element) && second(element)
     }
 
     object STATIC : ResolutionStrategy {
-        override fun invoke(element: PsiElement) = when (element) {
-            is JaktStructDeclaration, is JaktEnumDeclaration, is JaktNamespaceDeclaration -> true
+        override fun invoke(element: JaktDeclaration) = when (element) {
             is JaktFunctionDeclaration -> (element.jaktType as Type.Function).thisParameter == null
-            is JaktEnumVariant -> true
-            is JaktImportStatement, is JaktImportBraceEntry -> true
-            is JaktVariableDeclarationStatement -> true
-            else -> false
+            else -> true
         }
     }
 
     object INSTANCE : ResolutionStrategy {
-        override fun invoke(element: PsiElement) = when (element) {
-            is JaktStructField -> true
+        override fun invoke(element: JaktDeclaration) = when (element) {
             is JaktFunctionDeclaration -> (element.jaktType as Type.Function).thisParameter != null
-            is JaktVariableDeclarationStatement -> true
+            is JaktVariableDeclarationStatement, is JaktStructField -> true
             else -> false
         }
     }
 
     object TYPE : ResolutionStrategy {
-        override fun invoke(element: PsiElement) = (element as? JaktDeclaration)?.isTypeDeclaration == true
+        override fun invoke(element: JaktDeclaration) = (element as? JaktDeclaration)?.isTypeDeclaration == true
     }
 
     companion object {
