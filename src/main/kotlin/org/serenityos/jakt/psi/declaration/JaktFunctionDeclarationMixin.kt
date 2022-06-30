@@ -6,6 +6,7 @@ import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
+import org.serenityos.jakt.psi.caching.resolveCache
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
@@ -16,7 +17,7 @@ abstract class JaktFunctionDeclarationMixin(
     override val tracker = JaktModificationTracker()
 
     override val jaktType: Type
-        get() {
+        get() = resolveCache().resolveWithCaching(this) {
             val name = identifier.text
             val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
 
@@ -37,7 +38,7 @@ abstract class JaktFunctionDeclarationMixin(
                 ?: findChildOfType<JaktExpression>()?.jaktType
                 ?: Type.Unknown
 
-            return Type.Function(
+            Type.Function(
                 name,
                 null,
                 parameters,
