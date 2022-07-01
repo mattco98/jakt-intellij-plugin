@@ -6,7 +6,7 @@ import com.intellij.openapi.options.colors.ColorSettingsPage
 import org.serenityos.jakt.JaktLanguage
 
 class JaktColorSettingsPage : ColorSettingsPage {
-    override fun getIcon() = JaktLanguage.ICON
+    override fun getIcon() = JaktLanguage.FILE_ICON
 
     override fun getHighlighter() = JaktSyntaxHighlighter()
 

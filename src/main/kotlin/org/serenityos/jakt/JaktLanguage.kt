@@ -4,5 +4,5 @@ import com.intellij.lang.Language
 import com.intellij.openapi.util.IconLoader
 
 object JaktLanguage : Language("Jakt") {
-    val ICON = IconLoader.getIcon("/assets/icon.png", JaktLanguage.javaClass)
+    val FILE_ICON = IconLoader.getIcon("/assets/fileIcon.png", JaktLanguage.javaClass)
 }

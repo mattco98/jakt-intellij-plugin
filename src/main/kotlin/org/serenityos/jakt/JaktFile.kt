@@ -39,6 +39,6 @@ class JaktFile(
 
         override fun getDefaultExtension() = "jakt"
 
-        override fun getIcon() = JaktLanguage.ICON
+        override fun getIcon() = JaktLanguage.FILE_ICON
     }
 }
