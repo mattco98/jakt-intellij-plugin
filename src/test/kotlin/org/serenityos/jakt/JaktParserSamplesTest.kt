@@ -1,7 +1,6 @@
 package org.serenityos.jakt
 
 import com.intellij.lang.impl.PsiBuilderImpl
-import com.intellij.mock.MockApplication
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.TokenType
 import org.eclipse.jgit.api.Git
@@ -19,7 +18,7 @@ import java.nio.file.Files
  * each of them lex/parse successfully.
  */
 @RunWith(Parameterized::class)
-class JaktParserSamplesTest(ignored: String, private val file: File) : JaktBaseTest() {
+class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, private val file: File) : JaktBaseTest() {
     @Test
     fun test() {
         // Print a clickable link in test output
@@ -62,8 +61,6 @@ class JaktParserSamplesTest(ignored: String, private val file: File) : JaktBaseT
                     .setDirectory(it)
                     .call()
             }
-
-            MockApplication.setUp { }
 
             return File(jaktDirectory, "samples").walk().filter {
                 val name = it.parentFile.name + File.separator + it.name

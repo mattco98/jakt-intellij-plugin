@@ -9,11 +9,6 @@ import org.junit.runner.RunWith
 
 @RunWith(JUnit38ClassRunner::class)
 abstract class JaktBaseTest : BasePlatformTestCase() {
-    init {
-        // TODO: Why does this need to be called manually?
-        super.setUp()
-    }
-
     fun setupFor(text: String) {
         myFixture.configureByText("main.jakt", text)
     }
