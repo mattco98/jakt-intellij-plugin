@@ -49,10 +49,11 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
 
                 fieldLookups + methodLookups
             }
-            is Type.Enum -> type
-                    .methods
-                    .filterValues { it.thisParameter != null }
-                    .map { (name, func) -> lookupElementFromType(name, func, project) }
+            is Type.EnumVariant -> type
+                .parent
+                .methods
+                .filterValues { it.thisParameter != null }
+                .map { (name, func) -> lookupElementFromType(name, func, project) }
             else -> emptyList()
         }
     }

@@ -38,12 +38,8 @@ val builtinFunctionTypes = listOf("print", "println", "eprint", "eprintln", "for
 
 object JaktPlainQualifierCompletion : JaktCompletion() {
     override val pattern: PsiPattern = PlatformPatterns.or(
-        psiElement(JaktTypes.IDENTIFIER).debug { el, ctx ->
-            println()
-        }.withSuperParent(1, psiElement<JaktPlainQualifier>()),
-        psiElement(JaktTypes.COLON_COLON).debug { el, ctx ->
-            println()
-        }.withSuperParent(1, psiElement<JaktPlainQualifier>())
+        psiElement(JaktTypes.IDENTIFIER).withSuperParent(1, psiElement<JaktPlainQualifier>()),
+        psiElement(JaktTypes.COLON_COLON).withSuperParent(1, psiElement<JaktPlainQualifier>())
     )
 
     private fun getNamespacedTypeCompletions(project: Project, type_: Type): List<LookupElement> {
@@ -55,10 +51,16 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
                 .methods
                 .filterValues { it.thisParameter == null }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
-            is Type.Enum -> type
-                .methods
-                .filterValues { it.thisParameter == null }
-                .map { (name, func) -> lookupElementFromType(name, func, project) }
+            is Type.Enum -> {
+                val variantLookups = type.variants.values.map { lookupElementFromType(it.name, it, project) }
+
+                val methodLookups = type
+                    .methods
+                    .filterValues { it.thisParameter == null }
+                    .map { (name, func) -> lookupElementFromType(name, func, project) }
+
+                variantLookups + methodLookups
+            }
             else -> emptyList()
         }
     }

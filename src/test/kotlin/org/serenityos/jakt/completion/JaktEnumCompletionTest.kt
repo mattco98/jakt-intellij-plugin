@@ -12,10 +12,10 @@ class JaktEnumCompletionTest : JaktCompletionTest() {
 
         function main() {
             Foo::A
-        } 
+        }
     """)
 
-    fun `test static enum method completes after namespace operator`() = testCompletion("""
+    fun `test static enum method completes after namespace operator`() = testHasCompletions("""
         enum Foo { 
             A
 
@@ -25,17 +25,7 @@ class JaktEnumCompletionTest : JaktCompletionTest() {
         function main() {
             Foo::<caret>
         }
-    """, """
-        enum Foo { 
-            A
-
-            function bar() {}
-        }
-        
-        function main() {
-            Foo::bar()
-        }
-    """)
+    """, "bar")
 
     fun `test static enum method does not complete after dot operator`() = testDisallowedCompletions("""
         enum Foo {
