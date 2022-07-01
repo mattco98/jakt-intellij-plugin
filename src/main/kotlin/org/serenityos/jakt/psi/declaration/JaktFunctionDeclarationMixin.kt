@@ -1,6 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
@@ -59,10 +60,11 @@ abstract class JaktFunctionDeclarationMixin(
             } as Type.Function
 
             func.thisParameter = if (parameterList.thisParameter != null) {
-                ancestorOfType<JaktStructDeclaration>()?.let {
+                val parent = ancestorOfType<JaktStructDeclaration>() ?: ancestorOfType<JaktEnumDeclaration>()
+                parent?.let { p ->
                     Type.Function.Parameter(
                         "this",
-                        it.jaktType,
+                        p.jaktType,
                         false,
                         parameterList.thisParameter!!.mutKeyword != null,
                     )
@@ -71,7 +73,7 @@ abstract class JaktFunctionDeclarationMixin(
 
             func.returnType = functionReturnType.type?.jaktType
                 ?: findChildOfType<JaktExpression>()?.jaktType
-                ?: Type.Primitive.Void
+                    ?: Type.Primitive.Void
         }
     }
 

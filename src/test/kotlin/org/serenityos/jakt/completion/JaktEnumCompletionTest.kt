@@ -50,7 +50,7 @@ class JaktEnumCompletionTest : JaktCompletionTest() {
             Foo::A.<caret>
         }
     """, """
-        enum Foo { 
+        enum Foo {
             A
 
             function bar(this) {}
