@@ -6,6 +6,21 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <description>
+        <![CDATA[
+        Adds support for the <a href="https://github.com/SerenityOS/jakt">Jakt</a> language.
+        <br/>
+        Includes the following (non-comprehensive) features:
+        <br />
+        <ul>
+            <li>Semantic-based, configurable syntax highlighting</li>
+            <li>Intelligent completion, including prelude types</li>
+            <li>Reference resolution</li>
+            <li>Rename refactoring</li>
+        </ul>
+        ]]>
+    </description>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType
                 name="Jakt file"
