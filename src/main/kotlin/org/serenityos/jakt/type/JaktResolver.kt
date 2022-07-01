@@ -50,6 +50,17 @@ class JaktResolver(private val scope: PsiElement) {
         return null
     }
 
+    fun getPreviousDeclarations(): Sequence<JaktDeclaration> = sequence {
+        val scope = getPreviousScope()
+        when (scope) {
+            is JaktDeclaration -> yield(scope)
+            is JaktScope -> yieldAll(scope.getDeclarations())
+            null -> return@sequence
+        }
+
+        yieldAll(JaktResolver(scope!!).getPreviousDeclarations())
+    }
+
     sealed interface ResolutionStrategy : (JaktDeclaration) -> Boolean
 
     private class AndResolutionStrategy(
