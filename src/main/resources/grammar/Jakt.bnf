@@ -379,7 +379,7 @@ private FieldLookup ::= IDENTIFIER
 private TupleLookup ::= DECIMAL_LITERAL
 
 IndexedAccessExpression ::= Expression BRACKET_OPEN Expression BRACKET_CLOSE
-FieldAccessExpression ::= THIS_KEYWORD? DOT IDENTIFIER {
+FieldAccessExpression ::= ThisExpression? DOT IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktFieldAccessExpressionMixin"
 }
