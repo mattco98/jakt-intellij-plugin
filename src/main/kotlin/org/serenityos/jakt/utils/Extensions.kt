@@ -5,3 +5,12 @@ import com.intellij.openapi.application.ReadAction
 fun runInReadAction(block: () -> Unit) = ReadAction.run<Throwable>(block)
 
 fun unreachable(): Nothing = error("unreachable")
+
+fun <T> Array<T>.indicesOfAll(predicate: (T) -> Boolean): Set<Int> {
+    val indices = mutableSetOf<Int>()
+    for ((index, value) in withIndex()) {
+        if (predicate(value))
+            indices.add(index)
+    }
+    return indices
+}
