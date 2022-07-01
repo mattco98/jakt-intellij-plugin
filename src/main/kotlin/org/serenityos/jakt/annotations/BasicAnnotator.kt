@@ -136,7 +136,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             return
         }
 
-        var identHighlight = Highlights.IDENTIFIER
+        var identHighlight = if (isType) Highlights.TYPE_NAME else Highlights.IDENTIFIER
         val isCall = element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null || run {
             val exprAncestor = element.exprAncestor
             exprAncestor != null && exprAncestor == element.ancestorOfType<JaktCallExpression>()?.expression
@@ -152,18 +152,15 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
 
             if (isCall) {
                 getCallTargetHighlight(element.jaktType)
-            } else if (type is Type.EnumVariant) {
-                Highlights.ENUM_VARIANT_NAME
-            } else if (isType) {
-                when (type) {
-                    is Type.Struct -> Highlights.STRUCT_NAME
-                    is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
-                    is Type.Primitive -> Highlights.TYPE_NAME
-                    else -> identHighlight
-                }
-            } else identHighlight
+            } else when (type) {
+                is Type.Struct -> Highlights.STRUCT_NAME
+                is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
+                is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
+                is Type.Primitive -> Highlights.TYPE_NAME
+                else -> identHighlight
+            }
         }
 
-        (element as PsiNameIdentifierOwner).nameIdentifier!!.highlight(identHighlight)
+        (element as PsiNameIdentifierOwner).nameIdentifier?.highlight(identHighlight)
     }
 }
