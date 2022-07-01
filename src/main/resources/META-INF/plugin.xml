@@ -92,6 +92,11 @@
         />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager" />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache" />
+        <projectConfigurable
+                instance="org.serenityos.jakt.project.JaktLanguageProjectConfigurable"
+                groupId="language"
+                id="language.jakt"
+        />
 
         <additionalTextAttributes
                 scheme="Darcula"

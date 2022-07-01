@@ -8,13 +8,16 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import org.serenityos.jakt.bindings.JaktC
-import org.serenityos.jakt.bindings.TypecheckResult
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import org.serenityos.jakt.project.jaktProject
 
-class JaktExternalAnnotator : ExternalAnnotator<PsiFile, TypecheckResult>() {
+class JaktExternalAnnotator : ExternalAnnotator<PsiFile, JaktExternalAnnotator.TypecheckResult?>() {
     override fun collectInformation(file: PsiFile) = file
 
-    override fun doAnnotate(file: PsiFile): TypecheckResult {
+    override fun doAnnotate(file: PsiFile): TypecheckResult? {
         // Ensure file is flushed to file system
         val fileDocumentManager = FileDocumentManager.getInstance()
 
@@ -23,16 +26,42 @@ class JaktExternalAnnotator : ExternalAnnotator<PsiFile, TypecheckResult>() {
             application.invokeAndWait(fileDocumentManager::saveAllDocuments, ModalityState.defaultModalityState())
         }
 
-        return JaktC.typecheck(file.viewProvider.virtualFile.canonicalPath!!)
+        val binaryLocation = file.jaktProject.jaktBinary
+        if (!binaryLocation.exists())
+            return null
+
+        val filePath = file.originalFile.virtualFile?.toNioPath()?.toFile() ?: return null
+
+        val output = Runtime.getRuntime().exec("${binaryLocation.absolutePath} -jc ${filePath.absolutePath}")
+            .inputStream.bufferedReader().readText()
+
+        if (output.isBlank())
+            return null
+
+        return Json.Default.decodeFromString<TypecheckResult>(output)
     }
 
-    override fun apply(file: PsiFile, result: TypecheckResult, holder: AnnotationHolder) {
-        val error = (result as? TypecheckResult.Error)?.error ?: return
+    override fun apply(file: PsiFile, result: TypecheckResult?, holder: AnnotationHolder) {
+        if (result == null || result.fileId != 1)
+            return
 
-        val span = error.span!!
-        holder.newAnnotation(HighlightSeverity.ERROR, error.message)
+        val span = result.span
+        holder.newAnnotation(HighlightSeverity.ERROR, result.message)
             .range(TextRange.from(span.start, span.end - span.start))
             .needsUpdateOnTyping()
             .create()
     }
+
+    @Serializable
+    data class TypecheckResult(
+        val type: String,
+        val message: String,
+        val severity: String,
+        @SerialName("file_id")
+        val fileId: Int,
+        val span: Span,
+    )
+
+    @Serializable
+    data class Span(val start: Int, val end: Int)
 }

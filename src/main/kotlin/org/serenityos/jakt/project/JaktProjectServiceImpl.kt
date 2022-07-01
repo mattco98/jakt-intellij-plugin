@@ -12,6 +12,7 @@ import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.utils.runInReadAction
+import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.nio.file.Files
@@ -22,8 +23,16 @@ import kotlin.io.path.deleteIfExists
 class JaktProjectServiceImpl(private val project: Project) : JaktProjectService {
     @Volatile
     private var prelude: JaktFile? = null
-
     private var preludeDeclarations = mutableMapOf<String, JaktDeclaration>()
+
+    private val userHome: File
+        get() = File(System.getProperty("user.home"))
+
+    override var jaktBinary = File(userHome, ".cargo/bin/jakt")
+        set(value) {
+            val path = value.absolutePath.replaceFirst("^~", userHome.absolutePath)
+            field = File(path)
+        }
 
     init {
         CompletableFuture.supplyAsync {

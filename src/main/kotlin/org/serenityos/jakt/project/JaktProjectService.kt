@@ -6,8 +6,11 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
+import java.io.File
 
 interface JaktProjectService {
+    var jaktBinary: File
+
     fun getPreludeTypes(): List<JaktDeclaration>
 
     fun findPreludeDeclaration(type: String): JaktDeclaration?
