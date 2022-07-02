@@ -12,6 +12,7 @@ import org.serenityos.jakt.psi.caching.JaktModificationTracker
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.unwrap
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktFunctionDeclarationMixin(
@@ -54,11 +55,7 @@ abstract class JaktFunctionDeclarationMixin(
                 )
             })
 
-            val func = if (type is Type.Parameterized) {
-                type.underlyingType
-            } else {
-                type
-            } as Type.Function
+            val func = type.unwrap() as Type.Function
 
             func.thisParameter = if (parameterList.thisParameter != null) {
                 val parent = ancestorOfType<JaktStructDeclaration>() ?: ancestorOfType<JaktEnumDeclaration>()
