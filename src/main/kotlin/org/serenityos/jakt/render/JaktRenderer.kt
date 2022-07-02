@@ -34,7 +34,7 @@ fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): 
 sealed class JaktRenderer {
     protected abstract val builder: Builder
 
-    fun render(element: PsiElement, options: RenderOptions): String = with(builder) {
+    fun render(element: PsiElement, options: RenderOptions): String = withSynchronized(builder) {
         clear()
 
         when (element) {
@@ -51,7 +51,7 @@ sealed class JaktRenderer {
         toString()
     }
 
-    private fun renderType(type: Type, options: RenderOptions): Unit = with(builder) {
+    private fun renderType(type: Type, options: RenderOptions): Unit = withSynchronized(builder) {
         if (!options.showNamespaces)
             renderNamespaces(type)
 
@@ -155,19 +155,23 @@ sealed class JaktRenderer {
         }
     }
 
-    private fun renderNamespaces(type: Type): Unit = with(builder) {
+    private fun renderNamespaces(type: Type): Unit = withSynchronized(builder) {
         (type as? Type.TopLevelDecl)?.namespace?.also {
             if (".jakt" in it.name) {
                 // Hack: Files are treated as namespaces in the type system, but we
                 // definitely don't want to prefix a type with "foo.jakt::". Perhaps
                 // files should have their own type?
-                return@with
+                return@withSynchronized
             }
 
             renderNamespaces(it)
             appendStyled(it.name, Highlights.NAMESPACE_NAME)
             appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
         }
+    }
+
+    private fun <T : Any, R> withSynchronized(obj: T, block: T.() -> R) = synchronized(obj) {
+        with(obj, block)
     }
 
     abstract class Builder {
