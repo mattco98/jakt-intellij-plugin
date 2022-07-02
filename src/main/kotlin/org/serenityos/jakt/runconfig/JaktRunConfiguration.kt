@@ -19,6 +19,8 @@ class JaktRunConfiguration(
     factory: JaktConfigurationFactory,
 ) : LocatableConfigurationBase<RunConfigurationOptions>(project, factory, "Jakt Run Config") {
     var filePath: String? = null
+    var arguments: String? = null
+    var alwaysBuild: Boolean = true
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState {
         return object : CommandLineState(environment) {
@@ -32,14 +34,20 @@ class JaktRunConfiguration(
                 val buildDirectory = File(project.ideaDirectory, "build").absolutePath
 
                 val shellOptions = buildList {
-                    add(binaryPath.absolutePath)
-                    add("-o")
-                    add(buildDirectory)
-                    add("-R")
-                    add(buildDirectory)
-                    add(File(filePath!!).absolutePath)
-                    add("&&")
+                    if (alwaysBuild) {
+                        add(binaryPath.absolutePath)
+                        add("-o")
+                        add(buildDirectory)
+                        add("-R")
+                        add(buildDirectory)
+                        add(File(filePath!!).absolutePath)
+                        add("&&")
+                    }
+
                     add(File(buildDirectory, File(filePath!!).nameWithoutExtension).absolutePath)
+
+                    if (arguments != null)
+                        add(arguments)
                 }
 
                 // TODO: This is super not-portable
@@ -62,11 +70,15 @@ class JaktRunConfiguration(
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
         element.setAttribute("filePath", filePath.orEmpty())
+        element.setAttribute("arguments", arguments.orEmpty())
+        element.setAttribute("alwaysBuild", alwaysBuild.toString())
     }
 
     override fun readExternal(element: Element) {
         super.readExternal(element)
         filePath = element.getAttributeValue("filePath").nullize()
+        arguments = element.getAttributeValue("arguments").nullize()
+        alwaysBuild = element.getAttributeValue("alwaysBuild").toBooleanStrict()
     }
 
     override fun checkConfiguration() {
