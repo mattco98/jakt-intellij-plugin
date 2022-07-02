@@ -28,7 +28,7 @@ A fully-featured plugin for the [Jakt](https://github.com/SerenityOS/jakt) progr
     - Sees through import statements
     - Complex resolution support. Example:
         - Function argument labels resolve to the respective parameter
-        - Function parameters resolve to their usages in the function body (and _not_ the aformentioned argument lables)
+        - Function parameters resolve to their usages in the function body (and _not_ the aforementioned argument labels)
         - Shorthand enum names in match cases and `is` expressions
     - <details>
       <summary>Type declaration from identifiers when ctrl-clicking</summary>
@@ -36,26 +36,23 @@ A fully-featured plugin for the [Jakt](https://github.com/SerenityOS/jakt) progr
       </details>
 - Rename refactoring
     - Works for any identifier that supports resolution (declaration, local variable, imports, etc)
+- Run Configurations
+    - Gutter icons for `main` function allow easily running scripts with custom arguments 
 
 ## Contributing
 
-The plugin uses [JNA](https://github.com/java-native-access/jna) to communicate directly with the Jakt compiler. This requires custom Rust bindings. To compile the bindings:
+There is no special setup needed for the project; simply open it in IntelliJ, and run the `Test` task for tests, and
+the `Run IDE for UI Tests` to launch a clean version of IntelliJ with the plugin installed. 
 
-1. Enter the `jakt-jna-binding` directory
-2. Execute `cargo update`
-    - This has to be done every time the upstream Jakt repository changes to update the bindings
-3. Run `build_bindings.sh`
-    - This compiles the bindings and the Jakt compiler into a `libjakt.so`, which is copied to `src/main/resources/` and used by the JNA interface.
-
-After compiling the bindings, it is as simple as running the `Run IDE for UI Tests` launch configuration.
+The `buildPlugin` task will build the plugin to `build/libs`, which can be installed manually in the plugins tab in
+settings.
 
 ### TODO (in order of importance)
 
-- Github Actions: Automatically run tests for commits and PRs
+- GitHub Actions: Automatically run tests for commits and PRs
 - Grammar
     - Improve parsing errors
     - Implement error recovery (currently highlighting breaks for invalid files)
-- More complex tests (completion/intentions)
 - [Nav bar](https://plugins.jetbrains.com/docs/intellij/navbar.html)
 - Inlay hints? Perhaps for local variable whose type isn't obvious (i.e. not `let a = Foo()`)
 - Move left/right handler
@@ -65,4 +62,3 @@ After compiling the bindings, it is as simple as running the `Run IDE for UI Tes
     - etc...
 - Complex refactoring (move/delete)
 - Most of the features mentioned in the IntelliJ [Custom Language Support tutorial](https://plugins.jetbrains.com/docs/intellij/additional-minor-features.html)
-- Anything required for publishing the plugin to the JetBrains Marketplace (icons, metadata, CLion compat, etc)
