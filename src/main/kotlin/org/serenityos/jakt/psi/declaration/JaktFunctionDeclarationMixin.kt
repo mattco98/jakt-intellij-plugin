@@ -22,20 +22,12 @@ abstract class JaktFunctionDeclarationMixin(
     override val jaktType by recursivelyGuarded<Type> {
         val name = identifier.text
         val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
+        val parameters = mutableListOf<Type.Function.Parameter>()
 
         producer {
             val typeParameters = if (genericBounds != null) {
                 getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
             } else emptyList()
-
-            val parameters = parameterList.parameterList.map {
-                Type.Function.Parameter(
-                    it.identifier.text,
-                    it.typeAnnotation.jaktType,
-                    it.anonKeyword != null,
-                    it.mutKeyword != null,
-                )
-            }
 
             Type.Function(
                 name,
@@ -52,19 +44,28 @@ abstract class JaktFunctionDeclarationMixin(
             }
         }
 
-        initializer {
-            val func = if (it is Type.Parameterized) {
-                it.underlyingType
+        initializer { type ->
+            parameters.addAll(parameterList.parameterList.map {
+                Type.Function.Parameter(
+                    it.identifier.text,
+                    it.typeAnnotation.jaktType,
+                    it.anonKeyword != null,
+                    it.mutKeyword != null,
+                )
+            })
+
+            val func = if (type is Type.Parameterized) {
+                type.underlyingType
             } else {
-                it
+                type
             } as Type.Function
 
             func.thisParameter = if (parameterList.thisParameter != null) {
                 val parent = ancestorOfType<JaktStructDeclaration>() ?: ancestorOfType<JaktEnumDeclaration>()
-                parent?.let { p ->
+                parent?.let {
                     Type.Function.Parameter(
                         "this",
-                        p.jaktType,
+                        it.jaktType,
                         false,
                         parameterList.thisParameter!!.mutKeyword != null,
                     )
