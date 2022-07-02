@@ -3,6 +3,7 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorPairs
 import org.serenityos.jakt.psi.api.JaktScope
@@ -29,7 +30,10 @@ class JaktResolver(private val scope: PsiElement) {
         if (decl != null)
             return decl
 
-        return JaktResolver(getPreviousScope() ?: return null).resolveReference(name, resolutionStrategy)
+        val previousScope = getPreviousScope()
+            ?: return scope.jaktProject.findPreludeDeclaration(name)?.takeIf(resolutionStrategy)
+
+        return JaktResolver(previousScope).resolveReference(name, resolutionStrategy)
     }
 
     private fun getPreviousScope(): PsiElement? {
