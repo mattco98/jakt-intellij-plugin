@@ -73,7 +73,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
         val preludePath = Paths.get(buildFolder.absolutePath, "prelude.jakt")
 
         runInReadAction {
-            val virtualFile = LocalFileSystem.getInstance().findFileByNioFile(preludePath)
+            val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(preludePath)
                 ?: error("Unable to get VirtualFile from prelude.jakt at $preludePath")
 
             prelude = PsiManager.getInstance(project).findFile(virtualFile) as? JaktFile
