@@ -88,13 +88,15 @@ val JaktFunctionDeclaration.isExtern: Boolean
 val JaktFunctionDeclaration.isTopLevel: Boolean
     get() = ancestorOfType<JaktScope>() is JaktFile
 
-val JaktFunctionDeclaration.hasParameters: Boolean
-    get() = parameterList.let { it.thisParameter != null || it.parameterList.isNotEmpty() }
-
 val JaktFunctionDeclaration.returnType: Type
     get() = (jaktType.unwrap() as Type.Function).returnType
 
 val JaktFunctionDeclaration.isMainFunction: Boolean
-    get() = isTopLevel && !isExtern && !hasParameters && name == "main" && returnType.let {
+    get() = isTopLevel && !isExtern && name == "main" && returnType.let {
         it == Type.Primitive.Void || it == Type.Primitive.CInt
+    } && parameterList.let {
+        it.thisParameter == null && if (it.parameterList.size == 1) {
+            val type = it.parameterList.single().jaktType
+            type is Type.Array && type.underlyingType == Type.Primitive.String
+        } else it.parameterList.isEmpty()
     }
