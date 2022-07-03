@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.codeInsight
 
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
@@ -8,6 +8,7 @@ import org.intellij.sdk.language.psi.JaktArgumentList
 import org.intellij.sdk.language.psi.JaktCallExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktParameterList
+import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.type.Type

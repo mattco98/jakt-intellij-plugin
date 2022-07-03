@@ -81,7 +81,11 @@
         <typeDeclarationProvider implementation="org.serenityos.jakt.JaktTypeDeclarationProvider" />
         <codeInsight.parameterInfo
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.JaktParameterInfoHandler"
+                implementationClass="org.serenityos.jakt.codeInsight.JaktParameterInfoHandler"
+        />
+        <codeInsight.inlayProvider
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.codeInsight.JaktInlayHintsProvider"
         />
         <lang.psiStructureViewFactory
                 language="Jakt"
