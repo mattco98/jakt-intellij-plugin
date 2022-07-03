@@ -19,8 +19,22 @@ class JaktLanguageProjectConfigurable(private val project: Project) : BoundConfi
                 project.jaktProject.jaktBinary = it.toNioPath().toFile()
                 "" // TODO: What does the return value do?
             }
-            cell.component.textField.text = project.jaktProject.jaktBinary.toString()
+            cell.component.textField.text = project.jaktProject.jaktBinary?.absolutePath.orEmpty()
             cell.horizontalAlign(HorizontalAlign.FILL)
+        }
+
+        row("Jakt repository:") {
+            val cell = textFieldWithBrowseButton(
+                "Select the Location of the Cloned Jakt Repository",
+                project,
+                FileChooserDescriptorFactory.createSingleFileDescriptor(),
+            ) {
+                project.jaktProject.jaktRepo = it.toNioPath().toFile()
+                "" // TODO: What does the return value do?
+            }
+            cell.horizontalAlign(HorizontalAlign.FILL)
+            cell.comment("A locally-cloned version of Jakt. This is necessary to access the runtime files, and " +
+                "will hopefully not be necessary in the future.")
         }
     }
 

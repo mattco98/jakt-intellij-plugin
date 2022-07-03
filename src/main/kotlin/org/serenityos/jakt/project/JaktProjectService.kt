@@ -9,7 +9,8 @@ import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import java.io.File
 
 interface JaktProjectService {
-    var jaktBinary: File
+    var jaktBinary: File?
+    var jaktRepo: File?
 
     fun getPreludeTypes(): List<JaktDeclaration>
 
@@ -19,6 +20,9 @@ interface JaktProjectService {
 
     fun resolveImportedFile(from: VirtualFile, name: String): JaktFile?
 }
+
+val Project.ideaDirectory: File
+    get() = workspaceFile!!.parent.toNioPath().toFile()
 
 val Project.jaktProject: JaktProjectService
     get() = service()

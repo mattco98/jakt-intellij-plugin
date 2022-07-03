@@ -113,6 +113,8 @@
                 id="language.jakt"
         />
 
+        <configurationType implementation="org.serenityos.jakt.runconfig.JaktConfigurationType" />
+
         <additionalTextAttributes
                 scheme="Darcula"
                 file="org/serenityos/jakt/colorSchemes/JaktDarcula.xml"

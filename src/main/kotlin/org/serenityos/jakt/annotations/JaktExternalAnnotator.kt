@@ -27,7 +27,7 @@ class JaktExternalAnnotator : ExternalAnnotator<PsiFile, JaktExternalAnnotator.T
         }
 
         val binaryLocation = file.jaktProject.jaktBinary
-        if (!binaryLocation.exists())
+        if (binaryLocation?.exists() != true)
             return null
 
         val filePath = file.originalFile.virtualFile?.toNioPath()?.toFile() ?: return null
