@@ -38,7 +38,8 @@ class JaktExternalAnnotator : ExternalAnnotator<PsiFile, JaktExternalAnnotator.T
         if (output.isBlank())
             return null
 
-        return Json.Default.decodeFromString<TypecheckResult>(output)
+        // TODO: Do something with the type hint?
+        return Json.Default.decodeFromString<TypecheckResult>(output.lines().firstOrNull() ?: return null)
     }
 
     override fun apply(file: PsiFile, result: TypecheckResult?, holder: AnnotationHolder) {
