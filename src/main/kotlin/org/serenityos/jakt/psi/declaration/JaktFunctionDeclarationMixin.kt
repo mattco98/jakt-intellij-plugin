@@ -5,7 +5,9 @@ import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
 import org.intellij.sdk.language.psi.JaktStructDeclaration
+import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
@@ -82,3 +84,17 @@ abstract class JaktFunctionDeclarationMixin(
 
 val JaktFunctionDeclaration.isExtern: Boolean
     get() = externKeyword != null
+
+val JaktFunctionDeclaration.isTopLevel: Boolean
+    get() = ancestorOfType<JaktScope>() is JaktFile
+
+val JaktFunctionDeclaration.hasParameters: Boolean
+    get() = parameterList.let { it.thisParameter != null || it.parameterList.isNotEmpty() }
+
+val JaktFunctionDeclaration.returnType: Type
+    get() = (jaktType.unwrap() as Type.Function).returnType
+
+val JaktFunctionDeclaration.isMainFunction: Boolean
+    get() = isTopLevel && !isExtern && !hasParameters && name == "main" && returnType.let {
+        it == Type.Primitive.Void || it == Type.Primitive.CInt
+    }

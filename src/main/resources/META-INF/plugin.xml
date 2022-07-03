@@ -114,6 +114,11 @@
         />
 
         <configurationType implementation="org.serenityos.jakt.runconfig.JaktConfigurationType" />
+        <runLineMarkerContributor
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.runconfig.JaktRunLineMarkerContributor"
+        />
+        <runConfigurationProducer implementation="org.serenityos.jakt.runconfig.JaktRunConfigurationProducer" />
 
         <additionalTextAttributes
                 scheme="Darcula"
