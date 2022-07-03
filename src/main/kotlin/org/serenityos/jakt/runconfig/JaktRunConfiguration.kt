@@ -31,15 +31,22 @@ class JaktRunConfiguration(
 
                 val buildDirectory = File(project.ideaDirectory, "build").absolutePath
 
-                // TODO: This doesn't actually _run_ the file, it only compiles it. Figure
-                //       out how to chain GeneralCommandLine objects
-                val options = buildList {
+                val shellOptions = buildList {
                     add(binaryPath.absolutePath)
                     add("-o")
                     add(buildDirectory)
                     add("-R")
                     add(buildDirectory)
                     add(File(filePath!!).absolutePath)
+                    add("&&")
+                    add(File(buildDirectory, File(filePath!!).nameWithoutExtension).absolutePath)
+                }
+
+                // TODO: This is super not-portable
+                val options = buildList {
+                    add("bash")
+                    add("-c")
+                    add(shellOptions.joinToString(" "))
                 }
 
                 val commandLine = GeneralCommandLine(options)
