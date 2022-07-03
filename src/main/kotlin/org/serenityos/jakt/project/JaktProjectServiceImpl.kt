@@ -1,5 +1,8 @@
 package org.serenityos.jakt.project
 
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.StoragePathMacros
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -10,6 +13,7 @@ import com.intellij.psi.search.GlobalSearchScopes
 import org.apache.commons.io.FileUtils
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.project.JaktProjectService.Companion.userHome
 import org.serenityos.jakt.psi.caching.JaktPsiManager
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration
@@ -19,29 +23,22 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Paths
 
+@State(name = "JaktProjectService", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 class JaktProjectServiceImpl(private val project: Project) : JaktProjectService {
     @Volatile
     private var prelude: JaktFile? = null
     private var preludeDeclarations = mutableMapOf<String, JaktDeclaration>()
 
-    private val userHome: File
-        get() = File(System.getProperty("user.home"))
+    private var state = JaktProjectService.JaktState()
 
-    // TODO: These definitely won't persist
-    override var jaktBinary: File? = File(userHome, ".cargo/bin/jakt")
-        set(value) {
-            field = value?.absolutePath?.replaceFirst("^~", userHome.absolutePath)?.let(::File)
-        }
+    private fun File?.withNormalizedHomeDir() =
+        this?.absolutePath?.replaceFirst("^~", userHome.absolutePath)?.let(::File)
 
-    override var jaktRepo: File? = null
-        set(value) {
-            field = value?.absolutePath?.replaceFirst("^~", userHome.absolutePath)?.let(::File)
-            configureBuildFolder()
-        }
+    override val jaktBinary: File?
+        get() = state.jaktBinaryPath?.let(::File).withNormalizedHomeDir()
 
-    init {
-        configureBuildFolder()
-    }
+    override val jaktRepo: File?
+        get() = state.jaktRepoPath?.let(::File).withNormalizedHomeDir()
 
     override fun getPreludeTypes() = preludeDeclarations.values.toList()
 
@@ -59,7 +56,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
         }
     }
 
-    private fun configureBuildFolder() {
+    override fun reload() {
         if (jaktRepo == null)
             return
 
@@ -95,7 +92,10 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
         }
     }
 
-    companion object {
-        private const val PRELUDE_URL = "https://raw.githubusercontent.com/SerenityOS/jakt/main/runtime/prelude.jakt"
+    override fun getState() = state
+
+    override fun loadState(state: JaktProjectService.JaktState) {
+        this.state = state
+        reload()
     }
 }

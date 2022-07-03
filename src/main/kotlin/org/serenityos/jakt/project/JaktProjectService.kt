@@ -1,5 +1,6 @@
 package org.serenityos.jakt.project
 
+import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -8,9 +9,9 @@ import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import java.io.File
 
-interface JaktProjectService {
-    var jaktBinary: File?
-    var jaktRepo: File?
+interface JaktProjectService : PersistentStateComponent<JaktProjectService.JaktState> {
+    val jaktBinary: File?
+    val jaktRepo: File?
 
     fun getPreludeTypes(): List<JaktDeclaration>
 
@@ -19,6 +20,18 @@ interface JaktProjectService {
     fun findPreludeTypeDeclaration(type: String): JaktDeclaration?
 
     fun resolveImportedFile(from: VirtualFile, name: String): JaktFile?
+
+    fun reload()
+
+    data class JaktState @JvmOverloads constructor(
+        var jaktBinaryPath: String? = File(userHome, ".cargo/bin/jakt").absolutePath,
+        var jaktRepoPath: String? = null,
+    )
+
+    companion object {
+        val userHome: File
+            get() = File(System.getProperty("user.home"))
+    }
 }
 
 val Project.ideaDirectory: File
