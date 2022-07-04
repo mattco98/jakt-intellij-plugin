@@ -420,7 +420,7 @@ DestructuringBinding ::= IDENTIFIER {
     mixin="org.serenityos.jakt.psi.declaration.JaktDestructuringBindingMixin"
 }
 
-fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER {
+fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpecialization? {
     implements=[
         "org.serenityos.jakt.psi.api.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"

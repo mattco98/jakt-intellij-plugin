@@ -44,7 +44,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 val fieldLookups = type.fields.map { (name, type) -> lookupElementFromType(name, type, project) }
                 val methodLookups = type
                     .methods
-                    .filterValues { it.thisParameter != null }
+                    .filterValues { it.hasThis }
                     .map { (name, func) -> lookupElementFromType(name, func, project) }
 
                 fieldLookups + methodLookups
@@ -52,7 +52,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             is Type.EnumVariant -> type
                 .parent
                 .methods
-                .filterValues { it.thisParameter != null }
+                .filterValues { !it.hasThis }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
             else -> emptyList()
         }
@@ -64,19 +64,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         vararg specializations: Type
     ): List<LookupElement> {
         val declType = project.jaktProject.findPreludeDeclaration(preludeType)?.jaktType ?: return emptyList()
-
-        val type = when {
-            declType is Type.Parameterized -> if (specializations.size == declType.typeParameters.size) {
-                val m = (declType.typeParameters zip specializations).associate { it.first.name to it.second }
-                declType.specialize(m)
-            } else declType
-            specializations.isNotEmpty() -> {
-                println("Attempt to specialize non-parameterized prelude type $preludeType")
-                declType
-            }
-            else -> declType
-        }
-
+        val type = declType.specialize(specializations.toList())
         return getTypeCompletions(project, type)
     }
 

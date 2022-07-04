@@ -13,21 +13,19 @@ import org.serenityos.jakt.utils.unreachable
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
-            is JaktCallExpression -> when (val baseType = inferType(element.expression)) {
-                is Type.Struct -> baseType // TODO: This feels a bit odd
-                is Type.EnumVariant -> baseType.parent
-                is Type.Parameterized -> {
-                    val specializations = element.genericSpecialization?.findChildrenOfType<JaktType>()?.map {
-                        it.jaktType
-                    } ?: emptyList()
-                    if (specializations.size == baseType.typeParameters.size) {
-                        val map = (baseType.typeParameters.map { it.name } zip specializations).toMap()
-                        baseType.underlyingType.specialize(map)
-                    } else Type.Unknown
+            is JaktCallExpression -> {
+                val type = when (val baseType = inferType(element.expression)) {
+                    is Type.Struct -> baseType // TODO: This feels a bit odd
+                    is Type.EnumVariant -> baseType.parent
+                    is Type.Function -> baseType.returnType
+                    is Type.Unknown -> tryConstructOptionalType(element) ?: Type.Unknown
+                    else -> Type.Unknown
                 }
-                is Type.Function -> baseType.returnType
-                is Type.Unknown -> tryConstructOptionalType(element) ?: Type.Unknown
-                else -> Type.Unknown
+
+                val specializations = element.genericSpecialization?.typeList?.map { it.jaktType }
+                if (specializations != null) {
+                    type.specialize(specializations)
+                } else type
             }
             is JaktLogicalOrBinaryExpression,
             is JaktLogicalAndBinaryExpression -> Type.Primitive.Bool

@@ -16,12 +16,12 @@ abstract class JaktEnumVariantMixin(
 
         producer {
             Type.EnumVariant(
-                ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
                 nameNonNull,
+                ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
                 expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
             ).also {
-                it.declaration = this@JaktEnumVariantMixin
+                it.psiElement = this@JaktEnumVariantMixin
             }
         }
 

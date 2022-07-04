@@ -9,10 +9,10 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiUtilCore
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
-import org.serenityos.jakt.pad
-import org.serenityos.jakt.padWithNulls
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
+import org.serenityos.jakt.utils.pad
+import org.serenityos.jakt.utils.padWithNulls
 
 abstract class JaktResolveTest : JaktBaseTest() {
     data class ResolvedElements(

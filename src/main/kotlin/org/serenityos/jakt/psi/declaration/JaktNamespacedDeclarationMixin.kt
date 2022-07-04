@@ -13,7 +13,7 @@ abstract class JaktNamespacedDeclarationMixin(
         get() {
             val members = namespaceBody.topLevelDefinitionList.mapNotNull {
                 val t = (it as? JaktDeclaration)?.jaktType ?: return@mapNotNull null
-                require(t is Type.TopLevelDecl)
+                require(t is Type.Decl)
                 t
             }
 

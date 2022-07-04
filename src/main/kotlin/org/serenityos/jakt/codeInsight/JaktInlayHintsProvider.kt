@@ -67,7 +67,6 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 is Type.Enum -> text(type.typeRepr())
                 is Type.Function -> typeHintFor(Type.Unknown) // Jakt doesn't have method refs yet
                 is Type.Namespace -> typeHintFor(Type.Unknown) // Can't have namespace ref
-                is Type.Parameterized -> typeHintFor(Type.Unknown) // TODO
                 is Type.Struct -> text(type.name)
                 is Type.Dictionary -> seq(
                     text("["),
@@ -90,7 +89,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     },
                     suffix = text(")"),
                 )
-                is Type.TypeVar -> text(type.typeRepr())
+                is Type.TypeParameter -> text(type.typeRepr())
                 is Type.Weak -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
                 Type.Unknown -> text("???")
             }

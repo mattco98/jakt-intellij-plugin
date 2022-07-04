@@ -21,7 +21,7 @@ class JaktTypeDeclarationProvider : TypeDeclarationProvider {
             else -> symbolType
         }
 
-        val decl = (type.resolveToBuiltinType(symbol.project) as? Type.TopLevelDecl)?.declaration ?: return null
+        val decl = type.resolveToBuiltinType(symbol.project).psiElement ?: return null
         return arrayOf(decl)
     }
 }

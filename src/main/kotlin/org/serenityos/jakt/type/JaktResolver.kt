@@ -76,7 +76,7 @@ class JaktResolver(private val scope: PsiElement) {
 
     object STATIC : ResolutionStrategy {
         override fun invoke(element: JaktDeclaration) = when (element) {
-            is JaktFunctionDeclaration -> (element.jaktType.unwrap() as Type.Function).thisParameter == null
+            is JaktFunctionDeclaration -> !(element.jaktType as Type.Function).hasThis
             is JaktStructField -> false
             else -> true
         }
@@ -84,7 +84,7 @@ class JaktResolver(private val scope: PsiElement) {
 
     object INSTANCE : ResolutionStrategy {
         override fun invoke(element: JaktDeclaration) = when (element) {
-            is JaktFunctionDeclaration -> (element.jaktType.unwrap() as Type.Function).thisParameter != null
+            is JaktFunctionDeclaration -> (element.jaktType as Type.Function).hasThis
             is JaktVariableDeclarationStatement, is JaktStructField -> true
             else -> false
         }
@@ -108,7 +108,7 @@ class JaktResolver(private val scope: PsiElement) {
                 if (unaryExpr?.keywordIs != null && (unaryExpr.type as JaktPlainType).plainQualifier == qualifier) {
                     val baseType = unaryExpr.expression.jaktType
                     if (baseType is Type.EnumVariant && baseType.name == qualifier.name)
-                        return baseType.declaration
+                        return baseType.psiElement
                 }
             }
 

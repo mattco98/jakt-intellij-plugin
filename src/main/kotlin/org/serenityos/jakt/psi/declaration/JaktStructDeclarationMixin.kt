@@ -6,7 +6,6 @@ import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.unwrap
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
@@ -20,20 +19,17 @@ abstract class JaktStructDeclarationMixin(
 
         producer {
             val typeParameters = if (genericBounds != null) {
-                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
+                getDeclGenericBounds().map { Type.TypeParameter(it.identifier.text) }
             } else emptyList()
 
             Type.Struct(
                 identifier.text,
+                typeParameters,
                 fields,
                 methods,
                 linkage,
-            ).let {
-                it.declaration = this@JaktStructDeclarationMixin
-
-                if (typeParameters.isNotEmpty()) {
-                    Type.Parameterized(it, typeParameters)
-                } else it
+            ).also {
+                it.psiElement = this@JaktStructDeclarationMixin
             }
         }
 
@@ -46,7 +42,7 @@ abstract class JaktStructDeclarationMixin(
             }
 
             members.filterIsInstance<JaktStructMethod>().forEach { method ->
-                val type = method.functionDeclaration.jaktType.unwrap()
+                val type = method.functionDeclaration.jaktType
                 require(type is Type.Function)
                 methods[type.name] = type
             }

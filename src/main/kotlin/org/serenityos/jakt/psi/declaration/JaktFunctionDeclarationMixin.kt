@@ -1,10 +1,8 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktFunctionDeclaration
-import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktScope
@@ -14,7 +12,6 @@ import org.serenityos.jakt.psi.caching.JaktModificationTracker
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.unwrap
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktFunctionDeclarationMixin(
@@ -29,21 +26,21 @@ abstract class JaktFunctionDeclarationMixin(
 
         producer {
             val typeParameters = if (genericBounds != null) {
-                getDeclGenericBounds().map { Type.TypeVar(it.identifier.text) }
+                getDeclGenericBounds().map { Type.TypeParameter(it.identifier.text) }
             } else emptyList()
+
+            val thisParam = parameterList.thisParameter
 
             Type.Function(
                 name,
-                null,
+                typeParameters,
                 parameters,
                 Type.Primitive.Void,
                 linkage,
-            ).let {
-                it.declaration = this@JaktFunctionDeclarationMixin
-
-                if (typeParameters.isNotEmpty()) {
-                    Type.Parameterized(it, typeParameters)
-                } else it
+                thisParam != null,
+                thisParam?.mutKeyword != null,
+            ).also {
+                it.psiElement = this@JaktFunctionDeclarationMixin
             }
         }
 
@@ -57,19 +54,7 @@ abstract class JaktFunctionDeclarationMixin(
                 )
             })
 
-            val func = type.unwrap() as Type.Function
-
-            func.thisParameter = if (parameterList.thisParameter != null) {
-                val parent = ancestorOfType<JaktStructDeclaration>() ?: ancestorOfType<JaktEnumDeclaration>()
-                parent?.let {
-                    Type.Function.Parameter(
-                        "this",
-                        it.jaktType,
-                        false,
-                        parameterList.thisParameter!!.mutKeyword != null,
-                    )
-                }
-            } else null
+            val func = type as Type.Function
 
             func.returnType = functionReturnType.type?.jaktType
                 ?: findChildOfType<JaktExpression>()?.jaktType
@@ -89,7 +74,7 @@ val JaktFunctionDeclaration.isTopLevel: Boolean
     get() = ancestorOfType<JaktScope>() is JaktFile
 
 val JaktFunctionDeclaration.returnType: Type
-    get() = (jaktType.unwrap() as Type.Function).returnType
+    get() = (jaktType as Type.Function).returnType
 
 val JaktFunctionDeclaration.isMainFunction: Boolean
     get() = isTopLevel && !isExtern && name == "main" && returnType.let {

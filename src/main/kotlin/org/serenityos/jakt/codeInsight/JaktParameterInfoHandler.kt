@@ -11,13 +11,12 @@ import org.intellij.sdk.language.psi.JaktParameterList
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.type.Type
 
 class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktParameterInfoHandler.ParameterInfo> {
     override fun findElementForParameterInfo(context: CreateParameterInfoContext): JaktArgumentList? {
         val argList = findElement(context.file, context.offset) ?: return null
         val callTarget = argList.ancestorOfType<JaktCallExpression>()?.expression ?: return null
-        val func = (callTarget.jaktType as? Type.TopLevelDecl)?.declaration as? JaktFunctionDeclaration ?: return null
+        val func = callTarget.jaktType.psiElement as? JaktFunctionDeclaration ?: return null
         context.itemsToShow = arrayOf(ParameterInfo(func.parameterList))
         return argList
     }

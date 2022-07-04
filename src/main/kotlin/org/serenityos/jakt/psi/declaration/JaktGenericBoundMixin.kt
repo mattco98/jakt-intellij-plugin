@@ -9,5 +9,5 @@ abstract class JaktGenericBoundMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktGenericBound {
     override val jaktType: Type
-        get() = Type.TypeVar(nameNonNull)
+        get() = Type.TypeParameter(nameNonNull)
 }

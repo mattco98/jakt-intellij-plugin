@@ -17,19 +17,16 @@ abstract class JaktEnumDeclarationMixin(
         val methods = mutableMapOf<String, Type.Function>()
 
         producer {
-            val typeParameters = getDeclGenericBounds().map { Type.TypeVar(it.nameNonNull) }
+            val typeParameters = getDeclGenericBounds().map { Type.TypeParameter(it.nameNonNull) }
 
             Type.Enum(
                 nameNonNull,
                 underlyingTypeEnumBody?.typeAnnotation?.jaktType as? Type.Primitive,
+                typeParameters,
                 variants,
                 methods,
-            ).let {
-                it.declaration = this@JaktEnumDeclarationMixin
-
-                if (typeParameters.isNotEmpty()) {
-                    Type.Parameterized(it, typeParameters)
-                } else it
+            ).also {
+                it.psiElement = this@JaktEnumDeclarationMixin
             }
         }
 

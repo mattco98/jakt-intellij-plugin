@@ -1,57 +1,62 @@
 package org.serenityos.jakt.type
 
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import org.serenityos.jakt.project.jaktProject
-import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 @Suppress("unused")
-sealed interface Type {
-    fun typeRepr(): String
+sealed class Type {
+    var namespace: Namespace? = null
+    var psiElement: PsiElement? = null
+    open val typeParameters: List<Type>? = null
+
+    val hasUnresolvedTypeParameters: Boolean
+        get() = typeParameters?.let { p -> p.any { it is TypeParameter } } ?: false
+
+    abstract fun typeRepr(): String
 
     enum class Linkage {
         Internal,
         External,
     }
 
-    object Unknown : Type {
+    sealed class Decl(val name: String) : Type()
+
+    object Unknown : Type() {
         override fun typeRepr() = "<unknown>"
     }
 
-    enum class Primitive(typeName: kotlin.String? = null) : Type {
-        Void,
-        Bool,
-        I8,
-        I16,
-        I32,
-        I64,
-        U8,
-        U16,
-        U32,
-        U64,
-        F32,
-        F64,
-        CChar("c_char"),
-        CInt("c_int"),
-        USize,
-        String("String");
-
-        private val typeName = typeName ?: name.lowercase()
-
+    sealed class Primitive(private val typeName: kotlin.String) : Type() {
         override fun typeRepr() = typeName
+
+        object Void : Primitive("void")
+        object Bool : Primitive("bool")
+        object I8 : Primitive("i8")
+        object I16 : Primitive("i16")
+        object I32 : Primitive("i32")
+        object I64 : Primitive("i64")
+        object U8 : Primitive("u8")
+        object U16 : Primitive("u16")
+        object U32 : Primitive("u32")
+        object U64 : Primitive("u64")
+        object USize : Primitive("usize")
+        object CChar : Primitive("c_char")
+        object CInt : Primitive("c_int")
+        object String : Primitive("String")
+
+        companion object {
+            // Must be lazy as `objectInstance` is not usable before the class is
+            // initialized, which would be the case without the lazy block since
+            // this is in the companion object
+            private val nameToPrimitive by lazy {
+                Primitive::class.sealedSubclasses.map { it.objectInstance!! }.associateBy { it.typeName }
+            }
+
+            fun forName(name: kotlin.String): Primitive? = nameToPrimitive[name]
+        }
     }
 
-    sealed class Decl : Type {
-        open var declaration: JaktDeclaration? = null
-    }
-
-    sealed class TopLevelDecl : Decl() {
-        abstract val name: String
-        abstract var namespace: Namespace?
-    }
-
-    class Namespace(override val name: String, val members: List<TopLevelDecl>) : TopLevelDecl() {
-        override var namespace: Namespace? = null
-
+    class Namespace(name: String, val members: List<Decl>) : Decl(name) {
         init {
             members.forEach { it.namespace = this }
         }
@@ -59,91 +64,78 @@ sealed interface Type {
         override fun typeRepr() = (namespace?.name?.plus("::") ?: "") + name
     }
 
-    class Weak(val underlyingType: Type) : Type {
+    class Weak(val underlyingType: Type) : Type() {
         override fun typeRepr() = "weak ${underlyingType.typeRepr()}"
     }
 
-    class Raw(val underlyingType: Type) : Type {
+    class Raw(val underlyingType: Type) : Type() {
         override fun typeRepr() = "raw ${underlyingType.typeRepr()}"
     }
 
-    class Optional(val underlyingType: Type) : Type {
+    class Optional(val underlyingType: Type) : Type() {
         override fun typeRepr() = "${underlyingType.typeRepr()}?"
     }
 
-    class Array(val underlyingType: Type) : Type {
+    class Array(val underlyingType: Type) : Type() {
         override fun typeRepr() = "[${underlyingType.typeRepr()}]"
     }
 
-    class Set(val underlyingType: Type) : Type {
+    class Set(val underlyingType: Type) : Type() {
         override fun typeRepr() = "{${underlyingType.typeRepr()}"
     }
 
-    class Dictionary(val keyType: Type, val valueType: Type) : Type {
+    class Dictionary(val keyType: Type, val valueType: Type) : Type() {
         override fun typeRepr() = "[${keyType.typeRepr()}:${valueType.typeRepr()}]"
     }
 
-    class Tuple(val types: List<Type>) : Type {
+    class Tuple(val types: List<Type>) : Type() {
         override fun typeRepr() = "(${types.joinToString()})"
     }
 
-    class TypeVar(val name: String) : Type {
+    class TypeParameter(val name: String) : Type() {
         override fun typeRepr() = name
     }
 
-    class Parameterized(
-        val underlyingType: TopLevelDecl,
-        val typeParameters: List<TypeVar>,
-    ) : TopLevelDecl() {
-        override val name = underlyingType.name
-        override var namespace = underlyingType.namespace
-        override var declaration by underlyingType::declaration
-
-        override fun typeRepr() = underlyingType.typeRepr() // TODO: Add generic params to name
-    }
-
     class Struct(
-        override val name: String,
+        name: String,
+        override val typeParameters: List<Type>,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
         val linkage: Linkage,
-    ) : TopLevelDecl() {
-        override var namespace: Namespace? = null
-
+    ) : Decl(name) {
         override fun typeRepr() = name
     }
 
     // TODO: Variant types
     class Enum(
-        override val name: String,
+        name: String,
         val underlyingType: Primitive?,
+        override val typeParameters: List<Type>,
         val variants: Map<String, EnumVariant>,
         val methods: Map<String, Function>,
-    ) : TopLevelDecl() {
-        override var namespace: Namespace? = null
-
+    ) : Decl(name) {
         override fun typeRepr() = name
     }
 
     class EnumVariant constructor(
+        name: String,
         val parent: Enum,
-        val name: String,
         val value: Int?,
         val members: List<Pair<String?, Type>>,
-    ) : Decl() {
+    ) : Decl(name) {
         // TODO: Improve
         override fun typeRepr() = name
     }
 
     class Function(
-        override val name: String,
-        var thisParameter: Parameter?,
+        name: String,
+        override val typeParameters: List<Type>,
         val parameters: List<Parameter>,
         var returnType: Type,
         val linkage: Linkage,
-    ) : TopLevelDecl() {
-        override var namespace: Namespace? = null
-
+        var hasThis: Boolean,
+        var thisIsMutable: Boolean,
+    ) : Decl(name) {
         override fun typeRepr() = buildString {
             append("function ")
             append(name)
@@ -185,5 +177,3 @@ fun Type.resolveToBuiltinType(project: Project): Type {
         else -> this
     }
 }
-
-fun Type.unwrap() = if (this is Type.Parameterized) underlyingType else this

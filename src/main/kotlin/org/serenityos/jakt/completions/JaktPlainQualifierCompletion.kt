@@ -15,13 +15,12 @@ import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.type.JaktResolver
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.unwrap
 
 // TODO: Remove these when they are added to the prelude
 
 private fun makeBuiltinFormattingType(name: String) = Type.Function(
     name,
-    null,
+    emptyList(),
     mutableListOf(
         Type.Function.Parameter(
             "format_string",
@@ -32,6 +31,8 @@ private fun makeBuiltinFormattingType(name: String) = Type.Function(
     ),
     Type.Primitive.Void,
     Type.Linkage.External,
+    hasThis = false,
+    thisIsMutable = false,
 )
 
 val builtinFunctionTypes = listOf("print", "println", "eprint", "eprintln", "format").map(::makeBuiltinFormattingType)
@@ -42,21 +43,21 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
         psiElement(JaktTypes.COLON_COLON).withSuperParent(1, psiElement<JaktPlainQualifier>())
     )
 
-    private fun getNamespacedTypeCompletions(project: Project, type_: Type): List<LookupElement> {
-        return when (val type = type_.unwrap()) {
+    private fun getNamespacedTypeCompletions(project: Project, type: Type): List<LookupElement> {
+        return when (type) {
             is Type.Namespace -> type.members.map {
                 lookupElementFromType(it.name, it, project)
             }
             is Type.Struct -> type
                 .methods
-                .filterValues { it.thisParameter == null }
+                .filterValues { !it.hasThis }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
             is Type.Enum -> {
                 val variantLookups = type.variants.values.map { lookupElementFromType(it.name, it, project) }
 
                 val methodLookups = type
                     .methods
-                    .filterValues { it.thisParameter == null }
+                    .filterValues { !it.hasThis }
                     .map { (name, func) -> lookupElementFromType(name, func, project) }
 
                 variantLookups + methodLookups

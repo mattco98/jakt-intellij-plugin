@@ -39,14 +39,14 @@ object JaktFieldExpressionCompletion : JaktCompletion() {
                 }
 
                 receiverType.methods.filter {
-                    it.value.thisParameter != null
+                    it.value.hasThis
                 }.forEach { (name, type) ->
                     result.addElement(lookupElementFromType(name, type, project))
                 }
             }
             is Type.Enum -> {
                 receiverType.methods.filter {
-                    it.value.thisParameter != null
+                    it.value.hasThis
                 }.forEach { (name, type) ->
                     result.addElement(lookupElementFromType(name, type, project))
                 }

@@ -101,26 +101,18 @@ sealed class JaktRenderer {
                 }
                 appendStyled(")", Highlights.DELIM_PARENTHESIS)
             }
-            is Type.TypeVar -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
-            is Type.Parameterized -> {
-                renderType(type.underlyingType, options)
-                append("<")
-                type.typeParameters.forEachIndexed { index, it ->
-                    appendStyled(it.name, Highlights.TYPE_GENERIC_NAME)
-                    if (index != type.typeParameters.lastIndex)
-                        append(", ")
-                }
-                append(">")
-            }
+            is Type.TypeParameter -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
             is Type.Struct -> {
                 if (!options.asExpression)
                     appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.STRUCT_NAME)
+                renderGenerics(type, options)
             }
             is Type.Enum -> {
                 if (!options.asExpression)
                     appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.ENUM_NAME)
+                renderGenerics(type, options)
             }
             is Type.EnumVariant -> {
                 if (!options.showNamespaces) {
@@ -134,6 +126,7 @@ sealed class JaktRenderer {
                 if (!options.asExpression)
                     appendStyled("function ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
+                renderGenerics(type, options)
                 append("(")
 
                 if (type.parameters.isNotEmpty()) {
@@ -155,8 +148,25 @@ sealed class JaktRenderer {
         }
     }
 
+    private fun renderGenerics(type: Type, options: RenderOptions): Unit = withSynchronized(builder) {
+        val parameters = type.typeParameters ?: return@withSynchronized
+
+        append("<")
+        for ((index, parameter) in parameters.withIndex()) {
+            if (parameter === Type.Unknown) {
+                append("???")
+            } else {
+                renderType(parameter, options)
+            }
+
+            if (index != parameters.lastIndex)
+                append(", ")
+        }
+        append(">")
+    }
+
     private fun renderNamespaces(type: Type): Unit = withSynchronized(builder) {
-        (type as? Type.TopLevelDecl)?.namespace?.also {
+        type.namespace?.also {
             if (".jakt" in it.name) {
                 // Hack: Files are treated as namespaces in the type system, but we
                 // definitely don't want to prefix a type with "foo.jakt::". Perhaps

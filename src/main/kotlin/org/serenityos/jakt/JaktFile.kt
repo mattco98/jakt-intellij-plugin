@@ -17,7 +17,7 @@ class JaktFile(
         get() = findChildrenOfType<JaktTypeable>()
             .filter { it !is JaktImportStatement }
             .map { it.jaktType }
-            .filterIsInstance<Type.TopLevelDecl>()
+            .filterIsInstance<Type.Decl>()
             .let { Type.Namespace(name, it) }
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType<JaktDeclaration>().flatMap {
