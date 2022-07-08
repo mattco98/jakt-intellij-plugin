@@ -15,7 +15,7 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
             }
         """,
         "struct Foo<i64>",
-        "i64"
+        "i64",
     )
 
     fun `test chained specialization`() = doTest("""
@@ -33,6 +33,20 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
               //^T
             }
         """,
-        "struct Bar<i64>"
+        "struct Bar<i64>",
+    )
+
+    fun `test is recursion safe`() = doTest("""
+            struct Foo {
+                function bar(this) -> Foo { return Foo() }
+            }
+            
+            function main() {
+                let foo = Foo()
+                foo
+              //^T
+            }
+        """,
+        "struct Foo",
     )
 }
