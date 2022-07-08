@@ -147,7 +147,10 @@ sealed class JaktRenderer {
     }
 
     private fun renderGenerics(type: Type): Unit = withSynchronized(builder) {
-        val parameters = type.typeParameters ?: return@withSynchronized
+        if (type !is GenericType)
+            return@withSynchronized
+
+        val parameters = type.typeParameters
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {

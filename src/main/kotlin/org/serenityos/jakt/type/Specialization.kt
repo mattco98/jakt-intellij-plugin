@@ -27,7 +27,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
 
     // Store call specializations if they exist
     psi.genericSpecialization?.typeList?.let { concreteTypes ->
-        type.typeParameters.zip(concreteTypes).forEach { (genericType, concreteType) ->
+        (type as? GenericType)?.typeParameters?.zip(concreteTypes)?.forEach { (genericType, concreteType) ->
             if (genericType is TypeParameter)
                 specializations[genericType] = concreteType.jaktType
         }
@@ -205,6 +205,9 @@ fun applySpecializations(type: Type, specializations: Specializations): Type = w
 }
 
 fun applySpecializations(type: Type, specializationTypes: List<Type>): Type {
+    if (type !is GenericType)
+        return type
+
     require(type.typeParameters.all { it is TypeParameter })
     require(type.typeParameters.size == specializationTypes.size)
 

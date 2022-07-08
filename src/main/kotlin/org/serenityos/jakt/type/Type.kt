@@ -7,6 +7,9 @@ import org.serenityos.jakt.project.jaktProject
 sealed interface Type {
     var namespace: NamespaceType?
     var psiElement: PsiElement?
+}
+
+interface GenericType : Type {
     val typeParameters: List<Type>
 }
 
@@ -26,7 +29,6 @@ enum class Linkage {
 abstract class BaseType : Type {
     override var namespace: NamespaceType? = null
     override var psiElement: PsiElement? = null
-    override var typeParameters: List<Type> = emptyList()
 }
 
 object UnknownType : BaseType()
@@ -49,7 +51,6 @@ enum class PrimitiveType(typeName: kotlin.String? = null) : Type {
 
     override var namespace: NamespaceType? = null
     override var psiElement: PsiElement? = null
-    override val typeParameters = emptyList<Type>()
 
     val typeName: kotlin.String = typeName ?: name.lowercase()
 
@@ -94,7 +95,7 @@ class TypeParameter(val name: String) : BaseType()
 
 class StructType(
     override val name: String,
-    override var typeParameters: List<Type>,
+    var typeParameters: List<Type>,
     val fields: Map<String, Type>,
     val methods: Map<String, FunctionType>,
     val linkage: Linkage,
@@ -105,7 +106,7 @@ class StructType(
 class EnumType(
     override val name: String,
     val underlyingType: PrimitiveType?,
-    override var typeParameters: List<Type>,
+    var typeParameters: List<Type>,
     val variants: Map<String, EnumVariantType>,
     val methods: Map<String, FunctionType>,
 ) : BaseType(), DeclarationType, ContainerType {
@@ -123,7 +124,7 @@ class EnumVariantType(
 
 class FunctionType(
     override val name: String,
-    override var typeParameters: List<Type>,
+    var typeParameters: List<Type>,
     val parameters: List<Parameter>,
     var returnType: Type,
     val linkage: Linkage,
