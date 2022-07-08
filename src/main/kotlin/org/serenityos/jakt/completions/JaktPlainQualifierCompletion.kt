@@ -13,24 +13,23 @@ import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.type.JaktResolver
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
 
 // TODO: Remove these when they are added to the prelude
 
-private fun makeBuiltinFormattingType(name: String) = Type.Function(
+private fun makeBuiltinFormattingType(name: String) = FunctionType(
     name,
     emptyList(),
     mutableListOf(
-        Type.Function.Parameter(
+        FunctionType.Parameter(
             "format_string",
-            Type.Primitive.String,
+            PrimitiveType.String,
             isAnonymous = true,
             isMutable = false
         )
     ),
-    Type.Primitive.Void,
-    Type.Linkage.External,
+    PrimitiveType.Void,
+    Linkage.External,
     hasThis = false,
     thisIsMutable = false,
 )
@@ -45,14 +44,14 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
 
     private fun getNamespacedTypeCompletions(project: Project, type: Type): List<LookupElement> {
         return when (type) {
-            is Type.Namespace -> type.members.map {
+            is NamespaceType -> type.members.map {
                 lookupElementFromType(it.name, it, project)
             }
-            is Type.Struct -> type
+            is StructType -> type
                 .methods
                 .filterValues { !it.hasThis }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
-            is Type.Enum -> {
+            is EnumType -> {
                 val variantLookups = type.variants.values.map { lookupElementFromType(it.name, it, project) }
 
                 val methodLookups = type

@@ -13,6 +13,7 @@ import com.intellij.patterns.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.ProcessingContext
+import org.serenityos.jakt.type.FunctionType
 import org.serenityos.jakt.type.Type
 
 abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
@@ -35,23 +36,23 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
         project: Project,
         functionTemplateType: FunctionTemplateType = FunctionTemplateType.All,
     ): LookupElementBuilder {
-        val tailText = if (type is Type.Function) {
+        val tailText = if (type is FunctionType) {
             val paramStr = type.parameters.joinToString {
                 "${it.name}: ${it.type.typeRepr()}"
             }
             "($paramStr)"
         } else null
 
-        val displayType = if (type is Type.Function) type.returnType else type
+        val displayType = if (type is FunctionType) type.returnType else type
 
-        val icon = if (type is Type.Function) AllIcons.Nodes.Function else AllIcons.Nodes.Field
+        val icon = if (type is FunctionType) AllIcons.Nodes.Function else AllIcons.Nodes.Field
 
         var builder = LookupElementBuilder.create(name)
             .withTailText(tailText)
             .withTypeText(displayType.typeRepr())
             .withIcon(icon)
 
-        if (type is Type.Function && functionTemplateType != FunctionTemplateType.None) {
+        if (type is FunctionType && functionTemplateType != FunctionTemplateType.None) {
             if (functionTemplateType == FunctionTemplateType.All) {
                 builder = builder.withInsertHandler { context, _ ->
                     if (type.parameters.isNotEmpty()) {

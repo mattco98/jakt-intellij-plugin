@@ -8,6 +8,8 @@ import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.findChildrenOfType
+import org.serenityos.jakt.type.DeclarationType
+import org.serenityos.jakt.type.NamespaceType
 import org.serenityos.jakt.type.Type
 
 class JaktFile(
@@ -17,8 +19,8 @@ class JaktFile(
         get() = findChildrenOfType<JaktTypeable>()
             .filter { it !is JaktImportStatement }
             .map { it.jaktType }
-            .filterIsInstance<Type.Decl>()
-            .let { Type.Namespace(name, it) }
+            .filterIsInstance<DeclarationType>()
+            .let { NamespaceType(name, it) }
 
     override fun getDeclarations(): List<JaktDeclaration> = findChildrenOfType<JaktDeclaration>().flatMap {
         if (it is JaktImportStatement) {

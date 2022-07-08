@@ -5,6 +5,9 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.type.FunctionType
+import org.serenityos.jakt.type.Linkage
+import org.serenityos.jakt.type.StructType
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
@@ -14,12 +17,12 @@ abstract class JaktStructDeclarationMixin(
     override val jaktType by recursivelyGuarded<Type> {
         val typeParameters = mutableListOf<Type>()
         val fields = mutableMapOf<String, Type>()
-        val methods = mutableMapOf<String, Type.Function>()
+        val methods = mutableMapOf<String, FunctionType>()
 
-        val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
+        val linkage = if (isExtern) Linkage.External else Linkage.Internal
 
         producer {
-            Type.Struct(
+            StructType(
                 identifier.text,
                 typeParameters,
                 fields,
@@ -43,7 +46,7 @@ abstract class JaktStructDeclarationMixin(
 
             members.filterIsInstance<JaktStructMethod>().forEach { method ->
                 val type = method.functionDeclaration.jaktType
-                require(type is Type.Function)
+                require(type is FunctionType)
                 methods[type.name] = type
             }
         }

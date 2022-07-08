@@ -10,13 +10,14 @@ import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.UnknownType
 
 abstract class JaktImportStatementMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktImportStatement {
 
     override val jaktType: Type
-        get() = resolveFile()?.jaktType ?: Type.Unknown
+        get() = resolveFile()?.jaktType ?: UnknownType
 
     override fun getReference() = singleRef { resolveFile() }
 }

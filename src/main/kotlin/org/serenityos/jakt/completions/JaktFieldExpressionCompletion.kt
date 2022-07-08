@@ -13,7 +13,8 @@ import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.EnumType
+import org.serenityos.jakt.type.StructType
 
 object JaktFieldExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = PlatformPatterns.psiElement(JaktTypes.IDENTIFIER)
@@ -33,7 +34,7 @@ object JaktFieldExpressionCompletion : JaktCompletion() {
         } ?: return
 
         when (val receiverType = (receiver as JaktTypeable).jaktType) {
-            is Type.Struct -> {
+            is StructType -> {
                 receiverType.fields.forEach { (name, type) ->
                     result.addElement(lookupElementFromType(name, type, project))
                 }
@@ -44,7 +45,7 @@ object JaktFieldExpressionCompletion : JaktCompletion() {
                     result.addElement(lookupElementFromType(name, type, project))
                 }
             }
-            is Type.Enum -> {
+            is EnumType -> {
                 receiverType.methods.filter {
                     it.value.hasThis
                 }.forEach { (name, type) ->

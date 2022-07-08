@@ -11,8 +11,7 @@ import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.applySpecializations
+import org.serenityos.jakt.type.*
 
 object JaktAccessExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
@@ -21,26 +20,26 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 ProgressManager.checkCanceled()
                 val type = element.expression.jaktType
                 context[TYPE_INFO] = type
-                type != Type.Unknown
+                type != UnknownType
             }
         )
 
     private fun getTypeCompletions(project: Project, type: Type): List<LookupElement> {
         return when (type) {
-            is Type.Tuple -> type.types.mapIndexed { index, t ->
+            is TupleType -> type.types.mapIndexed { index, t ->
                 // TODO: How can we sort this so it is always [0, 1, ...]?
                 LookupElementBuilder
                     .create(index)
                     .bold()
                     .withTypeText(t.typeRepr())
             }
-            is Type.Namespace -> emptyList() // Namespaces only have static members
-            is Type.Weak -> getPreludeTypeCompletions(project, "Weak", type.underlyingType)
-            is Type.Optional -> getPreludeTypeCompletions(project, "Optional", type.underlyingType)
-            is Type.Array -> getPreludeTypeCompletions(project, "Array", type.underlyingType)
-            is Type.Set -> getPreludeTypeCompletions(project, "Set", type.underlyingType)
-            is Type.Dictionary -> getPreludeTypeCompletions(project, "Dictionary", type.keyType, type.valueType)
-            is Type.Struct -> {
+            is NamespaceType -> emptyList() // Namespaces only have static members
+            is WeakType -> getPreludeTypeCompletions(project, "Weak", type.underlyingType)
+            is OptionalType -> getPreludeTypeCompletions(project, "Optional", type.underlyingType)
+            is ArrayType -> getPreludeTypeCompletions(project, "Array", type.underlyingType)
+            is SetType -> getPreludeTypeCompletions(project, "Set", type.underlyingType)
+            is DictionaryType -> getPreludeTypeCompletions(project, "Dictionary", type.keyType, type.valueType)
+            is StructType -> {
                 val fieldLookups = type.fields.map { (name, type) -> lookupElementFromType(name, type, project) }
                 val methodLookups = type
                     .methods
@@ -49,7 +48,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
 
                 fieldLookups + methodLookups
             }
-            is Type.EnumVariant -> type
+            is EnumVariantType -> type
                 .parent
                 .methods
                 .filterValues { !it.hasThis }

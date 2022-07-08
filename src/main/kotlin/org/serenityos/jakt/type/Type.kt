@@ -4,173 +4,155 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.serenityos.jakt.project.jaktProject
 
-@Suppress("unused")
-sealed class Type {
-    var namespace: Namespace? = null
-    var psiElement: PsiElement? = null
-    open var typeParameters: List<Type> = emptyList()
+sealed interface Type {
+    var namespace: NamespaceType?
+    val psiElement: PsiElement?
+    val typeParameters: List<Type>
 
-    val hasUnresolvedTypeParameters: Boolean
-        get() = typeParameters.any { it is TypeParameter }
+    // TODO: Replace all uses of this with JaktRenderer
+    fun typeRepr() = ""
+}
 
-    abstract fun typeRepr(): String
+interface ContainerType : Type {
+    fun findTypeIn(name: String): Type?
+}
 
-    enum class Linkage {
-        Internal,
-        External,
-    }
+interface DeclarationType : Type {
+    val name: String
+}
 
-    sealed class Decl(val name: String) : Type()
+enum class Linkage {
+    Internal,
+    External,
+}
 
-    object Unknown : Type() {
-        override fun typeRepr() = "<unknown>"
-    }
+abstract class BaseType : Type {
+    override var namespace: NamespaceType? = null
+    override var psiElement: PsiElement? = null
+    override var typeParameters: List<Type> = emptyList()
+}
 
-    sealed class Primitive(private val typeName: kotlin.String) : Type() {
-        override fun typeRepr() = typeName
+object UnknownType : BaseType()
 
-        object Void : Primitive("void")
-        object Bool : Primitive("bool")
-        object I8 : Primitive("i8")
-        object I16 : Primitive("i16")
-        object I32 : Primitive("i32")
-        object I64 : Primitive("i64")
-        object U8 : Primitive("u8")
-        object U16 : Primitive("u16")
-        object U32 : Primitive("u32")
-        object U64 : Primitive("u64")
-        object USize : Primitive("usize")
-        object CChar : Primitive("c_char")
-        object CInt : Primitive("c_int")
-        object String : Primitive("String")
+enum class PrimitiveType(typeName: kotlin.String? = null) : Type {
+    Void,
+    Bool,
+    I8,
+    I16,
+    I32,
+    I64,
+    U8,
+    U16,
+    U32,
+    U64,
+    USize,
+    CChar("c_char"),
+    CInt("c_int"),
+    String("String");
 
-        companion object {
-            // Must be lazy as `objectInstance` is not usable before the class is
-            // initialized, which would be the case without the lazy block since
-            // this is in the companion object
-            private val nameToPrimitive by lazy {
-                Primitive::class.sealedSubclasses.map { it.objectInstance!! }.associateBy { it.typeName }
-            }
+    override var namespace: NamespaceType? = null
+    override val psiElement: PsiElement? = null
+    override val typeParameters = emptyList<Type>()
 
-            fun forName(name: kotlin.String): Primitive? = nameToPrimitive[name]
-        }
-    }
+    val typeName: kotlin.String = typeName ?: name.lowercase()
 
-    class Namespace(name: String, val members: List<Decl>) : Decl(name) {
-        init {
-            members.forEach { it.namespace = this }
-        }
-
-        override fun typeRepr() = (namespace?.name?.plus("::") ?: "") + name
-    }
-
-    class Weak(val underlyingType: Type) : Type() {
-        override fun typeRepr() = "weak ${underlyingType.typeRepr()}"
-    }
-
-    class Raw(val underlyingType: Type) : Type() {
-        override fun typeRepr() = "raw ${underlyingType.typeRepr()}"
-    }
-
-    class Optional(val underlyingType: Type) : Type() {
-        override fun typeRepr() = "${underlyingType.typeRepr()}?"
-    }
-
-    class Array(val underlyingType: Type) : Type() {
-        override fun typeRepr() = "[${underlyingType.typeRepr()}]"
-    }
-
-    class Set(val underlyingType: Type) : Type() {
-        override fun typeRepr() = "{${underlyingType.typeRepr()}"
-    }
-
-    class Dictionary(val keyType: Type, val valueType: Type) : Type() {
-        override fun typeRepr() = "[${keyType.typeRepr()}:${valueType.typeRepr()}]"
-    }
-
-    class Tuple(val types: List<Type>) : Type() {
-        override fun typeRepr() = "(${types.joinToString()})"
-    }
-
-    class TypeParameter(val name: String) : Type() {
-        override fun typeRepr() = name
-    }
-
-    class Struct(
-        name: String,
-        override var typeParameters: List<Type>,
-        val fields: Map<String, Type>,
-        val methods: Map<String, Function>,
-        val linkage: Linkage,
-    ) : Decl(name) {
-        override fun typeRepr() = name
-    }
-
-    class Enum(
-        name: String,
-        val underlyingType: Primitive?,
-        override var typeParameters: List<Type>,
-        val variants: Map<String, EnumVariant>,
-        val methods: Map<String, Function>,
-    ) : Decl(name) {
-        override fun typeRepr() = name
-    }
-
-    class EnumVariant constructor(
-        name: String,
-        var parent: Enum,
-        val value: Int?,
-        val members: List<Pair<String?, Type>>,
-    ) : Decl(name) {
-        // TODO: Improve
-        override fun typeRepr() = name
-    }
-
-    class Function(
-        name: String,
-        override var typeParameters: List<Type>,
-        val parameters: List<Parameter>,
-        var returnType: Type,
-        val linkage: Linkage,
-        var hasThis: Boolean,
-        var thisIsMutable: Boolean,
-    ) : Decl(name) {
-        override fun typeRepr() = buildString {
-            append("function ")
-            append(name)
-            append('(')
-            append(parameters.joinToString {
-                "${it.name}: ${it.type.typeRepr()}"
-            })
-            append(')')
-
-            if (returnType != Primitive.Void) {
-                append(" -> ")
-                append(returnType.typeRepr())
-            }
+    companion object {
+        // Must be lazy as `objectInstance` is not usable before the class is
+        // initialized, which would be the case without the lazy block since
+        // this is in the companion object
+        private val nameToPrimitive by lazy {
+            PrimitiveType::class.sealedSubclasses.map { it.objectInstance!! }.associateBy { it.typeName }
         }
 
-        data class Parameter(
-            val name: String,
-            val type: Type,
-            val isAnonymous: Boolean,
-            val isMutable: Boolean,
-        )
+        fun forName(name: kotlin.String) = nameToPrimitive[name]
     }
 }
 
+class NamespaceType(
+    override val name: String,
+    val members: List<DeclarationType>,
+) : BaseType(), DeclarationType, ContainerType {
+    init {
+        members.forEach { it.namespace = this }
+    }
+
+    override fun findTypeIn(name: String) = members.find { it.name == name }
+}
+
+class WeakType(val underlyingType: Type) : BaseType()
+
+class RawType(val underlyingType: Type) : BaseType()
+
+class OptionalType(val underlyingType: Type) : BaseType()
+
+class ArrayType(val underlyingType: Type) : BaseType()
+
+class SetType(val underlyingType: Type) : BaseType()
+
+class DictionaryType(val keyType: Type, val valueType: Type) : BaseType()
+
+class TupleType(val types: List<Type>) : BaseType()
+
+class TypeParameter(val name: String) : BaseType()
+
+class StructType(
+    override val name: String,
+    override var typeParameters: List<Type>,
+    val fields: Map<String, Type>,
+    val methods: Map<String, FunctionType>,
+    val linkage: Linkage,
+) : BaseType(), DeclarationType, ContainerType {
+    override fun findTypeIn(name: String) = fields[name] ?: methods[name]
+}
+
+class EnumType(
+    override val name: String,
+    val underlyingType: PrimitiveType?,
+    override var typeParameters: List<Type>,
+    val variants: Map<String, EnumVariantType>,
+    val methods: Map<String, FunctionType>,
+) : BaseType(), DeclarationType, ContainerType {
+    override fun findTypeIn(name: String) = variants[name] ?: methods[name]
+}
+
+class EnumVariantType(
+    override val name: String,
+    var parent: EnumType,
+    val value: Int?,
+    val members: List<Pair<String?, Type>>,
+) : BaseType(), DeclarationType, ContainerType {
+    override fun findTypeIn(name: String) = members.find { it.first == name }?.second
+}
+
+class FunctionType(
+    override val name: String,
+    override var typeParameters: List<Type>,
+    val parameters: List<Parameter>,
+    var returnType: Type,
+    val linkage: Linkage,
+    var hasThis: Boolean,
+    var thisIsMutable: Boolean,
+) : BaseType(), DeclarationType {
+    data class Parameter(
+        val name: String,
+        val type: Type,
+        val isAnonymous: Boolean,
+        val isMutable: Boolean,
+    )
+}
+
 private fun getPreludeType(project: Project, type: String) =
-    project.jaktProject.findPreludeDeclaration(type)?.jaktType ?: Type.Unknown
+    project.jaktProject.findPreludeDeclaration(type)?.jaktType ?: UnknownType
 
 fun Type.resolveToBuiltinType(project: Project): Type {
     return when (this) {
-        is Type.Array -> getPreludeType(project, "Array")
-        is Type.Dictionary -> getPreludeType(project, "Dictionary")
-        is Type.Optional -> getPreludeType(project, "Optional")
-        is Type.Set -> getPreludeType(project, "Set")
-        is Type.Tuple -> getPreludeType(project, "Tuple")
-        is Type.Weak -> getPreludeType(project, "Weak")
-        Type.Primitive.String -> getPreludeType(project, "String")
+        is ArrayType -> getPreludeType(project, "Array")
+        is DictionaryType -> getPreludeType(project, "Dictionary")
+        is OptionalType -> getPreludeType(project, "Optional")
+        is SetType -> getPreludeType(project, "Set")
+        is TupleType -> getPreludeType(project, "Tuple")
+        is WeakType -> getPreludeType(project, "Weak")
+        PrimitiveType.String -> getPreludeType(project, "String")
         else -> this
     }
 }

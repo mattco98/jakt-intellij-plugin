@@ -4,6 +4,8 @@ import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.type.DeclarationType
+import org.serenityos.jakt.type.NamespaceType
 import org.serenityos.jakt.type.Type
 
 abstract class JaktNamespacedDeclarationMixin(
@@ -13,11 +15,11 @@ abstract class JaktNamespacedDeclarationMixin(
         get() {
             val members = namespaceBody.topLevelDefinitionList.mapNotNull {
                 val t = (it as? JaktDeclaration)?.jaktType ?: return@mapNotNull null
-                require(t is Type.Decl)
+                require(t is DeclarationType)
                 t
             }
 
-            return Type.Namespace(nameNonNull, members).also { ns ->
+            return NamespaceType(nameNonNull, members).also { ns ->
                 ns.members.forEach {
                     it.namespace = ns
                 }

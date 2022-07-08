@@ -10,10 +10,11 @@ import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.JaktResolver
 import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.UnknownType
 
 abstract class JaktPlainQualifierMixin(node: ASTNode) : JaktNamedElement(node), JaktPlainQualifier {
     override val jaktType: Type
-        get() = (reference.resolve() as? JaktTypeable)?.jaktType ?: Type.Unknown
+        get() = (reference.resolve() as? JaktTypeable)?.jaktType ?: UnknownType
 
     override fun getReference() = singleRef(JaktResolver::resolveQualifier)
 }

@@ -15,24 +15,24 @@ object TypeInference {
         return when (element) {
             is JaktCallExpression -> {
                 val type = when (val baseType = inferType(element.expression)) {
-                    is Type.Struct -> baseType // TODO: This feels a bit odd
-                    is Type.EnumVariant -> baseType.parent
-                    is Type.Function -> baseType.returnType
-                    is Type.Unknown -> tryConstructOptionalType(element) ?: Type.Unknown
-                    else -> Type.Unknown
+                    is StructType -> baseType // TODO: This feels a bit odd
+                    is EnumVariantType -> baseType.parent
+                    is FunctionType -> baseType.returnType
+                    is UnknownType -> tryConstructOptionalType(element) ?: UnknownType
+                    else -> UnknownType
                 }
 
                 specialize(type, element)
             }
             is JaktLogicalOrBinaryExpression,
-            is JaktLogicalAndBinaryExpression -> Type.Primitive.Bool
+            is JaktLogicalAndBinaryExpression -> PrimitiveType.Bool
             is JaktBitwiseOrBinaryExpression,
             is JaktBitwiseAndBinaryExpression,
             is JaktBitwiseXorBinaryExpression -> {
                 // The types must be the same. Let the external annotator catch the case where they are not
                 inferType(element.findChildrenOfType<JaktExpression>()[0])
             }
-            is JaktRelationalBinaryExpression -> Type.Primitive.Bool
+            is JaktRelationalBinaryExpression -> PrimitiveType.Bool
             is JaktShiftBinaryExpression,
             is JaktAddBinaryExpression,
             is JaktMultiplyBinaryExpression -> {
@@ -44,62 +44,62 @@ object TypeInference {
                     element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
                     element.minus != null ||
                     element.tilde != null -> inferType(element.expression)
-                element.rawKeyword != null -> Type.Raw(inferType(element.expression))
+                element.rawKeyword != null -> RawType(inferType(element.expression))
                 element.asterisk != null -> inferType(element.expression).let {
-                    if (it is Type.Raw) it.underlyingType else Type.Unknown
+                    if (it is RawType) it.underlyingType else UnknownType
                 }
-                element.keywordIs != null || element.keywordNot != null -> Type.Primitive.Bool
+                element.keywordIs != null || element.keywordNot != null -> PrimitiveType.Bool
                 element.keywordAs != null -> element.type?.jaktType?.let {
-                    if (element.questionMark != null) Type.Optional(it) else it
-                } ?: Type.Unknown
+                    if (element.questionMark != null) OptionalType(it) else it
+                } ?: UnknownType
                 element.exclamationPoint != null -> inferType(element.expression).let {
-                    if (it is Type.Optional) it.underlyingType else it
+                    if (it is OptionalType) it.underlyingType else it
                 }
                 else -> unreachable()
             }
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
-            is JaktAccessExpression -> (element.reference?.resolve() as? JaktDeclaration)?.jaktType ?: Type.Unknown
-            is JaktIndexedAccessExpression -> Type.Unknown // TODO
+            is JaktAccessExpression -> (element.reference?.resolve() as? JaktDeclaration)?.jaktType ?: UnknownType
+            is JaktIndexedAccessExpression -> UnknownType // TODO
             is JaktThisExpression ->
-                (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: Type.Unknown
+                (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType
             is JaktFieldAccessExpression -> {
-                val thisDecl = element.ancestorOfType<JaktStructDeclaration>() ?: return Type.Unknown
-                thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: Type.Unknown
+                val thisDecl = element.ancestorOfType<JaktStructDeclaration>() ?: return UnknownType
+                thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
-            is JaktRangeExpression -> Type.Unknown // TODO
+            is JaktRangeExpression -> UnknownType // TODO
             is JaktArrayExpression -> when {
-                element.sizedArrayBody != null -> Type.Array(
+                element.sizedArrayBody != null -> ArrayType(
                     inferType(
                         element.sizedArrayBody!!.findChildrenOfType<JaktExpression>().first()
                     )
                 )
                 element.elementsArrayBody != null -> {
                     val expressions = element.elementsArrayBody!!.findChildrenOfType<JaktExpression>()
-                    Type.Array(expressions.firstOrNull()?.let(TypeInference::inferType) ?: Type.Unknown)
+                    ArrayType(expressions.firstOrNull()?.let(TypeInference::inferType) ?: UnknownType)
                 }
-                else -> Type.Array(Type.Unknown)
+                else -> ArrayType(UnknownType)
             }
             is JaktDictionaryExpression -> {
                 val els = element.findChildrenOfType<JaktDictionaryElement>()
                 if (els.isNotEmpty()) {
                     val (k, v) = els[0].expressionList
-                    Type.Dictionary(inferType(k), inferType(v))
-                } else Type.Dictionary(Type.Unknown, Type.Unknown)
+                    DictionaryType(inferType(k), inferType(v))
+                } else DictionaryType(UnknownType, UnknownType)
             }
             is JaktSetExpression -> {
                 val expr = element.findChildOfType<JaktExpression>()
-                Type.Set(expr?.let(TypeInference::inferType) ?: Type.Unknown)
+                SetType(expr?.let(TypeInference::inferType) ?: UnknownType)
             }
-            is JaktTupleExpression -> Type.Tuple(
+            is JaktTupleExpression -> TupleType(
                 element.findChildrenOfType<JaktExpression>().map(TypeInference::inferType)
             )
-            is JaktMatchExpression -> Type.Unknown // TODO
-            is JaktNumericLiteral -> Type.Primitive.I64 // TODO: Proper type
-            is JaktBooleanLiteral -> Type.Primitive.Bool
+            is JaktMatchExpression -> UnknownType // TODO
+            is JaktNumericLiteral -> PrimitiveType.I64 // TODO: Proper type
+            is JaktBooleanLiteral -> PrimitiveType.Bool
             is JaktLiteral -> when (element.firstChild.elementType) {
-                JaktTypes.STRING_LITERAL -> Type.Primitive.String
-                JaktTypes.BYTE_CHAR_LITERAL -> Type.Primitive.CInt
-                JaktTypes.CHAR_LITERAL -> Type.Primitive.CChar
+                JaktTypes.STRING_LITERAL -> PrimitiveType.String
+                JaktTypes.BYTE_CHAR_LITERAL -> PrimitiveType.CInt
+                JaktTypes.CHAR_LITERAL -> PrimitiveType.CChar
                 else -> unreachable()
             }
             is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
@@ -119,9 +119,9 @@ object TypeInference {
         return when (name) {
             "Some" -> if (args.size == 1) {
                 val arg = args[0].unlabeledArgument?.allChildren?.firstOrNull() as? JaktExpression ?: return null
-                Type.Optional(inferType(arg))
-            } else Type.Unknown
-            "None" -> Type.Optional(Type.Unknown)
+                OptionalType(inferType(arg))
+            } else UnknownType
+            "None" -> OptionalType(UnknownType)
             else -> null
         }
     }

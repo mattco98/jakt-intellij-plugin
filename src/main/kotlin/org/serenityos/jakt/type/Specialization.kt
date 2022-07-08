@@ -4,16 +4,17 @@ import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.utils.equivalentTo
+import org.serenityos.jakt.utils.unreachable
 
 class Specializations {
-    private val map: MutableMap<Type.TypeParameter, Type> = mutableMapOf()
+    private val map: MutableMap<TypeParameter, Type> = mutableMapOf()
 
-    operator fun get(key: Type.TypeParameter): Type? {
+    operator fun get(key: TypeParameter): Type? {
         return map[key]
     }
 
-    operator fun set(key: Type.TypeParameter, value: Type) {
-        map[key] = if (key in map && map[key] != value) Type.Unknown else value
+    operator fun set(key: TypeParameter, value: Type) {
+        map[key] = if (key in map && map[key] != value) UnknownType else value
     }
 }
 
@@ -28,7 +29,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
     // Store call specializations if they exist
     psi.genericSpecialization?.typeList?.let { concreteTypes ->
         type.typeParameters.zip(concreteTypes).forEach { (genericType, concreteType) ->
-            if (genericType is Type.TypeParameter)
+            if (genericType is TypeParameter)
                 specializations[genericType] = concreteType.jaktType
         }
     }
@@ -82,43 +83,43 @@ fun specialize(type: Type, psi: PsiElement): Type {
 }
 
 fun collectSpecializations(genericType: Type, concreteType: Type, specializations: Specializations) {
-    if (genericType !is Type.TypeParameter && genericType::class != concreteType::class)
+    if (genericType !is TypeParameter && genericType::class != concreteType::class)
         return
 
     when (genericType) {
-        is Type.Unknown, is Type.Primitive -> return
-        is Type.Namespace -> genericType.members.zip((concreteType as Type.Namespace).members).forEach { (g, c) ->
+        is UnknownType, is PrimitiveType -> return
+        is NamespaceType -> genericType.members.zip((concreteType as NamespaceType).members).forEach { (g, c) ->
             collectSpecializations(g, c, specializations)
         }
-        is Type.Weak -> collectSpecializations(
+        is WeakType -> collectSpecializations(
             genericType.underlyingType,
-            (concreteType as Type.Weak).underlyingType,
+            (concreteType as WeakType).underlyingType,
             specializations,
         )
-        is Type.Raw -> collectSpecializations(
+        is RawType -> collectSpecializations(
             genericType.underlyingType,
-            (concreteType as Type.Raw).underlyingType,
+            (concreteType as RawType).underlyingType,
             specializations,
         )
-        is Type.Optional -> collectSpecializations(
+        is OptionalType -> collectSpecializations(
             genericType.underlyingType,
-            (concreteType as Type.Optional).underlyingType,
+            (concreteType as OptionalType).underlyingType,
             specializations,
         )
-        is Type.Array -> collectSpecializations(
+        is ArrayType -> collectSpecializations(
             genericType.underlyingType,
-            (concreteType as Type.Array).underlyingType,
+            (concreteType as ArrayType).underlyingType,
             specializations,
         )
-        is Type.Set -> collectSpecializations(
+        is SetType -> collectSpecializations(
             genericType.underlyingType,
-            (concreteType as Type.Set).underlyingType,
+            (concreteType as SetType).underlyingType,
             specializations,
         )
-        is Type.Dictionary -> {
+        is DictionaryType -> {
             collectSpecializations(
                 genericType.keyType,
-                (concreteType as Type.Dictionary).keyType,
+                (concreteType as DictionaryType).keyType,
                 specializations,
             )
             collectSpecializations(
@@ -127,22 +128,22 @@ fun collectSpecializations(genericType: Type, concreteType: Type, specialization
                 specializations,
             )
         }
-        is Type.Tuple -> genericType.types.zip((concreteType as Type.Tuple).types).forEach { (g, c) ->
+        is TupleType -> genericType.types.zip((concreteType as TupleType).types).forEach { (g, c) ->
             collectSpecializations(g, c, specializations)
         }
-        is Type.TypeParameter -> specializations[genericType] = concreteType
-        is Type.Struct -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
-            genericType.typeParameters.zip((concreteType as Type.Struct).typeParameters).forEach { (g, c) ->
+        is TypeParameter -> specializations[genericType] = concreteType
+        is StructType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+            genericType.typeParameters.zip((concreteType as StructType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
         }
-        is Type.Enum -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
-            genericType.typeParameters.zip((concreteType as Type.Enum).typeParameters).forEach { (g, c) ->
+        is EnumType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+            genericType.typeParameters.zip((concreteType as EnumType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
         }
-        is Type.Function -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
-            genericType.typeParameters.zip((concreteType as Type.Function).typeParameters).forEach { (g, c) ->
+        is FunctionType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+            genericType.typeParameters.zip((concreteType as FunctionType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
         }
@@ -151,24 +152,24 @@ fun collectSpecializations(genericType: Type, concreteType: Type, specialization
 }
 
 fun applySpecializations(type: Type, specializations: Specializations): Type = when (type) {
-    Type.Unknown, is Type.Primitive -> type
-    is Type.Array -> Type.Array(applySpecializations(type.underlyingType, specializations))
-    is Type.Enum -> Type.Enum(
+    UnknownType, is PrimitiveType -> type
+    is ArrayType -> ArrayType(applySpecializations(type.underlyingType, specializations))
+    is EnumType -> EnumType(
         type.name,
         type.underlyingType,
         type.typeParameters.map { applySpecializations(it, specializations) },
-        type.variants.mapValues { applySpecializations(it.value, specializations) as Type.EnumVariant },
-        type.methods.mapValues { applySpecializations(it.value, specializations) as Type.Function },
+        type.variants.mapValues { applySpecializations(it.value, specializations) as EnumVariantType },
+        type.methods.mapValues { applySpecializations(it.value, specializations) as FunctionType },
     ).also { enum ->
         enum.variants.values.forEach { it.parent = enum }
     }
-    is Type.EnumVariant -> Type.EnumVariant(
+    is EnumVariantType -> EnumVariantType(
         type.name,
         type.parent,
         type.value,
         type.members.map { it.first to applySpecializations(it.second, specializations) },
     )
-    is Type.Function -> Type.Function(
+    is FunctionType -> FunctionType(
         type.name,
         type.typeParameters.map { applySpecializations(it, specializations) },
         type.parameters.map { it.copy(type = applySpecializations(it.type, specializations)) },
@@ -177,37 +178,38 @@ fun applySpecializations(type: Type, specializations: Specializations): Type = w
         type.hasThis,
         type.thisIsMutable,
     )
-    is Type.Namespace -> Type.Namespace(
+    is NamespaceType -> NamespaceType(
         type.name,
-        type.members.map { applySpecializations(it, specializations) as Type.Decl },
+        type.members.map { applySpecializations(it, specializations) as DeclarationType },
     )
-    is Type.Struct -> Type.Struct(
+    is StructType -> StructType(
         type.name,
         type.typeParameters.map { applySpecializations(it, specializations) },
         type.fields.mapValues { applySpecializations(it.value, specializations) },
-        type.methods.mapValues { applySpecializations(it.value, specializations) as Type.Function },
+        type.methods.mapValues { applySpecializations(it.value, specializations) as FunctionType },
         type.linkage,
     )
-    is Type.Dictionary -> Type.Dictionary(
+    is DictionaryType -> DictionaryType(
         applySpecializations(type.keyType, specializations),
         applySpecializations(type.valueType, specializations),
     )
-    is Type.Optional -> Type.Optional(applySpecializations(type.underlyingType, specializations))
-    is Type.Raw -> Type.Raw(applySpecializations(type.underlyingType, specializations))
-    is Type.Set -> Type.Set(applySpecializations(type.underlyingType, specializations))
-    is Type.Tuple -> Type.Tuple(type.types.map { applySpecializations(it, specializations) })
-    is Type.TypeParameter -> specializations[type] ?: type
-    is Type.Weak -> Type.Weak(applySpecializations(type.underlyingType, specializations))
+    is OptionalType -> OptionalType(applySpecializations(type.underlyingType, specializations))
+    is RawType -> RawType(applySpecializations(type.underlyingType, specializations))
+    is SetType -> SetType(applySpecializations(type.underlyingType, specializations))
+    is TupleType -> TupleType(type.types.map { applySpecializations(it, specializations) })
+    is TypeParameter -> specializations[type] ?: type
+    is WeakType -> WeakType(applySpecializations(type.underlyingType, specializations))
+    else -> unreachable()
 }
 
 fun applySpecializations(type: Type, vararg specializationTypes: Type): Type {
-    require(type.typeParameters.all { it is Type.TypeParameter })
-    require(specializationTypes.all { it !is Type.TypeParameter })
+    require(type.typeParameters.all { it is TypeParameter })
+    require(specializationTypes.all { it !is TypeParameter })
     require(type.typeParameters.size == specializationTypes.size)
 
     val specializations = Specializations()
     for ((genericType, concreteType) in type.typeParameters.zip(specializationTypes))
-        specializations[genericType as Type.TypeParameter] = concreteType
+        specializations[genericType as TypeParameter] = concreteType
 
     return applySpecializations(type, specializations)
 }

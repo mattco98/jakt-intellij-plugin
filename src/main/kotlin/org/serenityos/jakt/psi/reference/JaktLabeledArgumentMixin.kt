@@ -6,14 +6,14 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.DeclarationType
 
 abstract class JaktLabeledArgumentMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktLabeledArgument {
     override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
         override fun singleResolve(): PsiElement? {
-            val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType as? Type.Decl
+            val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType as? DeclarationType
             return when (val callTarget = exprType?.psiElement) {
                 is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.find {
                     it.name == element.name

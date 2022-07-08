@@ -10,7 +10,8 @@ import com.intellij.refactoring.suggested.endOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
+import org.serenityos.jakt.utils.unreachable
 import javax.swing.JPanel
 
 @Suppress("UnstableApiUsage")
@@ -61,24 +62,24 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
         private fun typeHintFor(type: Type): InlayPresentation = with(factory) {
             return when (type) {
-                is Type.Primitive -> text(type.typeRepr())
-                is Type.Array -> seq(text("["), typeHintFor(type.underlyingType), text("]"))
-                is Type.EnumVariant -> text(type.typeRepr())
-                is Type.Enum -> text(type.typeRepr())
-                is Type.Function -> typeHintFor(Type.Unknown) // Jakt doesn't have method refs yet
-                is Type.Namespace -> typeHintFor(Type.Unknown) // Can't have namespace ref
-                is Type.Struct -> text(type.name)
-                is Type.Dictionary -> seq(
+                is PrimitiveType -> text(type.typeRepr())
+                is ArrayType -> seq(text("["), typeHintFor(type.underlyingType), text("]"))
+                is EnumVariantType -> text(type.typeRepr())
+                is EnumType -> text(type.typeRepr())
+                is FunctionType -> typeHintFor(UnknownType) // Jakt doesn't have method refs yet
+                is NamespaceType -> typeHintFor(UnknownType) // Can't have namespace ref
+                is StructType -> text(type.name)
+                is DictionaryType -> seq(
                     text("["),
                     typeHintFor(type.keyType),
                     text(": "),
                     typeHintFor(type.valueType),
                     text("]"),
                 )
-                is Type.Optional -> seq(typeHintFor(type.underlyingType), text("?"))
-                is Type.Raw -> seq(text("raw "), typeHintFor(type.underlyingType))
-                is Type.Set -> seq(text("{"), typeHintFor(type.underlyingType), text("}"))
-                is Type.Tuple -> collapsible(
+                is OptionalType -> seq(typeHintFor(type.underlyingType), text("?"))
+                is RawType -> seq(text("raw "), typeHintFor(type.underlyingType))
+                is SetType -> seq(text("{"), typeHintFor(type.underlyingType), text("}"))
+                is TupleType -> collapsible(
                     prefix = text("("),
                     collapsed = text("..."),
                     expanded = {
@@ -89,9 +90,10 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     },
                     suffix = text(")"),
                 )
-                is Type.TypeParameter -> text(type.typeRepr())
-                is Type.Weak -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
-                Type.Unknown -> text("???")
+                is TypeParameter -> text(type.typeRepr())
+                is WeakType -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
+                UnknownType -> text("???")
+                else -> unreachable()
             }
         }
 

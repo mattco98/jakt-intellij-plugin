@@ -17,7 +17,7 @@ import org.serenityos.jakt.psi.reference.exprAncestor
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.psi.reference.isBase
 import org.serenityos.jakt.syntax.Highlights
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
 
 object BasicAnnotator : JaktAnnotator(), DumbAware {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {
@@ -107,10 +107,10 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
     }
 
     private fun getCallTargetHighlight(type: Type): TextAttributesKey = when (type) {
-        is Type.Struct -> Highlights.STRUCT_NAME
-        is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
-        is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
-        is Type.Function -> if (type.hasThis) {
+        is StructType -> Highlights.STRUCT_NAME
+        is EnumType, is OptionalType -> Highlights.ENUM_NAME
+        is EnumVariantType -> Highlights.ENUM_VARIANT_NAME
+        is FunctionType -> if (type.hasThis) {
             Highlights.FUNCTION_INSTANCE_CALL
         } else Highlights.FUNCTION_STATIC_CALL
         else -> Highlights.FUNCTION_CALL
@@ -152,10 +152,10 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             if (isCall) {
                 getCallTargetHighlight(element.jaktType)
             } else when (type) {
-                is Type.Struct -> Highlights.STRUCT_NAME
-                is Type.Enum, is Type.Optional -> Highlights.ENUM_NAME
-                is Type.EnumVariant -> Highlights.ENUM_VARIANT_NAME
-                is Type.Primitive -> Highlights.TYPE_NAME
+                is StructType -> Highlights.STRUCT_NAME
+                is EnumType, is OptionalType -> Highlights.ENUM_NAME
+                is EnumVariantType -> Highlights.ENUM_VARIANT_NAME
+                is PrimitiveType -> Highlights.TYPE_NAME
                 else -> identHighlight
             }
         }

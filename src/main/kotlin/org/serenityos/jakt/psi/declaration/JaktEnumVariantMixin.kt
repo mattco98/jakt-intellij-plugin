@@ -5,6 +5,8 @@ import org.intellij.sdk.language.psi.JaktEnumDeclaration
 import org.intellij.sdk.language.psi.JaktEnumVariant
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.type.EnumType
+import org.serenityos.jakt.type.EnumVariantType
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
@@ -15,9 +17,9 @@ abstract class JaktEnumVariantMixin(
         val members = mutableListOf<Pair<String?, Type>>()
 
         producer {
-            Type.EnumVariant(
+            EnumVariantType(
                 nameNonNull,
-                ancestorOfType<JaktEnumDeclaration>()!!.jaktType as Type.Enum,
+                ancestorOfType<JaktEnumDeclaration>()!!.jaktType as EnumType,
                 expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
             ).also {

@@ -9,7 +9,8 @@ import org.intellij.sdk.language.psi.JaktFieldAccessExpression
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.syntax.Highlights
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
+import org.serenityos.jakt.utils.unreachable
 
 fun renderElement(element: PsiElement, asHtml: Boolean): String {
     val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
@@ -46,43 +47,43 @@ sealed class JaktRenderer {
         renderNamespaces(type)
 
         when (type) {
-            is Type.Unknown -> append(type.typeRepr())
-            is Type.Primitive -> {
-                if (type != Type.Primitive.Void)
+            is UnknownType -> append(type.typeRepr())
+            is PrimitiveType -> {
+                if (type != PrimitiveType.Void)
                     appendStyled(type.typeRepr(), Highlights.TYPE_NAME)
             }
-            is Type.Namespace -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
-            is Type.Weak -> {
+            is NamespaceType -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
+            is WeakType -> {
                 appendStyled("weak ", Highlights.KEYWORD_MODIFIER)
                 renderType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
-            is Type.Raw -> {
+            is RawType -> {
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
                 renderType(type.underlyingType)
             }
-            is Type.Optional -> {
+            is OptionalType -> {
                 renderType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
-            is Type.Array -> {
+            is ArrayType -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)
                 renderType(type.underlyingType)
                 appendStyled("]", Highlights.DELIM_BRACKET)
             }
-            is Type.Set -> {
+            is SetType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
                 renderType(type.underlyingType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
-            is Type.Dictionary -> {
+            is DictionaryType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
                 renderType(type.keyType)
                 appendStyled(":", Highlights.COLON)
                 renderType(type.valueType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
-            is Type.Tuple -> {
+            is TupleType -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
                 type.types.forEachIndexed { index, it ->
                     renderType(it)
@@ -91,24 +92,24 @@ sealed class JaktRenderer {
                 }
                 appendStyled(")", Highlights.DELIM_PARENTHESIS)
             }
-            is Type.TypeParameter -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
-            is Type.Struct -> {
+            is TypeParameter -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
+            is StructType -> {
                 appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.STRUCT_NAME)
                 renderGenerics(type)
             }
-            is Type.Enum -> {
+            is EnumType -> {
                 appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.ENUM_NAME)
                 renderGenerics(type)
             }
-            is Type.EnumVariant -> {
+            is EnumVariantType -> {
                 appendStyled(type.parent.name, Highlights.ENUM_NAME)
                 appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
                 appendStyled(type.name, Highlights.ENUM_VARIANT_NAME)
                 // TODO: Members?
             }
-            is Type.Function -> {
+            is FunctionType -> {
                 appendStyled("function ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
                 renderGenerics(type)
@@ -130,6 +131,7 @@ sealed class JaktRenderer {
                 appendStyled(": ", Highlights.COLON)
                 renderType(type.returnType)
             }
+            else -> unreachable()
         }
     }
 
@@ -138,7 +140,7 @@ sealed class JaktRenderer {
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {
-            if (parameter === Type.Unknown) {
+            if (parameter === UnknownType) {
                 append("???")
             } else {
                 renderType(parameter)

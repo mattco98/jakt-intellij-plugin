@@ -6,22 +6,22 @@ import org.intellij.sdk.language.psi.JaktGenericBound
 import org.intellij.sdk.language.psi.JaktNormalEnumBody
 import org.intellij.sdk.language.psi.JaktUnderlyingTypeEnumBody
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktEnumDeclarationMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktEnumDeclaration {
     override val jaktType by recursivelyGuarded<Type> {
-        val variants = mutableMapOf<String, Type.EnumVariant>()
-        val methods = mutableMapOf<String, Type.Function>()
+        val variants = mutableMapOf<String, EnumVariantType>()
+        val methods = mutableMapOf<String, FunctionType>()
 
         producer {
-            val typeParameters = getDeclGenericBounds().map { Type.TypeParameter(it.nameNonNull) }
+            val typeParameters = getDeclGenericBounds().map { TypeParameter(it.nameNonNull) }
 
-            Type.Enum(
+            EnumType(
                 nameNonNull,
-                underlyingTypeEnumBody?.typeAnnotation?.jaktType as? Type.Primitive,
+                underlyingTypeEnumBody?.typeAnnotation?.jaktType as? PrimitiveType,
                 typeParameters,
                 variants,
                 methods,
@@ -32,17 +32,17 @@ abstract class JaktEnumDeclarationMixin(
 
         initializer {
             variants.putAll(underlyingTypeEnumBody?.enumVariantList?.associate {
-                it.nameNonNull to it.jaktType as Type.EnumVariant
+                it.nameNonNull to it.jaktType as EnumVariantType
             } ?: normalEnumBody?.normalEnumMemberList?.mapNotNull {
                 it.enumVariant
             }?.associate {
-                it.nameNonNull to it.jaktType as Type.EnumVariant
+                it.nameNonNull to it.jaktType as EnumVariantType
             } ?: emptyMap())
 
             methods.putAll(normalEnumBody?.normalEnumMemberList?.mapNotNull {
                 it.functionDeclaration
             }?.associate {
-                it.nameNonNull to it.jaktType as Type.Function
+                it.nameNonNull to it.jaktType as FunctionType
             } ?: emptyMap())
         }
     }

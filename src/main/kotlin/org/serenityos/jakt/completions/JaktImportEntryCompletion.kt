@@ -8,7 +8,7 @@ import org.intellij.sdk.language.psi.JaktImportBraceEntry
 import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.NamespaceType
 
 object JaktImportEntryCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
@@ -22,7 +22,7 @@ object JaktImportEntryCompletion : JaktCompletion() {
         ProgressManager.checkCanceled()
         val importStatement = parameters.position.ancestorOfType<JaktImportStatement>()!!
         val project = importStatement.project
-        val type = importStatement.jaktType as? Type.Namespace ?: return
+        val type = importStatement.jaktType as? NamespaceType ?: return
 
         for (subtype in type.members)
             result.addElement(lookupElementFromType(
