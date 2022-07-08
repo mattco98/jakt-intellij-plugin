@@ -8,9 +8,6 @@ sealed interface Type {
     var namespace: NamespaceType?
     val psiElement: PsiElement?
     val typeParameters: List<Type>
-
-    // TODO: Replace all uses of this with JaktRenderer
-    fun typeRepr() = ""
 }
 
 interface ContainerType : Type {

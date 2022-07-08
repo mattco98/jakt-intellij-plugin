@@ -11,6 +11,7 @@ import org.intellij.sdk.language.psi.JaktParameterList
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.render.renderType
 
 class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktParameterInfoHandler.ParameterInfo> {
     override fun findElementForParameterInfo(context: CreateParameterInfoContext): JaktArgumentList? {
@@ -60,8 +61,9 @@ class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktPara
         val parameters = parameters.parameterList.map {
             val anon = if (it.anonKeyword != null) "anon " else ""
             val mut = if (it.mutKeyword != null) "mut " else ""
+            val type = renderType(it.jaktType, asHtml = false)
 
-            "$anon$mut${it.name}: ${it.jaktType.typeRepr()}"
+            "$anon$mut${it.name}: $type"
         }
 
         fun findParameterRange(parameter: Int): TextRange {

@@ -11,6 +11,7 @@ import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.render.renderType
 import org.serenityos.jakt.type.*
 
 object JaktAccessExpressionCompletion : JaktCompletion() {
@@ -31,7 +32,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 LookupElementBuilder
                     .create(index)
                     .bold()
-                    .withTypeText(t.typeRepr())
+                    .withTypeText(renderType(t, asHtml = false))
             }
             is NamespaceType -> emptyList() // Namespaces only have static members
             is WeakType -> getPreludeTypeCompletions(project, "Weak", type.underlyingType)

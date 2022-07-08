@@ -62,10 +62,10 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
         private fun typeHintFor(type: Type): InlayPresentation = with(factory) {
             return when (type) {
-                is PrimitiveType -> text(type.typeRepr())
+                is PrimitiveType -> text(type.typeName)
                 is ArrayType -> seq(text("["), typeHintFor(type.underlyingType), text("]"))
-                is EnumVariantType -> text(type.typeRepr())
-                is EnumType -> text(type.typeRepr())
+                is EnumVariantType -> text(type.name)
+                is EnumType -> text(type.name)
                 is FunctionType -> typeHintFor(UnknownType) // Jakt doesn't have method refs yet
                 is NamespaceType -> typeHintFor(UnknownType) // Can't have namespace ref
                 is StructType -> text(type.name)
@@ -90,7 +90,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     },
                     suffix = text(")"),
                 )
-                is TypeParameter -> text(type.typeRepr())
+                is TypeParameter -> text(type.name)
                 is WeakType -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
                 UnknownType -> text("???")
                 else -> unreachable()

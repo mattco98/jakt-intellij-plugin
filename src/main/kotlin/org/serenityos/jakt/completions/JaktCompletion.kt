@@ -13,6 +13,7 @@ import com.intellij.patterns.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.ProcessingContext
+import org.serenityos.jakt.render.renderType
 import org.serenityos.jakt.type.FunctionType
 import org.serenityos.jakt.type.Type
 
@@ -38,7 +39,8 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
     ): LookupElementBuilder {
         val tailText = if (type is FunctionType) {
             val paramStr = type.parameters.joinToString {
-                "${it.name}: ${it.type.typeRepr()}"
+                val typeStr = renderType(it.type, asHtml = false)
+                "${it.name}: $typeStr"
             }
             "($paramStr)"
         } else null
@@ -49,7 +51,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
 
         var builder = LookupElementBuilder.create(name)
             .withTailText(tailText)
-            .withTypeText(displayType.typeRepr())
+            .withTypeText(renderType(displayType, asHtml = false))
             .withIcon(icon)
 
         if (type is FunctionType && functionTemplateType != FunctionTemplateType.None) {
@@ -68,7 +70,12 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
                             if (!parameter.isAnonymous)
                                 template.addTextSegment("${parameter.name}: ")
 
-                            template.addVariable(parameter.name, ConstantNode(parameter.type.typeRepr()), null, true)
+                            template.addVariable(
+                                parameter.name,
+                                ConstantNode(renderType(parameter.type, asHtml = false)),
+                                null,
+                                true,
+                            )
                         }
 
                         template.addEndVariable()

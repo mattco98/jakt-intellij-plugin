@@ -14,7 +14,12 @@ import org.serenityos.jakt.utils.unreachable
 
 fun renderElement(element: PsiElement, asHtml: Boolean): String {
     val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
-    return renderer.render(element)
+    return renderer.renderElement(element)
+}
+
+fun renderType(type: Type, asHtml: Boolean): String {
+    val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
+    return renderer.renderType(type)
 }
 
 /**
@@ -27,66 +32,72 @@ fun renderElement(element: PsiElement, asHtml: Boolean): String {
 sealed class JaktRenderer {
     protected abstract val builder: Builder
 
-    fun render(element: PsiElement): String = withSynchronized(builder) {
+    fun renderElement(element: PsiElement): String = withSynchronized(builder) {
         clear()
 
         when (element) {
             is JaktFieldAccessExpression -> {
                 appendStyled(element.name!!, Highlights.STRUCT_FIELD)
                 append(": ")
-                renderType(element.jaktType)
+                appendType(element.jaktType)
             }
-            is JaktTypeable -> renderType(element.jaktType)
+            is JaktTypeable -> appendType(element.jaktType)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
         }
 
         toString()
     }
 
-    private fun renderType(type: Type): Unit = withSynchronized(builder) {
+    fun renderType(type: Type): String = withSynchronized(builder) {
+        clear()
+        appendType(type)
+        toString()
+    }
+
+    private fun appendType(type: Type): Unit = withSynchronized(builder) {
         renderNamespaces(type)
 
         when (type) {
-            is UnknownType -> append(type.typeRepr())
+            is UnknownType -> append("??")
             is PrimitiveType -> {
                 if (type != PrimitiveType.Void)
-                    appendStyled(type.typeRepr(), Highlights.TYPE_NAME)
+                    appendStyled(type.typeName, Highlights.TYPE_NAME)
             }
             is NamespaceType -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
             is WeakType -> {
                 appendStyled("weak ", Highlights.KEYWORD_MODIFIER)
-                renderType(type.underlyingType)
+                appendType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is RawType -> {
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
-                renderType(type.underlyingType)
+                appendType(type.underlyingType)
             }
             is OptionalType -> {
-                renderType(type.underlyingType)
+                appendType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is ArrayType -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)
-                renderType(type.underlyingType)
+                appendType(type.underlyingType)
                 appendStyled("]", Highlights.DELIM_BRACKET)
             }
             is SetType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                renderType(type.underlyingType)
+                appendType(type.underlyingType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is DictionaryType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                renderType(type.keyType)
+                appendType(type.keyType)
                 appendStyled(":", Highlights.COLON)
-                renderType(type.valueType)
+                appendType(type.valueType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is TupleType -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
                 type.types.forEachIndexed { index, it ->
-                    renderType(it)
+                    appendType(it)
                     if (index != type.types.lastIndex)
                         append(", ")
                 }
@@ -119,7 +130,7 @@ sealed class JaktRenderer {
                     type.parameters.forEachIndexed { index, it ->
                         appendStyled(it.name, Highlights.FUNCTION_PARAMETER)
                         appendStyled(": ", Highlights.COLON)
-                        renderType(it.type)
+                        appendType(it.type)
 
                         if (index != type.parameters.lastIndex)
                             append(",")
@@ -129,7 +140,7 @@ sealed class JaktRenderer {
                 append(")")
 
                 appendStyled(": ", Highlights.COLON)
-                renderType(type.returnType)
+                appendType(type.returnType)
             }
             else -> unreachable()
         }
@@ -140,12 +151,7 @@ sealed class JaktRenderer {
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {
-            if (parameter === UnknownType) {
-                append("???")
-            } else {
-                renderType(parameter)
-            }
-
+            appendType(parameter)
             if (index != parameters.lastIndex)
                 append(", ")
         }
