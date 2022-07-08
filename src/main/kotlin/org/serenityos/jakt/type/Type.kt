@@ -6,7 +6,7 @@ import org.serenityos.jakt.project.jaktProject
 
 sealed interface Type {
     var namespace: NamespaceType?
-    val psiElement: PsiElement?
+    var psiElement: PsiElement?
     val typeParameters: List<Type>
 }
 
@@ -48,7 +48,7 @@ enum class PrimitiveType(typeName: kotlin.String? = null) : Type {
     String("String");
 
     override var namespace: NamespaceType? = null
-    override val psiElement: PsiElement? = null
+    override var psiElement: PsiElement? = null
     override val typeParameters = emptyList<Type>()
 
     val typeName: kotlin.String = typeName ?: name.lowercase()
@@ -151,5 +151,27 @@ fun Type.resolveToBuiltinType(project: Project): Type {
         is WeakType -> getPreludeType(project, "Weak")
         PrimitiveType.String -> getPreludeType(project, "String")
         else -> this
+    }
+}
+
+infix fun Type.equivalentTo(other: Type): Boolean = when {
+    this::class !== other::class -> false
+    namespace != null -> other.namespace != null && namespace!! equivalentTo other.namespace!!
+    else -> when (this) {
+        UnknownType, is PrimitiveType -> true
+        is NamespaceType -> name == (other as NamespaceType).name
+        is WeakType -> underlyingType equivalentTo (other as WeakType).underlyingType
+        is RawType -> underlyingType equivalentTo (other as RawType).underlyingType
+        is OptionalType -> underlyingType equivalentTo (other as OptionalType).underlyingType
+        is ArrayType -> underlyingType equivalentTo (other as ArrayType).underlyingType
+        is SetType -> underlyingType equivalentTo (other as SetType).underlyingType
+        is DictionaryType ->
+            keyType equivalentTo (other as DictionaryType).keyType && valueType equivalentTo other.valueType
+        is TupleType -> types.size == (other as TupleType).types.size && types.zip(other.types).all {
+            it.first equivalentTo it.second
+        }
+        is TypeParameter -> name == (other as TypeParameter).name
+        is DeclarationType -> name == (other as DeclarationType).name
+        else -> false
     }
 }

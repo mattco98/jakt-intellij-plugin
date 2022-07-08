@@ -3,7 +3,6 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.utils.equivalentTo
 import org.serenityos.jakt.utils.unreachable
 
 class Specializations {
@@ -132,17 +131,17 @@ fun collectSpecializations(genericType: Type, concreteType: Type, specialization
             collectSpecializations(g, c, specializations)
         }
         is TypeParameter -> specializations[genericType] = concreteType
-        is StructType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+        is StructType -> if (genericType equivalentTo concreteType) {
             genericType.typeParameters.zip((concreteType as StructType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
         }
-        is EnumType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+        is EnumType -> if (genericType equivalentTo concreteType) {
             genericType.typeParameters.zip((concreteType as EnumType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
         }
-        is FunctionType -> if (genericType.psiElement equivalentTo concreteType.psiElement) {
+        is FunctionType -> if (genericType equivalentTo concreteType) {
             genericType.typeParameters.zip((concreteType as FunctionType).typeParameters).forEach { (g, c) ->
                 collectSpecializations(g, c, specializations)
             }
@@ -200,11 +199,13 @@ fun applySpecializations(type: Type, specializations: Specializations): Type = w
     is TypeParameter -> specializations[type] ?: type
     is WeakType -> WeakType(applySpecializations(type.underlyingType, specializations))
     else -> unreachable()
+}.also {
+    it.namespace = type.namespace
+    it.psiElement = type.psiElement
 }
 
-fun applySpecializations(type: Type, vararg specializationTypes: Type): Type {
+fun applySpecializations(type: Type, specializationTypes: List<Type>): Type {
     require(type.typeParameters.all { it is TypeParameter })
-    require(specializationTypes.all { it !is TypeParameter })
     require(type.typeParameters.size == specializationTypes.size)
 
     val specializations = Specializations()

@@ -64,7 +64,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         vararg specializations: Type
     ): List<LookupElement> {
         val declType = project.jaktProject.findPreludeDeclaration(preludeType)?.jaktType ?: return emptyList()
-        val type = applySpecializations(declType, *specializations)
+        val type = applySpecializations(declType, specializations.toList())
         return getTypeCompletions(project, type)
     }
 
