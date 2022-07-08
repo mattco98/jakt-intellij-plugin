@@ -12,16 +12,13 @@ abstract class JaktStructDeclarationMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktStructDeclaration {
     override val jaktType by recursivelyGuarded<Type> {
+        val typeParameters = mutableListOf<Type>()
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, Type.Function>()
 
         val linkage = if (isExtern) Type.Linkage.External else Type.Linkage.Internal
 
         producer {
-            val typeParameters = if (genericBounds != null) {
-                getDeclGenericBounds().map { Type.TypeParameter(it.identifier.text) }
-            } else emptyList()
-
             Type.Struct(
                 identifier.text,
                 typeParameters,
@@ -34,6 +31,9 @@ abstract class JaktStructDeclarationMixin(
         }
 
         initializer {
+            if (genericBounds != null)
+                typeParameters.addAll(getDeclGenericBounds().map { it.jaktType })
+
             // TODO: Visibility
             val members = structBody.structMemberList.map { it.structMethod ?: it.structField }
 

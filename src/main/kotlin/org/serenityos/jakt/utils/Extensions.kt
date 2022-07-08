@@ -1,6 +1,8 @@
 package org.serenityos.jakt.utils
 
+import com.intellij.codeInsight.PsiEquivalenceUtil
 import com.intellij.openapi.application.ReadAction
+import com.intellij.psi.PsiElement
 
 fun runInReadAction(block: () -> Unit) = ReadAction.run<Throwable>(block)
 
@@ -23,3 +25,9 @@ inline fun <T : Any?> MutableCollection<T>.padded(minSize: Int, crossinline defa
     toMutableList().also { it.pad(minSize, default) }
 
 fun <T> MutableCollection<T?>.padWithNulls(minSize: Int) = pad(minSize) { null }
+
+infix fun PsiElement?.equivalentTo(other: PsiElement?) = when {
+    this == null -> other == null
+    other == null -> false
+    else -> PsiEquivalenceUtil.areElementsEquivalent(this, other)
+}

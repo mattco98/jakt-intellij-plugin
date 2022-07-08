@@ -1,7 +1,9 @@
 package org.serenityos.jakt.specialization
 
+import com.intellij.psi.PsiNameIdentifierOwner
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
+import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.utils.padWithNulls
 
@@ -27,7 +29,11 @@ abstract class JaktSpecializationTest : JaktBaseTest() {
                 "Specialization tag number must be absent or greater than 0"
             }
 
-            num - 1 to renderElement(value.single()) {}
+            val element = value.single().let {
+                it.ancestors().find { a -> (a as? PsiNameIdentifierOwner)?.nameIdentifier == it } ?: it
+            }
+
+            num - 1 to renderElement(element, asHtml = false)
         }
 
         check(taggedElements.map { it.first }.toSet().size == taggedElements.size) {

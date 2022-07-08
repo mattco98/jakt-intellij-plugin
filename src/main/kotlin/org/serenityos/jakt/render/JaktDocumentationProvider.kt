@@ -5,5 +5,5 @@ import com.intellij.psi.PsiElement
 
 class JaktDocumentationProvider : AbstractDocumentationProvider() {
     override fun getQuickNavigateInfo(element: PsiElement, originalElement: PsiElement?) =
-        renderElement(originalElement ?: element) { html = true }
+        renderElement(originalElement ?: element, asHtml = true)
 }

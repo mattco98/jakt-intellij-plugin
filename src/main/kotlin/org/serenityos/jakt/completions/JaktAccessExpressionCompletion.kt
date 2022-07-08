@@ -12,7 +12,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.specialize
+import org.serenityos.jakt.type.applySpecializations
 
 object JaktAccessExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
@@ -64,7 +64,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         vararg specializations: Type
     ): List<LookupElement> {
         val declType = project.jaktProject.findPreludeDeclaration(preludeType)?.jaktType ?: return emptyList()
-        val type = declType.specialize(specializations.toList())
+        val type = applySpecializations(declType, *specializations)
         return getTypeCompletions(project, type)
     }
 

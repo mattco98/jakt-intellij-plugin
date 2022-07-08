@@ -430,6 +430,11 @@ fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpeciali
 
 PlainQualifierExpr ::= PlainQualifierImpl {
     extends=Expression
+    implements=[
+        "org.serenityos.jakt.psi.api.JaktTypeable"
+        "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
+    ]
+    mixin="org.serenityos.jakt.psi.reference.JaktPlainQualifierExprMixin"
 }
 
 private PlainQualifierImpl ::= PlainQualifierStart PlainQualifierSegment*

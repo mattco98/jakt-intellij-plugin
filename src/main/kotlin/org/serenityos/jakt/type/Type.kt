@@ -8,10 +8,10 @@ import org.serenityos.jakt.project.jaktProject
 sealed class Type {
     var namespace: Namespace? = null
     var psiElement: PsiElement? = null
-    open val typeParameters: List<Type>? = null
+    open var typeParameters: List<Type> = emptyList()
 
     val hasUnresolvedTypeParameters: Boolean
-        get() = typeParameters?.let { p -> p.any { it is TypeParameter } } ?: false
+        get() = typeParameters.any { it is TypeParameter }
 
     abstract fun typeRepr(): String
 
@@ -98,7 +98,7 @@ sealed class Type {
 
     class Struct(
         name: String,
-        override val typeParameters: List<Type>,
+        override var typeParameters: List<Type>,
         val fields: Map<String, Type>,
         val methods: Map<String, Function>,
         val linkage: Linkage,
@@ -106,11 +106,10 @@ sealed class Type {
         override fun typeRepr() = name
     }
 
-    // TODO: Variant types
     class Enum(
         name: String,
         val underlyingType: Primitive?,
-        override val typeParameters: List<Type>,
+        override var typeParameters: List<Type>,
         val variants: Map<String, EnumVariant>,
         val methods: Map<String, Function>,
     ) : Decl(name) {
@@ -119,7 +118,7 @@ sealed class Type {
 
     class EnumVariant constructor(
         name: String,
-        val parent: Enum,
+        var parent: Enum,
         val value: Int?,
         val members: List<Pair<String?, Type>>,
     ) : Decl(name) {
@@ -129,7 +128,7 @@ sealed class Type {
 
     class Function(
         name: String,
-        override val typeParameters: List<Type>,
+        override var typeParameters: List<Type>,
         val parameters: List<Parameter>,
         var returnType: Type,
         val linkage: Linkage,
@@ -171,9 +170,7 @@ fun Type.resolveToBuiltinType(project: Project): Type {
         is Type.Set -> getPreludeType(project, "Set")
         is Type.Tuple -> getPreludeType(project, "Tuple")
         is Type.Weak -> getPreludeType(project, "Weak")
-        is Type.Primitive -> if (this == Type.Primitive.String) {
-            getPreludeType(project, "String")
-        } else this
+        Type.Primitive.String -> getPreludeType(project, "String")
         else -> this
     }
 }

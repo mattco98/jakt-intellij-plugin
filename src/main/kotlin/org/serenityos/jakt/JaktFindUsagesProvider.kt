@@ -66,5 +66,5 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         }
     }
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean) = renderElement(element)
+    override fun getNodeText(element: PsiElement, useFullName: Boolean) = renderElement(element, asHtml = false)
 }

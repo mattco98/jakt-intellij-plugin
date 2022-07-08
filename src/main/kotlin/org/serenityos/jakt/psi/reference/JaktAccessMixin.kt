@@ -4,7 +4,7 @@ import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktAccess
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.caching.resolveCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.JaktResolver
 import org.serenityos.jakt.type.Type
@@ -15,7 +15,27 @@ abstract class JaktAccessMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktAccess {
     override val jaktType: Type
-        get() = (reference.resolve() as? JaktTypeable)?.jaktType ?: Type.Unknown
+        get() = resolveCache().resolveWithCaching(this) {
+            val accessExpr = ancestorOfType<JaktAccessExpression>()!!
+            val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(project)
+
+            if (decimalLiteral != null) {
+                if (baseType is Type.Tuple) {
+                    baseType.types.getOrNull(decimalLiteral!!.text.toInt()) ?: Type.Unknown
+                } else Type.Unknown
+            } else {
+                val name = identifier!!.text
+
+                when (baseType) {
+                    is Type.Struct -> baseType.fields[name]
+                        ?: baseType.methods[name]?.takeIf { it.hasThis }
+                        ?: Type.Unknown
+                    is Type.EnumVariant -> baseType.parent.methods[name]?.takeIf { it.hasThis } ?: Type.Unknown
+                    is Type.Enum -> baseType.methods[name]?.takeIf { !it.hasThis } ?: Type.Unknown
+                    else -> Type.Unknown
+                }
+            }
+        }
 
     override fun getNameIdentifier() = identifier
 

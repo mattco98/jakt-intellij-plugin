@@ -8,12 +8,31 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
             
             function main() {
                 let foo = Foo(value: 10)
-                  //^T1
+                foo
+              //^T1
                 foo.value
                   //^T2
             }
         """,
         "struct Foo<i64>",
         "i64"
+    )
+
+    fun `test chained specialization`() = doTest("""
+            struct Foo<T> {
+                value: T
+            }
+    
+            struct Bar<T> {
+                value: Foo<T>
+            }
+            
+            function main() {
+                let bar = Bar(value: Foo(value: 10))
+                bar
+              //^T
+            }
+        """,
+        "struct Bar<i64>"
     )
 }

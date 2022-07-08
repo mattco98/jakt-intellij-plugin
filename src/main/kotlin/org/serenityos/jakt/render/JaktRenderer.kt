@@ -11,17 +11,9 @@ import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.Type
 
-data class RenderOptions(
-    var asExpression: Boolean = false,
-    var html: Boolean = false,
-    var showNamespaces: Boolean = true,
-)
-
-fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): String {
-    val options = RenderOptions()
-    options.builder()
-    val renderer = if (options.html) JaktRenderer.HTML else JaktRenderer.Plain
-    return renderer.render(element, options)
+fun renderElement(element: PsiElement, asHtml: Boolean): String {
+    val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
+    return renderer.render(element)
 }
 
 /**
@@ -34,68 +26,66 @@ fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): 
 sealed class JaktRenderer {
     protected abstract val builder: Builder
 
-    fun render(element: PsiElement, options: RenderOptions): String = withSynchronized(builder) {
+    fun render(element: PsiElement): String = withSynchronized(builder) {
         clear()
 
         when (element) {
             is JaktFieldAccessExpression -> {
-                require(!options.asExpression)
                 appendStyled(element.name!!, Highlights.STRUCT_FIELD)
                 append(": ")
-                renderType(element.jaktType, options.copy(asExpression = true))
+                renderType(element.jaktType)
             }
-            is JaktTypeable -> renderType(element.jaktType, options)
+            is JaktTypeable -> renderType(element.jaktType)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
         }
 
         toString()
     }
 
-    private fun renderType(type: Type, options: RenderOptions): Unit = withSynchronized(builder) {
-        if (!options.showNamespaces)
-            renderNamespaces(type)
+    private fun renderType(type: Type): Unit = withSynchronized(builder) {
+        renderNamespaces(type)
 
         when (type) {
             is Type.Unknown -> append(type.typeRepr())
             is Type.Primitive -> {
-                if (!options.asExpression || type != Type.Primitive.Void)
+                if (type != Type.Primitive.Void)
                     appendStyled(type.typeRepr(), Highlights.TYPE_NAME)
             }
             is Type.Namespace -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
             is Type.Weak -> {
                 appendStyled("weak ", Highlights.KEYWORD_MODIFIER)
-                renderType(type.underlyingType, options)
+                renderType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is Type.Raw -> {
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
-                renderType(type.underlyingType, options)
+                renderType(type.underlyingType)
             }
             is Type.Optional -> {
-                renderType(type.underlyingType, options)
+                renderType(type.underlyingType)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is Type.Array -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)
-                renderType(type.underlyingType, options)
+                renderType(type.underlyingType)
                 appendStyled("]", Highlights.DELIM_BRACKET)
             }
             is Type.Set -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                renderType(type.underlyingType, options)
+                renderType(type.underlyingType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is Type.Dictionary -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                renderType(type.keyType, options)
+                renderType(type.keyType)
                 appendStyled(":", Highlights.COLON)
-                renderType(type.valueType, options)
+                renderType(type.valueType)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is Type.Tuple -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
                 type.types.forEachIndexed { index, it ->
-                    renderType(it, options)
+                    renderType(it)
                     if (index != type.types.lastIndex)
                         append(", ")
                 }
@@ -103,37 +93,32 @@ sealed class JaktRenderer {
             }
             is Type.TypeParameter -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
             is Type.Struct -> {
-                if (!options.asExpression)
-                    appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
+                appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.STRUCT_NAME)
-                renderGenerics(type, options)
+                renderGenerics(type)
             }
             is Type.Enum -> {
-                if (!options.asExpression)
-                    appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
+                appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.ENUM_NAME)
-                renderGenerics(type, options)
+                renderGenerics(type)
             }
             is Type.EnumVariant -> {
-                if (!options.showNamespaces) {
-                    appendStyled(type.parent.name, Highlights.ENUM_NAME)
-                    appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
-                }
+                appendStyled(type.parent.name, Highlights.ENUM_NAME)
+                appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
                 appendStyled(type.name, Highlights.ENUM_VARIANT_NAME)
                 // TODO: Members?
             }
             is Type.Function -> {
-                if (!options.asExpression)
-                    appendStyled("function ", Highlights.KEYWORD_DECLARATION)
+                appendStyled("function ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
-                renderGenerics(type, options)
+                renderGenerics(type)
                 append("(")
 
                 if (type.parameters.isNotEmpty()) {
                     type.parameters.forEachIndexed { index, it ->
                         appendStyled(it.name, Highlights.FUNCTION_PARAMETER)
                         appendStyled(": ", Highlights.COLON)
-                        renderType(it.type, options.copy(asExpression = true))
+                        renderType(it.type)
 
                         if (index != type.parameters.lastIndex)
                             append(",")
@@ -143,12 +128,12 @@ sealed class JaktRenderer {
                 append(")")
 
                 appendStyled(": ", Highlights.COLON)
-                renderType(type.returnType, options.copy(asExpression = true))
+                renderType(type.returnType)
             }
         }
     }
 
-    private fun renderGenerics(type: Type, options: RenderOptions): Unit = withSynchronized(builder) {
+    private fun renderGenerics(type: Type): Unit = withSynchronized(builder) {
         val parameters = type.typeParameters ?: return@withSynchronized
 
         append("<")
@@ -156,7 +141,7 @@ sealed class JaktRenderer {
             if (parameter === Type.Unknown) {
                 append("???")
             } else {
-                renderType(parameter, options)
+                renderType(parameter)
             }
 
             if (index != parameters.lastIndex)
@@ -189,7 +174,7 @@ sealed class JaktRenderer {
 
         abstract fun appendStyled(value: String, key: TextAttributesKey)
 
-        fun append(v: String) = apply { builder.append(StringUtil.escapeXmlEntities(v)) }
+        open fun append(v: String) = apply { builder.append(v) }
         fun append(v: Char) = apply { builder.append(v) }
         fun append(v: Int) = apply { builder.append(v) }
         fun append(v: Float) = apply { builder.append(v) }
@@ -200,6 +185,8 @@ sealed class JaktRenderer {
 
     object HTML : JaktRenderer() {
         override val builder = object : Builder() {
+            override fun append(v: String) = apply { builder.append(StringUtil.escapeXmlEntities(v)) }
+
             override fun appendStyled(value: String, key: TextAttributesKey) {
                 HtmlSyntaxInfoUtil.appendStyledSpan(
                     builder,

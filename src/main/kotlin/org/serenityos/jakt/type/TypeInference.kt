@@ -22,10 +22,7 @@ object TypeInference {
                     else -> Type.Unknown
                 }
 
-                val specializations = element.genericSpecialization?.typeList?.map { it.jaktType }
-                if (specializations != null) {
-                    type.specialize(specializations)
-                } else type
+                specialize(type, element)
             }
             is JaktLogicalOrBinaryExpression,
             is JaktLogicalAndBinaryExpression -> Type.Primitive.Bool
