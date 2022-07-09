@@ -55,14 +55,7 @@ enum class PrimitiveType(typeName: kotlin.String? = null) : Type {
     val typeName: kotlin.String = typeName ?: name.lowercase()
 
     companion object {
-        // Must be lazy as `objectInstance` is not usable before the class is
-        // initialized, which would be the case without the lazy block since
-        // this is in the companion object
-        private val nameToPrimitive by lazy {
-            PrimitiveType::class.sealedSubclasses.map { it.objectInstance!! }.associateBy { it.typeName }
-        }
-
-        fun forName(name: kotlin.String) = nameToPrimitive[name]
+        fun forName(name: kotlin.String) = PrimitiveType.values().find { it.typeName == name }
     }
 }
 
