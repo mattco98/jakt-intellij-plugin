@@ -367,6 +367,7 @@ LabeledArgument ::= IDENTIFIER COLON Expression {
 }
 UnlabeledArgument ::= Expression
 
+// TODO: Put the mixin on AccessExpression, not Access
 AccessExpression ::= Expression DOT Access
 Access ::= FieldLookup | TupleLookup {
     implements=[
