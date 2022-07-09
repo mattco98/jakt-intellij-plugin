@@ -92,8 +92,31 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 )
                 is TypeParameter -> text(type.name)
                 is WeakType -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
+                is BoundType -> {
+                    val typeParameters = (type.type as? GenericType)?.typeParameters.orEmpty()
+                    typeHintForGenerics(
+                        typeHintFor(type.type),
+                        typeParameters.map { type.specializations[it] ?: it },
+                    )
+                }
                 UnknownType -> text("???")
                 else -> unreachable()
+            }
+        }
+
+        private fun typeHintForGenerics(
+            primaryHint: InlayPresentation,
+            generics: List<Type>,
+        ) = with(factory) {
+            if (generics.isEmpty()) {
+                primaryHint
+            } else {
+                seq(
+                    primaryHint,
+                    text("<"),
+                    join(generics.map(::typeHintFor)) { text(", ") },
+                    text(">"),
+                )
             }
         }
 
