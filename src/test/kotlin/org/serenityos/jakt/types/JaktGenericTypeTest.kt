@@ -1,6 +1,6 @@
-package org.serenityos.jakt.specialization
+package org.serenityos.jakt.types
 
-class JaktBasicSpecializationTest : JaktSpecializationTest() {
+class JaktGenericTypeTest : JaktTypeTest() {
     fun `test basic generic specialization`() = doTest("""
             struct Foo<T> {
                 value: T

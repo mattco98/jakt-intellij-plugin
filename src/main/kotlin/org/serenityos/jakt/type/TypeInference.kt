@@ -95,7 +95,7 @@ object TypeInference {
                 element.findChildrenOfType<JaktExpression>().map(TypeInference::inferType)
             )
             is JaktMatchExpression -> UnknownType // TODO
-            is JaktNumericLiteral -> PrimitiveType.I64 // TODO: Proper type
+            is JaktNumericLiteral -> getNumericLiteralType(element)
             is JaktBooleanLiteral -> PrimitiveType.Bool
             is JaktLiteral -> when (element.firstChild.elementType) {
                 JaktTypes.STRING_LITERAL -> PrimitiveType.String
@@ -124,6 +124,25 @@ object TypeInference {
             } else UnknownType
             "None" -> OptionalType(UnknownType)
             else -> null
+        }
+    }
+
+    private fun getNumericLiteralType(element: JaktNumericLiteral): Type {
+        return when (element.numericSuffix?.text) {
+            "u8" -> PrimitiveType.U8
+            "u16" -> PrimitiveType.U16
+            "u32" -> PrimitiveType.U32
+            "u64" -> PrimitiveType.U64
+            "i8" -> PrimitiveType.I8
+            "i16" -> PrimitiveType.I16
+            "i32" -> PrimitiveType.I32
+            "i64" -> PrimitiveType.I64
+            "f32" -> PrimitiveType.F32
+            "f64" -> PrimitiveType.F64
+            "uz" -> PrimitiveType.USize
+            else -> if (element.decimalLiteral?.textContains('.') == true) {
+                PrimitiveType.F64
+            } else PrimitiveType.I64
         }
     }
 }

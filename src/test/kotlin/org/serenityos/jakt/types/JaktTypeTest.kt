@@ -1,4 +1,4 @@
-package org.serenityos.jakt.specialization
+package org.serenityos.jakt.types
 
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
@@ -7,13 +7,13 @@ import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.render.renderType
 import org.serenityos.jakt.utils.padWithNulls
 
-abstract class JaktSpecializationTest : JaktBaseTest() {
+abstract class JaktTypeTest : JaktBaseTest() {
     fun doTest(@Language("Jakt") text: String, vararg renderedTypes: String) {
         setupFor(text)
 
         val taggedElements = extractTaggedElements().map { (key, value) ->
             check(key.startsWith("T")) {
-                "Invalid specialization tag $key"
+                "Invalid type tag $key"
             }
 
             check(value.size == 1) {
@@ -22,16 +22,16 @@ abstract class JaktSpecializationTest : JaktBaseTest() {
 
             val num = key.substring(1).ifBlank { "1" }.toIntOrNull()
             check(num != null) {
-                "Invalid specialization tag $key"
+                "Invalid type tag $key"
             }
 
             check(num >= 1) {
-                "Specialization tag number must be absent or greater than 0"
+                "Type tag number must be absent or greater than 0"
             }
 
             val type = value.single().let {
                 it.ancestors().filterIsInstance<JaktTypeable>().firstOrNull()?.jaktType
-                    ?: error("Specialization tag does not point to a typeable element")
+                    ?: error("Type tag does not point to a typeable element")
             }
 
             num - 1 to renderType(type, asHtml = false)
