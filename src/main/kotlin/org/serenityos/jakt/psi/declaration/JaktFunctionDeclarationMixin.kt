@@ -25,6 +25,8 @@ abstract class JaktFunctionDeclarationMixin(
         val parameters = mutableListOf<FunctionType.Parameter>()
 
         producer {
+            parameters.clear()
+
             val typeParameters = if (genericBounds != null) {
                 getDeclGenericBounds().map { TypeParameter(it.identifier.text) }
             } else emptyList()

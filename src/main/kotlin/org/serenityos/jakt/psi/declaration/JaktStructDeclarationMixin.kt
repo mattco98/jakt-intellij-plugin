@@ -19,6 +19,10 @@ abstract class JaktStructDeclarationMixin(
         val linkage = if (isExtern) Linkage.External else Linkage.Internal
 
         producer {
+            typeParameters.clear()
+            fields.clear()
+            methods.clear()
+
             StructType(
                 identifier.text,
                 typeParameters,

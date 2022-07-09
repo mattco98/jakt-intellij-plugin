@@ -17,6 +17,8 @@ abstract class JaktEnumVariantMixin(
         val members = mutableListOf<Pair<String?, Type>>()
 
         producer {
+            members.clear()
+
             EnumVariantType(
                 nameNonNull,
                 ancestorOfType<JaktEnumDeclaration>()!!.jaktType as EnumType,

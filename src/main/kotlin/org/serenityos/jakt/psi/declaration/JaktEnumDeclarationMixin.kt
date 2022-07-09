@@ -17,6 +17,9 @@ abstract class JaktEnumDeclarationMixin(
         val methods = mutableMapOf<String, FunctionType>()
 
         producer {
+            variants.clear()
+            methods.clear()
+
             val typeParameters = getDeclGenericBounds().map { TypeParameter(it.nameNonNull) }
 
             EnumType(
