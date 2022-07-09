@@ -367,15 +367,14 @@ LabeledArgument ::= IDENTIFIER COLON Expression {
 }
 UnlabeledArgument ::= Expression
 
-// TODO: Put the mixin on AccessExpression, not Access
-AccessExpression ::= Expression DOT Access
-Access ::= FieldLookup | TupleLookup {
+AccessExpression ::= Expression DOT Access {
     implements=[
         "org.serenityos.jakt.psi.api.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     ]
-    mixin="org.serenityos.jakt.psi.reference.JaktAccessMixin"
+    mixin="org.serenityos.jakt.psi.reference.JaktAccessExpressionMixin"
 }
+private Access ::= FieldLookup | TupleLookup
 private FieldLookup ::= IDENTIFIER
 private TupleLookup ::= DECIMAL_LITERAL
 

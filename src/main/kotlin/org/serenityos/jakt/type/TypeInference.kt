@@ -58,7 +58,7 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktParenExpression -> inferType(element.findNotNullChildOfType())
-            is JaktAccessExpression -> (element.access.reference?.resolve() as? JaktDeclaration)?.jaktType ?: UnknownType
+            is JaktAccessExpression -> (element.reference?.resolve() as? JaktDeclaration)?.jaktType ?: UnknownType
             is JaktIndexedAccessExpression -> UnknownType // TODO
             is JaktThisExpression ->
                 (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType

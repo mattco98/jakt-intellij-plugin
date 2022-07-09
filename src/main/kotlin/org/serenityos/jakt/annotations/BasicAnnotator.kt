@@ -37,7 +37,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     .highlight(highlight)
             }
             is JaktPlainQualifierExpr -> highlightQualifier(element.plainQualifier, false)
-            is JaktAccess -> {
+            is JaktAccessExpression -> {
                 if (element.identifier != null) {
                     val isDumb = DumbService.isDumb(element.project)
                     var identHighlight = Highlights.IDENTIFIER
