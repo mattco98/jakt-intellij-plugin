@@ -14,15 +14,15 @@ object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
             is JaktCallExpression -> {
-                val type = when (val baseType = inferType(element.expression)) {
-                    is StructType -> baseType // TODO: This feels a bit odd
-                    is EnumVariantType -> baseType.parent
-                    is FunctionType -> baseType.returnType
-                    is UnknownType -> tryConstructOptionalType(element) ?: UnknownType
-                    else -> UnknownType
+                val baseType = inferType(element.expression)
+
+                when (baseType) {
+                    is EnumVariantType -> return baseType.parent
+                    is UnknownType -> return tryConstructOptionalType(element) ?: UnknownType
+                    else -> {}
                 }
 
-                specialize(type, element)
+                specialize(baseType, element)
             }
             is JaktLogicalOrBinaryExpression,
             is JaktLogicalAndBinaryExpression -> PrimitiveType.Bool

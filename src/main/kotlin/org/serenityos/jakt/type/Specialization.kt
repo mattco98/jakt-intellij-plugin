@@ -3,6 +3,7 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.utils.unreachable
 
 class Specializations(
     private val map: MutableMap<TypeParameter, Type> = mutableMapOf()
@@ -74,7 +75,11 @@ fun specialize(type: Type, psi: PsiElement): Type {
     for ((genericType, concreteType) in matchedTypes)
         collectSpecializations(genericType, concreteType, specializations)
 
-    return BoundType(type, specializations)
+    return when (type) {
+        is StructType, is EnumType -> BoundType(type, specializations)
+        is FunctionType -> specializations[type.returnType] ?: UnknownType
+        else -> unreachable()
+    }
 }
 
 fun collectSpecializations(genericType: Type, concreteType: Type, specializations: Specializations) {

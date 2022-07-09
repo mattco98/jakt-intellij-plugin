@@ -71,12 +71,12 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
             
             function main() {
                 let foo = Foo<i32>()
+                foo
                 let bar = foo.bar(value: "hi")
                 bar
-              //^T2
+              //^T
             }
         """,
-        "struct Foo<i32>",
         "String",
     )
 
