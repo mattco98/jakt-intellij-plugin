@@ -16,7 +16,7 @@ import org.serenityos.jakt.type.*
 
 object JaktAccessExpressionCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
-        .withSuperParent(2,
+        .withSuperParent(1,
             psiElement<JaktAccessExpression>().condition { element, context ->
                 ProgressManager.checkCanceled()
                 val type = element.expression.jaktType
@@ -52,8 +52,10 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             is EnumVariantType -> type
                 .parent
                 .methods
-                .filterValues { !it.hasThis }
+                .filterValues { it.hasThis }
                 .map { (name, func) -> lookupElementFromType(name, func, project) }
+            // TODO: Use specializations
+            is BoundType -> getTypeCompletions(project, type.type)
             else -> emptyList()
         }
     }
