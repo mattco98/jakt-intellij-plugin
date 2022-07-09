@@ -3,7 +3,6 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.utils.unreachable
 
 class Specializations(
     private val map: MutableMap<TypeParameter, Type> = mutableMapOf()
@@ -15,12 +14,18 @@ class Specializations(
 }
 
 fun specialize(type: Type, psi: PsiElement): Type {
-    if (type !is GenericType || psi !is JaktCallExpression)
+    if (psi !is JaktCallExpression || (type is GenericType && type.typeParameters.isEmpty()))
         return type
 
     val specializations = Specializations()
 
-    val target = psi.expression.reference?.resolve() ?: return type
+    // TODO: Change the grammar to make this unnecessary, as this should really happen everywhere that
+    //       uses .reference
+    val ref = when (val expr = psi.expression) {
+        is JaktPlainQualifierExpr -> expr.plainQualifier.reference
+        else -> expr.reference
+    }
+    val target = ref?.resolve() ?: return type
 
     // Store call specializations if they exist
     psi.genericSpecialization?.typeList?.let { concreteTypes ->
@@ -74,14 +79,13 @@ fun specialize(type: Type, psi: PsiElement): Type {
     for ((genericType, concreteType) in matchedTypes)
         collectSpecializations(genericType, concreteType, specializations)
 
-    return when (type) {
-        is StructType, is EnumType -> BoundType(type, specializations)
-        is FunctionType -> specializations[type.returnType] ?: UnknownType
-        else -> unreachable()
+    val specializedType = applySpecializations(type, specializations)
+    return BoundType.withInner(specializedType) {
+        if (it is FunctionType) it.returnType else it
     }
 }
 
-fun collectSpecializations(genericType: Type, concreteType: Type, specializations: Specializations) {
+private fun collectSpecializations(genericType: Type, concreteType: Type, specializations: Specializations) {
     if (genericType !is TypeParameter && genericType::class != concreteType::class)
         return
 
@@ -148,27 +152,43 @@ fun collectSpecializations(genericType: Type, concreteType: Type, specialization
         }
         is BoundType -> if (genericType equivalentTo concreteType) {
             require(concreteType is BoundType)
-            // The genericType specializations contain the generic value mappings for the type
-            // we are specialization. The concreteType specializations contain the concrete
-            // value mappings for those type. The common keys link them.
-            val commonKeys = genericType.specializations.keys.intersect(concreteType.specializations.keys)
-            specializations.putAll(commonKeys.associate {
-                (genericType.specializations[it]!! as TypeParameter) to concreteType.specializations[it]!!
-            })
+            specializations.putAll(combineTypeSpecializations(
+                genericType.specializations,
+                concreteType.specializations,
+            ))
             collectSpecializations(genericType.type, concreteType.type, specializations)
         }
         else -> error("Unexpected type ${genericType::class.simpleName} in collectSpecializations")
     }
 }
 
+fun combineTypeSpecializations(
+    genericType: Map<TypeParameter, Type>,
+    concreteType: Map<TypeParameter, Type>,
+): Map<TypeParameter, Type> {
+    // The genericType specializations contain the generic value mappings for the type
+    // we are specialization. The concreteType specializations contain the concrete
+    // value mappings for those types. The common keys link them.
+    val commonKeys = genericType.keys.intersect(concreteType.keys)
+    return commonKeys.associate {
+        (genericType[it]!! as TypeParameter) to concreteType[it]!!
+    }.toMutableMap()
+}
+
 fun applySpecializations(type: Type, specializations: List<Type>): Type {
+    val map = (type as? GenericType)?.typeParameters
+        ?.zip(specializations)
+        ?.associate { it.first to it.second }
+
+    return applySpecializations(type, map ?: emptyMap())
+}
+
+fun applySpecializations(type: Type, specializations: Map<TypeParameter, Type>): Type {
+    if (type is BoundType)
+        return applySpecializations(type.type, specializations + type.specializations)
+
     if (type !is GenericType)
-        return type
+        return specializations[type] ?: UnknownType
 
-    val map = type.typeParameters
-        .zip(specializations)
-        .filter { it.first is TypeParameter }
-        .associate { (it.first as TypeParameter) to it.second }
-
-    return BoundType(type, map)
+    return BoundType(type, specializations)
 }

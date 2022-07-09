@@ -6,6 +6,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
@@ -14,7 +15,7 @@ object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
             is JaktCallExpression -> {
-                val baseType = inferType(element.expression)
+                val baseType = element.expression.jaktType
 
                 when (baseType) {
                     is EnumVariantType -> return baseType.parent

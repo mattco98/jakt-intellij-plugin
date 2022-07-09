@@ -1,10 +1,10 @@
 package org.serenityos.jakt.specialization
 
-import com.intellij.psi.PsiNameIdentifierOwner
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
 import org.serenityos.jakt.psi.ancestors
-import org.serenityos.jakt.render.renderElement
+import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.render.renderType
 import org.serenityos.jakt.utils.padWithNulls
 
 abstract class JaktSpecializationTest : JaktBaseTest() {
@@ -29,11 +29,12 @@ abstract class JaktSpecializationTest : JaktBaseTest() {
                 "Specialization tag number must be absent or greater than 0"
             }
 
-            val element = value.single().let {
-                it.ancestors().find { a -> (a as? PsiNameIdentifierOwner)?.nameIdentifier == it } ?: it
+            val type = value.single().let {
+                it.ancestors().filterIsInstance<JaktTypeable>().firstOrNull()?.jaktType
+                    ?: error("Specialization tag does not point to a typeable element")
             }
 
-            num - 1 to renderElement(element, asHtml = false)
+            num - 1 to renderType(type, asHtml = false)
         }
 
         check(taggedElements.map { it.first }.toSet().size == taggedElements.size) {

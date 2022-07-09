@@ -132,7 +132,15 @@ class FunctionType(
     )
 }
 
-class BoundType(val type: Type, val specializations: Map<TypeParameter, Type>) : BaseType() {
+class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseType() {
+    val type: Type = if (type is BoundType) {
+        type.type
+    } else type
+
+    val specializations: Map<TypeParameter, Type> = if (type is BoundType) {
+        type.specializations.mapValues { specializations[it.value] ?: it.value }
+    } else specializations
+
     override var namespace = type.namespace
     override var psiElement = type.psiElement
 
