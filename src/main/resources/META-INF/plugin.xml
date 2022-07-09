@@ -111,6 +111,7 @@
         />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager" />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache" />
+        <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktTypeCache" />
         <projectConfigurable
                 instance="org.serenityos.jakt.project.JaktLanguageProjectConfigurable"
                 groupId="language"

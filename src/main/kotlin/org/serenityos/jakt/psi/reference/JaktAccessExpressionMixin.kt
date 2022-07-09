@@ -2,7 +2,7 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktAccessExpression
-import org.serenityos.jakt.psi.caching.resolveCache
+import org.serenityos.jakt.psi.caching.typeCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 
@@ -10,7 +10,7 @@ abstract class JaktAccessExpressionMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktAccessExpression {
     override val jaktType: Type
-        get() = resolveCache().resolveWithCaching(this) {
+        get() = typeCache().resolveWithCaching(this) {
             val baseType = TypeInference.inferType(expression).resolveToBuiltinType(project)
 
             if (decimalLiteral != null) {

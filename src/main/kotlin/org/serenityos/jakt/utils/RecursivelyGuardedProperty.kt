@@ -1,7 +1,7 @@
 package org.serenityos.jakt.utils
 
 import com.intellij.psi.PsiElement
-import org.serenityos.jakt.psi.caching.resolveCache
+import org.serenityos.jakt.psi.caching.typeCache
 import kotlin.reflect.KProperty
 
 /**
@@ -49,7 +49,7 @@ class RecursivelyGuardedProperty<T : Any>(
         if (isInitializing)
             return value
 
-        return thisRef.resolveCache().resolveWithCaching(thisRef) {
+        return thisRef.typeCache().resolveWithCaching(thisRef) {
             isInitializing = true
             value = producer()
             initializer(value)

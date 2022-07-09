@@ -14,11 +14,15 @@ import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicReference
 
 // This is largely taken from the intellij-rust plugin
-class JaktResolveCache(project: Project) : Disposable {
+// TODO: Allow same PsiElement to have multiple cache entries, so we
+//      don't need a separate type/resolve cache
+abstract class JaktCache(project: Project) : Disposable {
+    private val cacheKey = Key.create<CachedValue<ConcurrentMap<PsiElement, Any>>>("CACHE_KEY")
     private val globalCache = AtomicReference(makeWeakMap())
     private val psiManager = project.service<JaktPsiManager>()
 
     init {
+        @Suppress("LeakingThis")
         project.messageBus.connect(this).subscribe(JAKT_STRUCTURE_CHANGE_TOPIC, object : JaktStructureChangeListener {
             override fun onStructureChanged() {
                 globalCache.set(makeWeakMap())
@@ -39,7 +43,7 @@ class JaktResolveCache(project: Project) : Disposable {
         val owner = element.modificationBoundary
 
         return if (owner != null) {
-            CachedValuesManager.getCachedValue(owner, CACHE_KEY) {
+            CachedValuesManager.getCachedValue(owner, cacheKey) {
                 CachedValueProvider.Result.create(makeWeakMap(), owner.tracker, psiManager.globalModificationTracker)
             }
         } else globalCache.get()
@@ -47,9 +51,10 @@ class JaktResolveCache(project: Project) : Disposable {
 
     private fun makeWeakMap() = ContainerUtil.createConcurrentWeakKeySoftValueMap<PsiElement, Any>()
 
-    companion object {
-        private val CACHE_KEY = Key.create<CachedValue<ConcurrentMap<PsiElement, Any>>>("CACHE_KEY")
-    }
 }
 
+class JaktResolveCache(project: Project) : JaktCache(project)
+class JaktTypeCache(project: Project) : JaktCache(project)
+
 fun PsiElement.resolveCache() = project.service<JaktResolveCache>()
+fun PsiElement.typeCache() = project.service<JaktTypeCache>()
