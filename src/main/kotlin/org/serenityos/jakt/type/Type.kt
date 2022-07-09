@@ -10,7 +10,7 @@ sealed interface Type {
 }
 
 interface GenericType : Type {
-    val typeParameters: List<Type>
+    val typeParameters: List<TypeParameter>
 }
 
 interface ContainerType : Type {
@@ -88,7 +88,7 @@ class TypeParameter(val name: String) : BaseType()
 
 class StructType(
     override val name: String,
-    override var typeParameters: List<Type>,
+    override var typeParameters: List<TypeParameter>,
     val fields: Map<String, Type>,
     val methods: Map<String, FunctionType>,
     val linkage: Linkage,
@@ -99,7 +99,7 @@ class StructType(
 class EnumType(
     override val name: String,
     val underlyingType: PrimitiveType?,
-    override var typeParameters: List<Type>,
+    override var typeParameters: List<TypeParameter>,
     val variants: Map<String, EnumVariantType>,
     val methods: Map<String, FunctionType>,
 ) : BaseType(), DeclarationType, ContainerType, GenericType {
@@ -117,7 +117,7 @@ class EnumVariantType(
 
 class FunctionType(
     override val name: String,
-    override var typeParameters: List<Type>,
+    override var typeParameters: List<TypeParameter>,
     val parameters: List<Parameter>,
     var returnType: Type,
     val linkage: Linkage,

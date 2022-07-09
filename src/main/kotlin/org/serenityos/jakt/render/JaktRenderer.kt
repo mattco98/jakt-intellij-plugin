@@ -153,12 +153,9 @@ sealed class JaktRenderer {
     }
 
     private fun renderGenerics(
-        type: Type,
+        type: GenericType,
         specializations: Map<TypeParameter, Type>,
     ): Unit = withSynchronized(builder) {
-        if (type !is GenericType)
-            return@withSynchronized
-
         val parameters = type.typeParameters.map { specializations[it] ?: it }
         if (parameters.isEmpty())
             return@withSynchronized

@@ -5,17 +5,14 @@ import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.type.FunctionType
-import org.serenityos.jakt.type.Linkage
-import org.serenityos.jakt.type.StructType
-import org.serenityos.jakt.type.Type
+import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktStructDeclarationMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktStructDeclaration {
     override val jaktType by recursivelyGuarded<Type> {
-        val typeParameters = mutableListOf<Type>()
+        val typeParameters = mutableListOf<TypeParameter>()
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, FunctionType>()
 
@@ -35,7 +32,7 @@ abstract class JaktStructDeclarationMixin(
 
         initializer {
             if (genericBounds != null)
-                typeParameters.addAll(getDeclGenericBounds().map { it.jaktType })
+                typeParameters.addAll(getDeclGenericBounds().map { it.jaktType as TypeParameter })
 
             // TODO: Visibility
             val members = structBody.structMemberList.map { it.structMethod ?: it.structField }
