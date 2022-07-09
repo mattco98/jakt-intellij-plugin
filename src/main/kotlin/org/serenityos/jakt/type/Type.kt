@@ -133,6 +133,9 @@ class FunctionType(
 }
 
 class BoundType(val type: Type, val specializations: Map<TypeParameter, Type>) : BaseType() {
+    override var namespace = type.namespace
+    override var psiElement = type.psiElement
+
     companion object {
         fun withInner(type: Type, block: (Type) -> Type): Type {
             if (type !is BoundType)

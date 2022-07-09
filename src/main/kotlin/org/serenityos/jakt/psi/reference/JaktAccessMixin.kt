@@ -44,7 +44,7 @@ abstract class JaktAccessMixin(
 
         val accessExpr = ancestorOfType<JaktAccessExpression>()!!
         val baseType = TypeInference.inferType(accessExpr.expression).resolveToBuiltinType(project)
-        val baseDecl = (baseType as? DeclarationType)?.psiElement ?: return@singleRef null
+        val baseDecl = baseType.psiElement ?: return@singleRef null
         JaktResolver(baseDecl).findDeclaration(name!!, JaktResolver.INSTANCE)
     }
 }
