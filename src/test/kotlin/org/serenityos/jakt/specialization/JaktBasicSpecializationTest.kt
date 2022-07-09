@@ -19,8 +19,8 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
     )
 
     fun `test chained specialization`() = doTest("""
-            struct Foo<T> {
-                value: T
+            struct Foo<A> {
+                value: A
             }
     
             struct Bar<T> {
@@ -48,5 +48,54 @@ class JaktBasicSpecializationTest : JaktSpecializationTest() {
             }
         """,
         "struct Foo",
+    )
+
+    fun `test user specified generic specialization`() = doTest("""
+            struct Foo<T> {}
+                
+            function main() {
+                let foo = Foo<i32>()
+                foo
+              //^T
+            }
+        """,
+        "struct Foo<i32>",
+    )
+
+    fun `test generic function in generic struct`() = doTest("""
+            struct Foo<T> {
+                function bar<U>(this, value: U) -> U {
+                    return value
+                }
+            }
+            
+            function main() {
+                let foo = Foo<i32>()
+                let bar = foo.bar(value: "hi")
+                bar
+              //^T2
+            }
+        """,
+        "struct Foo<i32>",
+        "String",
+    )
+
+    fun `test generic constructor function`() = doTest("""
+            struct Pair<K, V> {
+                first: K
+                second: V
+                
+                function make<A, B>(first: A, second: B) throws -> Pair<A, B> {
+                    return Pair(first, second)
+                }
+            }
+
+            function main() {
+                let pair = Pair::make(first: 10, second: "hi")
+                pair
+              //^T
+            }
+        """,
+        "struct Pair<i64, String>"
     )
 }
