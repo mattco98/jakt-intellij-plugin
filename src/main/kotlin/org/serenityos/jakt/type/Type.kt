@@ -95,21 +95,21 @@ class TypeParameter(val name: String) : BaseType()
 
 class StructType(
     override val name: String,
-    var typeParameters: List<Type>,
+    override var typeParameters: List<Type>,
     val fields: Map<String, Type>,
     val methods: Map<String, FunctionType>,
     val linkage: Linkage,
-) : BaseType(), DeclarationType, ContainerType {
+) : BaseType(), DeclarationType, ContainerType, GenericType {
     override fun findTypeIn(name: String) = fields[name] ?: methods[name]
 }
 
 class EnumType(
     override val name: String,
     val underlyingType: PrimitiveType?,
-    var typeParameters: List<Type>,
+    override var typeParameters: List<Type>,
     val variants: Map<String, EnumVariantType>,
     val methods: Map<String, FunctionType>,
-) : BaseType(), DeclarationType, ContainerType {
+) : BaseType(), DeclarationType, ContainerType, GenericType {
     override fun findTypeIn(name: String) = variants[name] ?: methods[name]
 }
 
@@ -124,19 +124,30 @@ class EnumVariantType(
 
 class FunctionType(
     override val name: String,
-    var typeParameters: List<Type>,
+    override var typeParameters: List<Type>,
     val parameters: List<Parameter>,
     var returnType: Type,
     val linkage: Linkage,
     var hasThis: Boolean,
     var thisIsMutable: Boolean,
-) : BaseType(), DeclarationType {
+) : BaseType(), DeclarationType, GenericType {
     data class Parameter(
         val name: String,
         val type: Type,
         val isAnonymous: Boolean,
         val isMutable: Boolean,
     )
+}
+
+class BoundType(val type: Type, val specializations: Map<TypeParameter, Type>) : BaseType() {
+    companion object {
+        fun withInner(type: Type, block: (Type) -> Type): Type {
+            if (type !is BoundType)
+                return block(type)
+
+            return BoundType(block(type.type), type.specializations)
+        }
+    }
 }
 
 private fun getPreludeType(project: Project, type: String) =
@@ -173,6 +184,7 @@ infix fun Type.equivalentTo(other: Type): Boolean = when {
         }
         is TypeParameter -> name == (other as TypeParameter).name
         is DeclarationType -> name == (other as DeclarationType).name
+        is BoundType -> type equivalentTo (other as BoundType).type
         else -> false
     }
 }

@@ -23,13 +23,15 @@ abstract class JaktAccessMixin(
             } else {
                 val name = identifier!!.text
 
-                when (baseType) {
-                    is StructType -> baseType.fields[name]
-                        ?: baseType.methods[name]?.takeIf { it.hasThis }
-                        ?: UnknownType
-                    is EnumVariantType -> baseType.parent.methods[name]?.takeIf { it.hasThis } ?: UnknownType
-                    is EnumType -> baseType.methods[name]?.takeIf { !it.hasThis } ?: UnknownType
-                    else -> UnknownType
+                BoundType.withInner(baseType) {
+                    when (it) {
+                        is StructType -> it.fields[name]
+                            ?: it.methods[name]?.takeIf(FunctionType::hasThis)
+                            ?: UnknownType
+                        is EnumVariantType -> it.parent.methods[name]?.takeIf(FunctionType::hasThis) ?: UnknownType
+                        is EnumType -> it.methods[name]?.takeUnless(FunctionType::hasThis) ?: UnknownType
+                        else -> UnknownType
+                    }
                 }
             }
         }

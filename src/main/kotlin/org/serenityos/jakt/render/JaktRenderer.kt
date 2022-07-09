@@ -39,9 +39,9 @@ sealed class JaktRenderer {
             is JaktFieldAccessExpression -> {
                 appendStyled(element.name!!, Highlights.STRUCT_FIELD)
                 append(": ")
-                appendType(element.jaktType)
+                appendType(element.jaktType, emptyMap())
             }
-            is JaktTypeable -> appendType(element.jaktType)
+            is JaktTypeable -> appendType(element.jaktType, emptyMap())
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
         }
 
@@ -50,11 +50,11 @@ sealed class JaktRenderer {
 
     fun renderType(type: Type): String = withSynchronized(builder) {
         clear()
-        appendType(type)
+        appendType(type, emptyMap())
         toString()
     }
 
-    private fun appendType(type: Type): Unit = withSynchronized(builder) {
+    private fun appendType(type: Type, specializations: Map<TypeParameter, Type>): Unit = withSynchronized(builder) {
         renderNamespaces(type)
 
         when (type) {
@@ -66,53 +66,58 @@ sealed class JaktRenderer {
             is NamespaceType -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
             is WeakType -> {
                 appendStyled("weak ", Highlights.KEYWORD_MODIFIER)
-                appendType(type.underlyingType)
+                appendType(type.underlyingType, specializations)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is RawType -> {
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
-                appendType(type.underlyingType)
+                appendType(type.underlyingType, specializations)
             }
             is OptionalType -> {
-                appendType(type.underlyingType)
+                appendType(type.underlyingType, specializations)
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is ArrayType -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)
-                appendType(type.underlyingType)
+                appendType(type.underlyingType, specializations)
                 appendStyled("]", Highlights.DELIM_BRACKET)
             }
             is SetType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                appendType(type.underlyingType)
+                appendType(type.underlyingType, specializations)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is DictionaryType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                appendType(type.keyType)
+                appendType(type.keyType, specializations)
                 appendStyled(":", Highlights.COLON)
-                appendType(type.valueType)
+                appendType(type.valueType, specializations)
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is TupleType -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
                 type.types.forEachIndexed { index, it ->
-                    appendType(it)
+                    appendType(it, specializations)
                     if (index != type.types.lastIndex)
                         append(", ")
                 }
                 appendStyled(")", Highlights.DELIM_PARENTHESIS)
             }
-            is TypeParameter -> appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
+            is TypeParameter -> {
+                val specializedType = specializations[type]
+                if (specializedType != null) {
+                    appendType(specializedType, specializations)
+                } else appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
+            }
             is StructType -> {
                 appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.STRUCT_NAME)
-                renderGenerics(type)
+                renderGenerics(type, specializations)
             }
             is EnumType -> {
                 appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.ENUM_NAME)
-                renderGenerics(type)
+                renderGenerics(type, specializations)
             }
             is EnumVariantType -> {
                 appendStyled(type.parent.name, Highlights.ENUM_NAME)
@@ -123,14 +128,14 @@ sealed class JaktRenderer {
             is FunctionType -> {
                 appendStyled("function ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
-                renderGenerics(type)
+                renderGenerics(type, specializations)
                 append("(")
 
                 if (type.parameters.isNotEmpty()) {
                     type.parameters.forEachIndexed { index, it ->
                         appendStyled(it.name, Highlights.FUNCTION_PARAMETER)
                         appendStyled(": ", Highlights.COLON)
-                        appendType(it.type)
+                        appendType(it.type, specializations)
 
                         if (index != type.parameters.lastIndex)
                             append(",")
@@ -140,21 +145,27 @@ sealed class JaktRenderer {
                 append(")")
 
                 appendStyled(": ", Highlights.COLON)
-                appendType(type.returnType)
+                appendType(type.returnType, specializations)
             }
+            is BoundType -> appendType(type.type, specializations + type.specializations)
             else -> unreachable()
         }
     }
 
-    private fun renderGenerics(type: Type): Unit = withSynchronized(builder) {
+    private fun renderGenerics(
+        type: Type,
+        specializations: Map<TypeParameter, Type>,
+    ): Unit = withSynchronized(builder) {
         if (type !is GenericType)
             return@withSynchronized
 
-        val parameters = type.typeParameters
+        val parameters = type.typeParameters.map { specializations[it] ?: it }
+        if (parameters.isEmpty())
+            return@withSynchronized
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {
-            appendType(parameter)
+            appendType(parameter, emptyMap())
             if (index != parameters.lastIndex)
                 append(", ")
         }
