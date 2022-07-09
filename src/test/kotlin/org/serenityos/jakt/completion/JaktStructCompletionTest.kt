@@ -24,7 +24,7 @@ class JaktStructCompletionTest : JaktCompletionTest() {
             let foo = Foo(bar: 10)
             foo::<caret>
         }
-    """.trimIndent())
+    """)
 
     fun `test struct static method completes after namespace operator`() = testCompletion("""
         struct Foo { 

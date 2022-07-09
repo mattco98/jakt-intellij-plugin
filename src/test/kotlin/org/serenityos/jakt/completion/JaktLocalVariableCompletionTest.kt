@@ -6,14 +6,14 @@ class JaktLocalVariableCompletionTest : JaktCompletionTest() {
             let foo = 10
             f<caret>
         }
-    """, "foo")
+    """, "foo" to "i64")
 
     fun `test local variable completes without hint`() = testHasCompletions("""
         function main() {
             let foo = 10
             <caret>
         }
-    """, "foo")
+    """, "foo" to "i64")
 
     fun `test local variable does not complete before declaration`() = testDisallowedCompletions("""
         function main() {

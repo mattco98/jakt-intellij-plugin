@@ -1,8 +1,12 @@
 package org.serenityos.jakt.completion
 
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.lookup.LookupElementPresentation
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
-import org.serenityos.jakt.utils.indicesOfAll
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.jvm.isAccessible
 
 abstract class JaktCompletionTest : JaktBaseTest() {
     fun testCompletion(@Language("Jakt") before: String, @Language("Jakt") after: String) {
@@ -21,15 +25,36 @@ abstract class JaktCompletionTest : JaktBaseTest() {
         myFixture.checkResult(after)
     }
 
-    fun testHasCompletions(@Language("Jakt") text: String, vararg requiredCompletions: String) {
+    data class MatchedCompletion(
+        val lookupElement: LookupElement?,
+        val expectedName: String,
+        val expectedType: String?,
+    )
+
+    fun testHasCompletions(@Language("Jakt") text: String, vararg requiredCompletions: Pair<String, String?>) {
         setupFor(text)
 
-        val completions = myFixture.completeBasic()?.flatMap { it.allLookupStrings } ?: error("Expected completions, but found none")
-        val indices = requiredCompletions.indicesOfAll { it in completions }
-        val missing = requiredCompletions.indices.filter { it !in indices }.map { requiredCompletions[it] }
+        val completions = myFixture.completeBasic() ?: error("Expected completions, but found none")
+        val matchedCompletions = requiredCompletions.map { (name, typeText) ->
+            MatchedCompletion(
+                completions.find { name in it.allLookupStrings },
+                name,
+                typeText,
+            )
+        }
 
-        if (missing.isNotEmpty())
-            error("Missing the following completions: ${missing.joinToString()}")
+        matchedCompletions.forEach {
+            if (it.lookupElement == null)
+                error("Missing the following completions: ${it.expectedName}")
+
+            (it.lookupElement as LookupElementBuilder).bold()
+
+            if (it.expectedType != null) {
+                val actualTypeText = getTypeText(it.lookupElement)
+                if (it.expectedType != actualTypeText)
+                    error("Expected type \"${it.expectedType}\", but found type \"$actualTypeText\"")
+            }
+        }
     }
 
     fun testNoCompletion(@Language("Jakt") text: String) {
@@ -48,6 +73,21 @@ abstract class JaktCompletionTest : JaktBaseTest() {
         for (completion in completions) {
             val disallowed = disallowedCompletions.find { it in completion.allLookupStrings } ?: continue
             error("Disallowed completion $disallowed appeared in completion list")
+        }
+    }
+
+    companion object {
+        private val copyPresentationMethod = LookupElementBuilder::class.declaredFunctions.first {
+            it.name == "copyPresentation"
+        }.also {
+            it.isAccessible = true
+        }
+
+        fun getTypeText(lookupElement: LookupElement): String? {
+            // TODO: Is there a nicer way to do this?
+            require(lookupElement is LookupElementBuilder)
+            val presentation = copyPresentationMethod.call(lookupElement) as LookupElementPresentation
+            return presentation.typeText
         }
     }
 }

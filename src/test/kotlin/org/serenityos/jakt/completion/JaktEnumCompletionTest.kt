@@ -25,7 +25,7 @@ class JaktEnumCompletionTest : JaktCompletionTest() {
         function main() {
             Foo::<caret>
         }
-    """, "bar")
+    """, "bar" to "")
 
     fun `test static enum method does not complete after dot operator`() = testDisallowedCompletions("""
         enum Foo {
