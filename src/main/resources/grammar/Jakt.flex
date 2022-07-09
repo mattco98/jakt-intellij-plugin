@@ -39,9 +39,11 @@ WHITE_SPACE=[\t ]+
 NEWLINE=[\r\n]
 
 HEX_LITERAL=(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*
-DECIMAL_LITERAL=\d[_\d]*
 OCTAL_LITERAL=(0o|0O)[0-7][_0-7]*
 BINARY_LITERAL=(0b|0B)[01][_01]*
+DECIMAL_LITERAL={DECIMAL_PART}(\.{DECIMAL_PART})?
+DECIMAL_PART=\d[_\d]*
+
 IDENTIFIER=[A-Za-z_][a-zA-Z_0-9]*
 DOC_COMMENT=(\/\/\/[^\r\n]*)+
 COMMENT=(\/\/[^\r\n]*)+
