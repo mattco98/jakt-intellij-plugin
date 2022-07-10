@@ -43,16 +43,22 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         private val obviousTypes = setOf(STRING_LITERAL, BYTE_CHAR_LITERAL, CHAR_LITERAL)
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-            if (element !is JaktVariableDeclarationStatement)
-                return true
+            val (hint, offset) = when (element) {
+                is JaktVariableDeclarationStatement -> {
+                    if (element.typeAnnotation != null)
+                        return true
 
-            if (settings.omitObviousTypes && isObvious(element.expression))
-                return true
+                    if (settings.omitObviousTypes && isObvious(element.expression))
+                        return true
 
-            val hint = typeHintFor(element.expression.jaktType)
+                    typeHintFor(element.expression.jaktType) to element.identifier.endOffset
+                }
+                is JaktForDecl -> typeHintFor(element.jaktType) to element.endOffset
+                else -> return true
+            }
 
             sink.addInlineElement(
-                element.identifier.endOffset,
+                offset,
                 false,
                 factory.roundWithBackground(factory.seq(factory.text(": "), hint)),
                 false,
@@ -80,16 +86,13 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 is OptionalType -> seq(typeHintFor(type.underlyingType), text("?"))
                 is RawType -> seq(text("raw "), typeHintFor(type.underlyingType))
                 is SetType -> seq(text("{"), typeHintFor(type.underlyingType), text("}"))
-                is TupleType -> collapsible(
-                    prefix = text("("),
-                    collapsed = text("..."),
-                    expanded = {
-                        join(
-                            type.types.map(::typeHintFor),
-                            separator = { text(", ") }
-                        )
-                    },
-                    suffix = text(")"),
+                is TupleType -> seq(
+                    text("("),
+                    join(
+                        type.types.map(::typeHintFor),
+                        separator = { text(", ") }
+                    ),
+                    text(")"),
                 )
                 is TypeParameter -> text(type.name)
                 is WeakType -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
