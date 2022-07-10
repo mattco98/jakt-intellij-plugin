@@ -42,6 +42,16 @@ object TypeInference {
                 // The types must be the same. Let the external annotator catch the case where they are not
                 element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
             }
+            is JaktIsExpression -> PrimitiveType.Bool
+            is JaktCastExpression -> element.type.jaktType.let { t ->
+                when {
+                    element.questionMark != null -> OptionalType(t)
+                    element.exclamationPoint != null -> BoundType.withInner(t) {
+                        if (it is OptionalType) it.underlyingType else it
+                    }
+                    else -> UnknownType
+                }
+            }
             is JaktUnaryExpression -> when {
                 element.findChildOfType(JaktTypes.PLUS_PLUS) != null ||
                     element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
@@ -51,16 +61,13 @@ object TypeInference {
                 element.asterisk != null -> element.expression.jaktType.let {
                     if (it is RawType) it.underlyingType else UnknownType
                 }
-                element.keywordIs != null || element.keywordNot != null -> PrimitiveType.Bool
-                element.keywordAs != null -> element.type?.jaktType?.let {
-                    if (element.questionMark != null) OptionalType(it) else it
-                } ?: UnknownType
+                element.keywordNot != null -> PrimitiveType.Bool
                 element.exclamationPoint != null -> element.expression.jaktType.let {
                     if (it is OptionalType) it.underlyingType else it
                 }
                 else -> unreachable()
             }
-            is JaktParenExpression -> element.expression?.jaktType ?: UnknownType
+            is JaktParenExpression -> element.expression.jaktType
             is JaktIndexedAccessExpression -> UnknownType // TODO
             is JaktThisExpression ->
                 (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType

@@ -111,8 +111,8 @@ class JaktResolver(private val scope: PsiElement) {
         private fun resolveType(qualifier: JaktPlainQualifier): PsiElement? {
             // Check for shorthand enum type in `is` expression
             if (qualifier.plainQualifier == null) {
-                val unaryExpr = qualifier.ancestorOfType<JaktUnaryExpression>()
-                if (unaryExpr?.keywordIs != null && (unaryExpr.type as JaktPlainType).plainQualifier == qualifier) {
+                val unaryExpr = qualifier.ancestorOfType<JaktIsExpression>()
+                if ((unaryExpr?.type as? JaktPlainType)?.plainQualifier == qualifier) {
                     val baseType = unaryExpr.expression.jaktType
                     if (baseType is EnumVariantType && baseType.name == qualifier.name)
                         return baseType.psiElement
