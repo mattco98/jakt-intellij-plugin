@@ -156,18 +156,20 @@ class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseTyp
     }
 }
 
-private fun getPreludeType(project: Project, type: String) =
-    project.jaktProject.findPreludeDeclaration(type)?.jaktType ?: UnknownType
+fun getSpecializedPreludeType(project: Project, type: String, vararg specializations: Type): Type {
+    val structType = project.jaktProject.findPreludeDeclaration(type)?.jaktType ?: return UnknownType
+    return applySpecializations(structType, specializations.toList())
+}
 
 fun Type.resolveToBuiltinType(project: Project): Type {
     return when (this) {
-        is ArrayType -> getPreludeType(project, "Array")
-        is DictionaryType -> getPreludeType(project, "Dictionary")
-        is OptionalType -> getPreludeType(project, "Optional")
-        is SetType -> getPreludeType(project, "Set")
-        is TupleType -> getPreludeType(project, "Tuple")
-        is WeakType -> getPreludeType(project, "Weak")
-        PrimitiveType.String -> getPreludeType(project, "String")
+        is ArrayType -> getSpecializedPreludeType(project, "Array", underlyingType)
+        is DictionaryType -> getSpecializedPreludeType(project, "Dictionary", keyType, valueType)
+        is OptionalType -> getSpecializedPreludeType(project, "Optional", underlyingType)
+        is SetType -> getSpecializedPreludeType(project, "Set", underlyingType)
+        is TupleType -> getSpecializedPreludeType(project, "Tuple", *types.toTypedArray())
+        is WeakType -> getSpecializedPreludeType(project, "Weak", underlyingType)
+        PrimitiveType.String -> getSpecializedPreludeType(project, "String")
         else -> this
     }
 }

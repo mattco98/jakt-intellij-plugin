@@ -184,6 +184,9 @@ fun applySpecializations(type: Type, specializations: List<Type>): Type {
 }
 
 fun applySpecializations(type: Type, specializations: Map<TypeParameter, Type>): Type {
+    if (specializations.isEmpty())
+        return type
+
     if (type is BoundType)
         return applySpecializations(type.type, specializations + type.specializations)
 

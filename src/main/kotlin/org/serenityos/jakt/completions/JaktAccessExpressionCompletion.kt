@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.ProcessingContext
 import org.intellij.sdk.language.psi.JaktAccessExpression
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.type.*
 
@@ -26,11 +25,8 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
         project: Project,
         preludeType: String,
         vararg specializations: Type,
-    ): List<Pair<String, Type>> {
-        val declType = project.jaktProject.findPreludeDeclaration(preludeType)?.jaktType ?: return emptyList()
-        val type = applySpecializations(declType, specializations.toList())
-        return getTypeCompletionPairs(project, type)
-    }
+    ): List<Pair<String, Type>> =
+        getTypeCompletionPairs(project, getSpecializedPreludeType(project, preludeType, *specializations))
 
     private fun getTypeCompletionPairs(project: Project, type: Type): List<Pair<String, Type>> = when (type) {
         is TupleType -> type.types.mapIndexed { index, t -> index.toString() to t }
