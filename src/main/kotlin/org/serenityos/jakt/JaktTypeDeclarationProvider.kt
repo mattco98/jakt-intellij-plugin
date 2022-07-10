@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration
+import org.serenityos.jakt.type.BoundType
 import org.serenityos.jakt.type.EnumVariantType
 import org.serenityos.jakt.type.FunctionType
 import org.serenityos.jakt.type.resolveToBuiltinType
@@ -16,10 +17,12 @@ class JaktTypeDeclarationProvider : TypeDeclarationProvider {
 
         val symbolType = (symbol as? JaktTypeable)?.jaktType ?: return null
 
-        val type = when (symbolType) {
-            is FunctionType -> symbolType.returnType
-            is EnumVariantType -> symbolType.parent
-            else -> symbolType
+        val type = BoundType.withInner(symbolType) {
+            when (it) {
+                is FunctionType -> it.returnType
+                is EnumVariantType -> it.parent
+                else -> it
+            }
         }
 
         val decl = type.resolveToBuiltinType(symbol.project).psiElement ?: return null

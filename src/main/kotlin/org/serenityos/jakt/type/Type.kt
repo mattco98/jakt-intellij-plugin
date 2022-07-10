@@ -151,7 +151,11 @@ class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseTyp
             if (type !is BoundType)
                 return block(type)
 
-            return BoundType(block(type.type), type.specializations)
+            // TODO: This feels like it doesn't belong here
+            val newType = block(type.type)
+            return if (newType is TypeParameter) {
+                type.specializations[newType] ?: UnknownType
+            } else BoundType(newType, type.specializations)
         }
     }
 }
