@@ -18,6 +18,9 @@ class JaktExternalAnnotator : ExternalAnnotator<PsiFile, JaktExternalAnnotator.T
     override fun collectInformation(file: PsiFile) = file
 
     override fun doAnnotate(file: PsiFile): TypecheckResult? {
+        if (ApplicationManager.getApplication().isUnitTestMode)
+            return null
+
         // Ensure file is flushed to file system
         val fileDocumentManager = FileDocumentManager.getInstance()
 
