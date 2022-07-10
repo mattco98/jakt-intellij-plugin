@@ -103,7 +103,7 @@ ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
 }
 private ImportAs ::= KEYWORD_AS IDENTIFIER
-ImportBraceList ::= CURLY_OPEN <<commaOrEolList ImportBraceEntry>>? CURLY_CLOSE
+ImportBraceList ::= CURLY_OPEN NL <<commaOrEolList ImportBraceEntry>>? NL CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
@@ -277,7 +277,7 @@ ForDecl ::= IDENTIFIER {
 UnsafeStatement ::= UNSAFE_KEYWORD Block
 InlineCppStatement ::= CPP_KEYWORD Block
 
-Block ::= NL CURLY_OPEN NLSEMI <<withOff StatementList? "NO_ASSIGN">> NLSEMI CURLY_CLOSE {
+Block ::= NL CURLY_OPEN NLSEMI StatementList? NLSEMI CURLY_CLOSE {
     extends=Statement
 }
 
@@ -331,7 +331,8 @@ GenericBound ::= IDENTIFIER {
 
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
-      IndexedAccessExpression // Must come before AccessExpression
+      MatchExpression // TODO: Why does this have to be first
+    | IndexedAccessExpression // Must come before AccessExpression
     | AccessExpression // Must come before CallExpression
     | CallExpression // Must come before RelationalBinaryExpression (because of generics)
     | AssignmentBinaryExpression // Must come before other binary expressions
@@ -354,7 +355,6 @@ Expression ::=
     | SetExpression
     | TupleExpression // Must come before ParenExpression
     | ParenExpression
-    | MatchExpression
     | Literal
     | PlainQualifierExpr
 
@@ -399,8 +399,8 @@ DictionaryElement ::= Expression COLON NL Expression
 SetExpression ::= CURLY_OPEN NL <<commaOrEolList Expression>>? NL CURLY_CLOSE
 TupleExpression ::= PAREN_OPEN NL <<commaOrEolList Expression>> NL PAREN_CLOSE
 
-MatchExpression ::= MATCH_KEYWORD Expression NL MatchBody
-MatchBody ::= CURLY_OPEN NL MatchCases? NL CURLY_CLOSE
+MatchExpression ::= MATCH_KEYWORD Expression MatchBody
+MatchBody ::= NL CURLY_OPEN NL [MatchCases NL] CURLY_CLOSE
 private MatchCases ::= <<commaOrEolList MatchCase>>
 MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.api.JaktScope"
