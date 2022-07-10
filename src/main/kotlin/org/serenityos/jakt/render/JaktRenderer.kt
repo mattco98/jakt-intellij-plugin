@@ -88,11 +88,11 @@ sealed class JaktRenderer {
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is DictionaryType -> {
-                appendStyled("{", Highlights.DELIM_BRACE)
+                appendStyled("[", Highlights.DELIM_BRACE)
                 appendType(type.keyType, specializations)
                 appendStyled(":", Highlights.COLON)
                 appendType(type.valueType, specializations)
-                appendStyled("}", Highlights.DELIM_BRACE)
+                appendStyled("]", Highlights.DELIM_BRACE)
             }
             is TupleType -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
