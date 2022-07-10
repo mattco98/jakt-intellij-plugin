@@ -12,21 +12,23 @@ abstract class JaktAccessExpressionMixin(
 ) : JaktNamedElement(node), JaktAccessExpression {
     override val jaktType: Type
         get() = typeCache().resolveWithCaching(this) {
-            val baseType = expression.jaktType.resolveToBuiltinType(project)
+            val type = expression.jaktType
 
+            // TODO: This is so ugly
             if (decimalLiteral != null) {
-                if (baseType is TupleType) {
-                    baseType.types.getOrNull(decimalLiteral!!.text.toInt()) ?: UnknownType
-                } else UnknownType
+                BoundType.withInner(type) {
+                    (it as? TupleType)?.types?.getOrNull(decimalLiteral!!.text.toInt()) ?: UnknownType
+                }
             } else {
                 val name = identifier!!.text
 
-                BoundType.withInner(baseType) {
+                BoundType.withInner(type.resolveToBuiltinType(project)) {
                     when (it) {
                         is StructType -> it.fields[name]
                             ?: it.methods[name]?.takeIf(FunctionType::hasThis)
                             ?: UnknownType
-                        is EnumVariantType -> it.parent.methods[name]?.takeIf(FunctionType::hasThis) ?: UnknownType
+                        is EnumVariantType -> it.parent.methods[name]?.takeIf(FunctionType::hasThis)
+                            ?: UnknownType
                         is EnumType -> it.methods[name]?.takeIf(FunctionType::hasThis) ?: UnknownType
                         else -> UnknownType
                     }
