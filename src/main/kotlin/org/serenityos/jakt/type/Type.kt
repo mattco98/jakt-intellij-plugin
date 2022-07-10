@@ -100,7 +100,7 @@ class StructType(
 
 class EnumType(
     override val name: String,
-    val underlyingType: PrimitiveType?,
+    var underlyingType: PrimitiveType?,
     override var typeParameters: List<TypeParameter>,
     val variants: Map<String, EnumVariantType>,
     val methods: Map<String, FunctionType>,

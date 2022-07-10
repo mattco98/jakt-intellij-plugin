@@ -12,7 +12,7 @@ import org.serenityos.jakt.utils.recursivelyGuarded
 abstract class JaktEnumDeclarationMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktEnumDeclaration {
-    override val jaktType by recursivelyGuarded<Type> {
+    override val jaktType by recursivelyGuarded<EnumType> {
         val variants = mutableMapOf<String, EnumVariantType>()
         val methods = mutableMapOf<String, FunctionType>()
 
@@ -24,7 +24,7 @@ abstract class JaktEnumDeclarationMixin(
 
             EnumType(
                 nameNonNull,
-                underlyingTypeEnumBody?.typeAnnotation?.jaktType as? PrimitiveType,
+                null, // TODO: Why does calculating this in the producer cause a StackOverflow?
                 typeParameters,
                 variants,
                 methods,
@@ -33,7 +33,7 @@ abstract class JaktEnumDeclarationMixin(
             }
         }
 
-        initializer {
+        initializer { enum ->
             variants.putAll(underlyingTypeEnumBody?.enumVariantList?.associate {
                 it.nameNonNull to it.jaktType as EnumVariantType
             } ?: normalEnumBody?.normalEnumMemberList?.mapNotNull {
@@ -47,6 +47,8 @@ abstract class JaktEnumDeclarationMixin(
             }?.associate {
                 it.nameNonNull to it.jaktType as FunctionType
             } ?: emptyMap())
+
+            enum.underlyingType = underlyingTypeEnumBody?.typeAnnotation?.jaktType as? PrimitiveType
         }
     }
 
