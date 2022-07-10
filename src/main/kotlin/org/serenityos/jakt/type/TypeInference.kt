@@ -7,7 +7,6 @@ import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
@@ -34,35 +33,34 @@ object TypeInference {
             is JaktBitwiseAndBinaryExpression,
             is JaktBitwiseXorBinaryExpression -> {
                 // The types must be the same. Let the external annotator catch the case where they are not
-                inferType(element.findChildrenOfType<JaktExpression>()[0])
+                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
             }
             is JaktRelationalBinaryExpression -> PrimitiveType.Bool
             is JaktShiftBinaryExpression,
             is JaktAddBinaryExpression,
             is JaktMultiplyBinaryExpression -> {
                 // The types must be the same. Let the external annotator catch the case where they are not
-                inferType(element.findChildrenOfType<JaktExpression>()[0])
+                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
             }
             is JaktUnaryExpression -> when {
                 element.findChildOfType(JaktTypes.PLUS_PLUS) != null ||
                     element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
                     element.minus != null ||
-                    element.tilde != null -> inferType(element.expression)
-                element.rawKeyword != null -> RawType(inferType(element.expression))
-                element.asterisk != null -> inferType(element.expression).let {
+                    element.tilde != null -> element.expression.jaktType
+                element.rawKeyword != null -> RawType(element.expression.jaktType)
+                element.asterisk != null -> element.expression.jaktType.let {
                     if (it is RawType) it.underlyingType else UnknownType
                 }
                 element.keywordIs != null || element.keywordNot != null -> PrimitiveType.Bool
                 element.keywordAs != null -> element.type?.jaktType?.let {
                     if (element.questionMark != null) OptionalType(it) else it
                 } ?: UnknownType
-                element.exclamationPoint != null -> inferType(element.expression).let {
+                element.exclamationPoint != null -> element.expression.jaktType.let {
                     if (it is OptionalType) it.underlyingType else it
                 }
                 else -> unreachable()
             }
-            is JaktParenExpression -> inferType(element.findNotNullChildOfType())
-            is JaktAccessExpression -> (element.reference?.resolve() as? JaktDeclaration)?.jaktType ?: UnknownType
+            is JaktParenExpression -> element.expression?.jaktType ?: UnknownType
             is JaktIndexedAccessExpression -> UnknownType // TODO
             is JaktThisExpression ->
                 (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType
@@ -75,30 +73,21 @@ object TypeInference {
             is JaktRangeExpression -> UnknownType // TODO
             is JaktArrayExpression -> when {
                 element.sizedArrayBody != null -> ArrayType(
-                    inferType(
-                        element.sizedArrayBody!!.findChildrenOfType<JaktExpression>().first()
-                    )
+                    element.sizedArrayBody?.expressionList?.first()?.jaktType ?: UnknownType
                 )
-                element.elementsArrayBody != null -> {
-                    val expressions = element.elementsArrayBody!!.findChildrenOfType<JaktExpression>()
-                    ArrayType(expressions.firstOrNull()?.let(TypeInference::inferType) ?: UnknownType)
-                }
+                element.elementsArrayBody != null ->
+                    ArrayType(element.elementsArrayBody?.expressionList?.firstOrNull()?.jaktType ?: UnknownType)
                 else -> ArrayType(UnknownType)
             }
             is JaktDictionaryExpression -> {
                 val els = element.findChildrenOfType<JaktDictionaryElement>()
                 if (els.isNotEmpty()) {
                     val (k, v) = els[0].expressionList
-                    DictionaryType(inferType(k), inferType(v))
+                    DictionaryType(k.jaktType, v.jaktType)
                 } else DictionaryType(UnknownType, UnknownType)
             }
-            is JaktSetExpression -> {
-                val expr = element.findChildOfType<JaktExpression>()
-                SetType(expr?.let(TypeInference::inferType) ?: UnknownType)
-            }
-            is JaktTupleExpression -> TupleType(
-                element.findChildrenOfType<JaktExpression>().map(TypeInference::inferType)
-            )
+            is JaktSetExpression -> SetType(element.expressionList.firstOrNull()?.jaktType ?: UnknownType)
+            is JaktTupleExpression -> TupleType(element.expressionList.map { it.jaktType })
             is JaktMatchExpression -> getMatchExpressionType(element)
             is JaktNumericLiteral -> getNumericLiteralType(element)
             is JaktBooleanLiteral -> PrimitiveType.Bool
@@ -108,7 +97,7 @@ object TypeInference {
                 JaktTypes.CHAR_LITERAL -> PrimitiveType.CChar
                 else -> unreachable()
             }
-            is JaktAssignmentBinaryExpression -> inferType(element.right!!) // TODO: Probably very wrong
+            is JaktAssignmentBinaryExpression -> element.right?.jaktType ?: UnknownType // TODO: Probably very wrong
             is JaktPlainQualifierExpr -> element.plainQualifier.jaktType
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
@@ -125,7 +114,7 @@ object TypeInference {
         return when (name) {
             "Some" -> if (args.size == 1) {
                 val arg = args[0].unlabeledArgument?.allChildren?.firstOrNull() as? JaktExpression ?: return null
-                OptionalType(inferType(arg))
+                OptionalType(arg.jaktType)
             } else UnknownType
             "None" -> OptionalType(UnknownType)
             else -> null

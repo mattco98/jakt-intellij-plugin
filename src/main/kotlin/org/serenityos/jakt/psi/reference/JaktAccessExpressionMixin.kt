@@ -2,6 +2,7 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktAccessExpression
+import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.caching.typeCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
@@ -11,7 +12,7 @@ abstract class JaktAccessExpressionMixin(
 ) : JaktNamedElement(node), JaktAccessExpression {
     override val jaktType: Type
         get() = typeCache().resolveWithCaching(this) {
-            val baseType = TypeInference.inferType(expression).resolveToBuiltinType(project)
+            val baseType = expression.jaktType.resolveToBuiltinType(project)
 
             if (decimalLiteral != null) {
                 if (baseType is TupleType) {
@@ -39,7 +40,7 @@ abstract class JaktAccessExpressionMixin(
         if (decimalLiteral != null)
             return@singleRef null
 
-        val baseType = TypeInference.inferType(expression).resolveToBuiltinType(project)
+        val baseType = expression.jaktType.resolveToBuiltinType(project)
         val baseDecl = baseType.psiElement ?: return@singleRef null
         JaktResolver(baseDecl).findDeclaration(name!!, JaktResolver.INSTANCE)
     }
