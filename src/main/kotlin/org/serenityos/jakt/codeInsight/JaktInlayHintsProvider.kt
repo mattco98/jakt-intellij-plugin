@@ -5,6 +5,7 @@ import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.elementType
 import com.intellij.refactoring.suggested.endOffset
 import org.intellij.sdk.language.psi.*
@@ -128,7 +129,9 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 val target = element.expression
                 if (target is JaktPlainQualifierExpr) {
                     val resolved = target.plainQualifier.reference?.resolve()
-                    return resolved is JaktEnumVariant || resolved is JaktStructDeclaration
+                    return if (resolved is JaktEnumVariant || resolved is JaktStructDeclaration) {
+                        target.text == (resolved as PsiNameIdentifierOwner).name
+                    } else false
                 }
             }
 
