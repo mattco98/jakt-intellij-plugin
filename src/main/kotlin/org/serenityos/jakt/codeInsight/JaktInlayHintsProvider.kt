@@ -1,7 +1,6 @@
 package org.serenityos.jakt.codeInsight
 
 import com.intellij.codeInsight.hints.*
-import com.intellij.codeInsight.hints.presentation.InlayPresentation
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -11,8 +10,7 @@ import com.intellij.refactoring.suggested.endOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.type.*
-import org.serenityos.jakt.utils.unreachable
+import org.serenityos.jakt.render.renderType
 import javax.swing.JPanel
 
 @Suppress("UnstableApiUsage")
@@ -51,9 +49,9 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     if (settings.omitObviousTypes && isObvious(element.expression))
                         return true
 
-                    typeHintFor(element.expression.jaktType) to element.identifier.endOffset
+                    factory.text(renderType(element.expression.jaktType, asHtml = false)) to element.identifier.endOffset
                 }
-                is JaktForDecl -> typeHintFor(element.jaktType) to element.endOffset
+                is JaktForDecl -> factory.text(renderType(element.jaktType, asHtml = false)) to element.endOffset
                 else -> return true
             }
 
@@ -65,63 +63,6 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
             )
 
             return true
-        }
-
-        private fun typeHintFor(type: Type): InlayPresentation = with(factory) {
-            return when (type) {
-                is PrimitiveType -> text(type.typeName)
-                is ArrayType -> seq(text("["), typeHintFor(type.underlyingType), text("]"))
-                is EnumVariantType -> text(type.name)
-                is EnumType -> text(type.name)
-                is FunctionType -> typeHintFor(UnknownType) // Jakt doesn't have method refs yet
-                is NamespaceType -> typeHintFor(UnknownType) // Can't have namespace ref
-                is StructType -> text(type.name)
-                is DictionaryType -> seq(
-                    text("["),
-                    typeHintFor(type.keyType),
-                    text(": "),
-                    typeHintFor(type.valueType),
-                    text("]"),
-                )
-                is OptionalType -> seq(typeHintFor(type.underlyingType), text("?"))
-                is RawType -> seq(text("raw "), typeHintFor(type.underlyingType))
-                is SetType -> seq(text("{"), typeHintFor(type.underlyingType), text("}"))
-                is TupleType -> seq(
-                    text("("),
-                    join(
-                        type.types.map(::typeHintFor),
-                        separator = { text(", ") }
-                    ),
-                    text(")"),
-                )
-                is TypeParameter -> text(type.name)
-                is WeakType -> seq(text("weak "), typeHintFor(type.underlyingType), text("?"))
-                is BoundType -> {
-                    val typeParameters = (type.type as? GenericType)?.typeParameters.orEmpty()
-                    typeHintForGenerics(
-                        typeHintFor(type.type),
-                        typeParameters.map { type.specializations[it] ?: it },
-                    )
-                }
-                UnknownType -> text("???")
-                else -> unreachable()
-            }
-        }
-
-        private fun typeHintForGenerics(
-            primaryHint: InlayPresentation,
-            generics: List<Type>,
-        ) = with(factory) {
-            if (generics.isEmpty()) {
-                primaryHint
-            } else {
-                seq(
-                    primaryHint,
-                    text("<"),
-                    join(generics.map(::typeHintFor)) { text(", ") },
-                    text(">"),
-                )
-            }
         }
 
         private fun isObvious(element: PsiElement): Boolean {
