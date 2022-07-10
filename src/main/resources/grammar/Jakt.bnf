@@ -260,7 +260,17 @@ ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
-TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD IDENTIFIER Statement
+
+TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD CatchDecl Statement {
+    implements="org.serenityos.jakt.psi.api.JaktScope"
+    mixin="org.serenityos.jakt.psi.declaration.JaktTryStatementMixin"
+}
+
+CatchDecl ::= IDENTIFIER {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktCatchDeclMixin"
+}
+
 BreakStatement ::= BREAK_KEYWORD
 ContinueStatement ::= CONTINUE_KEYWORD
 YieldStatement ::= YIELD_KEYWORD Expression
