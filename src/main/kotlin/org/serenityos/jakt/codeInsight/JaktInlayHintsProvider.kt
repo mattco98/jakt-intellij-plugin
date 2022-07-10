@@ -46,7 +46,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 return true
 
             if (settings.omitObviousTypes && isObvious(element.expression))
-                return false
+                return true
 
             val hint = typeHintFor(element.expression.jaktType)
 
@@ -57,7 +57,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 false,
             )
 
-            return false
+            return true
         }
 
         private fun typeHintFor(type: Type): InlayPresentation = with(factory) {
