@@ -94,7 +94,7 @@ object TypeInference {
             is JaktTupleExpression -> TupleType(
                 element.findChildrenOfType<JaktExpression>().map(TypeInference::inferType)
             )
-            is JaktMatchExpression -> UnknownType // TODO
+            is JaktMatchExpression -> getMatchExpressionType(element)
             is JaktNumericLiteral -> getNumericLiteralType(element)
             is JaktBooleanLiteral -> PrimitiveType.Bool
             is JaktLiteral -> when (element.firstChild.elementType) {
@@ -144,5 +144,31 @@ object TypeInference {
                 PrimitiveType.F64
             } else PrimitiveType.I64
         }
+    }
+
+    private fun getMatchExpressionType(element: JaktMatchExpression): Type {
+        val body = element.matchBody ?: return PrimitiveType.Void
+
+        val types = body.matchCaseList.map {
+            when (val target = it.matchCaseTrail.let { trail -> trail.expression ?: trail.block }) {
+                is JaktBlock -> getBlockType(target)
+                is JaktExpression -> target.jaktType
+                else -> UnknownType
+            }
+        }
+
+        if (types.isEmpty())
+            return PrimitiveType.Void
+
+        return types.reduce { prev, curr -> if (!prev.equivalentTo(curr)) UnknownType else prev }
+    }
+
+    private fun getBlockType(element: JaktBlock): Type {
+        for (statement in element.statementList) {
+            if (statement is JaktYieldStatement)
+                return statement.expression.jaktType
+        }
+
+        return PrimitiveType.Void
     }
 }
