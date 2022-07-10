@@ -26,7 +26,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
             is JaktLabeledArgument -> {
                 val isCtorLabel = if (!DumbService.isDumb(element.project)) {
-                    element.ancestorOfType<JaktCallExpression>()?.expression?.reference?.resolve() is JaktStructDeclaration
+                    element.reference?.resolve() is JaktStructField
                 } else false
 
                 val highlight = if (isCtorLabel) {
