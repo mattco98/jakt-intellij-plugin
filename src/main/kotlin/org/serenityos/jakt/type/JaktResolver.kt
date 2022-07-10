@@ -15,17 +15,17 @@ import org.serenityos.jakt.psi.reference.isType
 class JaktResolver(private val scope: PsiElement) {
     fun findDeclaration(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): JaktDeclaration? {
         if (scope is JaktVariableDeclarationStatement)
-            return scope.takeIf { it.name == name && resolutionStrategy(it) }?.unwrapImport()
+            return scope.takeIf { it.name == name && resolutionStrategy(it) }
 
         if (scope is JaktGeneric) {
             scope.getDeclGenericBounds()
-                .find { it.name == name && resolutionStrategy(it) }
+                .find { it.name == name && it.unwrapImport()?.let(resolutionStrategy) == true }
                 ?.let { return it.unwrapImport() }
         }
 
         if (scope is JaktScope) {
             scope.getDeclarations()
-                .find { it.name == name && resolutionStrategy(it) }
+                .find { it.name == name && it.unwrapImport()?.let(resolutionStrategy) == true }
                 ?.let { return it.unwrapImport() }
         }
 

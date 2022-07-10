@@ -12,7 +12,4 @@ interface JaktTypeable : JaktPsiElement {
 val JaktExpression.jaktType: Type
     get() = if (this is JaktTypeable) {
         this.jaktType
-    } else {
-        TypeInference.inferType(this)
-    }
-
+    } else TypeInference.inferType(this)
