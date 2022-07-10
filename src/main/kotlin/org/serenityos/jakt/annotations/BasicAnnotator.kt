@@ -41,7 +41,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 if (element.identifier != null) {
                     val isDumb = DumbService.isDumb(element.project)
                     var identHighlight = Highlights.IDENTIFIER
-                    val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element.parent ||
+                    val isCall = element.ancestorOfType<JaktCallExpression>()?.expression == element ||
                         element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null
 
                     if (!isDumb) {
