@@ -13,7 +13,7 @@ abstract class JaktForDeclMixin(node: ASTNode) : JaktNamedElement(node), JaktFor
     override val jaktType: Type
         get() = typeCache().resolveWithCaching(this) {
             val forStatement = ancestorOfType<JaktForStatement>() ?: return@resolveWithCaching UnknownType
-            val iteratorType = forStatement.expression.jaktType
+            val iteratorType = forStatement.expression.jaktType.resolveToBuiltinType(project)
 
             BoundType.withInner(iteratorType) {
                 if (it is StructType) {

@@ -123,7 +123,7 @@ sealed class JaktRenderer {
             is TypeParameter -> {
                 val specializedType = specializations[type]
                 if (specializedType != null) {
-                    appendType(specializedType, specializations, options.withExpression())
+                    appendType(specializedType, specializations, options)
                 } else appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
             }
             is StructType -> {
@@ -182,7 +182,7 @@ sealed class JaktRenderer {
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {
-            appendType(parameter, emptyMap(), options)
+            appendType(parameter, emptyMap(), options.withExpression())
             if (index != parameters.lastIndex)
                 append(", ")
         }
