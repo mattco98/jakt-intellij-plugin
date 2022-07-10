@@ -23,7 +23,10 @@ object TypeInference {
                     else -> {}
                 }
 
-                specialize(baseType, element)
+                when (val specializedType = specialize(baseType, element)) {
+                    is FunctionType -> specializedType.returnType
+                    else -> specializedType
+                }
             }
             is JaktLogicalOrBinaryExpression,
             is JaktLogicalAndBinaryExpression -> PrimitiveType.Bool
@@ -64,7 +67,9 @@ object TypeInference {
             is JaktThisExpression ->
                 (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType
             is JaktFieldAccessExpression -> {
-                val thisDecl = element.ancestorOfType<JaktStructDeclaration>() ?: return UnknownType
+                val thisDecl = element.ancestors().filterIsInstance<JaktScope>().find {
+                    it is JaktStructDeclaration || it is JaktEnumDeclaration
+                } ?: return UnknownType
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
             is JaktRangeExpression -> UnknownType // TODO
