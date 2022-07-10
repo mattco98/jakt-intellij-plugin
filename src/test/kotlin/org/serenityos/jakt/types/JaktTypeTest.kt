@@ -34,7 +34,7 @@ abstract class JaktTypeTest : JaktBaseTest() {
                     ?: error("Type tag does not point to a typeable element")
             }
 
-            num - 1 to renderType(type, asHtml = false)
+            num - 1 to renderType(type)
         }
 
         check(taggedElements.map { it.first }.toSet().size == taggedElements.size) {

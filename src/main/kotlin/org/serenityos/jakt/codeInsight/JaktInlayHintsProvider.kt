@@ -49,9 +49,10 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     if (settings.omitObviousTypes && isObvious(element.expression))
                         return true
 
-                    factory.text(renderType(element.expression.jaktType, asHtml = false)) to element.identifier.endOffset
+                    val renderedType = renderType(element.expression.jaktType)
+                    factory.text(renderedType) to element.identifier.endOffset
                 }
-                is JaktForDecl -> factory.text(renderType(element.jaktType, asHtml = false)) to element.endOffset
+                is JaktForDecl -> factory.text(renderType(element.jaktType)) to element.endOffset
                 else -> return true
             }
 

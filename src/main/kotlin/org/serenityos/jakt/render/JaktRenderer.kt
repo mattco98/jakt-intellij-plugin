@@ -12,14 +12,23 @@ import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.unreachable
 
-fun renderElement(element: PsiElement, asHtml: Boolean): String {
-    val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
-    return renderer.renderElement(element)
+fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): String {
+    val options = RenderOptions().apply(builder)
+    val renderer = if (options.asHtml) JaktRenderer.HTML else JaktRenderer.Plain
+    return renderer.renderElement(element, options)
 }
 
-fun renderType(type: Type, asHtml: Boolean): String {
-    val renderer = if (asHtml) JaktRenderer.HTML else JaktRenderer.Plain
-    return renderer.renderType(type)
+fun renderType(type: Type, builder: RenderOptions.() -> Unit = {}): String {
+    val options = RenderOptions().apply(builder)
+    val renderer = if (options.asHtml) JaktRenderer.HTML else JaktRenderer.Plain
+    return renderer.renderType(type, options)
+}
+
+data class RenderOptions(
+    var asHtml: Boolean = false,
+    var asExpression: Boolean = false,
+) {
+    fun withExpression() = copy(asExpression = true)
 }
 
 /**
@@ -32,29 +41,33 @@ fun renderType(type: Type, asHtml: Boolean): String {
 sealed class JaktRenderer {
     protected abstract val builder: Builder
 
-    fun renderElement(element: PsiElement): String = withSynchronized(builder) {
+    fun renderElement(element: PsiElement, options: RenderOptions): String = withSynchronized(builder) {
         clear()
 
         when (element) {
             is JaktFieldAccessExpression -> {
                 appendStyled(element.name!!, Highlights.STRUCT_FIELD)
                 append(": ")
-                appendType(element.jaktType, emptyMap())
+                appendType(element.jaktType, emptyMap(), options)
             }
-            is JaktTypeable -> appendType(element.jaktType, emptyMap())
+            is JaktTypeable -> appendType(element.jaktType, emptyMap(), options)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
         }
 
         toString()
     }
 
-    fun renderType(type: Type): String = withSynchronized(builder) {
+    fun renderType(type: Type, options: RenderOptions): String = withSynchronized(builder) {
         clear()
-        appendType(type, emptyMap())
+        appendType(type, emptyMap(), options)
         toString()
     }
 
-    private fun appendType(type: Type, specializations: Map<TypeParameter, Type>): Unit = withSynchronized(builder) {
+    private fun appendType(
+        type: Type,
+        specializations: Map<TypeParameter, Type>,
+        options: RenderOptions,
+    ): Unit = withSynchronized(builder) {
         renderNamespaces(type)
 
         when (type) {
@@ -63,41 +76,45 @@ sealed class JaktRenderer {
                 if (type != PrimitiveType.Void)
                     appendStyled(type.typeName, Highlights.TYPE_NAME)
             }
-            is NamespaceType -> appendStyled(type.name, Highlights.NAMESPACE_NAME)
+            is NamespaceType -> {
+                if (!options.asExpression)
+                    appendStyled("namespace ", Highlights.KEYWORD_DECLARATION)
+                appendStyled(type.name, Highlights.NAMESPACE_NAME)
+            }
             is WeakType -> {
                 appendStyled("weak ", Highlights.KEYWORD_MODIFIER)
-                appendType(type.underlyingType, specializations)
+                appendType(type.underlyingType, specializations, options.withExpression())
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is RawType -> {
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
-                appendType(type.underlyingType, specializations)
+                appendType(type.underlyingType, specializations, options.withExpression())
             }
             is OptionalType -> {
-                appendType(type.underlyingType, specializations)
+                appendType(type.underlyingType, specializations, options.withExpression())
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is ArrayType -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)
-                appendType(type.underlyingType, specializations)
+                appendType(type.underlyingType, specializations, options.withExpression())
                 appendStyled("]", Highlights.DELIM_BRACKET)
             }
             is SetType -> {
                 appendStyled("{", Highlights.DELIM_BRACE)
-                appendType(type.underlyingType, specializations)
+                appendType(type.underlyingType, specializations, options.withExpression())
                 appendStyled("}", Highlights.DELIM_BRACE)
             }
             is DictionaryType -> {
                 appendStyled("[", Highlights.DELIM_BRACE)
-                appendType(type.keyType, specializations)
+                appendType(type.keyType, specializations, options.withExpression())
                 appendStyled(":", Highlights.COLON)
-                appendType(type.valueType, specializations)
+                appendType(type.valueType, specializations, options.withExpression())
                 appendStyled("]", Highlights.DELIM_BRACE)
             }
             is TupleType -> {
                 appendStyled("(", Highlights.DELIM_PARENTHESIS)
                 type.types.forEachIndexed { index, it ->
-                    appendType(it, specializations)
+                    appendType(it, specializations, options.withExpression())
                     if (index != type.types.lastIndex)
                         append(", ")
                 }
@@ -106,36 +123,38 @@ sealed class JaktRenderer {
             is TypeParameter -> {
                 val specializedType = specializations[type]
                 if (specializedType != null) {
-                    appendType(specializedType, specializations)
+                    appendType(specializedType, specializations, options.withExpression())
                 } else appendStyled(type.name, Highlights.TYPE_GENERIC_NAME)
             }
             is StructType -> {
-                appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
+                if (!options.asExpression)
+                    appendStyled("struct ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.STRUCT_NAME)
-                renderGenerics(type, specializations)
+                renderGenerics(type, specializations, options)
             }
             is EnumType -> {
-                appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
+                if (!options.asExpression)
+                    appendStyled("enum ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.ENUM_NAME)
-                renderGenerics(type, specializations)
+                renderGenerics(type, specializations, options)
             }
             is EnumVariantType -> {
                 appendStyled(type.parent.name, Highlights.ENUM_NAME)
                 appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
                 appendStyled(type.name, Highlights.ENUM_VARIANT_NAME)
-                // TODO: Members?
             }
             is FunctionType -> {
+                require(!options.asExpression)
                 appendStyled("function ", Highlights.KEYWORD_DECLARATION)
                 appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
-                renderGenerics(type, specializations)
+                renderGenerics(type, specializations, options)
                 append("(")
 
                 if (type.parameters.isNotEmpty()) {
                     type.parameters.forEachIndexed { index, it ->
                         appendStyled(it.name, Highlights.FUNCTION_PARAMETER)
                         appendStyled(": ", Highlights.COLON)
-                        appendType(it.type, specializations)
+                        appendType(it.type, specializations, options)
 
                         if (index != type.parameters.lastIndex)
                             append(",")
@@ -145,9 +164,9 @@ sealed class JaktRenderer {
                 append(")")
 
                 appendStyled(": ", Highlights.COLON)
-                appendType(type.returnType, specializations)
+                appendType(type.returnType, specializations, options)
             }
-            is BoundType -> appendType(type.type, specializations + type.specializations)
+            is BoundType -> appendType(type.type, specializations + type.specializations, options)
             else -> unreachable()
         }
     }
@@ -155,6 +174,7 @@ sealed class JaktRenderer {
     private fun renderGenerics(
         type: GenericType,
         specializations: Map<TypeParameter, Type>,
+        options: RenderOptions,
     ): Unit = withSynchronized(builder) {
         val parameters = type.typeParameters.map { specializations[it] ?: it }
         if (parameters.isEmpty())
@@ -162,7 +182,7 @@ sealed class JaktRenderer {
 
         append("<")
         for ((index, parameter) in parameters.withIndex()) {
-            appendType(parameter, emptyMap())
+            appendType(parameter, emptyMap(), options)
             if (index != parameters.lastIndex)
                 append(", ")
         }

@@ -39,7 +39,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
     ): LookupElementBuilder {
         val tailText = if (type is FunctionType) {
             val paramStr = type.parameters.joinToString {
-                val typeStr = renderType(it.type, asHtml = false)
+                val typeStr = renderType(it.type)
                 "${it.name}: $typeStr"
             }
             "($paramStr)"
@@ -51,7 +51,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
 
         var builder = LookupElementBuilder.create(name)
             .withTailText(tailText)
-            .withTypeText(renderType(displayType, asHtml = false))
+            .withTypeText(renderType(displayType))
             .withIcon(icon)
 
         if (type is FunctionType && functionTemplateType != FunctionTemplateType.None) {
@@ -72,7 +72,7 @@ abstract class JaktCompletion : CompletionProvider<CompletionParameters>() {
 
                             template.addVariable(
                                 parameter.name,
-                                ConstantNode(renderType(parameter.type, asHtml = false)),
+                                ConstantNode(renderType(parameter.type)),
                                 null,
                                 true,
                             )

@@ -61,7 +61,7 @@ class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktPara
         val parameters = parameters.parameterList.map {
             val anon = if (it.anonKeyword != null) "anon " else ""
             val mut = if (it.mutKeyword != null) "mut " else ""
-            val type = renderType(it.jaktType, asHtml = false)
+            val type = renderType(it.jaktType)
 
             "$anon$mut${it.name}: $type"
         }

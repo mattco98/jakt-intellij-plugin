@@ -71,7 +71,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
         override fun getPresentation(): ItemPresentation {
             return psi?.let {
                 PresentationData(
-                    renderElement(it, asHtml = false),
+                    renderElement(it),
                     null,
                     getIcon(),
                     null,
