@@ -68,7 +68,9 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktParenExpression -> element.expression.jaktType
-            is JaktIndexedAccessExpression -> UnknownType // TODO
+            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
+                (it as? ArrayType)?.underlyingType
+            } ?: UnknownType
             is JaktThisExpression ->
                 (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType
             is JaktFieldAccessExpression -> {
