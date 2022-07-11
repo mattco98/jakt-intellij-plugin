@@ -28,7 +28,7 @@ private fun makeBuiltinFormattingType(name: String) = FunctionType(
             isMutable = false
         )
     ),
-    PrimitiveType.Void,
+    if (name == "format") PrimitiveType.String else PrimitiveType.Void,
     Linkage.External,
     hasThis = false,
     thisIsMutable = false,
