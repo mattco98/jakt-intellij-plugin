@@ -51,11 +51,14 @@ class RecursivelyGuardedProperty<T : Any>(
 
         return thisRef.typeCache().resolveWithCaching(thisRef) {
             isInitializing = true
-            value = producer()
-            initializer(value)
-            isInitializing = false
 
-            value
+            try {
+                value = producer()
+                initializer(value)
+                value
+            } finally {
+                isInitializing = false
+            }
         }
     }
 }
