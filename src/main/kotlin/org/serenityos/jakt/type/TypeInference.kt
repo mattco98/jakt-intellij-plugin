@@ -3,10 +3,13 @@ package org.serenityos.jakt.type
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.psi.*
+import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.findChildOfType
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
@@ -113,21 +116,19 @@ object TypeInference {
     }
 
     private fun tryConstructOptionalType(call: JaktCallExpression): Type? {
-        val ident = (call.expression as? JaktPlainQualifier) ?: return null
-        if (ident.hasNamespace)
-            return null
-
-        val name = ident.name
-        val args = call.argumentList.argumentList
-
-        return when (name) {
-            "Some" -> if (args.size == 1) {
-                val arg = args[0].unlabeledArgument?.allChildren?.firstOrNull() as? JaktExpression ?: return null
-                OptionalType(arg.jaktType)
-            } else UnknownType
-            "None" -> OptionalType(UnknownType)
-            else -> null
+        val qualifier = (call.expression as? JaktPlainQualifierExpr)?.plainQualifier
+        if (qualifier != null && !qualifier.hasNamespace) {
+            when (qualifier.name) {
+                "Some" -> {
+                    val arg = call.argumentList.argumentList.singleOrNull()?.unlabeledArgument?.expression
+                    if (arg != null)
+                        return OptionalType(arg.jaktType)
+                }
+                "None" -> return OptionalType(UnknownType)
+            }
         }
+
+        return null
     }
 
     private fun getNumericLiteralType(element: JaktNumericLiteral): Type {
