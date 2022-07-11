@@ -3,6 +3,7 @@ package org.serenityos.jakt.type
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.JaktScope
@@ -82,7 +83,12 @@ object TypeInference {
                 } ?: return UnknownType
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
-            is JaktRangeExpression -> UnknownType // TODO
+            is JaktRangeExpression -> {
+                val range = element.jaktProject.findPreludeDeclaration("Range")?.jaktType as? StructType
+                    ?: return UnknownType
+                val elementType = element.expressionList.firstOrNull()?.jaktType ?: UnknownType
+                return BoundType(range, mapOf(range.typeParameters.first() to elementType))
+            }
             is JaktArrayExpression -> when {
                 element.sizedArrayBody != null -> ArrayType(
                     element.sizedArrayBody?.expressionList?.first()?.jaktType ?: UnknownType
