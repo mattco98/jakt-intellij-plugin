@@ -114,6 +114,9 @@ class EnumVariantType(
     val value: Int?,
     val members: List<Pair<String?, Type>>,
 ) : BaseType(), DeclarationType, ContainerType {
+    val isStructLike: Boolean
+        get() = members.any { it.first != null }
+
     override fun findTypeIn(name: String) = members.find { it.first == name }?.second
 }
 

@@ -19,18 +19,14 @@ abstract class JaktDestructuringBindingMixin(
             val pattern = part.parent as? JaktMatchPattern ?: return@resolveWithCaching UnknownType
 
             val qualifier = pattern.plainQualifierExpr.plainQualifier
-            val members = (qualifier.jaktType as? EnumVariantType)?.members ?: return@resolveWithCaching UnknownType
+            val enumVariant = qualifier.jaktType as? EnumVariantType ?: return@resolveWithCaching UnknownType
 
-            val previousLabel = part.destructuringLabel?.name
-
-            val matchingMembers = if (previousLabel != null) {
-                members.find { it.first == previousLabel }
+            if (enumVariant.isStructLike) {
+                val label = part.destructuringLabel?.name ?: identifier.text
+                enumVariant.members.find { it.first == label }
             } else {
-                members.getOrNull(pattern.destructuringPartList.indexOfFirst {
-                    it.destructuringBinding == this
-                })
-            }
-
-            matchingMembers?.second ?: UnknownType
+                val index = pattern.destructuringPartList.indexOfFirst { it.destructuringBinding == this }
+                enumVariant.members.getOrNull(index)
+            }?.second ?: UnknownType
         }
 }

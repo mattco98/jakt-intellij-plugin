@@ -22,7 +22,6 @@ abstract class JaktForDeclMixin(node: ASTNode) : JaktNamedElement(node), JaktFor
                         null -> UnknownType
                         else -> type
                     }
-
                 } else UnknownType
             }
         }
