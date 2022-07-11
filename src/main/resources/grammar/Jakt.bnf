@@ -432,7 +432,7 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
 MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
 
-MatchPattern ::= PlainQualifierImpl [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
+MatchPattern ::= PlainQualifierExpr [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"

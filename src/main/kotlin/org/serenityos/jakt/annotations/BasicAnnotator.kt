@@ -142,7 +142,6 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             exprAncestor != null && exprAncestor == element.ancestorOfType<JaktCallExpression>()?.expression
         }
 
-
         val decl = element.reference.resolve()
 
         identHighlight = when (decl) {

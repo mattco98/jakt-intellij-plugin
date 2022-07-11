@@ -105,6 +105,17 @@ class JaktResolver(private val scope: PsiElement) {
         fun resolveQualifier(qualifier: JaktPlainQualifier): PsiElement? {
             if (qualifier.isType)
                 return resolveType(qualifier)
+
+            // Check for shorthand enum type in `match` expression
+            if (qualifier.plainQualifier == null) {
+                val matchPattern = qualifier.ancestorOfType<JaktMatchPattern>()
+                if (matchPattern != null) {
+                    val matchTarget = matchPattern.ancestorOfType<JaktMatchExpression>()?.expression?.jaktType
+                    if (matchTarget is EnumType)
+                        matchTarget.variants[qualifier.name!!]?.let { return it.psiElement }
+                }
+            }
+
             return resolveQualifierHelper(qualifier, STATIC)
         }
 

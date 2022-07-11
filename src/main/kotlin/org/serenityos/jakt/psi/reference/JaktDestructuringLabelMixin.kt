@@ -11,7 +11,7 @@ abstract class JaktDestructuringLabelMixin(
     node: ASTNode,
 ) : JaktNamedElement(node), JaktDestructuringLabel {
     override fun getReference() = singleRef {
-        val head = ancestorOfType<JaktMatchPattern>()?.plainQualifier ?: return@singleRef null
+        val head = ancestorOfType<JaktMatchPattern>()?.plainQualifierExpr?.plainQualifier ?: return@singleRef null
         val resolved = head.reference?.resolve() as? JaktEnumVariant ?: return@singleRef null
 
         resolved.normalEnumMemberBody?.structEnumMemberBodyPartList?.find {
