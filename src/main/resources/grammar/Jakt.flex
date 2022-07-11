@@ -166,14 +166,8 @@ COMMENT=(\/\/[^\r\n]*)+
 }
 
 <STRING> {
-  // Note that we return a valid token here. The external annotator will handle
-  // annotating the parser error, which means we get to keep our BNF file simpler
-  // TODO: Explicit handling for BAD_CHARACTER in the BNF file might be wise
-  [\r\n]                 { yybegin(YYINITIAL);
-                           yypushback(1);
-                           return zzStrType; }
   "\\"                   { zzMarkedPos += 1; }
-  <<EOF>>                { return zzStrType; }
+  <<EOF>>                { yybegin(YYINITIAL); return zzStrType; }
   [^]                    { if (zzInput == zzStrDelim) {
                                yybegin(YYINITIAL);
                                return zzStrType;
