@@ -65,7 +65,7 @@ object TypeInference {
                     if (it is RawType) it.underlyingType else UnknownType
                 }
                 element.keywordNot != null -> PrimitiveType.Bool
-                element.exclamationPoint != null -> element.expression.jaktType.let {
+                element.exclamationPoint != null -> BoundType.withInner(element.expression.jaktType) {
                     if (it is OptionalType) it.underlyingType else it
                 }
                 else -> unreachable()
