@@ -423,8 +423,7 @@ DictionaryElement ::= Expression COLON NL Expression
 SetExpression ::= CURLY_OPEN NL <<commaOrEolList Expression>>? NL CURLY_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD Expression MatchBody
-MatchBody ::= NL CURLY_OPEN NL [MatchCases NL] CURLY_CLOSE
-private MatchCases ::= <<commaOrEolList MatchCase>>
+MatchBody ::= NL CURLY_OPEN NL (MatchCase NL)* CURLY_CLOSE
 MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.api.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
