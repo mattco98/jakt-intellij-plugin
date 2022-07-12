@@ -21,8 +21,8 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Added generic support to type system</li>
-            <li>General improvements to resolution, typing, and the renderer</li>
+            <li>Removed requirement to have a local clone of the Jakt repository</li>
+            <li>Fixed bug requiring a newline between match cases</li>
         </ul>
     ]]></change-notes>
     
