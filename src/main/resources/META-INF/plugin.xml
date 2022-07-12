@@ -6,8 +6,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <description>
-        <![CDATA[
+    <description><![CDATA[
         Adds support for the <a href="https://github.com/SerenityOS/jakt">Jakt</a> language.
         <br/>
         Includes the following (non-comprehensive) features:
@@ -18,8 +17,14 @@
             <li>Reference resolution</li>
             <li>Rename refactoring</li>
         </ul>
-        ]]>
-    </description>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <ul>
+            <li>Added generic support to type system</li>
+            <li>General improvements to resolution, typing, and the renderer</li>
+        </ul>
+    ]]></change-notes>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType
