@@ -116,13 +116,13 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktAssignmentBinaryExpression -> element.right?.jaktType ?: UnknownType // TODO: Probably very wrong
-            is JaktPlainQualifierExpr -> element.plainQualifier.jaktType
+            is JaktPlainQualifierExpression -> element.plainQualifier.jaktType
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }
 
     private fun tryConstructOptionalType(call: JaktCallExpression): Type? {
-        val qualifier = (call.expression as? JaktPlainQualifierExpr)?.plainQualifier
+        val qualifier = (call.expression as? JaktPlainQualifierExpression)?.plainQualifier
         if (qualifier != null && !qualifier.hasNamespace) {
             when (qualifier.name) {
                 "Some" -> {

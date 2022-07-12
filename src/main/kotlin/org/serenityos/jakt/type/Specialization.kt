@@ -22,13 +22,13 @@ fun specialize(type: Type, psi: PsiElement): Type {
     // TODO: Change the grammar to make this unnecessary, as this should really happen everywhere that
     //       uses .reference
     val ref = when (val expr = psi.expression) {
-        is JaktPlainQualifierExpr -> expr.plainQualifier.reference
+        is JaktPlainQualifierExpression -> expr.plainQualifier.reference
         else -> expr.reference
     }
     val target = ref?.resolve() ?: return type
 
     // Store call specializations if they exist
-    (psi.expression as? JaktPlainQualifierExpr)?.genericSpecialization?.typeList?.let { concreteTypes ->
+    (psi.expression as? JaktPlainQualifierExpression)?.genericSpecialization?.typeList?.let { concreteTypes ->
         (type as? GenericType)?.typeParameters?.zip(concreteTypes)?.forEach { (genericType, concreteType) ->
             specializations[genericType] = concreteType.jaktType
         }

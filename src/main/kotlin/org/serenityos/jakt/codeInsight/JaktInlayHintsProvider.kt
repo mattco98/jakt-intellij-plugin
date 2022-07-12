@@ -72,7 +72,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
             if (element is JaktCallExpression) {
                 val target = element.expression
-                if (target is JaktPlainQualifierExpr) {
+                if (target is JaktPlainQualifierExpression) {
                     val resolved = target.plainQualifier.reference?.resolve()
                     return if (resolved is JaktEnumVariant || resolved is JaktStructDeclaration) {
                         target.text == (resolved as PsiNameIdentifierOwner).name

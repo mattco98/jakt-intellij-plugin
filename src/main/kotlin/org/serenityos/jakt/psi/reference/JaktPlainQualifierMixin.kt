@@ -2,7 +2,7 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktPlainQualifierExpr
+import org.intellij.sdk.language.psi.JaktPlainQualifierExpression
 import org.intellij.sdk.language.psi.JaktPlainType
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktTypeable
@@ -28,8 +28,8 @@ val JaktPlainQualifier.index: Int
 val JaktPlainQualifier.hasNamespace: Boolean
     get() = plainQualifier != null
 
-val JaktPlainQualifier.exprAncestor: JaktPlainQualifierExpr?
-    get() = ancestorOfType<JaktPlainQualifierExpr>()
+val JaktPlainQualifier.exprAncestor: JaktPlainQualifierExpression?
+    get() = ancestorOfType<JaktPlainQualifierExpression>()
 
 val JaktPlainQualifier.isType: Boolean
     get() {

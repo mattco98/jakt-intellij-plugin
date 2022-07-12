@@ -362,7 +362,7 @@ Expression ::=
     | Literal
     | AccessExpression
     | IndexedAccessExpression
-    | PlainQualifierExpr
+    | PlainQualifierExpression
     | CallExpression
     | ArrayExpression
     | DictionaryExpression
@@ -432,7 +432,7 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
 MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
 
-MatchPattern ::= PlainQualifierExpr [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
+MatchPattern ::= PlainQualifierExpression [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
@@ -452,9 +452,7 @@ fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpeciali
 }
 
 // TODO: Restrict specialization to only call expressions
-PlainQualifierExpr ::= PlainQualifierImpl GenericSpecialization? {
-    extends=Expression
-}
+PlainQualifierExpression ::= PlainQualifierImpl GenericSpecialization?
 
 private PlainQualifierImpl ::= PlainQualifierStart PlainQualifierSegment*
 

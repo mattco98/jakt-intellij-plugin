@@ -36,7 +36,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 TextRange.create(element.identifier.startOffset, element.colon.endOffset)
                     .highlight(highlight)
             }
-            is JaktPlainQualifierExpr -> highlightQualifier(element.plainQualifier, false)
+            is JaktPlainQualifierExpression -> highlightQualifier(element.plainQualifier, false)
             is JaktAccessExpression -> {
                 if (element.identifier != null) {
                     val isDumb = DumbService.isDumb(element.project)

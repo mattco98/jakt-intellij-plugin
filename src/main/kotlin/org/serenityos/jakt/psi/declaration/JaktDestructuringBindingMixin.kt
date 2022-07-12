@@ -18,7 +18,7 @@ abstract class JaktDestructuringBindingMixin(
             val part = parent as? JaktDestructuringPart ?: return@resolveWithCaching UnknownType
             val pattern = part.parent as? JaktMatchPattern ?: return@resolveWithCaching UnknownType
 
-            val qualifier = pattern.plainQualifierExpr.plainQualifier
+            val qualifier = pattern.plainQualifierExpression.plainQualifier
             val enumVariant = qualifier.jaktType as? EnumVariantType ?: return@resolveWithCaching UnknownType
 
             if (enumVariant.isStructLike) {
