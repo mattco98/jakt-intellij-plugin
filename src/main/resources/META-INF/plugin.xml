@@ -25,6 +25,13 @@
             <li>General improvements to resolution, typing, and the renderer</li>
         </ul>
     ]]></change-notes>
+    
+    <applicationListeners>
+        <listener
+                class="org.serenityos.jakt.project.JaktProjectListener"
+                topic="com.intellij.openapi.project.ProjectManagerListener"
+        />
+    </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType

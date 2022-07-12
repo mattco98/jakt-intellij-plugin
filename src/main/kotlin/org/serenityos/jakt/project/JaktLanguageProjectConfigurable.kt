@@ -12,13 +12,9 @@ import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 
 class JaktLanguageProjectConfigurable(private val project: Project) : BoundConfigurable("Jakt"), Disposable {
     private lateinit var jaktBinaryTextField: Cell<TextFieldWithBrowseButton>
-    private lateinit var jaktRepoTextField: Cell<TextFieldWithBrowseButton>
 
     private val state: JaktProjectService.JaktState
-        get() = JaktProjectService.JaktState(
-            jaktBinaryTextField.component.text,
-            jaktRepoTextField.component.text,
-        )
+        get() = JaktProjectService.JaktState(jaktBinaryTextField.component.text,)
 
     override fun createPanel(): DialogPanel = panel {
         row("Jakt binary:") {
@@ -29,18 +25,6 @@ class JaktLanguageProjectConfigurable(private val project: Project) : BoundConfi
             )
             jaktBinaryTextField.component.text = project.jaktProject.jaktBinary?.absolutePath.orEmpty()
             jaktBinaryTextField.horizontalAlign(HorizontalAlign.FILL)
-        }
-
-        row("Jakt repository:") {
-            jaktRepoTextField = textFieldWithBrowseButton(
-                "Select the Location of the Cloned Jakt Repository",
-                project,
-                FileChooserDescriptorFactory.createSingleFileDescriptor(),
-            )
-            jaktRepoTextField.component.text = project.jaktProject.jaktRepo?.absolutePath.orEmpty()
-            jaktRepoTextField.horizontalAlign(HorizontalAlign.FILL)
-            jaktRepoTextField.comment("A locally-cloned version of Jakt. This is necessary to access the runtime files, and " +
-                "will hopefully not be necessary in the future.")
         }
     }
 
@@ -55,7 +39,6 @@ class JaktLanguageProjectConfigurable(private val project: Project) : BoundConfi
 
         project.jaktProject.state?.let {
             it.jaktBinaryPath = state.jaktBinaryPath
-            it.jaktRepoPath = state.jaktRepoPath
         }
 
         project.jaktProject.reload()

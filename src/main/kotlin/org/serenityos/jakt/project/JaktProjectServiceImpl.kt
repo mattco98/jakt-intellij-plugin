@@ -5,12 +5,12 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.StoragePathMacros
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScopes
-import org.apache.commons.io.FileUtils
 import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.project.JaktProjectService.Companion.userHome
@@ -21,7 +21,7 @@ import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.utils.runInReadAction
 import java.io.File
 import java.io.IOException
-import java.nio.file.Paths
+import java.net.URL
 
 @State(name = "JaktProjectService", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 class JaktProjectServiceImpl(private val project: Project) : JaktProjectService {
@@ -36,9 +36,6 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
 
     override val jaktBinary: File?
         get() = state.jaktBinaryPath?.let(::File).withNormalizedHomeDir()
-
-    override val jaktRepo: File?
-        get() = state.jaktRepoPath?.let(::File).withNormalizedHomeDir()
 
     override fun getPreludeTypes() = preludeDeclarations.values.toList()
 
@@ -57,23 +54,10 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     }
 
     override fun reload() {
-        if (jaktRepo == null)
-            return
-
-        val buildFolder = File(project.workspaceFile!!.parent.path, "build")
-        buildFolder.delete()
-        buildFolder.mkdirs()
-
-        try {
-            FileUtils.copyDirectory(File(jaktRepo!!, "runtime"), buildFolder)
-        } catch (e: IOException) {
-            error("Unable to load prelude; did its location in the repository change?")
-        }
-
-        val preludePath = Paths.get(buildFolder.absolutePath, "prelude.jakt")
+        val preludePath = project.getUserData(PRELUDE_FILE_KEY) ?: return
 
         runInReadAction {
-            val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(preludePath)
+            val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(preludePath.toPath())
                 ?: error("Unable to get VirtualFile from prelude.jakt at $preludePath")
 
             prelude = PsiManager.getInstance(project).findFile(virtualFile) as? JaktFile
@@ -97,5 +81,29 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     override fun loadState(state: JaktProjectService.JaktState) {
         this.state = state
         reload()
+    }
+
+    companion object {
+        private val PRELUDE_URL = "https://raw.githubusercontent.com/SerenityOS/jakt/main/runtime/prelude.jakt"
+        private val PRELUDE_FILE_KEY = Key.create<File>("PRELUDE_FILE_KEY")
+
+        fun copyPreludeFile(project: Project) {
+            project.putUserData(PRELUDE_FILE_KEY, null)
+
+            val preludePath = File(project.workspaceFile?.parent?.toNioPath()?.toFile() ?: return, "prelude.jakt")
+            preludePath.delete()
+
+            try {
+                preludePath.outputStream().use { preludeFile ->
+                    URL(PRELUDE_URL).openStream().use { preludeContent ->
+                        preludeContent.copyTo(preludeFile)
+                    }
+                }
+            } catch (e: IOException) {
+                error("Unable to load prelude; did its location in the repository change?")
+            }
+            
+            project.putUserData(PRELUDE_FILE_KEY, preludePath)
+        }
     }
 }
