@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
+import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.syntax.Highlights
@@ -48,6 +49,13 @@ sealed class JaktRenderer {
             is JaktFieldAccessExpression -> {
                 appendStyled(element.name!!, Highlights.STRUCT_FIELD)
                 append(": ")
+                appendType(element.jaktType, emptyMap(), options)
+            }
+            is JaktVariableDeclarationStatement -> {
+                val kwText = if (element.mutKeyword != null) "mut " else "let "
+                appendStyled(kwText, Highlights.KEYWORD_DECLARATION)
+                appendStyled(element.name!!, Highlights.LOCAL_VAR)
+                appendStyled(": ", Highlights.COLON)
                 appendType(element.jaktType, emptyMap(), options)
             }
             is JaktTypeable -> appendType(element.jaktType, emptyMap(), options)

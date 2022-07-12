@@ -4,6 +4,9 @@ import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.psi.PsiElement
 
 class JaktDocumentationProvider : AbstractDocumentationProvider() {
+    override fun generateDoc(element: PsiElement, originalElement: PsiElement?) =
+        renderElement(element) { asHtml = true }
+
     override fun getQuickNavigateInfo(element: PsiElement, originalElement: PsiElement?) =
-        renderElement(originalElement ?: element) { asHtml = true }
+        generateDoc(element, originalElement)
 }
