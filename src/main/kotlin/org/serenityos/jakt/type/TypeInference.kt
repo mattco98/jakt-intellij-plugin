@@ -5,8 +5,8 @@ import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
-import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestors
+import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
@@ -76,8 +76,9 @@ object TypeInference {
             is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
                 (it as? ArrayType)?.underlyingType
             } ?: UnknownType
-            is JaktThisExpression ->
-                (element.ancestorOfType<JaktScope>() as? JaktTypeable)?.jaktType ?: UnknownType
+            is JaktThisExpression -> element.ancestorsOfType<JaktScope>()
+                .firstOrNull { it is JaktEnumDeclaration || it is JaktStructDeclaration }
+                ?.let { (it as JaktTypeable).jaktType } ?: UnknownType
             is JaktFieldAccessExpression -> {
                 val thisDecl = element.ancestors().filterIsInstance<JaktScope>().find {
                     it is JaktStructDeclaration || it is JaktEnumDeclaration
