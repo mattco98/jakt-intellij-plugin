@@ -302,7 +302,7 @@ private BaseType ::=
     | TupleType
     | PlainType
 
-GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {pin=1 extends=Type}
+GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
@@ -452,7 +452,7 @@ fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpeciali
 }
 
 // TODO: Restrict specialization to only call expressions
-PlainQualifierExpression ::= PlainQualifierImpl GenericSpecialization?
+PlainQualifierExpression ::= PlainQualifierImpl <<parsePathGenerics GenericSpecialization>>?
 
 private PlainQualifierImpl ::= PlainQualifierStart PlainQualifierSegment*
 

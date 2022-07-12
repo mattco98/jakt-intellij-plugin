@@ -2,40 +2,39 @@ package org.serenityos.jakt.syntax
 
 import com.intellij.lang.PsiBuilder
 import com.intellij.lang.parser.GeneratedParserUtilBase
-import com.intellij.openapi.util.Key
+import com.intellij.psi.TokenType
+import com.intellij.psi.tree.IElementType
+import org.serenityos.jakt.JaktTypes.*
 
 object JaktParserUtil : GeneratedParserUtilBase() {
-    private val MODES_KEY = Key.create<MutableMap<String, Int>>("MODES_KEY")
-
-    private var PsiBuilder.parsingModes: MutableMap<String, Int>
-        get() = getUserData(MODES_KEY) ?: mutableMapOf<String, Int>().also {
-            putUserData(MODES_KEY, it)
-        }
-        set(value) = putUserData(MODES_KEY, value)
-
-    @JvmStatic
-    fun withOn(builder: PsiBuilder, level: Int, parser: Parser, vararg modes: String): Boolean {
-        val parsingModes = builder.parsingModes
-        val parsingModesOld = parsingModes.toMutableMap()
-        modes.forEach {
-            val value = builder.parsingModes[it] ?: return@forEach
-            builder.parsingModes[it] = value + 1
+    private fun PsiBuilder.currentTokenSkipWS(): IElementType? {
+        for (i in 0..Int.MAX_VALUE) {
+            val type = rawLookup(i) ?: break
+            if (type != TokenType.WHITE_SPACE && type != NEWLINE)
+                return type
         }
 
-        return parser.parse(builder, level).also {
-            builder.parsingModes = parsingModesOld
-        }
+        return null
     }
 
     @JvmStatic
-    fun withOff(builder: PsiBuilder, level: Int, parser: Parser, vararg modes: String): Boolean {
-        val parsingModes = builder.parsingModes
-        val parsingModesOld = parsingModes.toMutableMap()
+    fun parsePathGenerics(builder: PsiBuilder, level: Int, genericSpecializationParser: Parser): Boolean {
+        if (builder.rawLookup(0) != LESS_THAN)
+            return false
 
-        modes.forEach { builder.parsingModes[it] = 0 }
+        val marker = builder.mark()
 
-        return parser.parse(builder, level).also {
-            builder.parsingModes = parsingModesOld
+        return if (genericSpecializationParser.parse(builder, level)) {
+            if (builder.currentTokenSkipWS() == PAREN_OPEN) {
+                marker.drop()
+                true
+            } else {
+                marker.error("Expected argument list after generic specialization")
+                false
+            }
+        } else {
+            marker.rollbackTo()
+            false
         }
     }
 }

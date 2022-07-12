@@ -3,6 +3,7 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.findChildOfType
 
 class Specializations(
     private val map: MutableMap<TypeParameter, Type> = mutableMapOf()
@@ -28,11 +29,13 @@ fun specialize(type: Type, psi: PsiElement): Type {
     val target = ref?.resolve() ?: return type
 
     // Store call specializations if they exist
-    (psi.expression as? JaktPlainQualifierExpression)?.genericSpecialization?.typeList?.let { concreteTypes ->
-        (type as? GenericType)?.typeParameters?.zip(concreteTypes)?.forEach { (genericType, concreteType) ->
-            specializations[genericType] = concreteType.jaktType
+    (psi.expression as? JaktPlainQualifierExpression)
+        ?.findChildOfType<JaktGenericSpecialization>()
+        ?.typeList?.let { concreteTypes ->
+            (type as? GenericType)?.typeParameters?.zip(concreteTypes)?.forEach { (genericType, concreteType) ->
+                specializations[genericType] = concreteType.jaktType
+            }
         }
-    }
 
     val arguments = psi.argumentList.argumentList.mapNotNull {
         when (val arg = it.labeledArgument ?: it.unlabeledArgument) {

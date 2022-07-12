@@ -1,5 +1,6 @@
 package org.serenityos.jakt.type
 
+import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
@@ -116,7 +117,13 @@ object TypeInference {
                 else -> unreachable()
             }
             is JaktAssignmentBinaryExpression -> element.right?.jaktType ?: UnknownType // TODO: Probably very wrong
-            is JaktPlainQualifierExpression -> element.plainQualifier.jaktType
+            is JaktPlainQualifierExpression -> {
+                if (element.findChildOfType<PsiErrorElement>() != null) {
+                    // There is a specialization with no invocation after
+                    return UnknownType
+                }
+                element.plainQualifier.jaktType
+            }
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
     }
