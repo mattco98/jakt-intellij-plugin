@@ -379,7 +379,7 @@ upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE 
     elementType=TupleExpression
 }
 
-CallExpression ::= Expression GenericSpecialization? ArgumentList
+CallExpression ::= Expression ArgumentList
 ArgumentList ::= PAREN_OPEN NL  [<<commaOrEolList Argument>>] PAREN_CLOSE
 Argument ::= LabeledArgument | UnlabeledArgument
 LabeledArgument ::= IDENTIFIER COLON Expression {
@@ -451,7 +451,8 @@ fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpeciali
     mixin="org.serenityos.jakt.psi.reference.JaktPlainQualifierMixin"
 }
 
-PlainQualifierExpr ::= PlainQualifierImpl {
+// TODO: Restrict specialization to only call expressions
+PlainQualifierExpr ::= PlainQualifierImpl GenericSpecialization? {
     extends=Expression
 }
 

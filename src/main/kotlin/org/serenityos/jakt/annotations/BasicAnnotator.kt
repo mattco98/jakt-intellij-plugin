@@ -137,10 +137,10 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         }
 
         var identHighlight = if (isType) Highlights.TYPE_NAME else Highlights.IDENTIFIER
-        val isCall = element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null || run {
+        val isCall = !isType && (element.ancestorOfType<JaktMatchPattern>()?.parenOpen != null || run {
             val exprAncestor = element.exprAncestor
             exprAncestor != null && exprAncestor == element.ancestorOfType<JaktCallExpression>()?.expression
-        }
+        })
 
         val decl = element.reference.resolve()
 

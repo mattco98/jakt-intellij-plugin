@@ -28,7 +28,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
     val target = ref?.resolve() ?: return type
 
     // Store call specializations if they exist
-    psi.genericSpecialization?.typeList?.let { concreteTypes ->
+    (psi.expression as? JaktPlainQualifierExpr)?.genericSpecialization?.typeList?.let { concreteTypes ->
         (type as? GenericType)?.typeParameters?.zip(concreteTypes)?.forEach { (genericType, concreteType) ->
             specializations[genericType] = concreteType.jaktType
         }
