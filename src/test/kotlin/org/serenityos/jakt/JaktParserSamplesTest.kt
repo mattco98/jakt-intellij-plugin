@@ -47,7 +47,7 @@ class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, priva
     }
 
     companion object {
-        private val IGNORED_TESTS = setOf("basics/error.jakt")
+        private val IGNORED_TESTS = setOf("basics/error.jakt", "guard/no_else.jakt")
 
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: {0}")

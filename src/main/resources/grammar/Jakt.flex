@@ -74,6 +74,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "for"                  { return FOR_KEYWORD; }
   "try"                  { return TRY_KEYWORD; }
   "catch"                { return CATCH_KEYWORD; }
+  "guard"                { return GUARD_KEYWORD; }
   "in"                   { return IN_KEYWORD; }
   "unsafe"               { return UNSAFE_KEYWORD; }
   "cpp"                  { return CPP_KEYWORD; }

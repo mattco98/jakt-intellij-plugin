@@ -243,12 +243,14 @@ Statement ::=
     | ForStatement
     | VariableDeclarationStatement
     | TryStatement
+    | GuardStatement
     | YieldStatement
     | BreakStatement
     | ContinueStatement
     | UnsafeStatement
     | InlineCppStatement
     | Block
+    { name='statement' }
 
 VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS Expression {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -270,6 +272,8 @@ CatchDecl ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktCatchDeclMixin"
 }
+
+GuardStatement ::= GUARD_KEYWORD Expression ELSE_KEYWORD Block
 
 BreakStatement ::= BREAK_KEYWORD
 ContinueStatement ::= CONTINUE_KEYWORD
@@ -368,6 +372,7 @@ Expression ::=
     | DictionaryExpression
     | SetExpression
     | TupleOrParenExpression
+    { name='expression' }
 
 fake ParenExpression ::= PAREN_OPEN Expression PAREN_CLOSE
 fake TupleExpression ::= PAREN_OPEN Expression+ PAREN_CLOSE

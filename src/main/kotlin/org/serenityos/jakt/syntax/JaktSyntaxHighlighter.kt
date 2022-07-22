@@ -137,6 +137,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             MATCH_KEYWORD,
             TRY_KEYWORD,
             CATCH_KEYWORD,
+            GUARD_KEYWORD,
             YIELD_KEYWORD,
             BREAK_KEYWORD,
             CONTINUE_KEYWORD,
