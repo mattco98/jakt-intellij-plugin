@@ -46,6 +46,7 @@ TopLevelDefinition ::=
     | ExternalStructDeclaration
     | EnumDeclaration
     | NamespaceDeclaration
+    | ImportExternStatement
     | ImportStatement {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     // For some reason this gets a getExternKeyword() function which conflicts
@@ -97,7 +98,7 @@ NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
 NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 
 // Import Statement
-ImportStatement ::= IMPORT_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+ImportStatement ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     extends=TopLevelDefinition
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
@@ -108,6 +109,20 @@ ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
 }
+
+ImportExternStatement ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITERAL ImportExternBody {
+    extends=TopLevelDefinition
+    implements="org.serenityos.jakt.psi.api.JaktScope"
+    mixin="org.serenityos.jakt.psi.declaration.JaktImportExternStatementMixin"
+}
+
+CSpecifier ::= 'c' | 'C'
+
+private ImportExternBody ::= CURLY_OPEN NL <<commaOrEolList ImportExternDeclaration>>? NL CURLY_CLOSE
+private ImportExternDeclaration ::=
+      ExternalFunctionDeclaration
+    | ExternalStructDeclaration
+    | NamespaceDeclaration
 
 /***************************
  *       FUNCTIONS         *

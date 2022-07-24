@@ -76,6 +76,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
+            is JaktImportExternStatement -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
             is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
             is JaktEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
