@@ -11,6 +11,7 @@ import java.io.File
 
 interface JaktProjectService : PersistentStateComponent<JaktProjectService.JaktState> {
     val jaktBinary: File?
+    val showTryAllocationHints: Boolean
 
     fun getPreludeTypes(): List<JaktDeclaration>
 
@@ -24,6 +25,7 @@ interface JaktProjectService : PersistentStateComponent<JaktProjectService.JaktS
 
     data class JaktState @JvmOverloads constructor(
         var jaktBinaryPath: String? = File(userHome, ".cargo/bin/jakt").absolutePath,
+        var showAllocationTryHints: Boolean = true,
     )
 
     companion object {

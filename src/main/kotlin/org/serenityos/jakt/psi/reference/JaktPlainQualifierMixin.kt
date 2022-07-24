@@ -1,13 +1,11 @@
 package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktGenericSpecialization
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.JaktPlainQualifierExpression
 import org.intellij.sdk.language.psi.JaktPlainType
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.JaktResolver
@@ -25,7 +23,7 @@ val JaktPlainQualifier.isBase: Boolean
     get() = findChildrenOfType<JaktPlainQualifier>().isEmpty()
 
 val JaktPlainQualifier.index: Int
-    get() = (parent as? JaktPlainQualifierMixin)?.index?.plus(1) ?: 0
+    get() = plainQualifier?.index?.plus(1) ?: 0
 
 val JaktPlainQualifier.hasNamespace: Boolean
     get() = plainQualifier != null
@@ -35,9 +33,9 @@ val JaktPlainQualifier.exprAncestor: JaktPlainQualifierExpression?
 
 val JaktPlainQualifier.isType: Boolean
     get() {
-        var rootQualifier = this
-        repeat(rootQualifier.index) {
-            rootQualifier = rootQualifier.parent as JaktPlainQualifier
+        var qualifier: JaktPlainQualifier = this
+        repeat(qualifier.index) {
+            qualifier = qualifier.plainQualifier!!
         }
-        return rootQualifier.parent is JaktPlainType
+        return qualifier is JaktPlainType
     }

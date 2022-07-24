@@ -28,6 +28,7 @@ abstract class JaktStructDeclarationMixin(
                 typeParameters,
                 fields,
                 methods,
+                classKeyword != null,
                 linkage,
             ).also {
                 it.psiElement = this@JaktStructDeclarationMixin

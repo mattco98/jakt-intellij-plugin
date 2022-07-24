@@ -95,6 +95,7 @@ class StructType(
     override var typeParameters: List<TypeParameter>,
     val fields: Map<String, Type>,
     val methods: Map<String, FunctionType>,
+    val isClass: Boolean,
     val linkage: Linkage,
 ) : BaseType(), DeclarationType, ContainerType, GenericType {
     override fun findTypeIn(name: String) = fields[name] ?: methods[name]
@@ -102,6 +103,7 @@ class StructType(
 
 class EnumType(
     override val name: String,
+    var isBoxed: Boolean,
     var underlyingType: PrimitiveType?,
     override var typeParameters: List<TypeParameter>,
     val variants: Map<String, EnumVariantType>,
@@ -127,6 +129,7 @@ class FunctionType(
     override var typeParameters: List<TypeParameter>,
     val parameters: List<Parameter>,
     var returnType: Type,
+    var throws: Boolean,
     val linkage: Linkage,
     var hasThis: Boolean,
     var thisIsMutable: Boolean,

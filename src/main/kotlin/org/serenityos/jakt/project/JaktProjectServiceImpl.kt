@@ -37,6 +37,9 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     override val jaktBinary: File?
         get() = state.jaktBinaryPath?.let(::File).withNormalizedHomeDir()
 
+    override val showTryAllocationHints: Boolean
+        get() = state.showAllocationTryHints
+
     override fun getPreludeTypes() = preludeDeclarations.values.toList()
 
     override fun findPreludeDeclaration(type: String): JaktDeclaration? = preludeDeclarations[type]

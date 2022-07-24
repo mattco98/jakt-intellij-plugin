@@ -24,6 +24,7 @@ abstract class JaktEnumDeclarationMixin(
 
             EnumType(
                 nameNonNull,
+                boxedKeyword != null,
                 null, // TODO: Why does calculating this in the producer cause a StackOverflow?
                 typeParameters,
                 variants,

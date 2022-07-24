@@ -7,10 +7,13 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.elementType
 import com.intellij.refactoring.suggested.endOffset
+import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
+import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.render.renderType
+import org.serenityos.jakt.type.TypeInference
 import javax.swing.JPanel
 
 @Suppress("UnstableApiUsage")
@@ -41,6 +44,17 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         private val obviousTypes = setOf(STRING_LITERAL, BYTE_CHAR_LITERAL, CHAR_LITERAL)
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
+            if (element is JaktExpression && TypeInference.doesThrow(element)) {
+                if (element.jaktProject.showTryAllocationHints) {
+                    sink.addInlineElement(
+                        element.startOffset,
+                        false,
+                        factory.roundWithBackgroundAndSmallInset(factory.text("try ")),
+                        false,
+                    )
+                }
+            }
+
             val (hint, offset) = when (element) {
                 is JaktVariableDecl -> {
                     val statement = element.ancestorOfType<JaktVariableDeclarationStatement>() ?: return true
@@ -61,7 +75,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
             sink.addInlineElement(
                 offset,
                 false,
-                factory.roundWithBackground(factory.seq(factory.text(": "), hint)),
+                factory.roundWithBackgroundAndSmallInset(factory.seq(factory.text(": "), hint)),
                 false,
             )
 

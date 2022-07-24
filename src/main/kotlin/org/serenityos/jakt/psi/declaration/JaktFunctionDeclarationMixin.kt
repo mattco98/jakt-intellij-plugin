@@ -36,6 +36,7 @@ abstract class JaktFunctionDeclarationMixin(
                 typeParameters,
                 parameters,
                 PrimitiveType.Void,
+                functionReturnType.throwsKeyword != null,
                 linkage,
                 thisParam != null,
                 thisParam?.mutKeyword != null,
