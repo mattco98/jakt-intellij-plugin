@@ -21,8 +21,11 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Removed requirement to have a local clone of the Jakt repository</li>
-            <li>Fixed bug requiring a newline between match cases</li>
+            <li>Added support for guard statements</li>
+            <li>Added support for "import extern" statements</li>
+            <li>Added support for references</li>
+            <li>Added support for variable destructuring</li>
+            <li>Fixed tuples breaking the parse tree</li>
         </ul>
     ]]></change-notes>
     
