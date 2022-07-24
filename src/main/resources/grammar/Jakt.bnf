@@ -345,6 +345,7 @@ Type ::=
       RawType
     | WeakType
     | OptionalType
+    | ReferenceType
     | BaseType
 {
     implements="org.serenityos.jakt.psi.api.JaktTypeable"
@@ -354,6 +355,7 @@ Type ::=
 RawType ::= RAW_KEYWORD BaseType {pin=1 extends=Type}
 WeakType ::= WEAK_KEYWORD BaseType QUESTION_MARK {pin=1 extends=Type}
 OptionalType ::= BaseType QUESTION_MARK {extends=Type}
+ReferenceType ::= AMPERSAND MUT_KEYWORD? BaseType {pin=1 extends=Type}
 
 TypeAnnotation ::= COLON Type {extends=Type}
 GenericBounds ::= LESS_THAN <<commaOrEolList GenericBound>> GREATER_THAN
@@ -550,7 +552,7 @@ private PrefixOp ::=
     | MINUS
     | KEYWORD_NOT
     | TILDE
-    | AMPERSAND RAW_KEYWORD
+    | AMPERSAND (RAW_KEYWORD | MUT_KEYWORD)?
     | ASTERISK
 private PostfixOp ::=
       PLUS_PLUS

@@ -62,9 +62,17 @@ object TypeInference {
                     element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
                     element.minus != null ||
                     element.tilde != null -> element.expression.jaktType
-                element.rawKeyword != null -> RawType(element.expression.jaktType)
+                element.ampersand != null -> if (element.rawKeyword != null) {
+                    RawType(element.expression.jaktType)
+                } else {
+                    ReferenceType(element.expression.jaktType, element.mutKeyword != null)
+                }
                 element.asterisk != null -> element.expression.jaktType.let {
-                    if (it is RawType) it.underlyingType else UnknownType
+                    when (it) {
+                        is RawType -> it.underlyingType
+                        is ReferenceType -> it.underlyingType
+                        else -> UnknownType
+                    }
                 }
                 element.keywordNot != null -> PrimitiveType.Bool
                 element.exclamationPoint != null -> BoundType.withInner(element.expression.jaktType) {

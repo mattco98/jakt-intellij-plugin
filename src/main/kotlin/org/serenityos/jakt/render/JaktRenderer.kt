@@ -112,12 +112,20 @@ sealed class JaktRenderer {
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
             }
             is RawType -> {
+                appendStyled("&", Highlights.OPERATOR)
                 appendStyled("raw ", Highlights.KEYWORD_MODIFIER)
                 appendType(type.underlyingType, specializations, options.withExpression())
             }
             is OptionalType -> {
                 appendType(type.underlyingType, specializations, options.withExpression())
                 appendStyled("?", Highlights.TYPE_OPTIONAL_QUALIFIER)
+            }
+            is ReferenceType -> {
+                appendStyled("&", Highlights.OPERATOR)
+                if (type.isMutable)
+                    appendStyled("mut ", Highlights.KEYWORD_DECLARATION)
+
+                appendType(type.underlyingType, specializations, options.withExpression())
             }
             is ArrayType -> {
                 appendStyled("[", Highlights.DELIM_BRACKET)

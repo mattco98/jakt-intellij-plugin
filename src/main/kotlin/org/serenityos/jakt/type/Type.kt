@@ -78,6 +78,8 @@ class RawType(val underlyingType: Type) : BaseType()
 
 class OptionalType(val underlyingType: Type) : BaseType()
 
+class ReferenceType(val underlyingType: Type, val isMutable: Boolean) : BaseType()
+
 class ArrayType(val underlyingType: Type) : BaseType()
 
 class SetType(val underlyingType: Type) : BaseType()
@@ -190,6 +192,8 @@ infix fun Type.equivalentTo(other: Type): Boolean = when {
         is WeakType -> underlyingType equivalentTo (other as WeakType).underlyingType
         is RawType -> underlyingType equivalentTo (other as RawType).underlyingType
         is OptionalType -> underlyingType equivalentTo (other as OptionalType).underlyingType
+        is ReferenceType -> underlyingType equivalentTo (other as ReferenceType).underlyingType
+            && isMutable == other.isMutable
         is ArrayType -> underlyingType equivalentTo (other as ArrayType).underlyingType
         is SetType -> underlyingType equivalentTo (other as SetType).underlyingType
         is DictionaryType ->

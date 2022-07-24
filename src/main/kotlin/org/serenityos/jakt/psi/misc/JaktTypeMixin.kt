@@ -12,6 +12,7 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
             is JaktRawType -> RawType(type!!.jaktType)
             is JaktWeakType -> WeakType(type!!.jaktType)
             is JaktOptionalType -> OptionalType(type.jaktType)
+            is JaktReferenceType -> ReferenceType(type!!.jaktType, mutKeyword != null)
             is JaktArrayType -> ArrayType(type.jaktType)
             is JaktDictionaryType -> DictionaryType(typeList[0].jaktType, typeList[1].jaktType)
             is JaktSetType -> SetType(type!!.jaktType)

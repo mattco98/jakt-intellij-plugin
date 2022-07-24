@@ -9,4 +9,26 @@ class JaktExpressionTypeTest : JaktTypeTest() {
                //^T
          }
     """, "[Foo]")
+
+    fun `test raw type rendering`() = doTest("""
+        struct Foo {}
+        
+        function main() {
+            let f = Foo();
+            let f1 = &raw f;
+              //^T
+        }
+    """, "&raw Foo")
+
+    fun `test reference type rendering`() = doTest("""
+        struct Foo {}
+        
+        function main() {
+            let f = Foo();
+            let f1 = &f;
+              //^T1
+            let f2 = &mut f;
+              //^T2
+        }
+    """, "&Foo", "&mut Foo")
 }
