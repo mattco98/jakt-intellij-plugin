@@ -3,7 +3,7 @@ package org.serenityos.jakt.hints
 class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
     fun `test local var inlay hints`() = doTest("""
         function main() {
-            let foo<hint text="i64" /> = 10
+            let foo<hint text="[:  i64]" /> = 10
         }
     """)
 
@@ -13,7 +13,7 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
         extern function get_foo() -> Foo
         
         function main() {
-            let foo<hint text="struct Foo" /> = get_foo()
+            let foo<hint text="[:  struct Foo]" /> = get_foo()
         }
     """)
 
@@ -21,13 +21,13 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
         struct Foo {}
          
         function main() {
-            let foo<hint text="[Foo]" /> = [Foo()]
+            let foo<hint text="[:  [Foo]]" /> = [Foo()]
         }
     """)
 
     fun `test unknown type`() = doTest("""
         function main() {
-            let a<hint text="??" /> = b
+            let a<hint text="[:  ??]" /> = b
         } 
     """)
 

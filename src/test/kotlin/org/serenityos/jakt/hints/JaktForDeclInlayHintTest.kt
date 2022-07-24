@@ -16,7 +16,7 @@ class JaktForDeclInlayHintTest : JaktInlayHintsTest() {
         $customType 
 
         function main() {
-            for a<hint text="i64" /> in MyContainer<i64>().iterator() {
+            for a<hint text="[:  i64]" /> in MyContainer<i64>().iterator() {
             }
         }
     """)
@@ -27,7 +27,7 @@ class JaktForDeclInlayHintTest : JaktInlayHintsTest() {
         struct Foo {}
         
         function main() {
-            for a<hint text="struct Foo" /> in MyContainer<Foo>().iterator() {
+            for a<hint text="[:  struct Foo]" /> in MyContainer<Foo>().iterator() {
             }
         }
     """)
@@ -38,7 +38,7 @@ class JaktForDeclInlayHintTest : JaktInlayHintsTest() {
         struct Foo {}
         
         function main() {
-            for a<hint text="[Foo]" /> in MyContainer<[Foo]>().iterator() {
+            for a<hint text="[:  [Foo]]" /> in MyContainer<[Foo]>().iterator() {
             }
         }
     """)
