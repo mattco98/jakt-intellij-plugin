@@ -9,7 +9,7 @@ import com.intellij.psi.util.elementType
 import com.intellij.refactoring.suggested.endOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.render.renderType
 import javax.swing.JPanel
 
@@ -42,14 +42,16 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
             val (hint, offset) = when (element) {
-                is JaktVariableDeclarationStatement -> {
-                    if (element.typeAnnotation != null)
+                is JaktVariableDecl -> {
+                    val statement = element.ancestorOfType<JaktVariableDeclarationStatement>() ?: return true
+
+                    if (statement.typeAnnotation != null)
                         return true
 
-                    if (settings.omitObviousTypes && isObvious(element.expression))
+                    if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
                         return true
 
-                    val renderedType = renderType(element.expression.jaktType)
+                    val renderedType = renderType(element.jaktType)
                     factory.text(renderedType) to element.identifier.endOffset
                 }
                 is JaktForDecl -> factory.text(renderType(element.jaktType)) to element.endOffset

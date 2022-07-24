@@ -252,10 +252,18 @@ Statement ::=
     | Block
     { name='statement' }
 
-VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) IDENTIFIER TypeAnnotation? EQUALS Expression {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclarationMixin"
+VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) VariableDeclLhs EQUALS Expression {
+    implements="org.serenityos.jakt.psi.api.JaktScope"
+    mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclarationStatementMixin"
 }
+
+private VariableDeclLhs ::= VariableDecl TypeAnnotation? | (PAREN_OPEN <<commaOrEolList VariableDecl>>? PAREN_CLOSE)
+
+VariableDecl ::= IDENTIFIER {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclMixin"
+}
+
 IfStatement ::= IF_KEYWORD Expression Block [ELSE_KEYWORD (IfStatement | Block)]
 ReturnStatement ::= RETURN_KEYWORD Expression?
 ThrowStatement ::= THROW_KEYWORD Expression
@@ -374,10 +382,11 @@ Expression ::=
     | TupleOrParenExpression
     { name='expression' }
 
-fake ParenExpression ::= PAREN_OPEN Expression PAREN_CLOSE
+fake ParenExpression ::= PAREN_OPEN Expression PAREN_CLOSE { pin=1 }
 fake TupleExpression ::= PAREN_OPEN Expression+ PAREN_CLOSE
 
 TupleOrParenExpression ::= PAREN_OPEN Expression (TupleExpressionUpper | PAREN_CLOSE) {
+    pin=1
     elementType=ParenExpression
 }
 upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE {

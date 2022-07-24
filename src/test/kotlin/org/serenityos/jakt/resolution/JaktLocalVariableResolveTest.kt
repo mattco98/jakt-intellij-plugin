@@ -76,4 +76,13 @@ class JaktLocalVariableResolveTest : JaktResolveTest() {
             let a = 10
           }
     """)
+
+    fun `test destructured element resolution`() = doTest("""
+        function main() {
+            let (a,  b) = (1, 2)
+               //^D1 ^D2
+            println("{} {}", a,  b)
+                           //^R1 ^R2
+        }
+    """)
 }

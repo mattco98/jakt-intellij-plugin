@@ -14,9 +14,6 @@ import org.serenityos.jakt.psi.reference.isType
 
 class JaktResolver(private val scope: PsiElement) {
     fun findDeclaration(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): JaktDeclaration? {
-        if (scope is JaktVariableDeclarationStatement)
-            return scope.takeIf { it.name == name && resolutionStrategy(it) }
-
         if (scope is JaktGeneric) {
             scope.getDeclGenericBounds()
                 .find { it.name == name && it.unwrapImport()?.let(resolutionStrategy) == true }
@@ -48,6 +45,12 @@ class JaktResolver(private val scope: PsiElement) {
             return null
 
         for ((current, parent) in scope.ancestorPairs(withSelf = true)) {
+            if (parent is JaktVariableDeclarationStatement) {
+                // The variable is in the RHS expression of a variable declaration statement,
+                // so we don't want to count this declaration
+                continue
+            }
+
             if (parent is JaktScope)
                 return parent
 
@@ -92,7 +95,7 @@ class JaktResolver(private val scope: PsiElement) {
     object INSTANCE : ResolutionStrategy {
         override fun invoke(element: JaktDeclaration) = when (element) {
             is JaktFunctionDeclaration -> (element.jaktType as FunctionType).hasThis
-            is JaktVariableDeclarationStatement, is JaktStructField -> true
+            is JaktVariableDecl, is JaktStructField -> true
             else -> false
         }
     }

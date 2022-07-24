@@ -100,7 +100,8 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 val color = if (element.mutKeyword != null) {
                     Highlights.LOCAL_VAR_MUT
                 } else Highlights.LOCAL_VAR
-                element.identifier.highlight(color)
+
+                element.variableDeclList.forEach { it.identifier.highlight(color) }
             }
             is JaktForDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
             is JaktCatchDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)

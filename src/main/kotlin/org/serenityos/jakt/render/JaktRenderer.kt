@@ -54,9 +54,26 @@ sealed class JaktRenderer {
             is JaktVariableDeclarationStatement -> {
                 val kwText = if (element.mutKeyword != null) "mut " else "let "
                 appendStyled(kwText, Highlights.KEYWORD_DECLARATION)
-                appendStyled(element.name!!, Highlights.LOCAL_VAR)
-                appendStyled(": ", Highlights.COLON)
-                appendType(element.jaktType, emptyMap(), options)
+
+                val identifierColor = if (element.mutKeyword != null) Highlights.LOCAL_VAR_MUT else Highlights.LOCAL_VAR
+
+                if (element.parenOpen != null) {
+                    append("(")
+                    var first = true
+                    for (identifier in element.variableDeclList) {
+                        if (!first)
+                            append(", ")
+                        first = false
+                        appendStyled(identifier.text, identifierColor)
+                    }
+                    append(")")
+                } else {
+                    val identifier = element.variableDeclList.firstOrNull()
+                    val type = identifier?.jaktType ?: UnknownType
+                    appendStyled(identifier?.text ?: "??", identifierColor)
+                    appendStyled(": ", Highlights.COLON)
+                    appendType(type, emptyMap(), options)
+                }
             }
             is JaktTypeable -> appendType(element.jaktType, emptyMap(), options)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
