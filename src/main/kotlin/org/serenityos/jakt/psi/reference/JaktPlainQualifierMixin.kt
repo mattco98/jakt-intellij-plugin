@@ -32,10 +32,4 @@ val JaktPlainQualifier.exprAncestor: JaktPlainQualifierExpression?
     get() = ancestorOfType<JaktPlainQualifierExpression>()
 
 val JaktPlainQualifier.isType: Boolean
-    get() {
-        var qualifier: JaktPlainQualifier = this
-        repeat(qualifier.index) {
-            qualifier = qualifier.plainQualifier!!
-        }
-        return qualifier is JaktPlainType
-    }
+    get() = parent is JaktPlainType
