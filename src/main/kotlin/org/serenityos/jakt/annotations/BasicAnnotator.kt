@@ -22,21 +22,6 @@ import org.serenityos.jakt.type.*
 object BasicAnnotator : JaktAnnotator(), DumbAware {
     override fun annotate(element: PsiElement, holder: JaktAnnotationHolder): Unit = with(holder) {
         when (element) {
-            is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
-            is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
-            is JaktLabeledArgument -> {
-                val isCtorLabel = if (!DumbService.isDumb(element.project)) {
-                    element.reference?.resolve() is JaktStructField
-                } else false
-
-                val highlight = if (isCtorLabel) {
-                    Highlights.STRUCT_FIELD
-                } else Highlights.FUNCTION_LABELED_ARGUMENT
-
-                TextRange.create(element.identifier.startOffset, element.colon.endOffset)
-                    .highlight(highlight)
-            }
-            is JaktPlainQualifierExpression -> highlightQualifier(element.plainQualifier, false)
             is JaktAccessExpression -> {
                 if (element.identifier != null) {
                     val isDumb = DumbService.isDumb(element.project)
@@ -57,14 +42,23 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     element.nameIdentifier!!.highlight(identHighlight)
                 }
             }
-            is JaktPlainType -> {
-                highlightQualifier(element.plainQualifier, true)
-                element.genericSpecialization?.typeList?.forEach {
-                    it.highlight(Highlights.TYPE_GENERIC_NAME)
+            is JaktCatchDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
+            is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
+            is JaktEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
+            is JaktFieldAccessExpression -> {
+                val color = when {
+                    DumbService.isDumb(element.project) -> Highlights.STRUCT_FIELD
+                    element.reference?.resolve() is JaktFunctionDeclaration -> Highlights.FUNCTION_DECLARATION
+                    else -> Highlights.STRUCT_FIELD
                 }
+                TextRange.create(element.dot.startOffset, element.identifier.endOffset)
+                    .highlight(color)
             }
-            is JaktNumericSuffix -> element.highlight(Highlights.LITERAL_NUMBER)
+            is JaktForDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
+            is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
+            is JaktImportExternStatement -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
             is JaktImportStatement -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
                 idents.first().highlight(Highlights.IMPORT_MODULE)
@@ -76,27 +70,35 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
-            is JaktImportExternStatement -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
-            is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
-            is JaktEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
-            is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktLabeledArgument -> {
+                val isCtorLabel = if (!DumbService.isDumb(element.project)) {
+                    element.reference?.resolve() is JaktStructField
+                } else false
+
+                val highlight = if (isCtorLabel) {
+                    Highlights.STRUCT_FIELD
+                } else Highlights.FUNCTION_LABELED_ARGUMENT
+
+                TextRange.create(element.identifier.startOffset, element.colon.endOffset)
+                    .highlight(highlight)
+            }
+            is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
+            is JaktNumericSuffix -> element.highlight(Highlights.LITERAL_NUMBER)
+            is JaktParameter -> element.identifier.highlight(Highlights.FUNCTION_PARAMETER)
+            is JaktPlainQualifierExpression -> highlightQualifier(element.plainQualifier, false)
+            is JaktPlainType -> {
+                highlightQualifier(element.plainQualifier, true)
+                element.genericSpecialization?.typeList?.forEach {
+                    it.highlight(Highlights.TYPE_GENERIC_NAME)
+                }
+            }
             is JaktStructDeclaration -> {
                 element.identifier.highlight(Highlights.STRUCT_NAME)
                 element.structBody.structMemberList.forEach {
                     it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
                 }
             }
-            is JaktFieldAccessExpression -> {
-                val color = when {
-                    DumbService.isDumb(element.project) -> Highlights.STRUCT_FIELD
-                    element.reference?.resolve() is JaktFunctionDeclaration -> Highlights.FUNCTION_DECLARATION
-                    else -> Highlights.STRUCT_FIELD
-                }
-                TextRange.create(element.dot.startOffset, element.identifier.endOffset)
-                    .highlight(color)
-            }
-            is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)
-            is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktVariableDeclarationStatement -> {
                 val color = if (element.mutKeyword != null) {
                     Highlights.LOCAL_VAR_MUT
@@ -104,8 +106,6 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
 
                 element.variableDeclList.forEach { it.identifier.highlight(color) }
             }
-            is JaktForDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
-            is JaktCatchDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
         }
     }
 
