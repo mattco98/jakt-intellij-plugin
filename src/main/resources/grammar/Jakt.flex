@@ -55,49 +55,49 @@ COMMENT=(\/\/[^\r\n]*)+
   {WHITE_SPACE}          { return SPACE; }
   {NEWLINE}              { return NEWLINE; }
 
-  "extern"               { return EXTERN_KEYWORD; }
-  "namespace"            { return NAMESPACE_KEYWORD; }
-  "class"                { return CLASS_KEYWORD; }
-  "struct"               { return STRUCT_KEYWORD; }
-  "enum"                 { return ENUM_KEYWORD; }
-  "function"             { return FUNCTION_KEYWORD; }
-  "public"               { return PUBLIC_KEYWORD; }
-  "private"              { return PRIVATE_KEYWORD; }
-  "restricted"           { return RESTRICTED_KEYWORD; }
-  "import"               { return IMPORT_KEYWORD; }
-  "let"                  { return LET_KEYWORD; }
-  "match"                { return MATCH_KEYWORD; }
-  "if"                   { return IF_KEYWORD; }
-  "else"                 { return ELSE_KEYWORD; }
-  "while"                { return WHILE_KEYWORD; }
-  "loop"                 { return LOOP_KEYWORD; }
-  "for"                  { return FOR_KEYWORD; }
-  "try"                  { return TRY_KEYWORD; }
-  "catch"                { return CATCH_KEYWORD; }
-  "guard"                { return GUARD_KEYWORD; }
-  "in"                   { return IN_KEYWORD; }
-  "unsafe"               { return UNSAFE_KEYWORD; }
-  "cpp"                  { return CPP_KEYWORD; }
-  "return"               { return RETURN_KEYWORD; }
-  "throw"                { return THROW_KEYWORD; }
-  "yield"                { return YIELD_KEYWORD; }
-  "break"                { return BREAK_KEYWORD; }
-  "continue"             { return CONTINUE_KEYWORD; }
-  "defer"                { return DEFER_KEYWORD; }
-  "true"                 { return TRUE_KEYWORD; }
-  "false"                { return FALSE_KEYWORD; }
-  "boxed"                { return BOXED_KEYWORD; }
-  "mut"                  { return MUT_KEYWORD; }
-  "anon"                 { return ANON_KEYWORD; }
-  "this"                 { return THIS_KEYWORD; }
-  "raw"                  { return RAW_KEYWORD; }
-  "weak"                 { return WEAK_KEYWORD; }
-  "throws"               { return THROWS_KEYWORD; }
   "and"                  { return KEYWORD_AND; }
-  "or"                   { return KEYWORD_OR; }
-  "not"                  { return KEYWORD_NOT; }
+  "anon"                 { return ANON_KEYWORD; }
   "as"                   { return KEYWORD_AS; }
+  "boxed"                { return BOXED_KEYWORD; }
+  "break"                { return BREAK_KEYWORD; }
+  "catch"                { return CATCH_KEYWORD; }
+  "class"                { return CLASS_KEYWORD; }
+  "continue"             { return CONTINUE_KEYWORD; }
+  "cpp"                  { return CPP_KEYWORD; }
+  "defer"                { return DEFER_KEYWORD; }
+  "else"                 { return ELSE_KEYWORD; }
+  "enum"                 { return ENUM_KEYWORD; }
+  "extern"               { return EXTERN_KEYWORD; }
+  "false"                { return FALSE_KEYWORD; }
+  "for"                  { return FOR_KEYWORD; }
+  "function"             { return FUNCTION_KEYWORD; }
+  "guard"                { return GUARD_KEYWORD; }
+  "if"                   { return IF_KEYWORD; }
+  "import"               { return IMPORT_KEYWORD; }
+  "in"                   { return IN_KEYWORD; }
   "is"                   { return KEYWORD_IS; }
+  "let"                  { return LET_KEYWORD; }
+  "loop"                 { return LOOP_KEYWORD; }
+  "match"                { return MATCH_KEYWORD; }
+  "mut"                  { return MUT_KEYWORD; }
+  "namespace"            { return NAMESPACE_KEYWORD; }
+  "not"                  { return KEYWORD_NOT; }
+  "or"                   { return KEYWORD_OR; }
+  "private"              { return PRIVATE_KEYWORD; }
+  "public"               { return PUBLIC_KEYWORD; }
+  "raw"                  { return RAW_KEYWORD; }
+  "restricted"           { return RESTRICTED_KEYWORD; }
+  "return"               { return RETURN_KEYWORD; }
+  "struct"               { return STRUCT_KEYWORD; }
+  "this"                 { return THIS_KEYWORD; }
+  "throw"                { return THROW_KEYWORD; }
+  "throws"               { return THROWS_KEYWORD; }
+  "true"                 { return TRUE_KEYWORD; }
+  "try"                  { return TRY_KEYWORD; }
+  "unsafe"               { return UNSAFE_KEYWORD; }
+  "weak"                 { return WEAK_KEYWORD; }
+  "while"                { return WHILE_KEYWORD; }
+  "yield"                { return YIELD_KEYWORD; }
   "("                    { return PAREN_OPEN; }
   ")"                    { return PAREN_CLOSE; }
   "{"                    { return CURLY_OPEN; }
