@@ -110,6 +110,12 @@
         <option name="FOREGROUND" value="e5c17c" />
       </value>
     </option>
+    <option name="JAKT_TRAIT_NAME">
+        <value>
+            <option name="FOREGROUND" value="98c379" />
+            <option name="FONT_TYPE" value="2" />
+        </value>
+    </option>
     <option name="JAKT_TYPE_NAME">
       <value>
         <option name="FOREGROUND" value="e5c17c" />

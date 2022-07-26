@@ -73,6 +73,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "function"             { return FUNCTION_KEYWORD; }
   "guard"                { return GUARD_KEYWORD; }
   "if"                   { return IF_KEYWORD; }
+  "implements"           { return IMPLEMENTS_KEYWORD; }
   "import"               { return IMPORT_KEYWORD; }
   "in"                   { return IN_KEYWORD; }
   "is"                   { return KEYWORD_IS; }
@@ -92,6 +93,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "this"                 { return THIS_KEYWORD; }
   "throw"                { return THROW_KEYWORD; }
   "throws"               { return THROWS_KEYWORD; }
+  "trait"                { return TRAIT_KEYWORD; }
   "true"                 { return TRUE_KEYWORD; }
   "try"                  { return TRY_KEYWORD; }
   "unsafe"               { return UNSAFE_KEYWORD; }

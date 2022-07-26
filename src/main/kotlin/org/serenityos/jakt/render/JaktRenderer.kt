@@ -199,6 +199,11 @@ sealed class JaktRenderer {
                 appendStyled(": ", Highlights.COLON)
                 appendType(type.returnType, specializations, options)
             }
+            is TraitType -> {
+                if (!options.asExpression)
+                    appendStyled("trait ", Highlights.KEYWORD_DECLARATION)
+                appendStyled(type.name, Highlights.TRAIT_NAME)
+            }
             is BoundType -> appendType(type.type, specializations + type.specializations, options)
             else -> unreachable()
         }

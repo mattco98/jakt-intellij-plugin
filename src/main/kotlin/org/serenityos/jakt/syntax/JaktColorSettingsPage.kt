@@ -48,6 +48,10 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 }
             }
             
+            trait TRAIT_NAME{Hashable} {
+                function hash(this) -> u64 
+            }
+            
             extern struct STRUCT_NAME{D} {
                 function FUNC_DECL{invoke}(this, FUNC_PARAM{a}: TY{i32}) -> TY{String}
             }
@@ -61,6 +65,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 public function FUNC_DECL{set_foo}(mut this, FUNC_PARAM{value}: TY{i32}) {
                     STRUCT_FIELD{.foo} = value
                 }
+                
+                implements(TRAIT_NAME{Hashable}) function hash(this) => 42
             }
             
             function FUNC_DECL{get_d}() -> TY{D}? => EN_VARIANT{None}
@@ -108,6 +114,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
         private val DESCRIPTORS = mapOf(
             "Comments" to Highlights.COMMENT,
             "Namespace Name" to Highlights.NAMESPACE_NAME,
+            "Trait Name" to Highlights.TRAIT_NAME,
 
             "Identifiers//Default" to Highlights.IDENTIFIER,
             "Identifiers//Local Mutable Variable" to Highlights.LOCAL_VAR_MUT,
@@ -143,7 +150,6 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Keywords//Import" to Highlights.KEYWORD_IMPORT,
             "Keywords//Modifiers" to Highlights.KEYWORD_MODIFIER,
             "Keywords//unsafe and cpp" to Highlights.KEYWORD_UNSAFE,
-            "Keywords//Visibility" to Highlights.KEYWORD_VISIBILITY,
 
             "Operators and Delimiters//Braces" to Highlights.DELIM_BRACE,
             "Operators and Delimiters//Brackets" to Highlights.DELIM_BRACKET,
@@ -187,6 +193,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "STATIC_CALL" to Highlights.FUNCTION_STATIC_CALL,
             "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
             "STRUCT_NAME" to Highlights.STRUCT_NAME,
+            "TRAIT_NAME" to Highlights.TRAIT_NAME,
             "TY" to Highlights.TYPE_NAME,
         )
     }

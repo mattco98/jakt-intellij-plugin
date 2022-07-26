@@ -46,6 +46,7 @@ TopLevelDefinition ::=
     | ExternalStructDeclaration
     | EnumDeclaration
     | NamespaceDeclaration
+    | TraitDeclaration
     | ImportExternStatement
     | ImportStatement {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
@@ -124,11 +125,25 @@ private ImportExternDeclaration ::=
     | ExternalStructDeclaration
     | NamespaceDeclaration
 
+// Traits
+TraitDeclaration ::= TRAIT_KEYWORD NL IDENTIFIER NL TraitBody {
+    extends=TopLevelDefinition
+    implements=[
+        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    ]
+    mixin="org.serenityos.jakt.psi.declaration.JaktTraitDeclarationMixin"
+}
+private TraitBody ::= CURLY_OPEN NL <<commaOrEolList TraitFunctionDeclaration>>? NL CURLY_CLOSE
+TraitFunctionDeclaration ::= FunctionHeader { elementType=FunctionDeclaration }
+
+TraitImplementsClause ::= IMPLEMENTS_KEYWORD PAREN_OPEN <<commaOrEolList PlainQualifierExpression>>? PAREN_CLOSE
+
 /***************************
  *       FUNCTIONS         *
  ***************************/
 
-fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
+fake FunctionDeclaration ::= TraitImplementsClause? EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -143,7 +158,7 @@ private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterL
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression
 
-InternalFunctionDeclaration ::= FunctionHeader FunctionBody {elementType=FunctionDeclaration}
+InternalFunctionDeclaration ::= TraitImplementsClause? FunctionHeader FunctionBody {elementType=FunctionDeclaration}
 ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {elementType=FunctionDeclaration}
 
 ParameterList ::= PAREN_OPEN [(ThisParameter | Parameter) (COMMA Parameter)*] PAREN_CLOSE

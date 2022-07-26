@@ -24,7 +24,6 @@ object Highlights {
     val LITERAL_SET = Default.BRACES.extend("LITERAL_SET")
 
     val KEYWORD_BASE = Default.KEYWORD.extend("KEYWORD_BASE")
-    val KEYWORD_VISIBILITY = KEYWORD_BASE.extend("KEYWORD_VISIBILITY")
     val KEYWORD_DECLARATION = KEYWORD_BASE.extend("KEYWORD_DECLARATION")
     val KEYWORD_CONTROL_FLOW = KEYWORD_BASE.extend("KEYWORD_CONTROL_FLOW")
     val KEYWORD_MODIFIER = KEYWORD_BASE.extend("KEYWORD_MODIFIER")
@@ -64,12 +63,14 @@ object Highlights {
     val TYPE_NAMESPACE_OPERATOR = OPERATOR.extend("TYPE_NAMESPACE_OPERATOR")
     val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER")
 
-    val ENUM_NAME = IDENTIFIER.extend("ENUM_NAME")
+    val ENUM_NAME = Default.CLASS_NAME.extend("ENUM_NAME")
     val ENUM_VARIANT_NAME = IDENTIFIER.extend("ENUM_VARIANT_NAME")
     val ENUM_STRUCT_LABEL = FUNCTION_PARAMETER.extend("ENUM_STRUCT_LABEL")
 
-    val STRUCT_NAME = IDENTIFIER.extend("STRUCT_NAME")
+    val STRUCT_NAME = Default.CLASS_NAME.extend("STRUCT_NAME")
     val STRUCT_FIELD = IDENTIFIER.extend("STRUCT_FIELD")
+
+    val TRAIT_NAME = Default.INTERFACE_NAME.extend("TRAIT_NAME")
 
     val COMMENT = Default.LINE_COMMENT.extend("COMMENT")
     val NAMESPACE_NAME = IDENTIFIER.extend("NAMESPACE_NAME")
@@ -111,6 +112,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             STRUCT_KEYWORD,
             FUNCTION_KEYWORD,
             ENUM_KEYWORD,
+            TRAIT_KEYWORD,
             LET_KEYWORD -> Highlights.KEYWORD_DECLARATION
 
             IMPORT_KEYWORD -> Highlights.KEYWORD_IMPORT
@@ -120,11 +122,6 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             KEYWORD_NOT,
             KEYWORD_AS,
             KEYWORD_IS -> Highlights.KEYWORD_OPERATOR
-
-            RESTRICTED_KEYWORD,
-            PRIVATE_KEYWORD,
-            PUBLIC_KEYWORD,
-            RESTRICTED_KEYWORD -> Highlights.KEYWORD_VISIBILITY
 
             IF_KEYWORD,
             ELSE_KEYWORD,
@@ -149,7 +146,11 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             RAW_KEYWORD,
             WEAK_KEYWORD,
             THIS_KEYWORD,
-            THROWS_KEYWORD -> Highlights.KEYWORD_MODIFIER
+            THROWS_KEYWORD,
+            PRIVATE_KEYWORD,
+            PUBLIC_KEYWORD,
+            RESTRICTED_KEYWORD,
+            IMPLEMENTS_KEYWORD -> Highlights.KEYWORD_MODIFIER
 
             UNSAFE_KEYWORD,
             CPP_KEYWORD -> Highlights.KEYWORD_UNSAFE

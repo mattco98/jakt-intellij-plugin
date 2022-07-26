@@ -21,6 +21,7 @@ abstract class JaktFunctionDeclarationMixin(
         val name = identifier.text
         val linkage = if (isExtern) Linkage.External else Linkage.Internal
         val parameters = mutableListOf<FunctionType.Parameter>()
+        val traits = mutableListOf<TraitType>()
 
         producer {
             parameters.clear()
@@ -38,6 +39,7 @@ abstract class JaktFunctionDeclarationMixin(
                 PrimitiveType.Void,
                 functionReturnType.throwsKeyword != null,
                 linkage,
+                traits,
                 thisParam != null,
                 thisParam?.mutKeyword != null,
             ).also {
@@ -58,6 +60,12 @@ abstract class JaktFunctionDeclarationMixin(
             val func = type as FunctionType
 
             func.returnType = functionReturnType.type?.jaktType ?: expression?.jaktType ?: PrimitiveType.Void
+
+            traits.addAll(traitImplementsClause
+                ?.plainQualifierExpressionList
+                ?.map { it.jaktType }
+                ?.filterIsInstance<TraitType>()
+                ?: emptyList())
         }
     }
 

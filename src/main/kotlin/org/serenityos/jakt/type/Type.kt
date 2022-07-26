@@ -131,6 +131,7 @@ class FunctionType(
     var returnType: Type,
     var throws: Boolean,
     val linkage: Linkage,
+    val traits: List<TraitType>,
     var hasThis: Boolean,
     var thisIsMutable: Boolean,
 ) : BaseType(), DeclarationType, GenericType {
@@ -142,7 +143,14 @@ class FunctionType(
     )
 }
 
-class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseType() {
+class TraitType(
+    override val name: String,
+    val functions: List<FunctionType>,
+) : BaseType(), DeclarationType, ContainerType {
+    override fun findTypeIn(name: String) = functions.find { it.name == name }
+}
+
+class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseType(), ContainerType {
     val type: Type = if (type is BoundType) {
         type.type
     } else type
@@ -153,6 +161,12 @@ class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseTyp
 
     override var namespace = type.namespace
     override var psiElement = type.psiElement
+
+    override fun findTypeIn(name: String): Type? {
+        return if (type is ContainerType) {
+            type.findTypeIn(name)
+        } else error("Bound::findTypeIn called when wrapping non-container type")
+    }
 
     companion object {
         fun withInner(type: Type, block: (Type) -> Type): Type {

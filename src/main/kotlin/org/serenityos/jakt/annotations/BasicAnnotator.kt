@@ -99,6 +99,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 }
             }
             is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktTraitDeclaration -> element.identifier.highlight(Highlights.TRAIT_NAME)
             is JaktVariableDeclarationStatement -> {
                 val color = if (element.mutKeyword != null) {
                     Highlights.LOCAL_VAR_MUT
@@ -116,6 +117,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         is FunctionType -> if (type.hasThis) {
             Highlights.FUNCTION_INSTANCE_CALL
         } else Highlights.FUNCTION_STATIC_CALL
+        is TraitType -> Highlights.TRAIT_NAME
         else -> Highlights.FUNCTION_CALL
     }
 
@@ -160,6 +162,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     is StructType -> Highlights.STRUCT_NAME
                     is EnumType, is OptionalType -> Highlights.ENUM_NAME
                     is EnumVariantType -> Highlights.ENUM_VARIANT_NAME
+                    is TraitType -> Highlights.TRAIT_NAME
                     is PrimitiveType -> Highlights.TYPE_NAME
                     else -> identHighlight
                 }
