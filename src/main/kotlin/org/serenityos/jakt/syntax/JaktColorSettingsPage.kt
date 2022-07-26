@@ -169,25 +169,25 @@ class JaktColorSettingsPage : ColorSettingsPage {
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
 
         private val EXTRA_HIGHLIGHT_TAGS = mapOf(
-            "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
+            "EN_NAME" to Highlights.ENUM_NAME,
+            "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
+            "EN_VARIANT" to Highlights.ENUM_VARIANT_NAME,
             "FUNC_CALL" to Highlights.FUNCTION_CALL,
+            "FUNC_DECL" to Highlights.FUNCTION_DECLARATION,
             "FUNC_PARAM" to Highlights.FUNCTION_PARAMETER,
-            "TY" to Highlights.TYPE_NAME,
             "GENERIC_TY" to Highlights.TYPE_GENERIC_NAME,
-            "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
-            "IMPORT_MOD" to Highlights.IMPORT_MODULE,
             "IMPORT_ALIAS" to Highlights.IMPORT_ALIAS,
             "IMPORT_ENTRY" to Highlights.IMPORT_ENTRY,
-            "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
-            "EN_NAME" to Highlights.ENUM_NAME,
-            "EN_VARIANT" to Highlights.ENUM_VARIANT_NAME,
-            "EN_STRUCT_LBL" to Highlights.ENUM_STRUCT_LABEL,
-            "STRUCT_NAME" to Highlights.STRUCT_NAME,
-            "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
+            "IMPORT_MOD" to Highlights.IMPORT_MODULE,
             "INSTANCE_CALL" to Highlights.FUNCTION_INSTANCE_CALL,
-            "STATIC_CALL" to Highlights.FUNCTION_STATIC_CALL,
+            "KW_IMPORT" to Highlights.KEYWORD_IMPORT,
             "LV" to Highlights.LOCAL_VAR,
             "LV_MUT" to Highlights.LOCAL_VAR_MUT,
+            "NUMERIC_SUFFIX" to Highlights.LITERAL_NUMBER_SUFFIX,
+            "STATIC_CALL" to Highlights.FUNCTION_STATIC_CALL,
+            "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
+            "STRUCT_NAME" to Highlights.STRUCT_NAME,
+            "TY" to Highlights.TYPE_NAME,
         )
     }
 }
