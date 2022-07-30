@@ -197,7 +197,10 @@ sealed class JaktRenderer {
 
                 append(")")
 
-                appendStyled(": ", Highlights.COLON)
+                if (type.throws)
+                    appendStyled(" throws", Highlights.KEYWORD_MODIFIER)
+
+                appendStyled(" -> ", Highlights.COLON)
                 appendType(type.returnType, specializations, options)
             }
             is BoundType -> appendType(type.type, specializations + type.specializations, options)
