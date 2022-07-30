@@ -52,6 +52,7 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
             .filterValues { it.hasThis }
             .toList()
             .sortedBy { it.first }
+        is ReferenceType -> getTypeCompletionPairs(project, type.underlyingType)
         is BoundType -> getTypeCompletionPairs(project, type.type).map {
             it.first to BoundType(it.second, type.specializations)
         }

@@ -103,5 +103,25 @@ class JaktStructCompletionTest : JaktCompletionTest() {
         }
     """)
 
-
+    fun `test struct reference completion`() = testCompletion("""
+        struct Foo {
+            a: i32
+        }
+        
+        function main() {
+            let foo = Foo(a: 10)
+            let ref = &mut foo
+            let a = ref.<caret>
+        }
+    """, """
+        struct Foo {
+            a: i32
+        }
+        
+        function main() {
+            let foo = Foo(a: 10)
+            let ref = &mut foo
+            let a = ref.a
+        }
+    """)
 }
