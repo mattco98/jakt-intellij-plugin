@@ -148,7 +148,7 @@ private FunctionBody ::= Block | FAT_ARROW NL Expression
 InternalFunctionDeclaration ::= FunctionDeclarationHeader FunctionBody {elementType=Function}
 ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionDeclarationHeader {elementType=Function}
 
-ParameterList ::= PAREN_OPEN [(ThisParameter | Parameter) (COMMA Parameter)*] PAREN_CLOSE
+ParameterList ::= PAREN_OPEN NL [(ThisParameter | Parameter) (MemberSeparator? Parameter)*] MemberSeparator? NL PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
 Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -420,9 +420,9 @@ upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE 
 }
 
 CallExpression ::= Expression ArgumentList
-ArgumentList ::= PAREN_OPEN NL  [<<commaOrEolList Argument>>] PAREN_CLOSE
+ArgumentList ::= PAREN_OPEN NL [<<separatedList Argument>>] PAREN_CLOSE
 Argument ::= LabeledArgument | UnlabeledArgument
-LabeledArgument ::= IDENTIFIER COLON Expression {
+LabeledArgument ::= IDENTIFIER COLON NL Expression {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktLabeledArgumentMixin"
 }
@@ -594,3 +594,4 @@ private NLSEMI ::= (NEWLINE | SEMICOLON)*
 private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
 private meta pipeList ::= <<p>> (NL PIPE NL <<p>>)*
 private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
+private meta separatedList ::= <<p>> (MemberSeparator? <<p>>)* MemberSeparator?
