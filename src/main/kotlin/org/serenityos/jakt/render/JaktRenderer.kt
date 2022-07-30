@@ -200,8 +200,10 @@ sealed class JaktRenderer {
                 if (type.throws)
                     appendStyled(" throws", Highlights.KEYWORD_MODIFIER)
 
-                appendStyled(" -> ", Highlights.COLON)
-                appendType(type.returnType, specializations, options)
+                if (type.returnType != PrimitiveType.Void) {
+                    appendStyled(" -> ", Highlights.COLON)
+                    appendType(type.returnType, specializations, options)
+                }
             }
             is BoundType -> appendType(type.type, specializations + type.specializations, options)
             else -> unreachable()

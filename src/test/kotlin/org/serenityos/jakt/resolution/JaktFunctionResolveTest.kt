@@ -51,4 +51,13 @@ class JaktFunctionResolveTest : JaktResolveTest() {
               //^R
         }
     """)
+
+    fun `test lambda capture resolution`() = doTest("""
+        function main() {
+            let c = 10
+              //^D
+            let f = function[&mut c]() {}
+                                //^R
+        } 
+    """)
 }
