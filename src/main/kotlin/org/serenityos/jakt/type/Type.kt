@@ -35,6 +35,7 @@ object UnknownType : BaseType()
 
 enum class PrimitiveType(typeName: kotlin.String? = null) : Type {
     Void,
+    Never,
     Bool,
     U8,
     U16,

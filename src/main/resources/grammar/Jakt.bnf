@@ -329,6 +329,8 @@ private BaseType ::=
     | ArrayType
     | SetType
     | TupleType
+    | NeverType
+    | VoidType
     | PlainType
     | FunctionType
 
@@ -337,6 +339,8 @@ ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
+NeverType ::= NEVER_KEYWORD { extends=Type }
+VoidType ::= VOID_KEYWORD { extends=Type }
 FunctionType ::= FUNCTION_KEYWORD ParameterList FunctionReturnType {pin=1 extends=Type}
 
 PlainType ::= PlainQualifierImpl GenericSpecialization? {

@@ -57,13 +57,15 @@ class JaktColorSettingsPage : ColorSettingsPage {
                 
                 // Create a new P from the given value
                 public function FUNC_DECL{make}(FUNC_PARAM{value}: TY{i32}) throws => STRUCT_NAME{P}(foo: value)
-                public function FUNC_DECL{get_foo}(this) => STRUCT_FIELD{.foo}
+                public function FUNC_DECL{get_foo}(this) -> VOID{void} => STRUCT_FIELD{.foo}
                 public function FUNC_DECL{set_foo}(mut this, FUNC_PARAM{value}: TY{i32}) {
                     STRUCT_FIELD{.foo} = value
                 }
             }
             
             function FUNC_DECL{get_d}() -> TY{D}? => EN_VARIANT{None}
+            
+            function FUNC_DECL{panic}() -> NEVER{never} { abort() }
             
             function FUNC_DECL{main}() {
                 mut LV_MUT{p} = STRUCT_NAME{P}::STATIC_CALL{make}(value: 12)
@@ -164,6 +166,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Types//Generic Type Name" to Highlights.TYPE_GENERIC_NAME,
             "Types//Raw Qualifier" to Highlights.TYPE_RAW,
             "Types//Weak Qualifier" to Highlights.TYPE_WEAK,
+            "Types//Void" to Highlights.TYPE_VOID,
+            "Types//Never" to Highlights.TYPE_NEVER,
             "Types//Namespace Operator" to Highlights.TYPE_NAMESPACE_OPERATOR,
             "Types//Optional Qualifier" to Highlights.TYPE_OPTIONAL_QUALIFIER,
         ).map { AttributesDescriptor(it.key, it.value) }.toTypedArray()
@@ -188,6 +192,8 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "STRUCT_FIELD" to Highlights.STRUCT_FIELD,
             "STRUCT_NAME" to Highlights.STRUCT_NAME,
             "TY" to Highlights.TYPE_NAME,
+            "VOID" to Highlights.TYPE_VOID,
+            "NEVER" to Highlights.TYPE_NEVER,
         )
     }
 }

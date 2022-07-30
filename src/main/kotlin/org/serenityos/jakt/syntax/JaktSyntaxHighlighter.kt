@@ -61,6 +61,8 @@ object Highlights {
     val TYPE_GENERIC_NAME = TYPE_NAME.extend("TYPE_GENERIC_NAME")
     val TYPE_RAW = KEYWORD_MODIFIER.extend("TYPE_RAW")
     val TYPE_WEAK = KEYWORD_MODIFIER.extend("TYPE_WEAK")
+    val TYPE_VOID = KEYWORD_MODIFIER.extend("TYPE_VOID")
+    val TYPE_NEVER = KEYWORD_MODIFIER.extend("TYPE_NEVER")
     val TYPE_NAMESPACE_OPERATOR = OPERATOR.extend("TYPE_NAMESPACE_OPERATOR")
     val TYPE_OPTIONAL_QUALIFIER = OPERATOR.extend("TYPE_OPTIONAL_QUALIFIER")
 
@@ -201,6 +203,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             RAW_KEYWORD -> Highlights.TYPE_RAW
             WEAK_KEYWORD -> Highlights.TYPE_WEAK
+            VOID_KEYWORD -> Highlights.TYPE_VOID
+            NEVER_KEYWORD -> Highlights.TYPE_NEVER
             QUESTION_MARK -> Highlights.TYPE_OPTIONAL_QUALIFIER
             COLON_COLON -> Highlights.TYPE_NAMESPACE_OPERATOR
 

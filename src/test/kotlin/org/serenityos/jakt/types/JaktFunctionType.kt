@@ -1,13 +1,29 @@
 package org.serenityos.jakt.types
 
 class JaktFunctionType : JaktTypeTest() {
-    fun `test void lambda`() = doTest("""
+    fun `test implicit void lambda`() = doTest("""
         function main() {
             let f = function() {}
             f
           //^T
         }
     """, "function()")
+
+    fun `test explicit void lambda`() = doTest("""
+        function main() {
+            let f = function() -> void {}
+            f
+          //^T
+        }
+    """, "function()")
+
+    fun `test never lambda`() = doTest("""
+        function main() {
+            let f = function() -> never { abort() }
+            f
+          //^T
+        } 
+    """, "function() -> never")
 
     fun `test lambda with return value`() = doTest("""
         function main() {

@@ -17,6 +17,8 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
             is JaktDictionaryType -> DictionaryType(typeList[0].jaktType, typeList[1].jaktType)
             is JaktSetType -> SetType(type!!.jaktType)
             is JaktTupleType -> TupleType(typeList.map { it.jaktType })
+            is JaktNeverType -> PrimitiveType.Never
+            is JaktVoidType -> PrimitiveType.Void
             is JaktTypeAnnotation -> type.jaktType
             is JaktFunctionType -> FunctionType(
                 null,

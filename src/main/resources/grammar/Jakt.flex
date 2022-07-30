@@ -81,6 +81,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "match"                { return MATCH_KEYWORD; }
   "mut"                  { return MUT_KEYWORD; }
   "namespace"            { return NAMESPACE_KEYWORD; }
+  "never"                { return NEVER_KEYWORD; }
   "not"                  { return KEYWORD_NOT; }
   "or"                   { return KEYWORD_OR; }
   "private"              { return PRIVATE_KEYWORD; }
@@ -95,6 +96,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "true"                 { return TRUE_KEYWORD; }
   "try"                  { return TRY_KEYWORD; }
   "unsafe"               { return UNSAFE_KEYWORD; }
+  "void"                 { return VOID_KEYWORD; }
   "weak"                 { return WEAK_KEYWORD; }
   "while"                { return WHILE_KEYWORD; }
   "yield"                { return YIELD_KEYWORD; }
