@@ -34,6 +34,7 @@ class JaktLanguageProjectConfigurable(private val project: Project) : BoundConfi
 
         row {
             showAllocationTryHints = checkBox("Show \"try\" inlay hints for throwing expressions")
+            showAllocationTryHints.component.isSelected = project.jaktProject.showTryAllocationHints
         }
     }
 
