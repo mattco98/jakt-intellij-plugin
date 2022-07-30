@@ -13,7 +13,7 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
         extern function get_foo() -> Foo
         
         function main() {
-            let foo<hint text="[:  struct Foo]" /> = get_foo()
+            let foo<hint text="[:  Foo]" /> = get_foo()
         }
     """)
 
@@ -21,7 +21,7 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
         struct Foo {}
          
         function main() {
-            let foo<hint text="[:  [Foo]]" /> = [Foo()]
+            let foo<hint text="[:  [[ Foo ]]]" /> = [Foo()]
         }
     """)
 
@@ -37,5 +37,11 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
         function main() {
             let foo = Foo()
         }
+    """)
+
+    fun `test tuple hints`() = doTest("""
+        function main() {
+            let f<hint text="[:  [( .. )]]" /> =  (1, 2, 3)
+        } 
     """)
 }

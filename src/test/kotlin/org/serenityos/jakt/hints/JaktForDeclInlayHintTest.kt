@@ -21,13 +21,13 @@ class JaktForDeclInlayHintTest : JaktInlayHintsTest() {
         }
     """)
 
-    fun `test struct type in non expression type does render struct keyword`() = doTest("""
+    fun `test struct type in non expression type does not render struct keyword`() = doTest("""
         $customType
         
         struct Foo {}
         
         function main() {
-            for a<hint text="[:  struct Foo]" /> in MyContainer<Foo>().iterator() {
+            for a<hint text="[:  Foo]" /> in MyContainer<Foo>().iterator() {
             }
         }
     """)
@@ -38,7 +38,7 @@ class JaktForDeclInlayHintTest : JaktInlayHintsTest() {
         struct Foo {}
         
         function main() {
-            for a<hint text="[:  [Foo]]" /> in MyContainer<[Foo]>().iterator() {
+            for a<hint text="[:  [[ Foo ]]]" /> in MyContainer<[Foo]>().iterator() {
             }
         }
     """)

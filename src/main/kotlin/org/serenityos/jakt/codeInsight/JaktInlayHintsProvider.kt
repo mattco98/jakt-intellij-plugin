@@ -1,7 +1,10 @@
 package org.serenityos.jakt.codeInsight
 
 import com.intellij.codeInsight.hints.*
+import com.intellij.codeInsight.hints.presentation.InlayPresentation
+import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.editor.Editor
+import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -12,8 +15,7 @@ import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.render.renderType
-import org.serenityos.jakt.type.TypeInference
+import org.serenityos.jakt.type.*
 import javax.swing.JPanel
 
 @Suppress("UnstableApiUsage")
@@ -65,10 +67,9 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
                         return true
 
-                    val renderedType = renderType(element.jaktType)
-                    factory.text(renderedType) to element.identifier.endOffset
+                    hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
                 }
-                is JaktForDecl -> factory.text(renderType(element.jaktType)) to element.endOffset
+                is JaktForDecl -> hintFor(element.jaktType, emptyMap()) to element.endOffset
                 else -> return true
             }
 
@@ -80,6 +81,86 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
             )
 
             return true
+        }
+
+        private fun hintFor(
+            type: Type,
+            specializations: Map<TypeParameter, Type>,
+        ): InlayPresentation = with(factory) {
+            when (type) {
+                is UnknownType -> text("??")
+                is NamespaceType -> text("??") // Can't have a reference to a namespace
+                is PrimitiveType -> text(type.typeName)
+                is WeakType -> seq(text("weak "), hintFor(type.underlyingType, specializations), text("?"))
+                is RawType -> seq(text("&raw "), hintFor(type.underlyingType, specializations))
+                is OptionalType -> seq(hintFor(type.underlyingType, specializations), text("?"))
+                is ReferenceType -> seq(
+                    text(if (type.isMutable) "&mut " else "&"),
+                    hintFor(type.underlyingType, specializations)
+                )
+                is ArrayType -> seq(text("["), hintFor(type.underlyingType, specializations), text("]"))
+                is SetType -> seq(text("{"), hintFor(type.underlyingType, specializations), text("}"))
+                is DictionaryType -> seq(
+                    text("{"),
+                    hintFor(type.keyType, specializations),
+                    text(":"),
+                    hintFor(type.valueType, specializations),
+                    text("}"),
+                )
+                is TupleType -> collapsible(
+                    prefix = text("("),
+                    collapsed = text(".."),
+                    expanded = {
+                        join(
+                            type.types.map { hintFor(it, specializations) },
+                            separator = { text(", ") },
+                        )
+                    },
+                    suffix = text(")"),
+                )
+                is TypeParameter -> {
+                    val specializedType = specializations[type]
+                    if (specializedType != null) {
+                        hintFor(specializedType, specializations)
+                    } else text(type.name).withPsiReference(type)
+                }
+                is StructType -> text(type.name).withPsiReference(type)
+                is EnumType -> text(type.name).withPsiReference(type)
+                is EnumVariantType -> seq(
+                    text(type.parent.name).withPsiReference(type.parent),
+                    text("::"),
+                    text(type.name).withPsiReference(type),
+                )
+                is FunctionType -> seq(
+                    text("function"),
+                    collapsible(
+                        prefix = text("("),
+                        collapsed = text(".."),
+                        expanded = {
+                            join(type.parameters.map {
+                                seq(
+                                    text("${it.name}: "),
+                                    hintFor(it.type, specializations)
+                                )
+                            }, separator = { text(", ") })
+                        },
+                        suffix = text(")"),
+                    )
+                )
+                is BoundType -> hintFor(type.type, specializations + type.specializations)
+            }
+        }
+
+        fun InlayPresentation.withPsiReference(type: Type): InlayPresentation {
+            val target = type.psiElement
+            return if (target != null) {
+                return factory.reference(this) {
+                    if (target is Navigatable) {
+                        CommandProcessor.getInstance()
+                            .executeCommand(target.project, { target.navigate(true) }, null, null)
+                    }
+                }
+            } else this
         }
 
         private fun isObvious(element: PsiElement): Boolean {
@@ -106,15 +187,26 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 ImmediateConfigurable.Case("Omit obvious types", "obvious-types", settings::omitObviousTypes),
                 ImmediateConfigurable.Case("Show for variables", "variables", settings::showForVariables),
                 ImmediateConfigurable.Case("Show for 'for' declarations", "for-decls", settings::showForForDecl),
+                ImmediateConfigurable.Case(
+                    "Collapse tuple types by default",
+                    "collapse-tuples",
+                    settings::collapseTuples
+                ),
+                ImmediateConfigurable.Case(
+                    "Collapse function parameter types by default",
+                    "collapse-params",
+                    settings::collapseParams
+                ),
             )
 
         override fun createComponent(listener: ChangeListener) = JPanel()
     }
 
-
     data class Settings(
         var omitObviousTypes: Boolean = true,
         var showForVariables: Boolean = true,
         var showForForDecl: Boolean = true,
+        var collapseTuples: Boolean = false,
+        var collapseParams: Boolean = false,
     )
 }

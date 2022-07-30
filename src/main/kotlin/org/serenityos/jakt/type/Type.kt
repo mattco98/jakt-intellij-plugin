@@ -9,15 +9,15 @@ sealed interface Type {
     var psiElement: PsiElement?
 }
 
-interface GenericType : Type {
+sealed interface GenericType : Type {
     val typeParameters: List<TypeParameter>
 }
 
-interface ContainerType : Type {
+sealed interface ContainerType : Type {
     fun findTypeIn(name: String): Type?
 }
 
-interface DeclarationType : Type {
+sealed interface DeclarationType : Type {
     val name: String?
 }
 
@@ -26,7 +26,7 @@ enum class Linkage {
     External,
 }
 
-abstract class BaseType : Type {
+sealed class BaseType : Type {
     override var namespace: NamespaceType? = null
     override var psiElement: PsiElement? = null
 }
