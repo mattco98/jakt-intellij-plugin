@@ -281,7 +281,7 @@ VariableDecl ::= IDENTIFIER {
     mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclMixin"
 }
 
-IfStatement ::= IF_KEYWORD Expression Block [ELSE_KEYWORD (IfStatement | Block)]
+IfStatement ::= IF_KEYWORD Expression Block [NL ELSE_KEYWORD (IfStatement | Block)]
 ReturnStatement ::= RETURN_KEYWORD Expression?
 ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
