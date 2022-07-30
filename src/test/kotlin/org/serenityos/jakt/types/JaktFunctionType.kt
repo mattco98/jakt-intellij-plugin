@@ -67,4 +67,13 @@ class JaktFunctionType : JaktTypeTest() {
           //^T
         } 
     """, "i32")
+
+    fun `test calling non-callable`() = doTest("""
+        function main() {
+            let a = 10
+            let b = a()
+            b
+          //^T
+        } 
+    """, "??")
 }

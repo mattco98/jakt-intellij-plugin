@@ -156,7 +156,7 @@ class BoundType(type: Type, specializations: Map<TypeParameter, Type>) : BaseTyp
     override var psiElement = type.psiElement
 
     companion object {
-        fun withInner(type: Type, block: (Type) -> Type): Type {
+        inline fun withInner(type: Type, block: (Type) -> Type): Type {
             if (type !is BoundType)
                 return block(type)
 

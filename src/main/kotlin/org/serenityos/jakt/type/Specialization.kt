@@ -82,10 +82,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
     for ((genericType, concreteType) in matchedTypes)
         collectSpecializations(genericType, concreteType, specializations)
 
-    val specializedType = applySpecializations(type, specializations)
-    return BoundType.withInner(specializedType) {
-        if (it is FunctionType) it.returnType else it
-    }
+    return applySpecializations(type, specializations)
 }
 
 private fun collectSpecializations(genericType: Type, concreteType: Type, specializations: Specializations) {

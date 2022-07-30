@@ -45,9 +45,14 @@ object TypeInference {
                     else -> {}
                 }
 
-                when (val specializedType = specialize(baseType, element)) {
-                    is FunctionType -> specializedType.returnType
-                    else -> specializedType
+                val specialized = specialize(baseType, element)
+
+                BoundType.withInner(specialized) {
+                    when (it) {
+                        is FunctionType -> it.returnType
+                        is StructType, is EnumVariantType -> it
+                        else -> return UnknownType
+                    }
                 }
             }
             is JaktCastExpression -> element.type.jaktType.let { t ->
