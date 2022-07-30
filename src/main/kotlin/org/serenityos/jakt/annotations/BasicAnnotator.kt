@@ -146,9 +146,12 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
         val decl = element.reference.resolve()
 
         identHighlight = when (decl) {
-            is JaktVariableDeclarationStatement -> if (decl.mutKeyword != null) {
-                Highlights.LOCAL_VAR_MUT
-            } else Highlights.LOCAL_VAR
+            is JaktVariableDecl -> {
+                val statement = decl.ancestorOfType<JaktVariableDeclarationStatement>()
+                if (statement?.mutKeyword != null) {
+                    Highlights.LOCAL_VAR_MUT
+                } else Highlights.LOCAL_VAR
+            }
             is JaktForDecl, is JaktCatchDecl -> Highlights.LOCAL_VAR
             else -> {
                 val type = element.jaktType
