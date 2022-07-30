@@ -6,7 +6,7 @@ import org.intellij.sdk.language.psi.JaktExpression
 import org.intellij.sdk.language.psi.JaktTryStatement
 
 abstract class JaktTryStatementMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTryStatement {
-    override fun getDeclarations(): List<JaktDeclaration> = listOf(catchDecl)
+    override fun getDeclarations(): List<JaktDeclaration> = listOfNotNull(catchDecl)
 
     // TODO: Why is this generated?
     override fun getExpression(): JaktExpression? = null

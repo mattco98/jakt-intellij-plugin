@@ -288,7 +288,7 @@ DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 
-TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD CatchDecl Statement {
+TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD CatchDecl? Statement {
     implements="org.serenityos.jakt.psi.api.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktTryStatementMixin"
 }
