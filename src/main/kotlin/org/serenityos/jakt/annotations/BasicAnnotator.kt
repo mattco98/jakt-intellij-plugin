@@ -99,6 +99,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
                 }
             }
+            is JaktStructEnumMemberLabel -> element.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktVariableDeclarationStatement -> {
                 val color = if (element.mutKeyword != null) {
                     Highlights.LOCAL_VAR_MUT
