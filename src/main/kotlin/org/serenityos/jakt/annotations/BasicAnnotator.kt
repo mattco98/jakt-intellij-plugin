@@ -43,7 +43,8 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                 }
             }
             is JaktCatchDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
-            is JaktDestructuringLabel -> element.nameIdentifier?.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktDestructuringLabel -> element.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
+            is JaktDestructuringBinding -> element.identifier.highlight(Highlights.LOCAL_VAR)
             is JaktEnumDeclaration -> element.identifier.highlight(Highlights.ENUM_NAME)
             is JaktEnumVariant -> element.identifier.highlight(Highlights.ENUM_VARIANT_NAME)
             is JaktFieldAccessExpression -> {
