@@ -178,8 +178,9 @@ sealed class JaktRenderer {
             }
             is FunctionType -> {
                 require(!options.asExpression)
-                appendStyled("function ", Highlights.KEYWORD_DECLARATION)
-                appendStyled(type.name, Highlights.FUNCTION_DECLARATION)
+                appendStyled("function", Highlights.KEYWORD_DECLARATION)
+                if (type.name != null)
+                    appendStyled(" ${type.name}", Highlights.FUNCTION_DECLARATION)
                 renderGenerics(type, specializations, options)
                 append("(")
 

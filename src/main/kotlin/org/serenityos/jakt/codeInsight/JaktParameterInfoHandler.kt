@@ -6,7 +6,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.JaktArgumentList
 import org.intellij.sdk.language.psi.JaktCallExpression
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktFunction
 import org.intellij.sdk.language.psi.JaktParameterList
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
@@ -17,7 +17,7 @@ class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktPara
     override fun findElementForParameterInfo(context: CreateParameterInfoContext): JaktArgumentList? {
         val argList = findElement(context.file, context.offset) ?: return null
         val callTarget = argList.ancestorOfType<JaktCallExpression>()?.expression ?: return null
-        val func = callTarget.jaktType.psiElement as? JaktFunctionDeclaration ?: return null
+        val func = callTarget.jaktType.psiElement as? JaktFunction ?: return null
         context.itemsToShow = arrayOf(ParameterInfo(func.parameterList))
         return argList
     }

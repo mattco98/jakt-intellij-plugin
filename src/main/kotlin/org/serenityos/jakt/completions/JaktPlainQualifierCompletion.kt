@@ -7,7 +7,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktFunction
 import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.JaktTypes
@@ -46,7 +46,7 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
     private fun getNamespacedTypeCompletions(project: Project, type: Type): List<LookupElement> {
         return when (type) {
             is NamespaceType -> type.members.map {
-                lookupElementFromType(it.name, it, project)
+                lookupElementFromType(it.name!!, it, project)
             }
             is StructType -> type
                 .methods
@@ -80,7 +80,7 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
             JaktResolver(element).getPreviousDeclarations()
                 .filter {
                     when (it) {
-                        is JaktFunctionDeclaration -> it.parameterList.thisParameter == null
+                        is JaktFunction -> it.parameterList.thisParameter == null
                         is JaktStructField -> false
                         else -> true
                     }
@@ -97,7 +97,7 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
                 // No function template since these are vararg functions, and it's kind of annoying
                 result.addElement(
                     lookupElementFromType(
-                        it.name,
+                        it.name!!,
                         it,
                         project,
                         functionTemplateType = FunctionTemplateType.Reduced,

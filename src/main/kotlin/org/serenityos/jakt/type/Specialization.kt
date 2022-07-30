@@ -56,7 +56,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
                 arguments.find { it.first == fieldName }?.let { fieldType to it.second }
             }
         }
-        is JaktFunctionDeclaration -> {
+        is JaktFunction -> {
             val params = target.parameterList.parameterList.map { it.name!! to it.jaktType }
 
             params.mapNotNull { (paramName, paramType) ->

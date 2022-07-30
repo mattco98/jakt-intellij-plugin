@@ -47,15 +47,15 @@ abstract class JaktStructDeclarationMixin(
             }
 
             members.filterIsInstance<JaktStructMethod>().forEach { method ->
-                val type = method.functionDeclaration.jaktType
+                val type = method.function.jaktType
                 require(type is FunctionType)
-                methods[type.name] = type
+                methods[type.name!!] = type
             }
         }
     }
 
     override fun getDeclarations(): List<JaktDeclaration> {
-        return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.functionDeclaration }
+        return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.function }
     }
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()

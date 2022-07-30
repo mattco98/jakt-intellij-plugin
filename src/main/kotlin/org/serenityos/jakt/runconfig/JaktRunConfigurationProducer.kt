@@ -5,7 +5,7 @@ import com.intellij.execution.actions.LazyRunConfigurationProducer
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktFunction
 import org.serenityos.jakt.psi.declaration.isMainFunction
 import org.serenityos.jakt.psi.findChildrenOfType
 import kotlin.io.path.absolutePathString
@@ -20,7 +20,7 @@ class JaktRunConfigurationProducer : LazyRunConfigurationProducer<JaktRunConfigu
         context: ConfigurationContext
     ): Boolean {
         val file = context.psiLocation?.containingFile ?: return false
-        val functions = file.findChildrenOfType<JaktFunctionDeclaration>()
+        val functions = file.findChildrenOfType<JaktFunction>()
         if (functions.none { it.isMainFunction })
             return false
         return configuration.filePath == file.virtualFile?.toNioPath()?.absolutePathString()
@@ -32,7 +32,7 @@ class JaktRunConfigurationProducer : LazyRunConfigurationProducer<JaktRunConfigu
         sourceElement: Ref<PsiElement>
     ): Boolean {
         val file = context.psiLocation?.containingFile ?: return false
-        val functions = file.findChildrenOfType<JaktFunctionDeclaration>()
+        val functions = file.findChildrenOfType<JaktFunction>()
         val mainFunction = functions.find { it.isMainFunction } ?: return false
         configuration.filePath = file.virtualFile?.toNioPath()?.absolutePathString() ?: return false
         sourceElement.set(mainFunction)

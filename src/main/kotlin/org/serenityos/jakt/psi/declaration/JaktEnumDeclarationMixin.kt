@@ -44,7 +44,7 @@ abstract class JaktEnumDeclarationMixin(
             } ?: emptyMap())
 
             methods.putAll(normalEnumBody?.normalEnumMemberList?.mapNotNull {
-                it.functionDeclaration
+                it.function
             }?.associate {
                 it.nameNonNull to it.jaktType as FunctionType
             } ?: emptyMap())
@@ -58,7 +58,7 @@ abstract class JaktEnumDeclarationMixin(
             is JaktNormalEnumBody -> buildList {
                 body.genericBounds?.genericBoundList?.let(::addAll)
                 body.normalEnumMemberList.forEach {
-                    add(it.enumVariant ?: it.functionDeclaration!!)
+                    add(it.enumVariant ?: it.function!!)
                 }
             }
             is JaktUnderlyingTypeEnumBody -> body.enumVariantList

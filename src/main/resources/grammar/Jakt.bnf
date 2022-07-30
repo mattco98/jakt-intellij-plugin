@@ -128,7 +128,7 @@ private ImportExternDeclaration ::=
  *       FUNCTIONS         *
  ***************************/
 
-fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
+fake Function ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -136,15 +136,17 @@ fake FunctionDeclaration ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
         "org.serenityos.jakt.psi.caching.JaktModificationBoundary"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktFunctionDeclarationMixin"
+    mixin="org.serenityos.jakt.psi.declaration.JaktFunctionMixin"
 }
 
-private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER? GenericBounds? ParameterList FunctionReturnType
+private FunctionDeclarationHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression
 
-InternalFunctionDeclaration ::= FunctionHeader FunctionBody {elementType=FunctionDeclaration}
-ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionHeader {elementType=FunctionDeclaration}
+InternalFunctionDeclaration ::= FunctionDeclarationHeader FunctionBody {elementType=Function}
+ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionDeclarationHeader {elementType=Function}
 
 ParameterList ::= PAREN_OPEN [(ThisParameter | Parameter) (COMMA Parameter)*] PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
@@ -177,7 +179,7 @@ StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
     mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
 }
 
-fake StructMethod ::= StructVisibility? FunctionDeclaration
+fake StructMethod ::= StructVisibility? Function
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
 private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
@@ -197,7 +199,7 @@ ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>>? NL
 ExternalStructMember ::= StructField | ExternalStructMethod {elementType=StructMember}
 ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {elementType=StructMethod}
 // Has to be different due to not requiring the extern keyword
-ExternalStructFunctionDeclaration ::= FunctionHeader {elementType=FunctionDeclaration}
+ExternalStructFunctionDeclaration ::= FunctionDeclarationHeader {elementType=Function}
 
 /*******************
  *      Enums      *
@@ -328,12 +330,14 @@ private BaseType ::=
     | SetType
     | TupleType
     | PlainType
+    | FunctionType
 
 GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
 TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
+FunctionType ::= FUNCTION_KEYWORD ParameterList FunctionReturnType {pin=1 extends=Type}
 
 PlainType ::= PlainQualifierImpl GenericSpecialization? {
     extends=Type
@@ -371,6 +375,7 @@ GenericBound ::= IDENTIFIER {
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
       MatchExpression
+    | LambdaExpression
     | AssignmentBinaryExpression
     | ThisExpression
     | FieldAccessExpression
@@ -489,16 +494,14 @@ private PlainQualifierImpl ::= PlainQualifierStart PlainQualifierSegment*
 PlainQualifierStart ::= IDENTIFIER {elementType=PlainQualifier}
 left PlainQualifierSegment ::= COLON_COLON IDENTIFIER {
     pin=1
-//    recoverWhile=PlainQualifierSegment_recover
     elementType=PlainQualifier
 }
 
-//private PlainQualifierSegment_recover ::= !(NEWLINE | <<eof>>)
-
-//private PlainQualifierImpl ::= PlainQualifierNS* PlainQualifierEnd
-//
-//PlainQualifierNS ::= IDENTIFIER COLON_COLON {pin=2 elementType=PlainQualifier}
-//left PlainQualifierEnd ::= IDENTIFIER {elementType=PlainQualifier}
+LambdaExpression ::= LambdaFunction
+LambdaFunction ::= LambdaHeader FunctionBody {elementType=Function}
+private LambdaHeader ::= FUNCTION_KEYWORD LambdaCaptures? ParameterList FunctionReturnType
+LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture >> BRACKET_CLOSE
+LambdaCapture ::= [AMPERSAND MUT_KEYWORD?] PlainQualifierExpression
 
 /*************************************
  *        BINARY EXPRESSIONS         *

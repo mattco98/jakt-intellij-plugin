@@ -72,6 +72,7 @@ object TypeInference {
                 } ?: return UnknownType
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
+            is JaktLambdaExpression -> element.function.jaktType
             is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
                 (it as? ArrayType)?.underlyingType
             } ?: UnknownType

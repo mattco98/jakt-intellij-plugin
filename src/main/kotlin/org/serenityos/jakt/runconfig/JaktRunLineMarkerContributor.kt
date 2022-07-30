@@ -5,7 +5,7 @@ import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.icons.AllIcons
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktFunction
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.declaration.isMainFunction
@@ -15,7 +15,7 @@ class JaktRunLineMarkerContributor : RunLineMarkerContributor() {
         if (element.elementType != JaktTypes.IDENTIFIER)
             return null
 
-        val funcDecl = element.ancestorOfType<JaktFunctionDeclaration>() ?: return null
+        val funcDecl = element.ancestorOfType<JaktFunction>() ?: return null
         if (!funcDecl.isMainFunction || funcDecl.identifier != element)
             return null
 

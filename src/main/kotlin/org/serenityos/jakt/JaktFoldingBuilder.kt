@@ -38,7 +38,7 @@ class JaktFoldingBuilder : CustomFoldingBuilder() {
         override fun visitPsiElement(o: JaktPsiElement) {
         }
 
-        override fun visitFunctionDeclaration(o: JaktFunctionDeclaration) {
+        override fun visitFunction(o: JaktFunction) {
             val block = o.block ?: return
             descriptors += FoldingDescriptor(block)
         }

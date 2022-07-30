@@ -49,14 +49,14 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktFieldAccessExpression -> {
                 val color = when {
                     DumbService.isDumb(element.project) -> Highlights.STRUCT_FIELD
-                    element.reference?.resolve() is JaktFunctionDeclaration -> Highlights.FUNCTION_DECLARATION
+                    element.reference?.resolve() is JaktFunction -> Highlights.FUNCTION_DECLARATION
                     else -> Highlights.STRUCT_FIELD
                 }
                 TextRange.create(element.dot.startOffset, element.identifier.endOffset)
                     .highlight(color)
             }
             is JaktForDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
-            is JaktFunctionDeclaration -> element.identifier.highlight(Highlights.FUNCTION_DECLARATION)
+            is JaktFunction -> element.identifier?.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
             is JaktImportExternStatement -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
             is JaktImportStatement -> {
@@ -98,7 +98,6 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     it.structField?.identifier?.highlight(Highlights.STRUCT_FIELD)
                 }
             }
-            is JaktStructEnumMemberBodyPart -> element.structEnumMemberLabel.identifier.highlight(Highlights.ENUM_STRUCT_LABEL)
             is JaktVariableDeclarationStatement -> {
                 val color = if (element.mutKeyword != null) {
                     Highlights.LOCAL_VAR_MUT

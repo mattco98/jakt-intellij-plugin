@@ -45,13 +45,13 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
         }
 
         override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean {
-            return element is JaktFunctionDeclaration
+            return element is JaktFunction
         }
 
         companion object {
             private val suitableClasses = arrayOf(
                 JaktFile::class.java,
-                JaktFunctionDeclaration::class.java,
+                JaktFunction::class.java,
                 JaktStructDeclaration::class.java,
                 JaktStructField::class.java,
                 JaktEnumDeclaration::class.java,
@@ -81,7 +81,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
 
         override fun getChildren(): Array<TreeElement> {
             return when (val psi = psi) {
-                is JaktFunctionDeclaration -> emptyArray()
+                is JaktFunction -> emptyArray()
                 is JaktScope -> psi.getDeclarations().filter(Model::isSuitable).map(::Element).toTypedArray()
                 else -> emptyArray()
             }
@@ -109,7 +109,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
             is JaktStructDeclaration -> PlatformIcons.CLASS_ICON
             is JaktEnumDeclaration -> PlatformIcons.ENUM_ICON
             is JaktEnumVariant -> PlatformIcons.ENUM_ICON
-            is JaktFunctionDeclaration -> if (element.ancestorOfType<JaktStructDeclaration>() != null) {
+            is JaktFunction -> if (element.ancestorOfType<JaktStructDeclaration>() != null) {
                 PlatformIcons.METHOD_ICON
             } else PlatformIcons.FUNCTION_ICON
             is JaktStructField -> PlatformIcons.FIELD_ICON

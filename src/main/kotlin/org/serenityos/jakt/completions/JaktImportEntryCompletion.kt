@@ -26,7 +26,7 @@ object JaktImportEntryCompletion : JaktCompletion() {
 
         for (subtype in type.members)
             result.addElement(lookupElementFromType(
-                subtype.name,
+                subtype.name ?: continue,
                 subtype,
                 project,
                 functionTemplateType = FunctionTemplateType.None,

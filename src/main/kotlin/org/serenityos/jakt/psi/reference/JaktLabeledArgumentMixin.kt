@@ -14,7 +14,7 @@ abstract class JaktLabeledArgumentMixin(
         override fun singleResolve(): PsiElement? {
             val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType
             return when (val callTarget = exprType?.psiElement) {
-                is JaktFunctionDeclaration -> callTarget.parameterList.parameterList.find {
+                is JaktFunction -> callTarget.parameterList.parameterList.find {
                     it.name == element.name
                 }
                 is JaktStructDeclaration -> callTarget.structBody.structMemberList

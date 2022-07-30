@@ -39,7 +39,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
         return when (element) {
             is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else unreachable()
             is JaktCallExpression -> "function call"
-            is JaktFunctionDeclaration -> (if (element.isExtern) "extern " else "") + "function"
+            is JaktFunction -> (if (element.isExtern) "extern " else "") + "function"
             is JaktNamespaceDeclaration -> "namespace"
             is JaktStructDeclaration -> buildString {
                 if (element.isExtern)

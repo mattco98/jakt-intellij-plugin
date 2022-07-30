@@ -18,6 +18,23 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
             is JaktSetType -> SetType(type!!.jaktType)
             is JaktTupleType -> TupleType(typeList.map { it.jaktType })
             is JaktTypeAnnotation -> type.jaktType
+            is JaktFunctionType -> FunctionType(
+                null,
+                emptyList(),
+                parameterList?.parameterList?.map {
+                    FunctionType.Parameter(
+                        it.identifier.text,
+                        it.typeAnnotation.jaktType,
+                        it.anonKeyword != null,
+                        it.mutKeyword != null,
+                    )
+                } ?: emptyList(),
+                functionReturnType?.type?.jaktType ?: PrimitiveType.Void,
+                functionReturnType?.throwsKeyword != null,
+                Linkage.Internal,
+                hasThis = false,
+                thisIsMutable = false,
+            )
             else -> error("Unknown Type class ${this::class.simpleName}")
         }
 }

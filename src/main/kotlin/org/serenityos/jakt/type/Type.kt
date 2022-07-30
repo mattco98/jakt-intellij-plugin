@@ -18,7 +18,7 @@ interface ContainerType : Type {
 }
 
 interface DeclarationType : Type {
-    val name: String
+    val name: String?
 }
 
 enum class Linkage {
@@ -125,7 +125,7 @@ class EnumVariantType(
 }
 
 class FunctionType(
-    override val name: String,
+    override val name: String?,
     override var typeParameters: List<TypeParameter>,
     val parameters: List<Parameter>,
     var returnType: Type,
@@ -205,7 +205,7 @@ infix fun Type.equivalentTo(other: Type): Boolean = when {
             it.first equivalentTo it.second
         }
         is TypeParameter -> name == (other as TypeParameter).name
-        is DeclarationType -> name == (other as DeclarationType).name
+        is DeclarationType -> name != null && name == (other as DeclarationType).name
         is BoundType -> type equivalentTo (other as BoundType).type
         else -> false
     }

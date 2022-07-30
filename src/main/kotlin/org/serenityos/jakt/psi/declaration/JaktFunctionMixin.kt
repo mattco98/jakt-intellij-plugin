@@ -1,7 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktFunctionDeclaration
+import org.intellij.sdk.language.psi.JaktFunction
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktScope
@@ -12,13 +12,12 @@ import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktFunctionDeclarationMixin(
+abstract class JaktFunctionMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktFunctionDeclaration, JaktModificationBoundary {
+) : JaktNamedElement(node), JaktFunction, JaktModificationBoundary {
     override val tracker = JaktModificationTracker()
 
     override val jaktType by recursivelyGuarded<Type> {
-        val name = identifier.text
         val linkage = if (isExtern) Linkage.External else Linkage.Internal
         val parameters = mutableListOf<FunctionType.Parameter>()
 
@@ -32,7 +31,7 @@ abstract class JaktFunctionDeclarationMixin(
             val thisParam = parameterList.thisParameter
 
             FunctionType(
-                name,
+                identifier?.text,
                 typeParameters,
                 parameters,
                 PrimitiveType.Void,
@@ -41,7 +40,7 @@ abstract class JaktFunctionDeclarationMixin(
                 thisParam != null,
                 thisParam?.mutKeyword != null,
             ).also {
-                it.psiElement = this@JaktFunctionDeclarationMixin
+                it.psiElement = this@JaktFunctionMixin
             }
         }
 
@@ -66,16 +65,16 @@ abstract class JaktFunctionDeclarationMixin(
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
 }
 
-val JaktFunctionDeclaration.isExtern: Boolean
+val JaktFunction.isExtern: Boolean
     get() = externKeyword != null
 
-val JaktFunctionDeclaration.isTopLevel: Boolean
+val JaktFunction.isTopLevel: Boolean
     get() = ancestorOfType<JaktScope>() is JaktFile
 
-val JaktFunctionDeclaration.returnType: Type
+val JaktFunction.returnType: Type
     get() = (jaktType as FunctionType).returnType
 
-val JaktFunctionDeclaration.isMainFunction: Boolean
+val JaktFunction.isMainFunction: Boolean
     get() = isTopLevel && !isExtern && name == "main" && returnType.let {
         it == PrimitiveType.Void || it == PrimitiveType.CInt
     } && parameterList.let {
