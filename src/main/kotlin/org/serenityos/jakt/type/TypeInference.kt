@@ -16,6 +16,26 @@ import org.serenityos.jakt.utils.unreachable
 object TypeInference {
     fun inferType(element: JaktExpression): Type {
         return when (element) {
+            is JaktAddBinaryExpression, is JaktMultiplyBinaryExpression -> {
+                // The types must be the same. Let the external annotator catch the case where they are not
+                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
+            }
+            is JaktArrayExpression -> when {
+                element.sizedArrayBody != null -> ArrayType(
+                    element.sizedArrayBody?.expressionList?.first()?.jaktType ?: UnknownType
+                )
+                element.elementsArrayBody != null ->
+                    ArrayType(element.elementsArrayBody?.expressionList?.firstOrNull()?.jaktType ?: UnknownType)
+                else -> ArrayType(UnknownType)
+            }
+            is JaktAssignmentBinaryExpression -> element.right?.jaktType ?: UnknownType // TODO: Probably very wrong
+            is JaktBitwiseOrBinaryExpression,
+            is JaktBitwiseAndBinaryExpression,
+            is JaktBitwiseXorBinaryExpression -> {
+                // The types must be the same. Let the external annotator catch the case where they are not
+                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
+            }
+            is JaktBooleanLiteral -> PrimitiveType.Bool
             is JaktCallExpression -> {
                 val baseType = element.expression.jaktType
 
@@ -30,22 +50,6 @@ object TypeInference {
                     else -> specializedType
                 }
             }
-            is JaktLogicalOrBinaryExpression,
-            is JaktLogicalAndBinaryExpression -> PrimitiveType.Bool
-            is JaktBitwiseOrBinaryExpression,
-            is JaktBitwiseAndBinaryExpression,
-            is JaktBitwiseXorBinaryExpression -> {
-                // The types must be the same. Let the external annotator catch the case where they are not
-                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
-            }
-            is JaktRelationalBinaryExpression -> PrimitiveType.Bool
-            is JaktShiftBinaryExpression,
-            is JaktAddBinaryExpression,
-            is JaktMultiplyBinaryExpression -> {
-                // The types must be the same. Let the external annotator catch the case where they are not
-                element.findChildrenOfType<JaktExpression>().firstOrNull()?.jaktType ?: UnknownType
-            }
-            is JaktIsExpression -> PrimitiveType.Bool
             is JaktCastExpression -> element.type.jaktType.let { t ->
                 when {
                     element.questionMark != null -> OptionalType(t)
@@ -55,6 +59,54 @@ object TypeInference {
                     else -> UnknownType
                 }
             }
+            is JaktDictionaryExpression -> {
+                val els = element.findChildrenOfType<JaktDictionaryElement>()
+                if (els.isNotEmpty()) {
+                    val (k, v) = els[0].expressionList
+                    DictionaryType(k.jaktType, v.jaktType)
+                } else DictionaryType(UnknownType, UnknownType)
+            }
+            is JaktFieldAccessExpression -> {
+                val thisDecl = element.ancestors().filterIsInstance<JaktScope>().find {
+                    it is JaktStructDeclaration || it is JaktEnumDeclaration
+                } ?: return UnknownType
+                thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
+            }
+            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
+                (it as? ArrayType)?.underlyingType
+            } ?: UnknownType
+            is JaktIsExpression -> PrimitiveType.Bool
+            is JaktLiteral -> when (element.firstChild.elementType) {
+                JaktTypes.STRING_LITERAL -> PrimitiveType.String
+                JaktTypes.BYTE_CHAR_LITERAL -> PrimitiveType.CInt
+                JaktTypes.CHAR_LITERAL -> PrimitiveType.CChar
+                else -> unreachable()
+            }
+            is JaktLogicalOrBinaryExpression,
+            is JaktLogicalAndBinaryExpression -> PrimitiveType.Bool
+            is JaktMatchExpression -> getMatchExpressionType(element)
+            is JaktNumericLiteral -> getNumericLiteralType(element)
+            is JaktParenExpression -> element.expression?.jaktType ?: UnknownType
+            is JaktPlainQualifierExpression -> {
+                if (element.findChildOfType<PsiErrorElement>() != null) {
+                    // There is a specialization with no invocation after
+                    return UnknownType
+                }
+                element.plainQualifier.jaktType
+            }
+            is JaktRangeExpression -> {
+                val range = element.jaktProject.findPreludeDeclaration("Range")?.jaktType as? StructType
+                    ?: return UnknownType
+                val elementType = element.expressionList.firstOrNull()?.jaktType ?: UnknownType
+                return BoundType(range, mapOf(range.typeParameters.first() to elementType))
+            }
+            is JaktRelationalBinaryExpression -> PrimitiveType.Bool
+            is JaktSetExpression -> SetType(element.expressionList.firstOrNull()?.jaktType ?: UnknownType)
+            is JaktShiftBinaryExpression -> PrimitiveType.Bool
+            is JaktThisExpression -> element.ancestorsOfType<JaktScope>()
+                .firstOrNull { it is JaktEnumDeclaration || it is JaktStructDeclaration }
+                ?.let { (it as JaktTypeable).jaktType } ?: UnknownType
+            is JaktTupleExpression -> TupleType(element.expressionList.map { it.jaktType })
             is JaktUnaryExpression -> when {
                 element.findChildOfType(JaktTypes.PLUS_PLUS) != null ||
                     element.findChildOfType(JaktTypes.MINUS_MINUS) != null ||
@@ -77,59 +129,6 @@ object TypeInference {
                     if (it is OptionalType) it.underlyingType else it
                 }
                 else -> unreachable()
-            }
-            is JaktParenExpression -> element.expression?.jaktType ?: UnknownType
-            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
-                (it as? ArrayType)?.underlyingType
-            } ?: UnknownType
-            is JaktThisExpression -> element.ancestorsOfType<JaktScope>()
-                .firstOrNull { it is JaktEnumDeclaration || it is JaktStructDeclaration }
-                ?.let { (it as JaktTypeable).jaktType } ?: UnknownType
-            is JaktFieldAccessExpression -> {
-                val thisDecl = element.ancestors().filterIsInstance<JaktScope>().find {
-                    it is JaktStructDeclaration || it is JaktEnumDeclaration
-                } ?: return UnknownType
-                thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
-            }
-            is JaktRangeExpression -> {
-                val range = element.jaktProject.findPreludeDeclaration("Range")?.jaktType as? StructType
-                    ?: return UnknownType
-                val elementType = element.expressionList.firstOrNull()?.jaktType ?: UnknownType
-                return BoundType(range, mapOf(range.typeParameters.first() to elementType))
-            }
-            is JaktArrayExpression -> when {
-                element.sizedArrayBody != null -> ArrayType(
-                    element.sizedArrayBody?.expressionList?.first()?.jaktType ?: UnknownType
-                )
-                element.elementsArrayBody != null ->
-                    ArrayType(element.elementsArrayBody?.expressionList?.firstOrNull()?.jaktType ?: UnknownType)
-                else -> ArrayType(UnknownType)
-            }
-            is JaktDictionaryExpression -> {
-                val els = element.findChildrenOfType<JaktDictionaryElement>()
-                if (els.isNotEmpty()) {
-                    val (k, v) = els[0].expressionList
-                    DictionaryType(k.jaktType, v.jaktType)
-                } else DictionaryType(UnknownType, UnknownType)
-            }
-            is JaktSetExpression -> SetType(element.expressionList.firstOrNull()?.jaktType ?: UnknownType)
-            is JaktTupleExpression -> TupleType(element.expressionList.map { it.jaktType })
-            is JaktMatchExpression -> getMatchExpressionType(element)
-            is JaktNumericLiteral -> getNumericLiteralType(element)
-            is JaktBooleanLiteral -> PrimitiveType.Bool
-            is JaktLiteral -> when (element.firstChild.elementType) {
-                JaktTypes.STRING_LITERAL -> PrimitiveType.String
-                JaktTypes.BYTE_CHAR_LITERAL -> PrimitiveType.CInt
-                JaktTypes.CHAR_LITERAL -> PrimitiveType.CChar
-                else -> unreachable()
-            }
-            is JaktAssignmentBinaryExpression -> element.right?.jaktType ?: UnknownType // TODO: Probably very wrong
-            is JaktPlainQualifierExpression -> {
-                if (element.findChildOfType<PsiErrorElement>() != null) {
-                    // There is a specialization with no invocation after
-                    return UnknownType
-                }
-                element.plainQualifier.jaktType
             }
             else -> error("Unknown JaktExpression ${element::class.simpleName}")
         }
