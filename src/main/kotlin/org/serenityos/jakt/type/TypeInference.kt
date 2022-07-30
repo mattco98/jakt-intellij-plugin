@@ -14,6 +14,27 @@ import org.serenityos.jakt.psi.reference.index
 import org.serenityos.jakt.utils.unreachable
 
 object TypeInference {
+    val builtinFunctionTypes = listOf("print", "println", "eprint", "eprintln", "format")
+        .associateWith(::makeBuiltinFormattingType)
+
+    private fun makeBuiltinFormattingType(name: String) = FunctionType(
+        name,
+        emptyList(),
+        mutableListOf(
+            FunctionType.Parameter(
+                "format_string",
+                PrimitiveType.String,
+                isAnonymous = true,
+                isMutable = false
+            )
+        ),
+        if (name == "format") PrimitiveType.String else PrimitiveType.Void,
+        false,
+        Linkage.External,
+        hasThis = false,
+        thisIsMutable = false,
+    )
+
     fun inferType(element: JaktExpression): Type {
         return when (element) {
             is JaktAddBinaryExpression, is JaktMultiplyBinaryExpression -> {
@@ -98,7 +119,18 @@ object TypeInference {
                     // There is a specialization with no invocation after
                     return UnknownType
                 }
-                element.plainQualifier.jaktType
+
+                val type = element.plainQualifier.jaktType
+
+                // Check for builtin function
+                if (type == UnknownType) {
+                    val qualifier = element.plainQualifier
+                    if (qualifier.plainQualifier == null) {
+                        return builtinFunctionTypes[qualifier.name] ?: UnknownType
+                    }
+                }
+
+                type
             }
             is JaktRangeExpression -> {
                 val range = element.jaktProject.findPreludeDeclaration("Range")?.jaktType as? StructType

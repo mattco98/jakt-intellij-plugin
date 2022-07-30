@@ -20,7 +20,7 @@ abstract class JaktAccessExpressionMixin(
                     (it as? TupleType)?.types?.getOrNull(decimalLiteral!!.text.toInt()) ?: UnknownType
                 }
             } else {
-                val name = identifier!!.text
+                val name = identifier?.text
 
                 BoundType.withInner(type.resolveToBuiltinType(project)) {
                     when (it) {

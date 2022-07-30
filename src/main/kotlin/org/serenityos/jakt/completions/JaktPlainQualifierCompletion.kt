@@ -17,26 +17,6 @@ import org.serenityos.jakt.type.*
 
 // TODO: Remove these when they are added to the prelude
 
-private fun makeBuiltinFormattingType(name: String) = FunctionType(
-    name,
-    emptyList(),
-    mutableListOf(
-        FunctionType.Parameter(
-            "format_string",
-            PrimitiveType.String,
-            isAnonymous = true,
-            isMutable = false
-        )
-    ),
-    if (name == "format") PrimitiveType.String else PrimitiveType.Void,
-    false,
-    Linkage.External,
-    hasThis = false,
-    thisIsMutable = false,
-)
-
-val builtinFunctionTypes = listOf("print", "println", "eprint", "eprintln", "format").map(::makeBuiltinFormattingType)
-
 object JaktPlainQualifierCompletion : JaktCompletion() {
     override val pattern: PsiPattern = PlatformPatterns.or(
         psiElement(JaktTypes.IDENTIFIER).withSuperParent(1, psiElement<JaktPlainQualifier>()),
@@ -93,12 +73,12 @@ object JaktPlainQualifierCompletion : JaktCompletion() {
                 result.addElement(lookupElementFromType(it.name ?: return@forEach, it.jaktType, project))
             }
 
-            builtinFunctionTypes.forEach {
+            TypeInference.builtinFunctionTypes.forEach { (name, type) ->
                 // No function template since these are vararg functions, and it's kind of annoying
                 result.addElement(
                     lookupElementFromType(
-                        it.name!!,
-                        it,
+                        name,
+                        type,
                         project,
                         functionTemplateType = FunctionTemplateType.Reduced,
                     )

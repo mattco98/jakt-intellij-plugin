@@ -31,4 +31,12 @@ class JaktExpressionTypeTest : JaktTypeTest() {
               //^T2
         }
     """, "&Foo", "&mut Foo")
+
+    fun `test calling builtin function`() = doTest("""
+        function main() {
+            let s = format("hello world")
+            s
+          //^T
+        } 
+    """, "String")
 }
