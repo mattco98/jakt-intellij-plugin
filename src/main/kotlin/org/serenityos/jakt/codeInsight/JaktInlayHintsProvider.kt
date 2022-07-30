@@ -55,6 +55,8 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                         false,
                     )
                 }
+
+                return true
             }
 
             val (hint, offset) = when (element) {
@@ -70,6 +72,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
                 }
                 is JaktForDecl -> hintFor(element.jaktType, emptyMap()) to element.endOffset
+                is JaktDestructuringBinding -> hintFor(element.jaktType, emptyMap()) to element.endOffset
                 else -> return true
             }
 
