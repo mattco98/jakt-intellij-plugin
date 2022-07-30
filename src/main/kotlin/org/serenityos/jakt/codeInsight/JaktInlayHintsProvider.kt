@@ -41,7 +41,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         settings: Settings,
         sink: InlayHintsSink
     ) = object : FactoryInlayHintsCollector(editor) {
-        private val obviousTypes = setOf(STRING_LITERAL, BYTE_CHAR_LITERAL, CHAR_LITERAL)
+        private val obviousTypes = setOf(STRING_LITERAL, BYTE_CHAR_LITERAL, CHAR_LITERAL, LAMBDA_EXPRESSION)
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
             if (element is JaktExpression && TypeInference.doesThrow(element)) {
