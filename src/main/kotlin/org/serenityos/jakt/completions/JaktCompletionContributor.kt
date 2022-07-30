@@ -10,6 +10,7 @@ class JaktCompletionContributor : CompletionContributor() {
         extend(JaktFieldExpressionCompletion)
         extend(JaktImportStatementCompletion)
         extend(JaktImportEntryCompletion)
+        extend(JaktMatchPatternCompletion)
     }
 
     private fun extend(completion: JaktCompletion) =
