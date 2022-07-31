@@ -13,7 +13,6 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
-import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.type.*
 import javax.swing.JPanel
@@ -47,7 +46,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
             if (element is JaktExpression && TypeInference.doesThrow(element)) {
-                if (element.jaktProject.showTryAllocationHints) {
+                if (settings.showTryHints) {
                     sink.addInlineElement(
                         element.startOffset,
                         false,
@@ -200,6 +199,11 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     "collapse-params",
                     settings::collapseParams
                 ),
+                ImmediateConfigurable.Case(
+                    "Show \"try\" hints for throwing expressions",
+                    "show-try-hints",
+                    settings::showTryHints,
+                )
             )
 
         override fun createComponent(listener: ChangeListener) = JPanel()
@@ -211,5 +215,6 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         var showForForDecl: Boolean = true,
         var collapseTuples: Boolean = false,
         var collapseParams: Boolean = false,
+        var showTryHints: Boolean = true,
     )
 }
