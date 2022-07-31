@@ -62,7 +62,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 is JaktVariableDecl -> {
                     val statement = element.ancestorOfType<JaktVariableDeclarationStatement>() ?: return true
 
-                    if (statement.typeAnnotation != null)
+                    if (statement.typeAnnotation != null || !settings.showForVariables)
                         return true
 
                     if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
@@ -70,7 +70,9 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
                     hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
                 }
-                is JaktForDecl -> hintFor(element.jaktType, emptyMap()) to element.endOffset
+                is JaktForDecl -> if (settings.showForForDecl) {
+                    hintFor(element.jaktType, emptyMap()) to element.endOffset
+                } else return true
                 is JaktDestructuringBinding -> hintFor(element.jaktType, emptyMap()) to element.endOffset
                 else -> return true
             }
@@ -119,6 +121,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                         )
                     },
                     suffix = text(")"),
+                    startWithPlaceholder = settings.collapseTuples,
                 )
                 is TypeParameter -> {
                     val specializedType = specializations[type]
@@ -147,6 +150,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                             }, separator = { text(", ") })
                         },
                         suffix = text(")"),
+                        startWithPlaceholder = settings.collapseParams,
                     )
                 )
                 is BoundType -> hintFor(type.type, specializations + type.specializations)
