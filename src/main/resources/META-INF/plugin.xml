@@ -21,11 +21,12 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Added support for guard statements</li>
-            <li>Added support for "import extern" statements</li>
-            <li>Added support for references</li>
-            <li>Added support for variable destructuring</li>
-            <li>Fixed tuples breaking the parse tree</li>
+            <li>Add "try" inlay hints for throwing expressions</li>
+            <li>Add support for: lambdas, void/never types, automatic dereferencing</li>
+            <li>Fix various grammar/resolution bugs</li>
+            <li>Drastically improve inlay hints, allowing the types to be ctrl-clicked for navigation</li>
+            <li>Add completion for match pattern enum destructuring</li>
+            <li>Fix annotation/inlay hints being extremely unstable when editing the document</li>
         </ul>
     ]]></change-notes>
     
