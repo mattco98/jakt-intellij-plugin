@@ -116,7 +116,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                     collapsed = text(".."),
                     expanded = {
                         join(
-                            type.types.map { hintFor(it, specializations) },
+                            type.types.map { hintFor(it, specializations) }.ifEmpty { listOf(text("")) },
                             separator = { text(", ") },
                         )
                     },
@@ -147,7 +147,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                                     text("${it.name}: "),
                                     hintFor(it.type, specializations)
                                 )
-                            }, separator = { text(", ") })
+                            }.ifEmpty { listOf(text("")) }, separator = { text(", ") })
                         },
                         suffix = text(")"),
                         startWithPlaceholder = settings.collapseParams,
