@@ -13,6 +13,7 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
+import org.serenityos.jakt.annotations.JaktAnnotator
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.type.*
 import javax.swing.JPanel
@@ -45,46 +46,52 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         private val obviousTypes = setOf(STRING_LITERAL, BYTE_CHAR_LITERAL, CHAR_LITERAL, LAMBDA_EXPRESSION)
 
         override fun collect(element: PsiElement, editor: Editor, sink: InlayHintsSink): Boolean {
-            if (element is JaktExpression && TypeInference.doesThrow(element)) {
-                if (settings.showTryHints) {
-                    sink.addInlineElement(
-                        element.startOffset,
-                        false,
-                        factory.roundWithBackgroundAndSmallInset(factory.text("try ")),
-                        false,
-                    )
+            JaktAnnotator.LOCK.lock()
+
+            try {
+                if (element is JaktExpression && TypeInference.doesThrow(element)) {
+                    if (settings.showTryHints) {
+                        sink.addInlineElement(
+                            element.startOffset,
+                            false,
+                            factory.roundWithBackgroundAndSmallInset(factory.text("try ")),
+                            false,
+                        )
+                    }
+
+                    return true
                 }
+
+                val (hint, offset) = when (element) {
+                    is JaktVariableDecl -> {
+                        val statement = element.ancestorOfType<JaktVariableDeclarationStatement>() ?: return true
+
+                        if (statement.typeAnnotation != null || !settings.showForVariables)
+                            return true
+
+                        if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
+                            return true
+
+                        hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
+                    }
+                    is JaktForDecl -> if (settings.showForForDecl) {
+                        hintFor(element.jaktType, emptyMap()) to element.endOffset
+                    } else return true
+                    is JaktDestructuringBinding -> hintFor(element.jaktType, emptyMap()) to element.endOffset
+                    else -> return true
+                }
+
+                sink.addInlineElement(
+                    offset,
+                    false,
+                    factory.roundWithBackgroundAndSmallInset(factory.seq(factory.text(": "), hint)),
+                    false,
+                )
 
                 return true
+            } finally {
+                JaktAnnotator.LOCK.unlock()
             }
-
-            val (hint, offset) = when (element) {
-                is JaktVariableDecl -> {
-                    val statement = element.ancestorOfType<JaktVariableDeclarationStatement>() ?: return true
-
-                    if (statement.typeAnnotation != null || !settings.showForVariables)
-                        return true
-
-                    if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
-                        return true
-
-                    hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
-                }
-                is JaktForDecl -> if (settings.showForForDecl) {
-                    hintFor(element.jaktType, emptyMap()) to element.endOffset
-                } else return true
-                is JaktDestructuringBinding -> hintFor(element.jaktType, emptyMap()) to element.endOffset
-                else -> return true
-            }
-
-            sink.addInlineElement(
-                offset,
-                false,
-                factory.roundWithBackgroundAndSmallInset(factory.seq(factory.text(": "), hint)),
-                false,
-            )
-
-            return true
         }
 
         private fun hintFor(
