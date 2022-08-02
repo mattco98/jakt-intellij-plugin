@@ -17,10 +17,11 @@ abstract class JaktVariableDeclMixin(
     override val jaktType: Type
         get() = resolveCache().resolveWithCaching(this) {
             val statement = ancestorOfType<JaktVariableDeclarationStatement>() ?: return@resolveWithCaching UnknownType
+            val typeAnnotation = statement.typeAnnotation?.jaktType
             val exprType = statement.expression.jaktType
 
             when {
-                statement.parenOpen == null -> exprType
+                statement.parenOpen == null -> typeAnnotation ?: exprType
                 exprType is TupleType -> {
                     val thisIndex = statement.variableDeclList.indexOf(this)
                     if (thisIndex == -1 || thisIndex > exprType.types.size) {
