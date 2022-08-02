@@ -75,7 +75,11 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                         if (statement.parenOpen == null && settings.omitObviousTypes && isObvious(statement.expression))
                             return true
 
-                        hintFor(element.jaktType, emptyMap()) to element.identifier.endOffset
+                        val type = element.jaktType
+                        if (type == PrimitiveType.Void)
+                            return true
+
+                        hintFor(type, emptyMap()) to element.identifier.endOffset
                     }
                     is JaktForDecl -> if (settings.showForForDecl) {
                         hintFor(element.jaktType, emptyMap()) to element.endOffset
