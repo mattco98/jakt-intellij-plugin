@@ -1,6 +1,7 @@
 package org.serenityos.jakt.type
 
 import com.intellij.psi.PsiErrorElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
@@ -259,6 +260,18 @@ object TypeInference {
     }
 
     private fun unifyMatchBlockTypes(lhs: Type, rhs: Type): Type {
+        if (lhs == PrimitiveType.Never)
+            return rhs
+
+        if (rhs == PrimitiveType.Never)
+            return lhs
+
+        if (lhs == UnknownType)
+            return rhs
+
+        if (rhs == UnknownType)
+            return lhs
+
         return when (lhs) {
             is EnumVariantType -> when (rhs) {
                 is EnumVariantType -> if (lhs.parent equivalentTo rhs.parent) lhs.parent else UnknownType
@@ -282,14 +295,7 @@ object TypeInference {
                     unifyMatchBlockTypes(lhs.valueType, rhs.valueType),
                 )
             } else UnknownType
-            UnknownType -> rhs
-            PrimitiveType.Never -> rhs
-            else -> when {
-                rhs == PrimitiveType.Never -> lhs
-                rhs == UnknownType -> lhs
-                lhs equivalentTo rhs -> lhs
-                else -> UnknownType
-            }
+            else -> if (lhs equivalentTo rhs) lhs else UnknownType
         }
     }
 
@@ -297,6 +303,26 @@ object TypeInference {
         for (statement in element.statementList) {
             if (statement is JaktYieldStatement)
                 return statement.expression.jaktType
+
+            if (statement is JaktReturnStatement)
+                return PrimitiveType.Never
+
+            if (statement is JaktBlock && getBlockType(statement) == PrimitiveType.Never)
+                return PrimitiveType.Never
+
+            var hasNever = false
+
+            PsiTreeUtil.processElements(statement) {
+                if (it is JaktExpression && it.jaktType == PrimitiveType.Never) {
+                    hasNever = true
+                    return@processElements false
+                }
+
+                true
+            }
+
+            if (hasNever)
+                return PrimitiveType.Never
         }
 
         return PrimitiveType.Void
