@@ -52,7 +52,8 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
             try {
                 if (element is JaktExpression && TypeInference.doesThrow(element)) {
-                    if (settings.showTryHints) {
+                    // Prevent duplicate try hints
+                    if (settings.showTryHints && (element !is JaktCallExpression || !TypeInference.doesThrow(element.expression))) {
                         sink.addInlineElement(
                             element.startOffset,
                             false,

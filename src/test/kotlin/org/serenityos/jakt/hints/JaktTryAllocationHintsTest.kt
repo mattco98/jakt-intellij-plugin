@@ -90,4 +90,14 @@ class JaktTryAllocationHintsTest : JaktInlayHintsTest() {
             }
         }
     """)
+
+    fun `test no duplicate try hints`() = doTest("""
+        function get_func() throws -> function() throws {
+            return function() throws {}
+        }
+
+        function main() {
+            let f = <hint text="try " />get_func()()
+        }
+    """)
 }

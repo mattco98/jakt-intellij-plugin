@@ -6,14 +6,12 @@ import com.intellij.psi.util.elementType
 import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
-import org.serenityos.jakt.psi.ancestors
-import org.serenityos.jakt.psi.ancestorsOfType
+import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktScope
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
-import org.serenityos.jakt.psi.findChildOfType
-import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.reference.hasNamespace
+import org.serenityos.jakt.psi.reference.index
 import org.serenityos.jakt.utils.unreachable
 
 object TypeInference {
@@ -197,6 +195,13 @@ object TypeInference {
                     else -> false
                 }
             }
+            is JaktPlainQualifierExpression -> if (expression.ancestorOfType<JaktMatchPattern>() == null) {
+                val qualifier = expression.plainQualifier
+                if (qualifier.index == 1) {
+                    val prev = qualifier.plainQualifier!!.jaktType
+                    prev is EnumType && prev.isBoxed && expression.jaktType != UnknownType
+                } else false
+            } else false
             is JaktLiteral -> expression.firstChild?.elementType == JaktTypes.STRING_LITERAL
             else -> false
         }
