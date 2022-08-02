@@ -99,9 +99,14 @@ object TypeInference {
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
             is JaktLambdaExpression -> element.function.jaktType
-            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType?.let {
-                (it as? ArrayType)?.underlyingType
-            } ?: UnknownType
+            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType.let {
+                when (it) {
+                    is ArrayType -> it.underlyingType
+                    is SetType -> it.underlyingType
+                    is DictionaryType -> it.valueType
+                    else -> UnknownType
+                }
+            }
             is JaktIsExpression -> PrimitiveType.Bool
             is JaktLiteral -> when (element.firstChild.elementType) {
                 JaktTypes.STRING_LITERAL -> PrimitiveType.String
