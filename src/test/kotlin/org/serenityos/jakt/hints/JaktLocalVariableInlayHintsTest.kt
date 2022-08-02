@@ -19,9 +19,11 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
 
     fun `test struct type in expression type does not render struct keyword`() = doTest("""
         struct Foo {}
+        
+        function make_foo() -> Foo { Foo() }
          
         function main() {
-            let foo<hint text="[:  [[ Foo ]]]" /> = [Foo()]
+            let foo<hint text="[:  Foo]" /> = make_foo()
         }
     """)
 
@@ -41,7 +43,7 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
 
     fun `test tuple hints`() = doTest("""
         function main() {
-            let f<hint text="[:  [( .. )]]" /> =  (1, 2, 3)
+            let f<hint text="[:  [( [i64 ,  i64 ,  i64] )]]" /> =  (1, 2, 3)
         } 
     """)
 }

@@ -22,7 +22,7 @@ import javax.swing.JPanel
 class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Settings> {
     override val name = "JaktHintsProvider"
 
-    override val key = SettingsKey<Settings>("jakt.hints.provider")
+    override val key = KEY
 
     override val previewText: String
         get() = """
@@ -228,4 +228,8 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
         var collapseParams: Boolean = false,
         var showTryHints: Boolean = true,
     )
+
+    companion object {
+        val KEY = SettingsKey<Settings>("jakt.hints.provider")
+    }
 }

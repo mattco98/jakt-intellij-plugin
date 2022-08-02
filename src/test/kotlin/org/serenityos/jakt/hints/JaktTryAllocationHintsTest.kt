@@ -1,6 +1,6 @@
 package org.serenityos.jakt.hints
 
-class JaktTryAllocationHintsTest : JaktInlayHintsTest(showAllocationTryHints = true) {
+class JaktTryAllocationHintsTest : JaktInlayHintsTest() {
     fun `test try allocation hint for string literals`() = doTest("""
         function main() {
             <hint text="try "/>"abc"
