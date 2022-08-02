@@ -250,7 +250,42 @@ object TypeInference {
         if (types.isEmpty())
             return PrimitiveType.Void
 
-        return types.reduce { prev, curr -> if (!prev.equivalentTo(curr)) UnknownType else prev }
+        return types.reduce(::unifyMatchBlockTypes)
+    }
+
+    private fun unifyMatchBlockTypes(lhs: Type, rhs: Type): Type {
+        return when (lhs) {
+            is EnumVariantType -> when (rhs) {
+                is EnumVariantType -> if (lhs.parent equivalentTo rhs.parent) lhs.parent else UnknownType
+                is EnumType -> if (lhs.parent equivalentTo rhs) rhs else UnknownType
+                else -> UnknownType
+            }
+            is EnumType -> when (rhs) {
+                is EnumVariantType -> if (lhs equivalentTo rhs.parent) lhs else UnknownType
+                is EnumType -> if (lhs equivalentTo rhs) rhs else UnknownType
+                else -> UnknownType
+            }
+            is ArrayType -> if (rhs is ArrayType) {
+                ArrayType(unifyMatchBlockTypes(lhs.underlyingType, rhs.underlyingType))
+            } else UnknownType
+            is SetType -> if (rhs is SetType) {
+                SetType(unifyMatchBlockTypes(lhs.underlyingType, rhs.underlyingType))
+            } else UnknownType
+            is DictionaryType -> if (rhs is DictionaryType) {
+                DictionaryType(
+                    unifyMatchBlockTypes(lhs.keyType, rhs.keyType),
+                    unifyMatchBlockTypes(lhs.valueType, rhs.valueType),
+                )
+            } else UnknownType
+            UnknownType -> rhs
+            PrimitiveType.Never -> rhs
+            else -> when {
+                rhs == PrimitiveType.Never -> lhs
+                rhs == UnknownType -> lhs
+                lhs equivalentTo rhs -> lhs
+                else -> UnknownType
+            }
+        }
     }
 
     private fun getBlockType(element: JaktBlock): Type {
