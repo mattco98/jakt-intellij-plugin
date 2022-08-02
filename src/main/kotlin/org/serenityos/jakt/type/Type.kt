@@ -176,13 +176,14 @@ fun getSpecializedPreludeType(project: Project, type: String, vararg specializat
 
 fun Type.resolveToBuiltinType(project: Project): Type {
     return when (this) {
+        PrimitiveType.String -> getSpecializedPreludeType(project, "String")
         is ArrayType -> getSpecializedPreludeType(project, "Array", underlyingType)
         is DictionaryType -> getSpecializedPreludeType(project, "Dictionary", keyType, valueType)
         is OptionalType -> getSpecializedPreludeType(project, "Optional", underlyingType)
         is SetType -> getSpecializedPreludeType(project, "Set", underlyingType)
         is TupleType -> getSpecializedPreludeType(project, "Tuple", *types.toTypedArray())
         is WeakType -> getSpecializedPreludeType(project, "Weak", underlyingType)
-        PrimitiveType.String -> getSpecializedPreludeType(project, "String")
+        is BoundType -> BoundType(type.resolveToBuiltinType(project), specializations)
         else -> this
     }
 }
@@ -208,6 +209,5 @@ infix fun Type.equivalentTo(other: Type): Boolean = when {
         is TypeParameter -> name == (other as TypeParameter).name
         is DeclarationType -> name != null && name == (other as DeclarationType).name
         is BoundType -> type equivalentTo (other as BoundType).type
-        else -> false
     }
 }
