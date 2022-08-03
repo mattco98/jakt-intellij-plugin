@@ -11,6 +11,7 @@ import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.psi.declaration.*
 import org.serenityos.jakt.psi.prevNonWSSibling
 import org.serenityos.jakt.psi.reference.isType
+import org.serenityos.jakt.utils.unreachable
 
 class JaktResolver(private val scope: PsiElement) {
     fun findDeclaration(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): JaktDeclaration? {
@@ -26,7 +27,44 @@ class JaktResolver(private val scope: PsiElement) {
                 ?.let { return it.unwrapImport() }
         }
 
+        // Look for bindings in guard and if statements
+        if (scope is JaktGuardStatement || scope is JaktIfStatement) {
+            val expression = when (scope) {
+                is JaktGuardStatement -> scope.expression
+                is JaktIfStatement -> scope.expression
+                else -> unreachable()
+            }
+
+            val isExpressions = collectLongLivingIsExpressions(expression)
+            isExpressions.asReversed().forEach { expr ->
+                expr.matchPattern.destructuringPartList.forEach {
+                    val binding = it.destructuringBinding
+                    if (binding.text == name && resolutionStrategy(binding))
+                        return binding
+                }
+            }
+        }
+
         return null
+    }
+
+    private fun collectLongLivingIsExpressions(
+        element: JaktExpression,
+    ): List<JaktIsExpression> {
+        val list = mutableListOf<JaktIsExpression>()
+
+        fun collect(expr: JaktExpression) {
+            when (expr) {
+                is JaktLogicalAndBinaryExpression -> {
+                    collect(expr.left)
+                    expr.right?.also { collect(it) }
+                }
+                is JaktIsExpression -> list.add(expr)
+            }
+        }
+
+        collect(element)
+        return list
     }
 
     fun resolveReference(name: String, resolutionStrategy: (JaktDeclaration) -> Boolean): PsiElement? {
@@ -57,8 +95,19 @@ class JaktResolver(private val scope: PsiElement) {
             if (parent is JaktBlock) {
                 // Return the previous statement in the block, or the block itself if the
                 // current element is the first child
-                return current.prevNonWSSibling() ?: parent
+                return current.prevNonWSSibling()?.let {
+                    // We cannot consider the previous statement in the block if that
+                    // statement is an if statement, since it's is-expression bindings
+                    // are only available inside it
+                    if (it is JaktIfStatement) null else it
+                } ?: parent
             }
+
+            // If there is an IfStatement in the parent chain, check it for is-expression
+            // bindings. Note that we don't check for JaktGuardStatement, as those bindings
+            // are available _after_ the guard statement, not inside of it.
+            if (parent is JaktIfStatement)
+                return parent
         }
 
         return null
