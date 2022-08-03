@@ -21,12 +21,12 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Add "try" inlay hints for throwing expressions</li>
-            <li>Add support for: lambdas, void/never types, automatic dereferencing</li>
-            <li>Fix various grammar/resolution bugs</li>
-            <li>Drastically improve inlay hints, allowing the types to be ctrl-clicked for navigation</li>
-            <li>Add completion for match pattern enum destructuring</li>
-            <li>Fix annotation/inlay hints being extremely unstable when editing the document</li>
+            <li>Show generics in inlay hints</li>
+            <li>Support is-expression patterns in guard- and if-statements</li>
+            <li>Add optional chaining</li>
+            <li>Respect never-returning functions when deducing match expression type</li>
+            <li>Fix some enum type inference bugs related to match expressions</li>
+            <li>Fix duplicate "try" inlay hints when constructing boxed enum variant</li>
         </ul>
     ]]></change-notes>
     
