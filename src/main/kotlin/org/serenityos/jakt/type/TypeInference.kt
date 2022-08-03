@@ -59,7 +59,14 @@ object TypeInference {
             }
             is JaktBooleanLiteral -> PrimitiveType.Bool
             is JaktCallExpression -> {
-                val baseType = element.expression.jaktType
+                // TODO: This duplicates logic with AccessExpressionMixin, and is also just
+                //       generally not pretty
+                val (baseType, didUnwrap) = element.expression.let {
+                    val type = it.jaktType
+                    if (it is JaktAccessExpression && it.dotQuestionMark != null && type is OptionalType) {
+                        type.underlyingType to true
+                    } else type to false
+                }
 
                 when (baseType) {
                     is EnumVariantType -> return baseType.parent
@@ -69,13 +76,15 @@ object TypeInference {
 
                 val specialized = specialize(baseType, element)
 
-                BoundType.withInner(specialized) {
+                val type = BoundType.withInner(specialized) {
                     when (it) {
                         is FunctionType -> it.returnType
                         is StructType, is EnumVariantType -> it
                         else -> return UnknownType
                     }
                 }
+
+                if (didUnwrap) OptionalType(type) else type
             }
             is JaktCastExpression -> element.type.jaktType.let { t ->
                 when {

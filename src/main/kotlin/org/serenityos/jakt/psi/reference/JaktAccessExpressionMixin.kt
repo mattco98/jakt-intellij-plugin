@@ -12,17 +12,21 @@ abstract class JaktAccessExpressionMixin(
 ) : JaktNamedElement(node), JaktAccessExpression {
     override val jaktType: Type
         get() = typeCache().resolveWithCaching(this) {
-            val type = expression.jaktType
+            val (baseType, didUnwrap) = expression.jaktType.let {
+                if (it is OptionalType && dotQuestionMark != null) {
+                    it.underlyingType to true
+                } else it to false
+            }
 
             // TODO: This is so ugly
-            if (decimalLiteral != null) {
-                BoundType.withInner(type) {
+            val type = if (decimalLiteral != null) {
+                BoundType.withInner(baseType) {
                     (it as? TupleType)?.types?.getOrNull(decimalLiteral!!.text.toInt()) ?: UnknownType
                 }
             } else {
                 val name = identifier?.text
 
-                BoundType.withInner(type.resolveToBuiltinType(project)) {
+                BoundType.withInner(baseType.resolveToBuiltinType(project)) {
                     when (it) {
                         is StructType -> it.fields[name]
                             ?: it.methods[name]?.takeIf(FunctionType::hasThis)
@@ -34,6 +38,8 @@ abstract class JaktAccessExpressionMixin(
                     }
                 }
             }
+
+            if (didUnwrap) OptionalType(type) else type
         }
 
     override fun getNameIdentifier() = identifier

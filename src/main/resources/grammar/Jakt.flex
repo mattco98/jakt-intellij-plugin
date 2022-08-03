@@ -111,6 +111,7 @@ COMMENT=(\/\/[^\r\n]*)+
   ";"                    { return SEMICOLON; }
   "."                    { return DOT; }
   ".."                   { return DOT_DOT; }
+  "?."                   { return DOT_QUESTION_MARK; }
   ","                    { return COMMA; }
   "="                    { return EQUALS; }
   "=="                   { return DOUBLE_EQUALS; }

@@ -428,7 +428,7 @@ LabeledArgument ::= IDENTIFIER COLON NL Expression {
 }
 UnlabeledArgument ::= Expression
 
-AccessExpression ::= Expression DOT Access {
+AccessExpression ::= Expression (DOT | DOT_QUESTION_MARK) Access {
     implements=[
         "org.serenityos.jakt.psi.api.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"

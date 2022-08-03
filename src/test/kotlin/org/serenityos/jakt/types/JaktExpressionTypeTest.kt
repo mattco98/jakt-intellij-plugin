@@ -39,4 +39,28 @@ class JaktExpressionTypeTest : JaktTypeTest() {
           //^T
         } 
     """, "String")
+
+    fun `test access optional chaining`() = doTest("""
+        struct Test {
+            x: i32
+        
+            function y(this) throws => this
+        }
+        
+        function main() {
+            mut test: Test? = Test(x: 123)
+            let a = test?.y()?.x
+            a
+          //^T
+        }
+    """, "i32?")
+
+    fun `test tuple optional chaining`() = doTest("""
+        function main() {
+            let tuple: (i64, i64)? = (1, 2)
+            let a = tuple?.0
+            a
+          //^T
+        } 
+    """, "i64?")
 }
