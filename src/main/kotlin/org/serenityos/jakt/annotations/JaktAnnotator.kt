@@ -22,7 +22,7 @@ abstract class JaktAnnotator {
     }
 
     companion object {
-        private val annotators = listOf(BasicAnnotator)
+        private val annotators = listOf(BasicAnnotator, StringAnnotator)
 
         // TODO: This lock is used by both the annotator and the inlay hints provider.
         //       Without this lock guarding both of those behaviors, they are both

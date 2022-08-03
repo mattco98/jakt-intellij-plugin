@@ -69,7 +69,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             
             function FUNC_DECL{main}() {
                 mut LV_MUT{p} = STRUCT_NAME{P}::STATIC_CALL{make}(value: 12)
-                FUNC_CALL{println}("value = {}", LV_MUT{p}.INSTANCE_CALL{get_foo}())
+                FUNC_CALL{println}("value = FMT{{}}", LV_MUT{p}.INSTANCE_CALL{get_foo}())
                 LV_MUT{p}.INSTANCE_CALL{set_foo}(value: 0x123)
                 unsafe {
                     cpp {
@@ -77,12 +77,12 @@ class JaktColorSettingsPage : ColorSettingsPage {
                     }
                 }
                 
-                FUNC_CALL{println}("{}", FUNC_CALL{get_d}()!.INSTANCE_CALL{invoke}(a: 20))
+                FUNC_CALL{println}("FMT{{}}", FUNC_CALL{get_d}()!.INSTANCE_CALL{invoke}(a: 20))
                 
                 let LV{x} = 10
                 let LV{y} = &raw LV{x}
                 unsafe {
-                    FUNC_CALL{println}("{}", *LV{y}) // 10
+                    FUNC_CALL{println}("FMT{{}}", *LV{y}) // 10
                 }
                 
                 return 0
@@ -134,6 +134,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "Literals//Numbers" to Highlights.LITERAL_NUMBER,
             "Literals//Numeric Suffix" to Highlights.LITERAL_NUMBER_SUFFIX,
             "Literals//Strings and Characters" to Highlights.LITERAL_STRING,
+            "Literals//String Format Specifier" to Highlights.STRING_FORMAT_SPECIFIER,
             "Literals//Booleans" to Highlights.LITERAL_BOOLEAN,
             "Literals//Arrays" to Highlights.LITERAL_ARRAY,
             "Literals//Dictionaries" to Highlights.LITERAL_DICTIONARY,
@@ -194,6 +195,7 @@ class JaktColorSettingsPage : ColorSettingsPage {
             "TY" to Highlights.TYPE_NAME,
             "VOID" to Highlights.TYPE_VOID,
             "NEVER" to Highlights.TYPE_NEVER,
+            "FMT" to Highlights.STRING_FORMAT_SPECIFIER,
         )
     }
 }

@@ -24,4 +24,11 @@ data class JaktAnnotationHolder(private val holder: AnnotationHolder) {
             .textAttributes(attribute)
             .create()
     }
+
+    fun TextRange.highlightError(message: String) {
+        newAnnotation(HighlightSeverity.ERROR, message)
+            .range(this)
+            .create()
+    }
+
 }
