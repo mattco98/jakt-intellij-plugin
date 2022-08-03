@@ -107,33 +107,27 @@ class JaktResolver(private val scope: PsiElement) {
     companion object {
         fun resolveQualifier(qualifier: JaktPlainQualifier): PsiElement? {
             if (qualifier.isType)
-                return resolveType(qualifier)
+                return resolveQualifierHelper(qualifier, AndResolutionStrategy(STATIC, TYPE))
 
-            // Check for shorthand enum type in `match` expression
+            // Check for shorthand enum type in match-expression and is-expression patterns
             if (qualifier.plainQualifier == null) {
-                val matchPattern = qualifier.ancestorOfType<JaktMatchPattern>()
-                if (matchPattern != null) {
+                var matchPattern = qualifier.ancestorOfType<JaktMatchPattern>()
+                if (matchPattern?.plainQualifierExpression?.plainQualifier == qualifier) {
                     val matchTarget = matchPattern.ancestorOfType<JaktMatchExpression>()?.expression?.jaktType
                     if (matchTarget is EnumType)
                         matchTarget.variants[qualifier.name!!]?.let { return it.psiElement }
                 }
-            }
 
-            return resolveQualifierHelper(qualifier, STATIC)
-        }
-
-        private fun resolveType(qualifier: JaktPlainQualifier): PsiElement? {
-            // Check for shorthand enum type in `is` expression
-            if (qualifier.plainQualifier == null) {
-                val unaryExpr = qualifier.ancestorOfType<JaktIsExpression>()
-                if ((unaryExpr?.type as? JaktPlainType)?.plainQualifier == qualifier) {
-                    val baseType = unaryExpr.expression.jaktType
+                val isExpr = qualifier.ancestorOfType<JaktIsExpression>()
+                matchPattern = isExpr?.matchPattern
+                if (matchPattern?.plainQualifierExpression?.plainQualifier == qualifier) {
+                    val baseType = isExpr!!.expression.jaktType
                     if (baseType is EnumVariantType && baseType.name == qualifier.name)
                         return baseType.psiElement
                 }
             }
 
-            return resolveQualifierHelper(qualifier, AndResolutionStrategy(STATIC, TYPE))
+            return resolveQualifierHelper(qualifier, STATIC)
         }
 
         private fun resolveQualifierHelper(

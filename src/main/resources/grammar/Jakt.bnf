@@ -535,7 +535,7 @@ PrefixUnaryExpression ::= PrefixOp NL Expression {elementType=UnaryExpression}
 PostfixUnaryExpression ::= Expression PostfixOp {elementType=UnaryExpression}
 
 CastExpression ::= Expression KEYWORD_AS (QUESTION_MARK | EXCLAMATION_POINT) Type
-IsExpression ::= Expression KEYWORD_IS Type
+IsExpression ::= Expression KEYWORD_IS MatchPattern
 
 private AddOp ::= PLUS | MINUS
 private MultiplyOp ::= ASTERISK | SLASH | PERCENT
