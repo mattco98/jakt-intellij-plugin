@@ -108,6 +108,9 @@ class JaktResolver(private val scope: PsiElement) {
             // are available _after_ the guard statement, not inside of it.
             if (parent is JaktIfStatement)
                 return parent
+
+            if (parent is JaktGuardStatement && current !is JaktBlock)
+                return parent
         }
 
         return null

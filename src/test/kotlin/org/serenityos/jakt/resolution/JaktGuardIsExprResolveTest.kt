@@ -24,7 +24,7 @@ class JaktGuardIsExprResolveTest : JaktResolveTest() {
             let bar = Foo::Bar(10)
             
             guard bar is Bar(value) and value < 20 else {
-                           //^D
+                           //^D         ^R
                 return
             }
             
@@ -55,7 +55,20 @@ class JaktGuardIsExprResolveTest : JaktResolveTest() {
         }
     """)
 
-    fun `test unresolvable with boolean-or expression`() = doTest("""
+    fun `test unresolvable with boolean-or in guard expression`() = doTest("""
+        enum Foo { Bar(i64) }
+        
+        function main() {
+            let bar = Foo::Bar(10)
+            
+            guard bar is Bar(value) or value else {
+                                     //^U
+                return
+            }
+        }
+    """)
+
+    fun `test unresolvable with boolean-or after the guard statement`() = doTest("""
         enum Foo { Bar(i64) }
          
         function main() {
