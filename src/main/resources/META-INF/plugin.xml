@@ -21,12 +21,20 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Show generics in inlay hints</li>
-            <li>Support is-expression patterns in guard- and if-statements</li>
-            <li>Add optional chaining</li>
-            <li>Respect never-returning functions when deducing match expression type</li>
-            <li>Fix some enum type inference bugs related to match expressions</li>
-            <li>Fix duplicate "try" inlay hints when constructing boxed enum variant</li>
+            <li>
+                Dedicated format-string support in the compiler builtin functions:
+                <ul>
+                    <li>Special highlighting for format specifiers (i.e. "{...}")</li>
+                    <li>
+                        Errors when not enough arguments are provided for a format string.
+                        Supports indexed arguments.
+                    </li>
+                </ul>
+            </li>
+            <li>Allow newlines before secondary expressions</li>
+            <li>Add support for resolving identifiers derived from is-expression patterns</li>
+            <li>Fix showing enum variant names for inlay hints</li>
+            <li>Add support for most (if not all) types that can show up in the Find Usages dialog</li>
         </ul>
     ]]></change-notes>
     
