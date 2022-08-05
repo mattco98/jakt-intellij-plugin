@@ -177,8 +177,8 @@ class JaktResolver(private val scope: PsiElement) {
                 matchPattern = isExpr?.matchPattern
                 if (matchPattern?.plainQualifierExpression?.plainQualifier == qualifier) {
                     val baseType = isExpr!!.expression.jaktType
-                    if (baseType is EnumVariantType && baseType.name == qualifier.name)
-                        return baseType.psiElement
+                    if (baseType is EnumType)
+                        baseType.variants[qualifier.name!!]?.let { return it.psiElement }
                 }
             }
 

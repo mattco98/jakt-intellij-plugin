@@ -3,14 +3,15 @@ package org.serenityos.jakt.resolution
 class JaktIfIsExprResolveTest : JaktResolveTest() {
     fun `test basic pattern resolution`() = doTest("""
         enum Foo { Bar(i64) }
+                 //^D1
          
         function main() {
             let bar = Foo::Bar(10)
             
             if bar is Bar(value) {
-                        //^D
+                    //^R1 ^D2
                 value
-              //^R
+              //^R2
             }
         } 
     """)
