@@ -13,7 +13,7 @@ class JaktFormattingBlock(
     wrap: Wrap?,
     alignment: Alignment?,
     private val indent_: Indent?,
-    private val spacingBuilder: JaktSpacingBuilder,
+    private val spacingBuilder: SpacingBuilder,
 ) : AbstractBlock(node, wrap, alignment) {
     private val children by lazy {
         val children = generateSequence(myNode.firstChildNode) { it.treeNext }

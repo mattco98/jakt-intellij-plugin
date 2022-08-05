@@ -30,7 +30,7 @@ object TypeInference {
             )
         ),
         if (name == "format") PrimitiveType.String else PrimitiveType.Void,
-        false,
+        throws = true,
         Linkage.External,
         hasThis = false,
         thisIsMutable = false,

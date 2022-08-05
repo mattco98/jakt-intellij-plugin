@@ -15,7 +15,10 @@ class JaktFormattingModelBuilder : FormattingModelBuilder {
             null,
             null,
             null,
-            buildJaktSpacingRules(settings.getCommonSettings(JaktLanguage)),
+            buildJaktSpacingRules(
+                settings.getCommonSettings(JaktLanguage),
+                settings.getCustomSettings(JaktCodeStyleSettings::class.java),
+            ),
         )
 
         return FormattingModelProvider.createFormattingModelForPsiFile(

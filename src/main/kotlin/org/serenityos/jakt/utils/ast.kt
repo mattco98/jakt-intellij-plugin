@@ -9,7 +9,7 @@ fun ASTNode.treePrevs() = generateSequence(treePrev, ASTNode::getTreePrev)
 fun ASTNode.treePrevOfType(type: IElementType) = treePrevs().find { it.elementType == type }
 
 fun ASTNode.isDelimiterFor(node: ASTNode): Boolean {
-    return elementType in DELIMTERS && treeParent == node
+    return elementType in DELIMITERS && treeParent == node
 }
 
 fun ASTNode.afterNewline() = treePrevOfType(JaktTypes.NEWLINE) != null
