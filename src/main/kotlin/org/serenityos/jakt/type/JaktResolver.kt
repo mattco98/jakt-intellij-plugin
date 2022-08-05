@@ -166,23 +166,36 @@ class JaktResolver(private val scope: PsiElement) {
 
             // Check for shorthand enum type in match-expression and is-expression patterns
             if (qualifier.plainQualifier == null) {
-                var matchPattern = qualifier.ancestorOfType<JaktMatchPattern>()
-                if (matchPattern?.plainQualifierExpression?.plainQualifier == qualifier) {
-                    val matchTarget = matchPattern.ancestorOfType<JaktMatchExpression>()?.expression?.jaktType
-                    if (matchTarget is EnumType)
-                        matchTarget.variants[qualifier.name!!]?.let { return it.psiElement }
-                }
-
-                val isExpr = qualifier.ancestorOfType<JaktIsExpression>()
-                matchPattern = isExpr?.matchPattern
-                if (matchPattern?.plainQualifierExpression?.plainQualifier == qualifier) {
-                    val baseType = isExpr!!.expression.jaktType
-                    if (baseType is EnumType)
-                        baseType.variants[qualifier.name!!]?.let { return it.psiElement }
-                }
+                val baseType = getQualifierShorthandType(qualifier)
+                if (baseType is EnumType)
+                    baseType.variants[qualifier.name!!]?.let { return it.psiElement }
+                if (baseType is EnumVariantType)
+                    return baseType.psiElement
             }
 
             return resolveQualifierHelper(qualifier, STATIC)
+        }
+
+        private fun getQualifierShorthandType(qualifier: JaktPlainQualifier): Type? {
+            val matchPattern = qualifier.ancestorOfType<JaktMatchPattern>()
+            if (matchPattern?.plainQualifierExpression?.plainQualifier != qualifier)
+                return null
+
+            val isExpr = matchPattern.parent as? JaktIsExpression
+            if (isExpr != null)
+                return isExpr.expression.jaktType
+
+            val matchExpr = matchPattern
+                .parent  // MatchCaseHead?
+                ?.parent // MatchCase?
+                ?.parent // MatchBody?
+                ?.parent // MatchExpression?
+                as? JaktMatchExpression
+
+            if (matchExpr != null)
+                return matchExpr.expression?.jaktType
+
+            return null
         }
 
         private fun resolveQualifierHelper(
