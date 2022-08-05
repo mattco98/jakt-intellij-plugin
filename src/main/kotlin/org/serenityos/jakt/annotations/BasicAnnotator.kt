@@ -154,7 +154,10 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     Highlights.LOCAL_VAR_MUT
                 } else Highlights.LOCAL_VAR
             }
-            is JaktForDecl, is JaktCatchDecl -> Highlights.LOCAL_VAR
+            is JaktForDecl,
+            is JaktCatchDecl,
+            is JaktDestructuringBinding,
+            is JaktDestructuringLabel -> Highlights.LOCAL_VAR
             else -> {
                 val type = element.jaktType
 
