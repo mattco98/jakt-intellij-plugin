@@ -30,6 +30,9 @@ class JaktFindUsagesProvider : FindUsagesProvider {
     }
 
     override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
+        if (psiElement is JaktThisExpression || psiElement is JaktThisParameter)
+            return false
+
         return psiElement is PsiNamedElement
     }
 
@@ -40,6 +43,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
             is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else unreachable()
             is JaktCallExpression -> "function call"
             is JaktFunction -> (if (element.isExtern) "extern " else "") + "function"
+            is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
             is JaktNamespaceDeclaration -> "namespace"
             is JaktStructDeclaration -> buildString {
                 if (element.isExtern)
@@ -51,10 +55,17 @@ class JaktFindUsagesProvider : FindUsagesProvider {
                     append("struct")
                 }
             }
+            is JaktStructField -> "struct field"
             is JaktEnumDeclaration -> "enum"
-            is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
-            is JaktVariableDeclarationStatement -> "variable declaration"
-            else -> "TODO(getType => ${element::class.simpleName})"
+            is JaktEnumVariant -> "enum variant"
+            is JaktGenericBound -> "generic parameter"
+            is JaktImportBraceEntry -> "import item"
+            is JaktVariableDeclarationStatement,
+            is JaktVariableDecl,
+            is JaktForDecl,
+            is JaktCatchDecl,
+            is JaktDestructuringLabel -> "variable declaration"
+            else -> "TODO: JaktFindUsagesProvider::getType for ${element::class.simpleName}"
         }
     }
 
