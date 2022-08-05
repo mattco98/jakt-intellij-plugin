@@ -63,4 +63,14 @@ class JaktExpressionTypeTest : JaktTypeTest() {
           //^T
         } 
     """, "i64?")
+
+    fun `test enum variant type is the enum itself`() = doTest("""
+        enum Foo { A }
+         
+         function main() {
+             let a = Foo::A
+             a
+           //^T
+         }
+    """, "enum Foo")
 }

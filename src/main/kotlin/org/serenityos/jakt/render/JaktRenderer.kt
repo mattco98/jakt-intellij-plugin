@@ -171,11 +171,9 @@ sealed class JaktRenderer {
                 appendStyled(type.name, Highlights.ENUM_NAME)
                 renderGenerics(type, specializations, options)
             }
-            is EnumVariantType -> {
-                appendStyled(type.parent.name, Highlights.ENUM_NAME)
-                appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
-                appendStyled(type.name, Highlights.ENUM_VARIANT_NAME)
-            }
+            // Note that Enum variants aren't actually types, so we just render
+            // the parent instead
+            is EnumVariantType -> appendType(type.parent, specializations, options)
             is FunctionType -> {
                 require(!options.asExpression)
                 appendStyled("function", Highlights.KEYWORD_DECLARATION)

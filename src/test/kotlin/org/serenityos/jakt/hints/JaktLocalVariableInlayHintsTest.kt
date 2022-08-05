@@ -46,4 +46,12 @@ class JaktLocalVariableInlayHintsTest : JaktInlayHintsTest() {
             let f<hint text="[:  [( [i64 ,  i64 ,  i64] )]]" /> =  (1, 2, 3)
         } 
     """)
+
+    fun `test enum variant hints`() = doTest("""
+        enum Foo { A }
+         
+        function main() {
+            let a<hint text="[:  Foo]" /> = Foo::A     
+        }
+    """)
 }

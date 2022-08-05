@@ -159,11 +159,9 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
 
                     seq(*elements.toTypedArray())
                 }
-                is EnumVariantType -> seq(
-                    text(type.parent.name).withPsiReference(type.parent),
-                    text("::"),
-                    text(type.name).withPsiReference(type),
-                )
+                // Note that Enum variants aren't actually types, so we just show
+                // the type hint for the parent instead
+                is EnumVariantType -> hintFor(type.parent, specializations)
                 is FunctionType -> {
                     val elements = mutableListOf(text("function"))
 
