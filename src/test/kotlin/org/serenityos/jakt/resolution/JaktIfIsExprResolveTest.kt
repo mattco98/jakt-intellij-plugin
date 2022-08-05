@@ -89,4 +89,15 @@ class JaktIfIsExprResolveTest : JaktResolveTest() {
           //^U
         }
     """)
+
+    // For issue resolved in afd5d43a
+    fun `test resolve to binding before if statement`() = doTest("""
+        function main() {
+            let a = 1
+              //^D
+            if true {}
+            a
+          //^R
+        }
+    """)
 }

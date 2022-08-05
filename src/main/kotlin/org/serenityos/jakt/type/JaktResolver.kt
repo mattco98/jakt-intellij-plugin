@@ -95,12 +95,15 @@ class JaktResolver(private val scope: PsiElement) {
             if (parent is JaktBlock) {
                 // Return the previous statement in the block, or the block itself if the
                 // current element is the first child
-                return current.prevNonWSSibling()?.let {
-                    // We cannot consider the previous statement in the block if that
-                    // statement is an if statement, since it's is-expression bindings
-                    // are only available inside it
-                    if (it is JaktIfStatement) null else it
-                } ?: parent
+                var prev = current.prevNonWSSibling()
+
+                // We cannot consider the previous statement in the block if that statement
+                // is an if statement, since it's is-expression bindings are only available
+                // inside it
+                while (prev is JaktIfStatement)
+                    prev = prev.prevNonWSSibling()
+
+                return prev ?: parent
             }
 
             // If there is an IfStatement in the parent chain, check it for is-expression
