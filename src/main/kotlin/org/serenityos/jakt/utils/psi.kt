@@ -1,5 +1,6 @@
 package org.serenityos.jakt.utils
 
+import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import org.serenityos.jakt.JaktTypes.*
@@ -174,6 +175,8 @@ val BINARY_OPERATORS = mapOf(
     RIGHT_SHIFT_EQUALS to ">>=",
     EQUALS to "=",
 )
+
+val WHITE_SPACE = setOf(TokenType.WHITE_SPACE, NEWLINE)
 
 fun tokenSetOf(vararg types: IElementType?) = TokenSet.create(*types.filterNotNull().toTypedArray())
 

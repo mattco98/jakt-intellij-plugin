@@ -11,7 +11,6 @@ import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.*
-import org.serenityos.jakt.utils.unreachable
 
 fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): String {
     val options = RenderOptions().apply(builder)
@@ -204,7 +203,6 @@ sealed class JaktRenderer {
                 }
             }
             is BoundType -> appendType(type.type, specializations + type.specializations, options)
-            else -> unreachable()
         }
     }
 

@@ -14,6 +14,7 @@ fun buildJaktSpacingRules(settings: CommonCodeStyleSettings, customSettings: Jak
 
         .around(BINARY_OPERATORS.tokenSet()).spaces(1)
         .before(PREFIX_UNARY_OPERATORS.tokenSet()).spaces(1)
+        .after(KEYWORD_NOT).spaces(1) // Ensure this overwrites the next rule for "not"
         .after(PREFIX_UNARY_OPERATORS.tokenSet()).spaces(0)
         .before(POSTFIX_UNARY_OPERATORS.tokenSet()).spaces(0)
         .after(POSTFIX_UNARY_OPERATORS.tokenSet()).spaces(1)
@@ -96,12 +97,11 @@ fun buildJaktSpacingRules(settings: CommonCodeStyleSettings, customSettings: Jak
         // MISC //
         //////////
 
-        .before(MEMBER_SEPARATOR).spaces(0)
-        .after(MEMBER_SEPARATOR).spaces(1)
+        .before(COMMA).spaces(0)
+        .after(COMMA).spaces(1)
+        .between(MEMBER_SEPARATOR, DELIMITERS).spaces(0)
         .between(CURLY_OPEN, CURLY_CLOSE).spaceIf(customSettings.SPACE_BETWEEN_EMPTY_BRACES)
         .around(KEYWORDS).spaces(1)
-        .aroundInside(tokenSetOf(CURLY_OPEN, CURLY_CLOSE), BLOCK_LIKE).spaces(1)
-
 
     for ((left, right, parents, condition) in DELIMITED_LISTS) {
         builder = builder
