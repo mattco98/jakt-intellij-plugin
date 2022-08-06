@@ -70,12 +70,13 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
 
         override fun getPresentation(): ItemPresentation {
             return psi?.let {
-                PresentationData(
-                    renderElement(it),
-                    null,
-                    getIcon(),
-                    null,
-                )
+                val text = when (it) {
+                    is JaktEnumVariant -> it.name
+                    is JaktFile -> it.name
+                    else -> renderElement(it) { showStructure = true }
+                }
+
+                PresentationData(text, null, getIcon(), null)
             } ?: PresentationData("", null, null, null)
         }
 

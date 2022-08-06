@@ -6,12 +6,12 @@ import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import org.intellij.sdk.language.psi.JaktFieldAccessExpression
+import org.intellij.sdk.language.psi.JaktStructField
 import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.psi.api.jaktType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.*
-import org.serenityos.jakt.utils.unreachable
 
 fun renderElement(element: PsiElement, builder: RenderOptions.() -> Unit = {}): String {
     val options = RenderOptions().apply(builder)
@@ -28,6 +28,7 @@ fun renderType(type: Type, builder: RenderOptions.() -> Unit = {}): String {
 data class RenderOptions(
     var asHtml: Boolean = false,
     var asExpression: Boolean = false,
+    var showStructure: Boolean = false,
 ) {
     fun withExpression() = copy(asExpression = true)
 }
@@ -74,6 +75,11 @@ sealed class JaktRenderer {
                     appendStyled(": ", Highlights.COLON)
                     appendType(type, emptyMap(), options)
                 }
+            }
+            is JaktStructField -> {
+                append(element.name!!)
+                append(": ")
+                appendType(element.jaktType, emptyMap(), options.withExpression())
             }
             is JaktTypeable -> appendType(element.jaktType, emptyMap(), options)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
@@ -178,9 +184,12 @@ sealed class JaktRenderer {
             }
             is FunctionType -> {
                 require(!options.asExpression)
-                appendStyled("function", Highlights.KEYWORD_DECLARATION)
+                if (!options.showStructure)
+                    appendStyled("function", Highlights.KEYWORD_DECLARATION)
+                if (type.name != null && !options.showStructure)
+                    append(" ")
                 if (type.name != null)
-                    appendStyled(" ${type.name}", Highlights.FUNCTION_DECLARATION)
+                    appendStyled("${type.name}", Highlights.FUNCTION_DECLARATION)
                 renderGenerics(type, specializations, options)
                 append("(")
 
@@ -188,7 +197,7 @@ sealed class JaktRenderer {
                     type.parameters.forEachIndexed { index, it ->
                         appendStyled(it.name, Highlights.FUNCTION_PARAMETER)
                         appendStyled(": ", Highlights.COLON)
-                        appendType(it.type, specializations, options)
+                        appendType(it.type, specializations, options.withExpression())
 
                         if (index != type.parameters.lastIndex)
                             append(",")
@@ -202,7 +211,7 @@ sealed class JaktRenderer {
 
                 if (type.returnType != PrimitiveType.Void) {
                     appendStyled(" -> ", Highlights.COLON)
-                    appendType(type.returnType, specializations, options)
+                    appendType(type.returnType, specializations, options.withExpression())
                 }
             }
             is BoundType -> appendType(type.type, specializations + type.specializations, options)

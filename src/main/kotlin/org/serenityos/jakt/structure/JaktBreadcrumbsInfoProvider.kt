@@ -13,7 +13,7 @@ class JaktBreadcrumbsInfoProvider : BreadcrumbsProvider {
 
     override fun getElementInfo(element: PsiElement) = getElementInfoImpl(element)!!
 
-    private fun getElementInfoImpl(element: PsiElement) = when (element) {
+    fun getElementInfoImpl(element: PsiElement) = when (element) {
         is JaktFunction -> element.name + "()"
         is JaktStructField -> element.name
         is JaktEnumDeclaration -> renderType(element.jaktType)
