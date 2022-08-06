@@ -1,15 +1,16 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     idea
-    kotlin("jvm") version "1.7.0"
-    id("org.jetbrains.intellij") version "1.7.0-SNAPSHOT"
+    kotlin("jvm") version "1.7.10"
+    id("org.jetbrains.intellij") version "1.8.0"
     id("org.jetbrains.grammarkit") version "2021.2.2"
-    kotlin("plugin.serialization") version "1.7.0"
+    kotlin("plugin.serialization") version "1.7.10"
 }
 
 group = properties("pluginGroup")
@@ -24,7 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-    implementation("net.java.dev.jna:jna:5.11.0")
+    implementation("net.java.dev.jna:jna:5.12.1")
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r")
 }
 
