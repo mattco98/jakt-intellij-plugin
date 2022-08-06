@@ -41,13 +41,13 @@ abstract class JaktEnumDeclarationMixin(
                 it.enumVariant
             }?.associate {
                 it.nameNonNull to it.jaktType as EnumVariantType
-            } ?: emptyMap())
+            }.orEmpty())
 
             methods.putAll(normalEnumBody?.normalEnumMemberList?.mapNotNull {
                 it.function
             }?.associate {
                 it.nameNonNull to it.jaktType as FunctionType
-            } ?: emptyMap())
+            }.orEmpty())
 
             enum.underlyingType = underlyingTypeEnumBody?.typeAnnotation?.jaktType as? PrimitiveType
         }
@@ -67,5 +67,5 @@ abstract class JaktEnumDeclarationMixin(
     }
 
     override fun getDeclGenericBounds(): List<JaktGenericBound> =
-        normalEnumBody?.genericBounds?.genericBoundList ?: emptyList()
+        normalEnumBody?.genericBounds?.genericBoundList.orEmpty()
 }

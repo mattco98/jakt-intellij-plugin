@@ -91,7 +91,10 @@ private ExpressionLead ::=
 
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    implements=[
+        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    ]
     mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
 }
 
@@ -504,7 +507,7 @@ left PlainQualifierSegment ::= COLON_COLON IDENTIFIER {
 LambdaExpression ::= LambdaFunction
 LambdaFunction ::= LambdaHeader FunctionBody {elementType=Function}
 private LambdaHeader ::= FUNCTION_KEYWORD LambdaCaptures? ParameterList FunctionReturnType
-LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture >> BRACKET_CLOSE
+LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture>> BRACKET_CLOSE
 LambdaCapture ::= [AMPERSAND MUT_KEYWORD?] PlainQualifierExpression
 
 /*************************************

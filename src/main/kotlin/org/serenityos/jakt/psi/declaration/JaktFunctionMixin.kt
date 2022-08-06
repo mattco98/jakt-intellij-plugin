@@ -62,7 +62,7 @@ abstract class JaktFunctionMixin(
 
     override fun getDeclarations(): List<JaktDeclaration> = parameterList.parameterList
 
-    override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
+    override fun getDeclGenericBounds() = genericBounds?.genericBoundList.orEmpty()
 }
 
 val JaktFunction.isExtern: Boolean

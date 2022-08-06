@@ -75,7 +75,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
                     arguments.find { it.first == partName }?.let { partType to it.second }
                 }
             }
-        } ?: emptyList()
+        }.orEmpty()
         else -> return type
     }
 
@@ -180,7 +180,7 @@ fun applySpecializations(type: Type, specializations: List<Type>): Type {
         ?.zip(specializations)
         ?.associate { it.first to it.second }
 
-    return applySpecializations(type, map ?: emptyMap())
+    return applySpecializations(type, map.orEmpty())
 }
 
 fun applySpecializations(type: Type, specializations: Map<TypeParameter, Type>): Type {

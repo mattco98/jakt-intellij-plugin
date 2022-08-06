@@ -130,6 +130,10 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.JaktQuoteHandler"
         />
+        <moveLeftRightHandler
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.JaktMoveElementLeftRightHandler"
+        />
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"

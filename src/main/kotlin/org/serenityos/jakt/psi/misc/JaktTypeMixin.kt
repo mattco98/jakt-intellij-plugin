@@ -30,7 +30,7 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
                         it.anonKeyword != null,
                         it.mutKeyword != null,
                     )
-                } ?: emptyList(),
+                }.orEmpty(),
                 functionReturnType?.type?.jaktType ?: PrimitiveType.Void,
                 functionReturnType?.throwsKeyword != null,
                 Linkage.Internal,

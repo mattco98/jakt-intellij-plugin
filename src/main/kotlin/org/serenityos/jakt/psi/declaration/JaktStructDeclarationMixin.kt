@@ -58,7 +58,7 @@ abstract class JaktStructDeclarationMixin(
         return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.function }
     }
 
-    override fun getDeclGenericBounds() = genericBounds?.genericBoundList ?: emptyList()
+    override fun getDeclGenericBounds() = genericBounds?.genericBoundList.orEmpty()
 }
 
 val JaktStructDeclaration.isExtern: Boolean
