@@ -115,6 +115,7 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.structure.JaktStructureViewFactory"
         />
+        <breadcrumbsInfoProvider implementation="org.serenityos.jakt.structure.JaktBreadcrumbsInfoProvider" />
         <lang.formatter
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.formatting.JaktFormattingModelBuilder"
