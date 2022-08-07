@@ -231,9 +231,7 @@ fake EnumVariant ::= IDENTIFIER [(EQUALS Expression) | NormalEnumMemberBody] {
 private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?
 UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {elementType=EnumVariant}
 
-NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL NormalEnumMembers CURLY_CLOSE
-
-private NormalEnumMembers ::= <<commaOrEolList NormalEnumMember>>?
+NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL <<commaOrEolList NormalEnumMember>>? CURLY_CLOSE
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {elementType=EnumVariant}
 NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE

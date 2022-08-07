@@ -30,13 +30,13 @@ abstract class JaktLabeledArgumentMixin(
         }
 
         override fun isReferenceTo(element: PsiElement): Boolean {
-            // Returning false here prevents this label from showing up when finding references
-            // to the parameter this label references. This is desired over the alternative because
-            // otherwise, this label will only show as a reference to the parameter when the parameter
-            // has no usage in the function body. That is probably fixable, but either way it seems
-            // a bit odd for labels to show up there. If the user wants to find references to
-            // function parameters at the usage site, they can just find the function usages.
-            return false
+            // We usually want to return false here, since we don't really want to resolve struct
+            // fields and function parameters to their usages in a call expression. Both of those
+            // elements have more important usages targets; function parameters should show usages
+            // in the function they belong to, and struct fields should show field access expressions.
+            // However, named enum fields don't have a more important usage target, so we allow
+            // those to resolve to their usages in ctor calls.
+            return ancestorOfType<JaktCallExpression>()?.expression?.jaktType?.psiElement is JaktEnumVariant
         }
     }
 }
