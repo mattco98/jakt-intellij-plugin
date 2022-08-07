@@ -37,7 +37,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
         editor: Editor?,
     ) : StructureViewModelBase(file, editor, Element(file)), StructureViewModel.ElementInfoProvider {
         init {
-            withSuitableClasses(*suitableClasses)
+            withSuitableClasses(*suitableJaktClasses)
         }
 
         override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean {
@@ -49,7 +49,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
         }
 
         companion object {
-            private val suitableClasses = arrayOf(
+            private val suitableJaktClasses = arrayOf(
                 JaktFile::class.java,
                 JaktFunction::class.java,
                 JaktStructDeclaration::class.java,
@@ -58,7 +58,7 @@ class JaktStructureViewFactory : PsiStructureViewFactory {
                 JaktEnumVariant::class.java,
             )
 
-            fun isSuitable(element: PsiElement) = suitableClasses.any {
+            fun isSuitable(element: PsiElement) = suitableJaktClasses.any {
                 ReflectionUtil.isAssignable(it, element::class.java)
             }
         }
