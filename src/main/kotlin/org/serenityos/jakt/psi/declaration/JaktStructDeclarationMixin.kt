@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.intellij.sdk.language.psi.JaktStructField
-import org.intellij.sdk.language.psi.JaktStructMethod
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
+import org.serenityos.jakt.psi.api.JaktStructField
+import org.serenityos.jakt.psi.api.JaktStructMethod
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded

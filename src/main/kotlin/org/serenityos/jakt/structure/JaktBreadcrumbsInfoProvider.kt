@@ -2,8 +2,8 @@ package org.serenityos.jakt.structure
 
 import com.intellij.psi.PsiElement
 import com.intellij.ui.breadcrumbs.BreadcrumbsProvider
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktLanguage
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.render.renderType
 
 class JaktBreadcrumbsInfoProvider : BreadcrumbsProvider {

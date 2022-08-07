@@ -3,9 +3,9 @@ package org.serenityos.jakt
 import com.intellij.codeInsight.editorActions.moveLeftRight.MoveElementLeftRightHandler
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import org.intellij.sdk.language.psi.*
+import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.allChildren
-import org.serenityos.jakt.psi.api.JaktScope
+import org.serenityos.jakt.psi.api.*
 
 object JaktMoveElementLeftRightHandler : MoveElementLeftRightHandler() {
     override fun getMovableSubElements(element: PsiElement): Array<PsiElement> {

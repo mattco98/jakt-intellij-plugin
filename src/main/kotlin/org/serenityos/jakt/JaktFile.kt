@@ -3,11 +3,11 @@ package org.serenityos.jakt
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.psi.FileViewProvider
-import org.intellij.sdk.language.psi.JaktImportExternStatement
-import org.intellij.sdk.language.psi.JaktImportStatement
+import org.serenityos.jakt.psi.JaktScope
+import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.allChildren
-import org.serenityos.jakt.psi.api.JaktScope
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktImportExternStatement
+import org.serenityos.jakt.psi.api.JaktImportStatement
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.type.DeclarationType

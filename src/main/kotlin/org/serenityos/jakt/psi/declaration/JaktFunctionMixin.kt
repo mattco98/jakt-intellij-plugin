@@ -1,13 +1,13 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktFunction
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktScope
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded

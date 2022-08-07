@@ -5,8 +5,8 @@
 
     psiClassPrefix="Jakt"
     psiImplClassSuffix="Impl"
-    psiPackage="org.intellij.sdk.language.psi"
-    psiImplPackage="org.intellij.sdk.language.psi.impl"
+    psiPackage="org.serenityos.jakt.psi.api"
+    psiImplPackage="org.serenityos.jakt.psi.impl"
 
     elementTypeHolderClass="org.serenityos.jakt.JaktTypes"
     elementTypeClass="org.serenityos.jakt.syntax.JaktElementType"
@@ -92,7 +92,7 @@ private ExpressionLead ::=
 NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
@@ -115,7 +115,7 @@ ImportBraceEntry ::= IDENTIFIER {
 
 ImportExternStatement ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITERAL ImportExternBody {
     extends=TopLevelDefinition
-    implements="org.serenityos.jakt.psi.api.JaktScope"
+    implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportExternStatementMixin"
 }
 
@@ -135,7 +135,7 @@ fake Function ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
-        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.caching.JaktModificationBoundary"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -165,7 +165,7 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
 fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -211,7 +211,7 @@ ExternalStructFunctionDeclaration ::= FunctionDeclarationHeader {elementType=Fun
 EnumDeclaration ::= EnumHead EnumBody {
     extends=TopLevelDefinition
     implements=[
-        "org.serenityos.jakt.psi.api.JaktScope"
+        "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
@@ -271,7 +271,7 @@ Statement ::=
     { name='statement' }
 
 VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) VariableDeclLhs EQUALS Expression {
-    implements="org.serenityos.jakt.psi.api.JaktScope"
+    implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclarationStatementMixin"
 }
 
@@ -290,7 +290,7 @@ WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 
 TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD CatchDecl? Statement {
-    implements="org.serenityos.jakt.psi.api.JaktScope"
+    implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktTryStatementMixin"
 }
 
@@ -306,7 +306,7 @@ ContinueStatement ::= CONTINUE_KEYWORD
 YieldStatement ::= YIELD_KEYWORD Expression
 
 ForStatement ::= FOR_KEYWORD ForDecl IN_KEYWORD Expression Block {
-    implements="org.serenityos.jakt.psi.api.JaktScope"
+    implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktForStatementMixin"
 }
 ForDecl ::= IDENTIFIER {
@@ -357,7 +357,7 @@ Type ::=
     | ReferenceType
     | BaseType
 {
-    implements="org.serenityos.jakt.psi.api.JaktTypeable"
+    implements="org.serenityos.jakt.psi.JaktTypeable"
     mixin="org.serenityos.jakt.psi.misc.JaktTypeMixin"
 }
 
@@ -431,7 +431,7 @@ UnlabeledArgument ::= Expression
 
 AccessExpression ::= Expression (DOT | DOT_QUESTION_MARK) Access {
     implements=[
-        "org.serenityos.jakt.psi.api.JaktTypeable"
+        "org.serenityos.jakt.psi.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.psi.reference.JaktAccessExpressionMixin"
@@ -466,7 +466,7 @@ SetExpression ::= CURLY_OPEN NL <<commaOrEolList Expression>>? NL CURLY_CLOSE
 MatchExpression ::= MATCH_KEYWORD Expression MatchBody
 MatchBody ::= NL CURLY_OPEN NL (MatchCase NL)* CURLY_CLOSE
 MatchCase ::= MatchCaseHead MatchCaseTrail {
-    implements="org.serenityos.jakt.psi.api.JaktScope"
+    implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
 MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
@@ -485,7 +485,7 @@ DestructuringBinding ::= IDENTIFIER {
 
 fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpecialization? {
     implements=[
-        "org.serenityos.jakt.psi.api.JaktTypeable"
+        "org.serenityos.jakt.psi.JaktTypeable"
         "org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     ]
     mixin="org.serenityos.jakt.psi.reference.JaktPlainQualifierMixin"

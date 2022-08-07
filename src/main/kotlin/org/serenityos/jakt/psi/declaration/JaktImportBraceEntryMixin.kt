@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktImportBraceEntry
-import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktImportBraceEntry
+import org.serenityos.jakt.psi.api.JaktImportStatement
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.JaktResolver

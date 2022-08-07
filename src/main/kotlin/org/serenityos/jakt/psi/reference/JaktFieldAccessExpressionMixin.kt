@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktFieldAccessExpression
-import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.psi.ancestorsOfType
+import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktFieldAccessExpressionMixin(

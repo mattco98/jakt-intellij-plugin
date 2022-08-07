@@ -1,11 +1,11 @@
 package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktPlainQualifierExpression
-import org.intellij.sdk.language.psi.JaktPlainType
+import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktPlainQualifier
+import org.serenityos.jakt.psi.api.JaktPlainQualifierExpression
+import org.serenityos.jakt.psi.api.JaktPlainType
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.JaktResolver

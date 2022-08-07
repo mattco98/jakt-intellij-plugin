@@ -1,9 +1,9 @@
 package org.serenityos.jakt.type
 
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.*
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.findChildOfType
+import org.serenityos.jakt.psi.jaktType
 
 class Specializations(
     private val map: MutableMap<TypeParameter, Type> = mutableMapOf()

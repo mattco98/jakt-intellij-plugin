@@ -3,11 +3,11 @@ package org.serenityos.jakt.annotations
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import org.intellij.sdk.language.psi.JaktArgument
-import org.intellij.sdk.language.psi.JaktCallExpression
-import org.intellij.sdk.language.psi.JaktPlainQualifierExpression
-import org.intellij.sdk.language.psi.JaktUnlabeledArgument
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.api.JaktArgument
+import org.serenityos.jakt.psi.api.JaktCallExpression
+import org.serenityos.jakt.psi.api.JaktPlainQualifierExpression
+import org.serenityos.jakt.psi.api.JaktUnlabeledArgument
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.TypeInference
 

@@ -8,9 +8,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.reference.JaktPlainQualifierMixin
 import org.serenityos.jakt.psi.reference.exprAncestor

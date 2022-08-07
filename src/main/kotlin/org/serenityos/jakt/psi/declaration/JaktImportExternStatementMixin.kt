@@ -1,7 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktImportExternStatement
+import org.serenityos.jakt.psi.api.JaktImportExternStatement
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktImportExternStatementMixin(

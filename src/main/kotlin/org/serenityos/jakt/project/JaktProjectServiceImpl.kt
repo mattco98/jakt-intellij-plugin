@@ -11,9 +11,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScopes
-import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.project.JaktProjectService.Companion.userHome
+import org.serenityos.jakt.psi.api.JaktTopLevelDefinition
 import org.serenityos.jakt.psi.caching.JaktPsiManager
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration

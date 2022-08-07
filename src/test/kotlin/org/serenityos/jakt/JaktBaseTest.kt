@@ -6,7 +6,6 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.internal.runners.JUnit38ClassRunner
 import org.junit.runner.RunWith
-import org.serenityos.jakt.project.jaktProject
 
 @RunWith(JUnit38ClassRunner::class)
 abstract class JaktBaseTest : BasePlatformTestCase() {

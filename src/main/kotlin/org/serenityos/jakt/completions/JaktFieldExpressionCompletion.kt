@@ -5,14 +5,14 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktFieldAccessExpression
-import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.JaktScope
+import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.ancestorsOfType
-import org.serenityos.jakt.psi.api.JaktScope
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
+import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.type.EnumType
 import org.serenityos.jakt.type.StructType
 

@@ -7,9 +7,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiManager
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.api.JaktImportStatement
 
 object JaktImportStatementCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)

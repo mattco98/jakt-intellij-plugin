@@ -2,9 +2,8 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktPlainType
-import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.psi.caching.resolveCache
+import org.serenityos.jakt.psi.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktPlainType
 import org.serenityos.jakt.psi.caching.typeCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.PrimitiveType

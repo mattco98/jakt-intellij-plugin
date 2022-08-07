@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktDestructuringBinding
-import org.intellij.sdk.language.psi.JaktDestructuringPart
-import org.intellij.sdk.language.psi.JaktMatchPattern
+import org.serenityos.jakt.psi.api.JaktDestructuringBinding
+import org.serenityos.jakt.psi.api.JaktDestructuringPart
+import org.serenityos.jakt.psi.api.JaktMatchPattern
 import org.serenityos.jakt.psi.caching.typeCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.EnumVariantType

@@ -1,7 +1,6 @@
-package org.serenityos.jakt.psi.api
+package org.serenityos.jakt.psi
 
-import org.intellij.sdk.language.psi.JaktExpression
-import org.serenityos.jakt.psi.JaktPsiElement
+import org.serenityos.jakt.psi.api.JaktExpression
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.type.TypeInference
 

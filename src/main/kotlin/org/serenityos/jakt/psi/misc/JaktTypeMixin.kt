@@ -2,8 +2,8 @@ package org.serenityos.jakt.psi.misc
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.*
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.JaktTypeable
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.type.*
 
 abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTypeable {

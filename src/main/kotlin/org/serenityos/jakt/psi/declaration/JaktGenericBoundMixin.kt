@@ -1,8 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktGenericBound
-import org.serenityos.jakt.psi.caching.resolveCache
+import org.serenityos.jakt.psi.api.JaktGenericBound
 import org.serenityos.jakt.psi.caching.typeCache
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.Type

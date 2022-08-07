@@ -3,12 +3,12 @@ package org.serenityos.jakt.completions
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktDestructuringBinding
-import org.intellij.sdk.language.psi.JaktDestructuringPart
-import org.intellij.sdk.language.psi.JaktMatchPattern
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.JaktDestructuringBinding
+import org.serenityos.jakt.psi.api.JaktDestructuringPart
+import org.serenityos.jakt.psi.api.JaktMatchPattern
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.type.EnumVariantType
 
 object JaktMatchPatternCompletion : JaktCompletion() {

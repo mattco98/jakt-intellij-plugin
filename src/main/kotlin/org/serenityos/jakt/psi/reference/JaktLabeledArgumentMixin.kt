@@ -2,9 +2,9 @@ package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.*
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktLabeledArgumentMixin(

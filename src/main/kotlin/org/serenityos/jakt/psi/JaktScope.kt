@@ -1,6 +1,5 @@
-package org.serenityos.jakt.psi.api
+package org.serenityos.jakt.psi
 
-import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 interface JaktScope : JaktPsiElement {

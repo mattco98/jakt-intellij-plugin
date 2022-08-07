@@ -4,13 +4,13 @@ import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
-import org.intellij.sdk.language.psi.JaktArgumentList
-import org.intellij.sdk.language.psi.JaktCallExpression
-import org.intellij.sdk.language.psi.JaktFunction
-import org.intellij.sdk.language.psi.JaktParameterList
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.JaktArgumentList
+import org.serenityos.jakt.psi.api.JaktCallExpression
+import org.serenityos.jakt.psi.api.JaktFunction
+import org.serenityos.jakt.psi.api.JaktParameterList
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.render.renderType
 
 class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktParameterInfoHandler.ParameterInfo> {

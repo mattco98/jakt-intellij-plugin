@@ -5,11 +5,11 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktFieldAccessExpression
-import org.intellij.sdk.language.psi.JaktStructField
-import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
-import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktStructField
+import org.serenityos.jakt.psi.api.JaktVariableDeclarationStatement
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.*
 

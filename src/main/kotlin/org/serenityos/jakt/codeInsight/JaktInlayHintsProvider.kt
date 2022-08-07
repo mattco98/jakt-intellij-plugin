@@ -12,10 +12,10 @@ import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.util.elementType
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes.*
 import org.serenityos.jakt.annotations.JaktAnnotator
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.declaration.JaktGeneric
 import org.serenityos.jakt.type.*
 import javax.swing.JPanel

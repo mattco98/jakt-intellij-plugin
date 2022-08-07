@@ -7,12 +7,12 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktFunction
-import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktFunction
+import org.serenityos.jakt.psi.api.JaktPlainQualifier
+import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.type.*
 
 // TODO: Remove these when they are added to the prelude

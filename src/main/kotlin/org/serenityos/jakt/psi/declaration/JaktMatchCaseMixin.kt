@@ -2,7 +2,7 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktMatchCase
+import org.serenityos.jakt.psi.api.JaktMatchCase
 
 abstract class JaktMatchCaseMixin(
     node: ASTNode,

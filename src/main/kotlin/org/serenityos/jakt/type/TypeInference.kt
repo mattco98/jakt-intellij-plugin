@@ -3,13 +3,10 @@ package org.serenityos.jakt.type
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.*
-import org.serenityos.jakt.psi.api.JaktScope
-import org.serenityos.jakt.psi.api.JaktTypeable
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.psi.reference.index
 import org.serenityos.jakt.utils.unreachable

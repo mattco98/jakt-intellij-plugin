@@ -3,13 +3,13 @@ package org.serenityos.jakt.psi.reference
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.util.IncorrectOperationException
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.intellij.sdk.language.psi.JaktThisExpression
-import org.serenityos.jakt.psi.api.JaktScope
+import org.serenityos.jakt.psi.JaktScope
+import org.serenityos.jakt.psi.ancestorsOfType
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
+import org.serenityos.jakt.psi.api.JaktThisExpression
 import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
 import org.serenityos.jakt.psi.named.JaktNamedElement
-import org.serenityos.jakt.psi.ancestorsOfType
 
 // TODO: It feels weird to inherit from JaktNamedElement here,
 //       but JaktRef requires it

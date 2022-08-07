@@ -3,11 +3,11 @@ package org.serenityos.jakt.intentions
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktImportStatement
-import org.intellij.sdk.language.psi.JaktPlainQualifier
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.JaktPsiFactory
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktPlainQualifier
 import org.serenityos.jakt.psi.declaration.aliasIdent
 import org.serenityos.jakt.psi.declaration.nameIdent
 import org.serenityos.jakt.psi.reference.index

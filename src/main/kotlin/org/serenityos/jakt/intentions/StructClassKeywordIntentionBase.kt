@@ -4,10 +4,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import org.intellij.sdk.language.psi.JaktStructDeclaration
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.JaktPsiFactory
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
 
 /**
  * Converts the "class" keyword to "struct" and vice-versa

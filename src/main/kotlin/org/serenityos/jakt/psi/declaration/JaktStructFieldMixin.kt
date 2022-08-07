@@ -3,10 +3,10 @@ package org.serenityos.jakt.psi.declaration
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
-import org.intellij.sdk.language.psi.JaktFieldAccessExpression
-import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.intellij.sdk.language.psi.JaktStructField
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
+import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.multiRef
 import org.serenityos.jakt.type.Type

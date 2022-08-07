@@ -4,10 +4,10 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.util.ProcessingContext
-import org.intellij.sdk.language.psi.JaktImportBraceEntry
-import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktImportBraceEntry
+import org.serenityos.jakt.psi.api.JaktImportStatement
 import org.serenityos.jakt.type.NamespaceType
 
 object JaktImportEntryCompletion : JaktCompletion() {

@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktGenericBound
-import org.intellij.sdk.language.psi.JaktStructDeclaration
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.JaktTypeable
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
+import org.serenityos.jakt.psi.api.JaktGenericBound
+import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
 
 interface JaktDeclaration : JaktTypeable, JaktNameIdentifierOwner {

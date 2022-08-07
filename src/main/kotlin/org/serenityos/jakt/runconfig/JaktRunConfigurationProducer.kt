@@ -5,7 +5,7 @@ import com.intellij.execution.actions.LazyRunConfigurationProducer
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktFunction
+import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.declaration.isMainFunction
 import org.serenityos.jakt.psi.findChildrenOfType
 import kotlin.io.path.absolutePathString

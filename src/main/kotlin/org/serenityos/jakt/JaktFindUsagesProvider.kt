@@ -7,7 +7,7 @@ import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.tree.TokenSet
-import org.intellij.sdk.language.psi.*
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.declaration.isClass
 import org.serenityos.jakt.psi.declaration.isExtern
 import org.serenityos.jakt.psi.named.JaktNamedElement

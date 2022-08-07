@@ -4,10 +4,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.PsiTreeUtil
-import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
-import org.intellij.sdk.language.psi.JaktPlainQualifier
-import org.intellij.sdk.language.psi.JaktTopLevelDefinition
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
+import org.serenityos.jakt.psi.api.JaktPlainQualifier
+import org.serenityos.jakt.psi.api.JaktTopLevelDefinition
 
 class JaktPsiFactory(private val project: Project) {
     fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory

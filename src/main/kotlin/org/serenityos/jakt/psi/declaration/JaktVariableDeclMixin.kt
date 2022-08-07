@@ -1,11 +1,11 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktVariableDecl
-import org.intellij.sdk.language.psi.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.JaktVariableDecl
+import org.serenityos.jakt.psi.api.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.caching.resolveCache
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.TupleType
 import org.serenityos.jakt.type.Type

@@ -2,7 +2,7 @@ package org.serenityos.jakt
 
 import com.intellij.codeInsight.navigation.actions.TypeDeclarationProvider
 import com.intellij.psi.PsiElement
-import org.serenityos.jakt.psi.api.JaktTypeable
+import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration
 import org.serenityos.jakt.type.BoundType

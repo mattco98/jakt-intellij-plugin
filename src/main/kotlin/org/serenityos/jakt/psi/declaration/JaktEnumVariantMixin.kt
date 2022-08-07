@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktEnumVariant
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
+import org.serenityos.jakt.psi.api.JaktEnumVariant
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.EnumType
 import org.serenityos.jakt.type.EnumVariantType

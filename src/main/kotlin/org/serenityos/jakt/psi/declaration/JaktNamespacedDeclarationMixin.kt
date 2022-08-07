@@ -1,7 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktNamespaceDeclaration
+import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.DeclarationType
 import org.serenityos.jakt.type.NamespaceType

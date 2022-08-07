@@ -2,10 +2,10 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.JaktImportStatement
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.api.JaktImportStatement
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef

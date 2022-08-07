@@ -2,8 +2,8 @@ package org.serenityos.jakt.types
 
 import org.intellij.lang.annotations.Language
 import org.serenityos.jakt.JaktBaseTest
+import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.ancestors
-import org.serenityos.jakt.psi.api.JaktTypeable
 import org.serenityos.jakt.render.renderType
 import org.serenityos.jakt.utils.padWithNulls
 

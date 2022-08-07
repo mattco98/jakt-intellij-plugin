@@ -16,10 +16,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.RowIcon
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ReflectionUtil
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktScope
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.utils.unreachable

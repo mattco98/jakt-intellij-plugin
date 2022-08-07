@@ -1,9 +1,9 @@
 package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktAccessExpression
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.api.JaktAccessExpression
 import org.serenityos.jakt.psi.caching.typeCache
+import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 

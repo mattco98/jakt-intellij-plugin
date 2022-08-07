@@ -1,10 +1,10 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktEnumDeclaration
-import org.intellij.sdk.language.psi.JaktGenericBound
-import org.intellij.sdk.language.psi.JaktNormalEnumBody
-import org.intellij.sdk.language.psi.JaktUnderlyingTypeEnumBody
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
+import org.serenityos.jakt.psi.api.JaktGenericBound
+import org.serenityos.jakt.psi.api.JaktNormalEnumBody
+import org.serenityos.jakt.psi.api.JaktUnderlyingTypeEnumBody
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded

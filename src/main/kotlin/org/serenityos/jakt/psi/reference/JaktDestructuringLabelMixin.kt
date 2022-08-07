@@ -1,10 +1,10 @@
 package org.serenityos.jakt.psi.reference
 
 import com.intellij.lang.ASTNode
-import org.intellij.sdk.language.psi.JaktDestructuringLabel
-import org.intellij.sdk.language.psi.JaktEnumVariant
-import org.intellij.sdk.language.psi.JaktMatchPattern
 import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktDestructuringLabel
+import org.serenityos.jakt.psi.api.JaktEnumVariant
+import org.serenityos.jakt.psi.api.JaktMatchPattern
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktDestructuringLabelMixin(

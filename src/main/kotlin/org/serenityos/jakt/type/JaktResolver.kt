@@ -1,15 +1,11 @@
 package org.serenityos.jakt.type
 
 import com.intellij.psi.PsiElement
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.project.jaktProject
-import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.ancestorPairs
-import org.serenityos.jakt.psi.api.JaktScope
-import org.serenityos.jakt.psi.api.jaktType
+import org.serenityos.jakt.psi.*
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.declaration.*
-import org.serenityos.jakt.psi.prevNonWSSibling
 import org.serenityos.jakt.psi.reference.isType
 import org.serenityos.jakt.utils.unreachable
 

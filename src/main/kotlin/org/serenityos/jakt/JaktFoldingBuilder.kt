@@ -9,8 +9,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.intellij.sdk.language.psi.*
 import org.serenityos.jakt.psi.JaktPsiElement
+import org.serenityos.jakt.psi.api.*
 
 class JaktFoldingBuilder : CustomFoldingBuilder() {
     override fun buildLanguageFoldRegions(
