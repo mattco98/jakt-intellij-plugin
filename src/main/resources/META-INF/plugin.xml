@@ -134,6 +134,20 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.JaktMoveElementLeftRightHandler"
         />
+
+        <declarationRangeHandler
+                key="org.serenityos.jakt.psi.api.JaktStructDeclaration"
+                implementationClass="org.serenityos.jakt.JaktStructDeclRangeHandler" />
+        <declarationRangeHandler
+                key="org.serenityos.jakt.psi.api.JaktEnumDeclaration"
+                implementationClass="org.serenityos.jakt.JaktEnumDeclRangeHandler" />
+        <declarationRangeHandler
+                key="org.serenityos.jakt.psi.api.JaktNamespaceDeclaration"
+                implementationClass="org.serenityos.jakt.JaktNamespaceDeclRangeHandler" />
+        <declarationRangeHandler
+                key="org.serenityos.jakt.psi.api.JaktFunction"
+                implementationClass="org.serenityos.jakt.JaktFunctionDeclRangeHandler" />
+
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"
                 serviceImplementation="org.serenityos.jakt.project.JaktProjectServiceImpl"
