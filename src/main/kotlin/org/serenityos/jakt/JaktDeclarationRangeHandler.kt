@@ -34,6 +34,6 @@ class JaktNamespaceDeclRangeHandler : JaktDeclarationRangeHandler<JaktNamespaceD
 }
 
 class JaktFunctionDeclRangeHandler : JaktDeclarationRangeHandler<JaktFunction>() {
-    override fun JaktFunction.start() = externKeyword ?: functionKeyword
+    override fun JaktFunction.start() = externKeyword ?: comptimeKeyword ?: functionKeyword!!
     override fun JaktFunction.end() = functionReturnType.let { it.type ?: it.throwsKeyword } ?: parameterList.parenClose
 }

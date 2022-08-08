@@ -62,6 +62,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "break"                { return BREAK_KEYWORD; }
   "catch"                { return CATCH_KEYWORD; }
   "class"                { return CLASS_KEYWORD; }
+  "comptime"             { return COMPTIME_KEYWORD; }
   "continue"             { return CONTINUE_KEYWORD; }
   "cpp"                  { return CPP_KEYWORD; }
   "defer"                { return DEFER_KEYWORD; }

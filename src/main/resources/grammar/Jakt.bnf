@@ -142,8 +142,8 @@ fake Function ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     mixin="org.serenityos.jakt.psi.declaration.JaktFunctionMixin"
 }
 
-private FunctionHeader ::= FUNCTION_KEYWORD IDENTIFIER? GenericBounds? ParameterList FunctionReturnType
-private FunctionDeclarationHeader ::= FUNCTION_KEYWORD IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+private FunctionHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? GenericBounds? ParameterList FunctionReturnType
+private FunctionDeclarationHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER GenericBounds? ParameterList FunctionReturnType
 
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression

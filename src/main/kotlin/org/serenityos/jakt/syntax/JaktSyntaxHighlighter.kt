@@ -112,6 +112,7 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             NAMESPACE_KEYWORD,
             CLASS_KEYWORD,
             STRUCT_KEYWORD,
+            COMPTIME_KEYWORD,
             FUNCTION_KEYWORD,
             ENUM_KEYWORD,
             LET_KEYWORD -> Highlights.KEYWORD_DECLARATION
