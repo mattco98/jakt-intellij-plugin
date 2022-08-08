@@ -21,20 +21,12 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>
-                Dedicated format-string support in the compiler builtin functions:
-                <ul>
-                    <li>Special highlighting for format specifiers (i.e. "{...}")</li>
-                    <li>
-                        Errors when not enough arguments are provided for a format string.
-                        Supports indexed arguments.
-                    </li>
-                </ul>
-            </li>
-            <li>Allow newlines before secondary expressions</li>
-            <li>Add support for resolving identifiers derived from is-expression patterns</li>
-            <li>Fix showing enum variant names for inlay hints</li>
-            <li>Add support for most (if not all) types that can show up in the Find Usages dialog</li>
+            <li>Update ladyball icon to new SVG from SerenityOS/artwork</li>
+            <li>Add breadcrumbs and navbar support</li>
+            <li>Drastically improve the structure view, along with some minor renderer improvements</li>
+            <li>Add a left/right move element handler</li>
+            <li>Add Find All Usages support for struct-like enum variant fields</li>
+            <li>Add grammar support for try-expressions, default parameters, and comptime functions</li>
         </ul>
     ]]></change-notes>
     
