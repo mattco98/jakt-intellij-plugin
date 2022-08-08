@@ -260,7 +260,6 @@ Statement ::=
     | LoopStatement
     | ForStatement
     | VariableDeclarationStatement
-    | TryStatement
     | GuardStatement
     | YieldStatement
     | BreakStatement
@@ -288,11 +287,6 @@ ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
-
-TryStatement ::= TRY_KEYWORD Statement CATCH_KEYWORD CatchDecl? Statement {
-    implements="org.serenityos.jakt.psi.JaktScope"
-    mixin="org.serenityos.jakt.psi.declaration.JaktTryStatementMixin"
-}
 
 CatchDecl ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -380,6 +374,7 @@ GenericBound ::= IDENTIFIER {
 // TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
       MatchExpression
+    | TryExpression
     | LambdaExpression
     | AssignmentBinaryExpression
     | ThisExpression
@@ -481,6 +476,14 @@ DestructuringLabel ::= IDENTIFIER {
 DestructuringBinding ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktDestructuringBindingMixin"
+}
+
+TryExpression ::= TRY_KEYWORD (Expression | Block) [CATCH_KEYWORD CatchDecl? Block] {
+    implements=[
+        "org.serenityos.jakt.psi.JaktTypeable"
+        "org.serenityos.jakt.psi.JaktScope"
+    ]
+    mixin="org.serenityos.jakt.psi.declaration.JaktTryExpressionMixin"
 }
 
 fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpecialization? {

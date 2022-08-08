@@ -51,16 +51,20 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
             JaktAnnotator.LOCK.lock()
 
             try {
-                if (element is JaktExpression && TypeInference.doesThrow(element)) {
-                    // Prevent duplicate try hints
-                    if (settings.showTryHints && (element !is JaktCallExpression || !TypeInference.doesThrow(element.expression))) {
-                        sink.addInlineElement(
-                            element.startOffset,
-                            false,
-                            factory.roundWithBackgroundAndSmallInset(factory.text("try ")),
-                            false,
-                        )
-                    }
+                // Ensure we are not duplicating type hints, and also not putting a "try " hint on
+                // an expression that is already in a try expression
+                if (element is JaktExpression
+                    && settings.showTryHints
+                    && TypeInference.doesThrow(element)
+                    && (element !is JaktCallExpression || !TypeInference.doesThrow(element.expression))
+                    && element.parent !is JaktTryExpression
+                ) {
+                    sink.addInlineElement(
+                        element.startOffset,
+                        false,
+                        factory.roundWithBackgroundAndSmallInset(factory.text("try ")),
+                        false,
+                    )
 
                     return true
                 }
