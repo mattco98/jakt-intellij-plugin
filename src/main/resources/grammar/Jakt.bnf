@@ -153,7 +153,7 @@ ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionDeclarationHeader {elemen
 
 ParameterList ::= PAREN_OPEN NL [(ThisParameter | Parameter) (MemberSeparator? Parameter)*] MemberSeparator? NL PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
-Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation {
+Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [EQUALS Expression] {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktParameterMixin"
 }
