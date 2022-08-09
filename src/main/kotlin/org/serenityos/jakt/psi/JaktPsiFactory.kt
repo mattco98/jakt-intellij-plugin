@@ -5,9 +5,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.JaktFile
-import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
-import org.serenityos.jakt.psi.api.JaktPlainQualifier
-import org.serenityos.jakt.psi.api.JaktTopLevelDefinition
+import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.api.*
 
 class JaktPsiFactory(private val project: Project) {
     fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory
@@ -29,6 +28,18 @@ class JaktPsiFactory(private val project: Project) {
         val file = createFile(text)
         return PsiTreeUtil.findChildOfType(file, JaktPlainQualifier::class.java)
             ?: error("Failed to create plain qualifier")
+    }
+
+    fun createBlock(contents: String): JaktBlock {
+        val text = "function foo() {\n    $contents\n}"
+        val file = createFile(text)
+        return PsiTreeUtil.findChildOfType(file, JaktBlock::class.java) ?: error("Failed to create block")
+    }
+
+    fun createFunctionFatArrow(): PsiElement {
+        val text = "function foo() => 10"
+        val file = createFile(text)
+        return file.findChildOfType<JaktFunction>()?.findChildOfType(JaktTypes.FAT_ARROW) ?: error("Failed to create fat arrow")
     }
 
     private fun createNamespace(name: String) =

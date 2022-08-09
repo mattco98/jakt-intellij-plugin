@@ -1,0 +1,4 @@
+function some_function() <spot>{
+    return 10
+}
+</spot>
