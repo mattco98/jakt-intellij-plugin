@@ -464,7 +464,7 @@ MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
-MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
+MatchCaseTrail ::= NL FAT_ARROW (Block | Expression) COMMA?
 MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
 
 MatchPattern ::= PlainQualifierExpression [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
