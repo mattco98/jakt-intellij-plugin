@@ -5,16 +5,27 @@ import com.intellij.lang.parser.GeneratedParserUtilBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import org.serenityos.jakt.JaktTypes.*
+import org.serenityos.jakt.syntax.JaktParserDefinition
 
 object JaktParserUtil : GeneratedParserUtilBase() {
     private fun PsiBuilder.currentTokenSkipWS(): IElementType? {
         for (i in 0..Int.MAX_VALUE) {
             val type = rawLookup(i) ?: break
-            if (type != TokenType.WHITE_SPACE && type != NEWLINE)
+            if (type != TokenType.WHITE_SPACE)
                 return type
         }
 
         return null
+    }
+
+    @JvmStatic
+    fun parseSemi(builder: PsiBuilder, level: Int): Boolean {
+        if (builder.tokenText == ";") {
+            builder.advanceLexer()
+            return true
+        }
+
+        return false
     }
 
     @JvmStatic

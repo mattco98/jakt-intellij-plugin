@@ -1,8 +1,8 @@
 package org.serenityos.jakt.utils
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import org.serenityos.jakt.JaktTypes
 
 fun ASTNode.treePrevs() = generateSequence(treePrev, ASTNode::getTreePrev)
 
@@ -12,4 +12,6 @@ fun ASTNode.isDelimiterFor(node: ASTNode): Boolean {
     return elementType in DELIMTERS && treeParent == node
 }
 
-fun ASTNode.afterNewline() = treePrevOfType(JaktTypes.NEWLINE) != null
+fun ASTNode.afterNewline() = treePrevOfType(TokenType.WHITE_SPACE).let {
+    it != null && '\n' in it.text
+}

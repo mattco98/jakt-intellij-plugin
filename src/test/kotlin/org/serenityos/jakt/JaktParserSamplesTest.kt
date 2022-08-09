@@ -67,7 +67,7 @@ class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, priva
                 if (name in IGNORED_TESTS) {
                     false
                 } else !it.isDirectory && it.extension == "jakt"
-            }.map { arrayOf<Any>(it.name, it) }.toList()
+            }.map { arrayOf<Any>(it.absolutePath, it) }.toList()
         }
     }
 }

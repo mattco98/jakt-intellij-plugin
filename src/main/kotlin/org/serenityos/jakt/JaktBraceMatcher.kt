@@ -3,6 +3,7 @@ package org.serenityos.jakt
 import com.intellij.lang.BracePair
 import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
+import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 
 class JaktBraceMatcher : PairedBraceMatcher {
@@ -21,11 +22,9 @@ class JaktBraceMatcher : PairedBraceMatcher {
         )
 
         private val ALLOWED_CONTEXT_TOKENS = setOf(
+            TokenType.WHITE_SPACE,
             JaktTypes.COMMENT,
             JaktTypes.DOC_COMMENT,
-            JaktTypes.NEWLINE,
-            JaktTypes.SEMICOLON,
-            JaktTypes.COMMA,
             JaktTypes.CURLY_CLOSE,
             JaktTypes.CURLY_OPEN,
         )

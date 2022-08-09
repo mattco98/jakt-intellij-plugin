@@ -35,9 +35,9 @@
  *               ROOT                *
  *************************************/
 
-File ::= NL TopLevelDefinitionList? NL
+File ::= TopLevelDefinitionList?
 
-private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
+private TopLevelDefinitionList ::= TopLevelDefinition+
 
 TopLevelDefinition ::=
       InternalFunctionDeclaration
@@ -68,7 +68,6 @@ private StatementLead ::=
     | THROW_KEYWORD
     | DEFER_KEYWORD
     | THROWS_KEYWORD
-    | SEMICOLON
     | ExpressionLead
 
 private ExpressionLead ::=
@@ -98,7 +97,7 @@ NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
     mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
 }
 
-NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
+NamespaceBody ::= CURLY_OPEN TopLevelDefinitionList? CURLY_CLOSE
 
 // Import Statement
 ImportStatement ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
@@ -107,7 +106,7 @@ ImportStatement ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBr
     mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
 }
 private ImportAs ::= KEYWORD_AS IDENTIFIER
-ImportBraceList ::= CURLY_OPEN NL <<commaOrEolList ImportBraceEntry>>? NL CURLY_CLOSE
+ImportBraceList ::= CURLY_OPEN ImportBraceEntry* CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
@@ -121,7 +120,7 @@ ImportExternStatement ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITER
 
 CSpecifier ::= 'c' | 'C'
 
-private ImportExternBody ::= CURLY_OPEN NL <<commaOrEolList ImportExternDeclaration>>? NL CURLY_CLOSE
+private ImportExternBody ::= CURLY_OPEN ImportExternDeclaration* CURLY_CLOSE
 private ImportExternDeclaration ::=
       ExternalFunctionDeclaration
     | ExternalStructDeclaration
@@ -146,14 +145,14 @@ private FunctionHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? Gen
 private FunctionDeclarationHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER GenericBounds? ParameterList FunctionReturnType
 
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
-private FunctionBody ::= Block | FAT_ARROW NL Expression
+private FunctionBody ::= Block | FAT_ARROW Expression
 
 InternalFunctionDeclaration ::= FunctionDeclarationHeader FunctionBody {elementType=Function}
 ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionDeclarationHeader {elementType=Function}
 
-ParameterList ::= PAREN_OPEN NL [(ThisParameter | Parameter) (MemberSeparator? Parameter)*] MemberSeparator? NL PAREN_CLOSE
+ParameterList ::= PAREN_OPEN ThisParameter? Parameter* PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
-Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [EQUALS Expression] {
+Parameter ::= !PAREN_CLOSE ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [!PAREN_CLOSE EQUALS Expression] {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktParameterMixin"
 }
@@ -172,9 +171,9 @@ fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
     mixin="org.serenityos.jakt.psi.declaration.JaktStructDeclarationMixin"
 }
 
-private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
+private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds?
 
-fake StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
+fake StructBody ::= CURLY_OPEN StructMember* CURLY_CLOSE
 fake StructMember ::= StructField | StructMethod
 
 StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
@@ -185,20 +184,19 @@ StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
 fake StructMethod ::= StructVisibility? Function
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
-private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
-MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
+private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN Type* PAREN_CLOSE
 
 // INTERNAL
 
 InternalStructDeclaration ::= StructHeader InternalStructBody {elementType=StructDeclaration}
-InternalStructBody ::= CURLY_OPEN NL <<commaOrEolList InternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
+InternalStructBody ::= CURLY_OPEN InternalStructMember* CURLY_CLOSE {elementType=StructBody}
 InternalStructMember ::= StructField | InternalStructMethod {elementType=StructMember}
 InternalStructMethod ::= StructVisibility? InternalFunctionDeclaration {elementType=StructMethod}
 
 // EXTERNAL
 
 ExternalStructDeclaration ::= EXTERN_KEYWORD StructHeader ExternalStructBody {elementType=StructDeclaration}
-ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
+ExternalStructBody ::= CURLY_OPEN ExternalStructMember* CURLY_CLOSE {elementType=StructBody}
 ExternalStructMember ::= StructField | ExternalStructMethod {elementType=StructMember}
 ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {elementType=StructMethod}
 // Has to be different due to not requiring the extern keyword
@@ -217,10 +215,10 @@ EnumDeclaration ::= EnumHead EnumBody {
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktEnumDeclarationMixin"
 }
-private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
+private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD IDENTIFIER
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody
 
-UnderlyingTypeEnumBody ::= TypeAnnotation NL CURLY_OPEN NL UnderlyingTypeEnumMembers CURLY_CLOSE
+UnderlyingTypeEnumBody ::= TypeAnnotation CURLY_OPEN UnderlyingTypeEnumMembers CURLY_CLOSE
 
 fake EnumVariant ::= IDENTIFIER [(EQUALS Expression) | NormalEnumMemberBody] {
     name="enum variant"
@@ -228,15 +226,14 @@ fake EnumVariant ::= IDENTIFIER [(EQUALS Expression) | NormalEnumMemberBody] {
     mixin="org.serenityos.jakt.psi.declaration.JaktEnumVariantMixin"
 }
 
-private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?
+private UnderlyingTypeEnumMembers ::= UnderlyingTypeEnumVariant*
 UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {elementType=EnumVariant}
 
-NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL <<commaOrEolList NormalEnumMember>>? CURLY_CLOSE
+NormalEnumBody ::= GenericBounds? CURLY_OPEN NormalEnumMember* CURLY_CLOSE
 NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {elementType=EnumVariant}
-NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
-TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
-private StructEnumMemberBody ::= <<commaOrEolList StructEnumMemberBodyPart>>
+NormalEnumMemberBody ::= PAREN_OPEN [TypeEnumMemberBody | StructEnumMemberBodyPart*] PAREN_CLOSE
+TypeEnumMemberBody ::= (Type !COLON)+
 StructEnumMemberBodyPart ::= StructEnumMemberLabel TypeAnnotation
 StructEnumMemberLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -247,8 +244,6 @@ StructEnumMemberLabel ::= IDENTIFIER {
  *            STATEMENTS             *
  *************************************/
 
-private StatementList ::= Statement (StatementSeparator Statement)*
-private StatementSeparator ::= (NEWLINE | SEMICOLON)+
 
 Statement ::=
       Expression
@@ -274,14 +269,14 @@ VariableDeclarationStatement ::= (LET_KEYWORD | MUT_KEYWORD) VariableDeclLhs EQU
     mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclarationStatementMixin"
 }
 
-private VariableDeclLhs ::= VariableDecl TypeAnnotation? | (PAREN_OPEN <<commaOrEolList VariableDecl>>? PAREN_CLOSE)
+private VariableDeclLhs ::= VariableDecl TypeAnnotation? | (PAREN_OPEN VariableDecl* PAREN_CLOSE)
 
 VariableDecl ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktVariableDeclMixin"
 }
 
-IfStatement ::= IF_KEYWORD Expression Block [NL ELSE_KEYWORD (IfStatement | Block)]
+IfStatement ::= IF_KEYWORD Expression Block [ELSE_KEYWORD (IfStatement | Block)]
 ReturnStatement ::= RETURN_KEYWORD Expression?
 ThrowStatement ::= THROW_KEYWORD Expression
 DeferStatement ::= DEFER_KEYWORD Statement
@@ -311,7 +306,7 @@ ForDecl ::= IDENTIFIER {
 UnsafeStatement ::= UNSAFE_KEYWORD Block
 InlineCppStatement ::= CPP_KEYWORD Block
 
-Block ::= NL CURLY_OPEN NLSEMI StatementList? NLSEMI CURLY_CLOSE {
+Block ::= CURLY_OPEN [Statement (!CURLY_CLOSE Statement)*] CURLY_CLOSE {
     extends=Statement
 }
 
@@ -329,11 +324,11 @@ private BaseType ::=
     | PlainType
     | FunctionType
 
-GenericSpecialization ::= LESS_THAN <<commaOrEolList Type>> GREATER_THAN {extends=Type}
+GenericSpecialization ::= LESS_THAN Type+ GREATER_THAN {extends=Type}
 ArrayType ::= BRACKET_OPEN Type BRACKET_CLOSE {extends=Type}
 DictionaryType ::= BRACKET_OPEN Type COLON Type BRACKET_CLOSE {pin=3 extends=Type}
 SetType ::= CURLY_OPEN Type CURLY_CLOSE {pin=1 extends=Type}
-TupleType ::= PAREN_OPEN <<commaList Type>> PAREN_CLOSE {pin=1 extends=Type}
+TupleType ::= PAREN_OPEN Type+ PAREN_CLOSE {pin=1 extends=Type}
 NeverType ::= NEVER_KEYWORD { extends=Type }
 VoidType ::= VOID_KEYWORD { extends=Type }
 FunctionType ::= FUNCTION_KEYWORD ParameterList FunctionReturnType {pin=1 extends=Type}
@@ -361,7 +356,7 @@ OptionalType ::= BaseType QUESTION_MARK {extends=Type}
 ReferenceType ::= AMPERSAND MUT_KEYWORD? BaseType {pin=1 extends=Type}
 
 TypeAnnotation ::= COLON Type {extends=Type}
-GenericBounds ::= LESS_THAN <<commaOrEolList GenericBound>> GREATER_THAN
+GenericBounds ::= LESS_THAN GenericBound+ GREATER_THAN
 GenericBound ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktGenericBoundMixin"
@@ -371,7 +366,6 @@ GenericBound ::= IDENTIFIER {
  *            EXPRESSIONS            *
  *************************************/
 
-// TODO: Pretty much every expression can start with an arbitrary amount of newlines
 Expression ::=
       MatchExpression
     | TryExpression
@@ -411,14 +405,14 @@ TupleOrParenExpression ::= PAREN_OPEN Expression (TupleExpressionUpper | PAREN_C
     pin=1
     elementType=ParenExpression
 }
-upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE {
+upper TupleExpressionUpper ::= Expression+ PAREN_CLOSE {
     elementType=TupleExpression
 }
 
 CallExpression ::= Expression ArgumentList
-ArgumentList ::= PAREN_OPEN NL [<<separatedList Argument>>] PAREN_CLOSE
+ArgumentList ::= PAREN_OPEN Argument* PAREN_CLOSE
 Argument ::= LabeledArgument | UnlabeledArgument
-LabeledArgument ::= IDENTIFIER COLON NL Expression {
+LabeledArgument ::= IDENTIFIER COLON Expression {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktLabeledArgumentMixin"
 }
@@ -450,24 +444,27 @@ private IndexedAccess ::= BRACKET_OPEN Expression BRACKET_CLOSE
 
 RangeExpression ::= Expression DOT_DOT Expression
 
-ArrayExpression ::= BRACKET_OPEN NL [SizedArrayBody | ElementsArrayBody] NL BRACKET_CLOSE
-SizedArrayBody ::= Expression SEMICOLON NumericLiteral
-ElementsArrayBody ::= <<commaOrEolList Expression>>
+ArrayExpression ::= BRACKET_OPEN [SizedArrayBody | ElementsArrayBody] BRACKET_CLOSE
+SizedArrayBody ::= Expression <<parseSemi>> NumericLiteral
+ElementsArrayBody ::= Expression*
 
-DictionaryExpression ::= BRACKET_OPEN NL [<<commaOrEolList DictionaryElement>> | COLON] NL BRACKET_CLOSE
-DictionaryElement ::= Expression COLON NL Expression
-SetExpression ::= CURLY_OPEN NL <<commaOrEolList Expression>>? NL CURLY_CLOSE
+DictionaryExpression ::= BRACKET_OPEN [DictionaryElement+ | COLON] BRACKET_CLOSE
+DictionaryElement ::= Expression COLON Expression
+SetExpression ::= CURLY_OPEN Expression* CURLY_CLOSE
 
 MatchExpression ::= MATCH_KEYWORD Expression MatchBody
-MatchBody ::= NL CURLY_OPEN NL (MatchCase NL)* CURLY_CLOSE
+MatchBody ::= CURLY_OPEN MatchCase* CURLY_CLOSE
 MatchCase ::= MatchCaseHead MatchCaseTrail {
     implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktMatchCaseMixin"
 }
-MatchCaseTrail ::= NL FAT_ARROW (Block | Expression)
-MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
-
-MatchPattern ::= PlainQualifierExpression [PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE]
+MatchCaseTrail ::= FAT_ARROW (Block | Expression)
+MatchCaseHead ::= MatchHeadPart (PIPE MatchHeadPart)*
+MatchHeadPart ::= ELSE_KEYWORD | MatchPattern | Expression
+//MatchCaseHead ::= <<pipeList (ELSE_KEYWORD | MatchPattern | Expression)>>
+//private meta pipeList ::= <<p>> (!FAT_ARROW PIPE <<p>>)*
+ 
+MatchPattern ::= PlainQualifierExpression [PAREN_OPEN DestructuringPart* PAREN_CLOSE]
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
@@ -508,7 +505,7 @@ left PlainQualifierSegment ::= COLON_COLON IDENTIFIER {
 LambdaExpression ::= LambdaFunction
 LambdaFunction ::= LambdaHeader FunctionBody {elementType=Function}
 private LambdaHeader ::= FUNCTION_KEYWORD LambdaCaptures? ParameterList FunctionReturnType
-LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture>> BRACKET_CLOSE
+LambdaCaptures ::= BRACKET_OPEN LambdaCapture* BRACKET_CLOSE
 LambdaCapture ::= [AMPERSAND MUT_KEYWORD?] PlainQualifierExpression
 
 /*************************************
@@ -519,22 +516,22 @@ fake BinaryExpression ::= Expression+ {
     methods=[left="Expression[0]" right="Expression[1]"]
 }
 
-LogicalOrBinaryExpression ::= Expression NL LogicalOrOp NL Expression
-LogicalAndBinaryExpression ::= Expression NL KEYWORD_AND NL Expression
+LogicalOrBinaryExpression ::= Expression LogicalOrOp Expression
+LogicalAndBinaryExpression ::= Expression KEYWORD_AND Expression
 // &ExpressionLead helps disambiguate rules in PatternHead production
-BitwiseOrBinaryExpression ::= Expression NL PIPE NL &ExpressionLead Expression
-BitwiseXorBinaryExpression ::= Expression NL CARET NL Expression
-BitwiseAndBinaryExpression ::= Expression NL AMPERSAND NL Expression
-RelationalBinaryExpression ::= Expression NL RelationalOp NL Expression
-ShiftBinaryExpression ::= Expression NL ShiftOp NL Expression
-AddBinaryExpression ::= Expression NL AddOp NL Expression
-MultiplyBinaryExpression ::= Expression NL MultiplyOp NL Expression
+BitwiseOrBinaryExpression ::= Expression PIPE &ExpressionLead Expression
+BitwiseXorBinaryExpression ::= Expression CARET Expression
+BitwiseAndBinaryExpression ::= Expression AMPERSAND Expression
+RelationalBinaryExpression ::= Expression RelationalOp Expression
+ShiftBinaryExpression ::= Expression ShiftOp Expression
+AddBinaryExpression ::= Expression AddOp Expression
+MultiplyBinaryExpression ::= Expression MultiplyOp Expression
 // TODO: Restrict LHS?
 // TODO: Invert Expression{WithoutAssignment} => Expression{WithAssignment}, as this can't be a part
 //       of the expression tree root
-AssignmentBinaryExpression ::= Expression NL AssignmentOp NL Expression {rightAssociative=true}
+AssignmentBinaryExpression ::= Expression AssignmentOp Expression {rightAssociative=true}
 
-fake UnaryExpression ::= PrefixOp? NL Expression PostfixOp?
+fake UnaryExpression ::= PrefixOp? Expression PostfixOp?
 PrefixUnaryExpression ::= PrefixOp Expression {elementType=UnaryExpression}
 PostfixUnaryExpression ::= Expression PostfixOp {elementType=UnaryExpression}
 
@@ -588,14 +585,3 @@ NumericLiteral ::= (BINARY_LITERAL | OCTAL_LITERAL | HEX_LITERAL | DECIMAL_LITER
 NumericSuffix ::= 'uz' | 'f32' | 'f64' | 'u8' | 'u16' | 'u32' | 'u64' | 'i8' | 'i16' | 'i32' | 'i64'
 
 BooleanLiteral ::= TRUE_KEYWORD | FALSE_KEYWORD {extends=Expression}
-
-/*************************************
- *             HELPERS               *
- *************************************/
-
-private NL ::= NEWLINE*
-private NLSEMI ::= (NEWLINE | SEMICOLON)*
-private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
-private meta pipeList ::= <<p>> (NL PIPE NL <<p>>)*
-private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
-private meta separatedList ::= <<p>> (MemberSeparator? <<p>>)* MemberSeparator?

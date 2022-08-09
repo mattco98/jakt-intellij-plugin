@@ -1,10 +1,12 @@
 package org.serenityos.jakt.codeInsight
 
-import com.intellij.lang.parameterInfo.*
+import com.intellij.lang.parameterInfo.CreateParameterInfoContext
+import com.intellij.lang.parameterInfo.ParameterInfoHandler
+import com.intellij.lang.parameterInfo.ParameterInfoUIContext
+import com.intellij.lang.parameterInfo.UpdateParameterInfoContext
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
-import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktArgumentList
 import org.serenityos.jakt.psi.api.JaktCallExpression
@@ -44,13 +46,12 @@ class JaktParameterInfoHandler : ParameterInfoHandler<JaktArgumentList, JaktPara
     }
 
     override fun updateParameterInfo(parameterOwner: JaktArgumentList, context: UpdateParameterInfoContext) {
-        val currentParameterIndex = ParameterInfoUtils.getCurrentParameterIndex(
-            parameterOwner.node,
-            context.offset,
-            JaktTypes.MEMBER_SEPARATOR,
-        )
+        val index = parameterOwner.argumentList.indexOfFirst {
+            it.startOffset > context.offset
+        }
 
-        context.setCurrentParameter(currentParameterIndex)
+        if (index != -1)
+            context.setCurrentParameter(index)
     }
 
     override fun showParameterInfo(element: JaktArgumentList, context: CreateParameterInfoContext) {

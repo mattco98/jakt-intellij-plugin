@@ -36,7 +36,7 @@ import static org.serenityos.jakt.JaktTypes.*;
 %unicode
 
 WHITE_SPACE=[\t ]+
-NEWLINE=[\r\n]
+NEWLINE=\r\n?|\n
 
 HEX_LITERAL=(0x|0X)[\dA-Fa-f][_\dA-Fa-f]*
 OCTAL_LITERAL=(0o|0O)[0-7][_0-7]*
@@ -54,6 +54,8 @@ COMMENT=(\/\/[^\r\n]*)+
 <YYINITIAL> {
   {WHITE_SPACE}          { return SPACE; }
   {NEWLINE}              { return NEWLINE; }
+  ","                    { return COMMA; }
+  ";"                    { return SEMICOLON; }
 
   "and"                  { return KEYWORD_AND; }
   "anon"                 { return ANON_KEYWORD; }
@@ -113,7 +115,6 @@ COMMENT=(\/\/[^\r\n]*)+
   "."                    { return DOT; }
   ".."                   { return DOT_DOT; }
   "?."                   { return DOT_QUESTION_MARK; }
-  ","                    { return COMMA; }
   "="                    { return EQUALS; }
   "=="                   { return DOUBLE_EQUALS; }
   "!="                   { return NOT_EQUALS; }

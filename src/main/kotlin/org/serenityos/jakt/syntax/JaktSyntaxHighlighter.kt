@@ -38,11 +38,9 @@ object Highlights {
     val DELIM_BRACE = Default.BRACES.extend("DELIM_BRACE")
     val DELIM_BRACKET = Default.BRACKETS.extend("DELIM_BRACKET")
     val COLON = OPERATOR.extend("COLON")
-    val COMMA = OPERATOR.extend("COMMA")
     val DOT = OPERATOR.extend("DOT")
     val NAMESPACE_QUALIFIER = OPERATOR.extend("NAMESPACE")
     val RANGE = OPERATOR.extend("RANGE")
-    val SEMICOLON = OPERATOR.extend("SEMICOLON")
     val OPTIONAL_ASSERTION = OPERATOR.extend("OPTIONAL_ASSERTION")
 
     val IMPORT_MODULE = IDENTIFIER.extend("IMPORT_MODULE")
@@ -160,10 +158,8 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
 
             DOT -> Highlights.DOT
             DOT_DOT -> Highlights.RANGE
-            COMMA -> Highlights.COMMA
             COLON -> Highlights.COLON
             COLON_COLON -> Highlights.NAMESPACE_QUALIFIER
-            SEMICOLON -> Highlights.SEMICOLON
             EXCLAMATION_POINT -> Highlights.OPTIONAL_ASSERTION
 
             PLUS,
@@ -209,8 +205,6 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             NEVER_KEYWORD -> Highlights.TYPE_NEVER
             QUESTION_MARK -> Highlights.TYPE_OPTIONAL_QUALIFIER
             COLON_COLON -> Highlights.TYPE_NAMESPACE_OPERATOR
-
-            NEWLINE -> return emptyArray()
 
             else -> {
                 if (tokenType is JaktToken)

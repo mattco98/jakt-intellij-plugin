@@ -25,13 +25,18 @@ class JaktParserDefinition : ParserDefinition {
     override fun createFile(viewProvider: FileViewProvider): PsiFile = JaktFile(viewProvider)
 
     override fun getCommentTokens(): TokenSet = COMMENTS
-    override fun getWhitespaceTokens(): TokenSet = WHITE_SPACES
+    override fun getWhitespaceTokens(): TokenSet = WHITE_SPACE
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
     companion object {
         val FILE = IFileElementType(JaktLanguage)
 
-        private val WHITE_SPACES = TokenSet.create(JaktLexerBase.SPACE)
+        val WHITE_SPACE = TokenSet.create(
+            JaktLexerBase.SPACE, 
+            JaktLexerBase.NEWLINE, 
+            JaktLexerBase.COMMA, 
+            JaktLexerBase.SEMICOLON,
+        )
         private val COMMENTS = TokenSet.create(JaktTypes.COMMENT, JaktTypes.DOC_COMMENT)
         private val STRING_LITERALS = TokenSet.create(JaktTypes.STRING_LITERAL)
     }
