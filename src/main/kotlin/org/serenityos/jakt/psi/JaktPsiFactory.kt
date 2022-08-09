@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.JaktFile
+import org.serenityos.jakt.psi.api.JaktBlock
 import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
 import org.serenityos.jakt.psi.api.JaktPlainQualifier
 import org.serenityos.jakt.psi.api.JaktTopLevelDefinition
@@ -29,6 +30,12 @@ class JaktPsiFactory(private val project: Project) {
         val file = createFile(text)
         return PsiTreeUtil.findChildOfType(file, JaktPlainQualifier::class.java)
             ?: error("Failed to create plain qualifier")
+    }
+
+    fun createBlock(contents: String): JaktBlock {
+        val text = "function foo() { $contents }"
+        val file = createFile(text)
+        return PsiTreeUtil.findChildOfType(file, JaktBlock::class.java) ?: error("Failed to create block")
     }
 
     private fun createNamespace(name: String) =

@@ -182,6 +182,14 @@
             <className>org.serenityos.jakt.intentions.ImportNSDeclarationIntention</className>
             <category>Jakt</category>
         </intentionAction>
+        <intentionAction>
+            <className>org.serenityos.jakt.intentions.FunctionExprBodyToBlockIntention</className>
+            <category>Jakt</category>
+        </intentionAction>
+        <intentionAction>
+            <className>org.serenityos.jakt.intentions.FunctionBlockBodyToExprIntention</className>
+            <category>Jakt</category>
+        </intentionAction>
 
     </extensions>
 </idea-plugin>
