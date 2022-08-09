@@ -21,12 +21,8 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Update ladyball icon to new SVG from SerenityOS/artwork</li>
-            <li>Add breadcrumbs and navbar support</li>
-            <li>Drastically improve the structure view, along with some minor renderer improvements</li>
-            <li>Add a left/right move element handler</li>
-            <li>Add Find All Usages support for struct-like enum variant fields</li>
-            <li>Add grammar support for try-expressions, default parameters, and comptime functions</li>
+            <li>Allow commas after match cases</li>
+            <li>Add intention to convert function expression bodies to block bodies (and vice versa)</li>
         </ul>
     ]]></change-notes>
     
