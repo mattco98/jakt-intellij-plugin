@@ -40,10 +40,8 @@ File ::= NL TopLevelDefinitionList? NL
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
 
 TopLevelDefinition ::=
-      InternalFunctionDeclaration
-    | ExternalFunctionDeclaration
-    | InternalStructDeclaration
-    | ExternalStructDeclaration
+      Function
+    | StructDeclaration
     | EnumDeclaration
     | NamespaceDeclaration
     | ImportExternStatement
@@ -122,16 +120,13 @@ ImportExternStatement ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITER
 CSpecifier ::= 'c' | 'C'
 
 private ImportExternBody ::= CURLY_OPEN NL <<commaOrEolList ImportExternDeclaration>>? NL CURLY_CLOSE
-private ImportExternDeclaration ::=
-      ExternalFunctionDeclaration
-    | ExternalStructDeclaration
-    | NamespaceDeclaration
+private ImportExternDeclaration ::= Function | StructDeclaration | NamespaceDeclaration
 
 /***************************
  *       FUNCTIONS         *
  ***************************/
 
-fake Function ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
+Function ::= FunctionHeader FunctionBody? {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -142,14 +137,11 @@ fake Function ::= EXTERN_KEYWORD? FunctionHeader FunctionBody? {
     mixin="org.serenityos.jakt.psi.declaration.JaktFunctionMixin"
 }
 
-private FunctionHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? GenericBounds? ParameterList FunctionReturnType
-private FunctionDeclarationHeader ::= (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER GenericBounds? ParameterList FunctionReturnType
+private FunctionHeader ::= EXTERN_KEYWORD? (COMPTIME_KEYWORD | FUNCTION_KEYWORD)
+    IDENTIFIER? GenericBounds? ParameterList FunctionReturnType
 
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression
-
-InternalFunctionDeclaration ::= FunctionDeclarationHeader FunctionBody {elementType=Function}
-ExternalFunctionDeclaration ::= EXTERN_KEYWORD FunctionDeclarationHeader {elementType=Function}
 
 ParameterList ::= PAREN_OPEN NL [(ThisParameter | Parameter) (MemberSeparator? Parameter)*] MemberSeparator? NL PAREN_CLOSE
 ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
@@ -162,7 +154,7 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [EQUALS Expre
  *       STRUCTS         *
  *************************/
 
-fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
+StructDeclaration ::= StructHeader StructBody {
     extends=TopLevelDefinition
     implements=[
         "org.serenityos.jakt.psi.JaktScope"
@@ -172,37 +164,21 @@ fake StructDeclaration ::= EXTERN_KEYWORD? StructHeader StructBody {
     mixin="org.serenityos.jakt.psi.declaration.JaktStructDeclarationMixin"
 }
 
-private StructHeader ::= (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
+private StructHeader ::= EXTERN_KEYWORD? (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
 
-fake StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
-fake StructMember ::= StructField | StructMethod
+StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
+StructMember ::= StructField | StructMethod
 
 StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
 }
 
-fake StructMethod ::= StructVisibility? Function
+StructMethod ::= StructVisibility? Function
 
 StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
 private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
-
-// INTERNAL
-
-InternalStructDeclaration ::= StructHeader InternalStructBody {elementType=StructDeclaration}
-InternalStructBody ::= CURLY_OPEN NL <<commaOrEolList InternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
-InternalStructMember ::= StructField | InternalStructMethod {elementType=StructMember}
-InternalStructMethod ::= StructVisibility? InternalFunctionDeclaration {elementType=StructMethod}
-
-// EXTERNAL
-
-ExternalStructDeclaration ::= EXTERN_KEYWORD StructHeader ExternalStructBody {elementType=StructDeclaration}
-ExternalStructBody ::= CURLY_OPEN NL <<commaOrEolList ExternalStructMember>>? NL CURLY_CLOSE {elementType=StructBody}
-ExternalStructMember ::= StructField | ExternalStructMethod {elementType=StructMember}
-ExternalStructMethod ::= StructVisibility? ExternalStructFunctionDeclaration {elementType=StructMethod}
-// Has to be different due to not requiring the extern keyword
-ExternalStructFunctionDeclaration ::= FunctionDeclarationHeader {elementType=Function}
 
 /*******************
  *      Enums      *
@@ -232,7 +208,7 @@ private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant
 UnderlyingTypeEnumVariant ::= IDENTIFIER [EQUALS Expression] {elementType=EnumVariant}
 
 NormalEnumBody ::= GenericBounds? NL CURLY_OPEN NL <<commaOrEolList NormalEnumMember>>? CURLY_CLOSE
-NormalEnumMember ::= NormalEnumVariant | (StructVisibility? InternalFunctionDeclaration)
+NormalEnumMember ::= NormalEnumVariant | (StructVisibility? Function)
 NormalEnumVariant ::= IDENTIFIER NormalEnumMemberBody? {elementType=EnumVariant}
 NormalEnumMemberBody ::= PAREN_OPEN NL [TypeEnumMemberBody | StructEnumMemberBody] PAREN_CLOSE
 TypeEnumMemberBody ::= <<commaList (Type !COLON)>>
