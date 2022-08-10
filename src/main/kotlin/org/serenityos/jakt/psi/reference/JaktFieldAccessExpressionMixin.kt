@@ -15,7 +15,7 @@ abstract class JaktFieldAccessExpressionMixin(
                 if (member.structField?.identifier?.text == it.name)
                     return@singleRef member.structField
                 if (member.structMethod?.function?.identifier?.text == it.name)
-                    return@singleRef member.structMethod
+                    return@singleRef member.structMethod?.function
             }
         }
 
