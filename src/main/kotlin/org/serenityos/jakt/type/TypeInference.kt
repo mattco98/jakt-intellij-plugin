@@ -105,7 +105,7 @@ object TypeInference {
                 } ?: return UnknownType
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
-            is JaktLambdaExpression -> element.function.jaktType
+            is JaktLambdaExpression -> element.findChildOfType<JaktFunction>()?.jaktType ?: UnknownType
             is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType.let {
                 when (it) {
                     is ArrayType -> it.underlyingType

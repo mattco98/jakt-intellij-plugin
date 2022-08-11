@@ -6,6 +6,7 @@ import org.serenityos.jakt.psi.api.JaktGenericBound
 import org.serenityos.jakt.psi.api.JaktNormalEnumBody
 import org.serenityos.jakt.psi.api.JaktUnderlyingTypeEnumBody
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.reference.function
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
@@ -44,7 +45,7 @@ abstract class JaktEnumDeclarationMixin(
             }.orEmpty())
 
             methods.putAll(normalEnumBody?.normalEnumMemberList?.mapNotNull {
-                it.function
+                it.structMethod?.function
             }?.associate {
                 it.nameNonNull to it.jaktType as FunctionType
             }.orEmpty())
@@ -58,7 +59,7 @@ abstract class JaktEnumDeclarationMixin(
             is JaktNormalEnumBody -> buildList {
                 body.genericBounds?.genericBoundList?.let(::addAll)
                 body.normalEnumMemberList.forEach {
-                    add(it.enumVariant ?: it.function!!)
+                    add(it.enumVariant ?: it.structMethod?.function ?: return@forEach)
                 }
             }
             is JaktUnderlyingTypeEnumBody -> body.enumVariantList

@@ -1,7 +1,9 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import org.serenityos.jakt.psi.api.JaktNamespaceBody
 import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
+import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.type.DeclarationType
 import org.serenityos.jakt.type.NamespaceType
@@ -12,7 +14,7 @@ abstract class JaktNamespacedDeclarationMixin(
 ) : JaktNamedElement(node), JaktNamespaceDeclaration {
     override val jaktType: Type
         get() {
-            val members = namespaceBody.topLevelDefinitionList.mapNotNull {
+            val members = namespaceBody.members.mapNotNull {
                 (it as? JaktDeclaration)?.jaktType as? DeclarationType ?: return@mapNotNull null
             }
 
@@ -23,5 +25,8 @@ abstract class JaktNamespacedDeclarationMixin(
             }
         }
 
-    override fun getDeclarations() = namespaceBody.topLevelDefinitionList.filterIsInstance<JaktDeclaration>()
+    override fun getDeclarations() = namespaceBody.members
 }
+
+val JaktNamespaceBody.members: List<JaktDeclaration>
+    get() = findChildrenOfType()

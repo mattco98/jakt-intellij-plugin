@@ -25,7 +25,7 @@
             <li>Add intention to convert function expression bodies to block bodies (and vice versa)</li>
         </ul>
     ]]></change-notes>
-    
+
     <applicationListeners>
         <listener
                 class="org.serenityos.jakt.project.JaktProjectListener"
@@ -45,6 +45,7 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.syntax.JaktParserDefinition"
         />
+        <stubElementTypeHolder class="org.serenityos.jakt.JaktTypes" />
         <lang.syntaxHighlighterFactory
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.syntax.JaktSyntaxHighlighterFactory"

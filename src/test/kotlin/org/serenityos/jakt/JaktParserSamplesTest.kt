@@ -33,7 +33,7 @@ class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, priva
             null,
             null
         )
-        val result = JaktParser().parse(JaktParserDefinition.FILE, builder)
+        val result = JaktParser().parse(JaktParserDefinition().fileNodeType, builder)
         val errorElement = result.findChildByType(TokenType.ERROR_ELEMENT)
         if (errorElement != null) {
             throw AssertionError(errorElement.let {

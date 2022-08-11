@@ -3,7 +3,10 @@ package org.serenityos.jakt.psi.reference
 import com.intellij.lang.ASTNode
 import org.serenityos.jakt.psi.ancestorsOfType
 import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.api.JaktStructDeclaration
+import org.serenityos.jakt.psi.api.JaktStructMethod
+import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktFieldAccessExpressionMixin(
@@ -22,3 +25,6 @@ abstract class JaktFieldAccessExpressionMixin(
         null
     }
 }
+
+val JaktStructMethod.function: JaktFunction?
+    get() = findChildOfType()

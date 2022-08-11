@@ -6,7 +6,11 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.PsiTreeUtil
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.psi.api.*
+import org.serenityos.jakt.psi.api.JaktBlock
+import org.serenityos.jakt.psi.api.JaktFunction
+import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
+import org.serenityos.jakt.psi.api.JaktPlainQualifier
+import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 class JaktPsiFactory(private val project: Project) {
     fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory
@@ -17,8 +21,8 @@ class JaktPsiFactory(private val project: Project) {
             text,
         ) as JaktFile
 
-    fun createDefinition(text: String): JaktTopLevelDefinition {
-        return createFile(text).children.first() as JaktTopLevelDefinition
+    fun createDefinition(text: String): JaktDeclaration {
+        return createFile(text).children.first() as JaktDeclaration
     }
 
     fun createIdentifier(name: String) = createNamespace(name).identifier

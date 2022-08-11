@@ -13,7 +13,6 @@ import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScopes
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.project.JaktProjectService.Companion.userHome
-import org.serenityos.jakt.psi.api.JaktTopLevelDefinition
 import org.serenityos.jakt.psi.caching.JaktPsiManager
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.declaration.isTypeDeclaration
@@ -63,8 +62,7 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
             prelude = PsiManager.getInstance(project).findFile(virtualFile) as? JaktFile
                 ?: error("Unable to get JaktFile from prelude.jakt at $preludePath")
 
-            prelude!!.findChildrenOfType<JaktTopLevelDefinition>()
-                .filterIsInstance<JaktDeclaration>()
+            prelude!!.findChildrenOfType<JaktDeclaration>()
                 .forEach { decl ->
                     decl.name?.also {
                         preludeDeclarations[it] = decl
