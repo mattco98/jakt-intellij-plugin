@@ -4,13 +4,14 @@ import com.intellij.lang.PsiBuilder
 import com.intellij.lang.parser.GeneratedParserUtilBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import org.serenityos.jakt.JaktTypes.*
+import org.serenityos.jakt.JaktTypes.LESS_THAN
+import org.serenityos.jakt.JaktTypes.PAREN_OPEN
 
 object JaktParserUtil : GeneratedParserUtilBase() {
     private fun PsiBuilder.currentTokenSkipWS(): IElementType? {
         for (i in 0..Int.MAX_VALUE) {
             val type = rawLookup(i) ?: break
-            if (type != TokenType.WHITE_SPACE && type != NEWLINE)
+            if (type != TokenType.WHITE_SPACE && type !in JaktParserDefinition.WHITE_SPACES)
                 return type
         }
 

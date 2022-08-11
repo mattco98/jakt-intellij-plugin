@@ -31,7 +31,7 @@ class JaktParserDefinition : ParserDefinition {
     companion object {
         val FILE = IFileElementType(JaktLanguage)
 
-        private val WHITE_SPACES = TokenSet.create(JaktLexerBase.SPACE)
+        val WHITE_SPACES = TokenSet.create(JaktLexerBase.SPACE, JaktLexerBase.NEWLINE)
         private val COMMENTS = TokenSet.create(JaktTypes.COMMENT, JaktTypes.DOC_COMMENT)
         private val STRING_LITERALS = TokenSet.create(JaktTypes.STRING_LITERAL)
     }

@@ -4,7 +4,7 @@ import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
-import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.syntax.JaktParserDefinition
 import org.serenityos.jakt.utils.BLOCK_LIKE
 import org.serenityos.jakt.utils.LIST_LIKE
 
@@ -19,7 +19,7 @@ class JaktFormattingBlock(
         val children = generateSequence(myNode.firstChildNode) { it.treeNext }
 
         children.filter {
-            it.elementType !in IGNORED_TYPES
+            it.elementType != TokenType.WHITE_SPACE && it.elementType !in JaktParserDefinition.WHITE_SPACES
         }.map {
             JaktFormattingBlock(
                 it,
@@ -45,9 +45,5 @@ class JaktFormattingBlock(
         if (node.elementType in BLOCK_LIKE || node.elementType in LIST_LIKE)
             return ChildAttributes(Indent.getNormalIndent(), null)
         return ChildAttributes(Indent.getNoneIndent(), null)
-    }
-
-    companion object {
-        private val IGNORED_TYPES = setOf(TokenType.WHITE_SPACE, JaktTypes.NEWLINE)
     }
 }

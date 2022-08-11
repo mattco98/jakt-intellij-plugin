@@ -18,5 +18,8 @@ abstract class JaktLexerBase : FlexLexer {
     companion object {
         @JvmField
         val SPACE = JaktElementType("SPACE")
+
+        @JvmField
+        val NEWLINE = JaktElementType("NEWLINE")
     }
 }

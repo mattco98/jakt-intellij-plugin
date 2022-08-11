@@ -210,8 +210,6 @@ class JaktSyntaxHighlighter : SyntaxHighlighterBase() {
             QUESTION_MARK -> Highlights.TYPE_OPTIONAL_QUALIFIER
             COLON_COLON -> Highlights.TYPE_NAMESPACE_OPERATOR
 
-            NEWLINE -> return emptyArray()
-
             else -> {
                 if (tokenType is JaktToken)
                     println("No Token highlighting defined for element $tokenType!")

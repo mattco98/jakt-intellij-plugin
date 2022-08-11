@@ -2,10 +2,11 @@ package org.serenityos.jakt.psi
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
-import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.syntax.JaktParserDefinition
 
 val PsiElement.allChildren: Sequence<PsiElement>
     get() = generateSequence(firstChild) { it.nextSibling }
@@ -37,6 +38,6 @@ inline fun <reified T> PsiElement.ancestorOfType(withSelf: Boolean = false) = an
 fun PsiElement.prevSiblings() = generateSequence(prevSibling) { it.prevSibling }
 
 fun PsiElement.prevNonWSSibling() = prevSiblings().find {
-    it is JaktPsiElement && it.elementType != JaktTypes.NEWLINE
+    it is JaktPsiElement && it.elementType !in JaktParserDefinition.WHITE_SPACES && it.elementType != TokenType.WHITE_SPACE
 }
 
