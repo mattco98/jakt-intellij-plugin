@@ -59,8 +59,8 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktForDecl -> element.identifier.highlight(Highlights.LOCAL_VAR)
             is JaktFunction -> element.identifier?.highlight(Highlights.FUNCTION_DECLARATION)
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
-            is JaktImportExternStatement -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
-            is JaktImportStatement -> {
+            is JaktExternImport -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
+            is JaktImport -> {
                 val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
                 idents.first().highlight(Highlights.IMPORT_MODULE)
 

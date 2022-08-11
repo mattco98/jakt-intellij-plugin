@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.JaktPsiFactory
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.psi.api.JaktPlainQualifier
 import org.serenityos.jakt.psi.declaration.aliasIdent
 import org.serenityos.jakt.psi.declaration.nameIdent
@@ -26,7 +26,7 @@ class ImportNSDeclarationIntention : JaktIntention<ImportNSDeclarationIntention.
         if (resolvedFile == file)
             return null
 
-        val importStatement = file.getDeclarations().filterIsInstance<JaktImportStatement>()
+        val importStatement = file.getDeclarations().filterIsInstance<JaktImport>()
             .find { it.nameIdent.text == resolvedFile.name.substringBefore(".jakt") }
             ?: return null
 
@@ -63,14 +63,14 @@ class ImportNSDeclarationIntention : JaktIntention<ImportNSDeclarationIntention.
             importText.substring(0, indexOfLast) + ", $newImportName }"
         }
 
-        val newStatement = factory.createFromText<JaktImportStatement>(newImportText)
+        val newStatement = factory.createFromText<JaktImport>(newImportText)
             ?: error("Failed to create import statement")
 
         context.importStatement.replace(newStatement)
     }
 
     data class Context(
-        val importStatement: JaktImportStatement,
+        val importStatement: JaktImport,
         val qualifier: JaktPlainQualifier,
     )
 }

@@ -8,7 +8,7 @@ class JaktCompletionContributor : CompletionContributor() {
         extend(JaktAccessExpressionCompletion)
         extend(JaktPlainQualifierCompletion)
         extend(JaktFieldExpressionCompletion)
-        extend(JaktImportStatementCompletion)
+        extend(JaktImportCompletion)
         extend(JaktImportEntryCompletion)
         extend(JaktMatchPatternCompletion)
     }

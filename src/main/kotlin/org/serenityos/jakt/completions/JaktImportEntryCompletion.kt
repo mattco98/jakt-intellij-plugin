@@ -7,7 +7,7 @@ import com.intellij.util.ProcessingContext
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktImportBraceEntry
-import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.type.NamespaceType
 
 object JaktImportEntryCompletion : JaktCompletion() {
@@ -20,7 +20,7 @@ object JaktImportEntryCompletion : JaktCompletion() {
         result: CompletionResultSet
     ) {
         ProgressManager.checkCanceled()
-        val importStatement = parameters.position.ancestorOfType<JaktImportStatement>()!!
+        val importStatement = parameters.position.ancestorOfType<JaktImport>()!!
         val project = importStatement.project
         val type = importStatement.jaktType as? NamespaceType ?: return
 

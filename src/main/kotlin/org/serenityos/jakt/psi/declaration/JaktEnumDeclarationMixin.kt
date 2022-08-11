@@ -1,18 +1,21 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.psi.api.JaktEnumDeclaration
 import org.serenityos.jakt.psi.api.JaktGenericBound
 import org.serenityos.jakt.psi.api.JaktNormalEnumBody
 import org.serenityos.jakt.psi.api.JaktUnderlyingTypeEnumBody
-import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.psi.reference.function
+import org.serenityos.jakt.stubs.JaktEnumDeclarationStub
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktEnumDeclarationMixin(
-    node: ASTNode,
-) : JaktNamedElement(node), JaktEnumDeclaration {
+abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclarationStub>, JaktEnumDeclaration {
+    constructor(node: ASTNode) : super(node)
+    constructor(stub: JaktEnumDeclarationStub, type: IStubElementType<*, *>) : super(stub, type)
+
     override val jaktType by recursivelyGuarded<EnumType> {
         val variants = mutableMapOf<String, EnumVariantType>()
         val methods = mutableMapOf<String, FunctionType>()

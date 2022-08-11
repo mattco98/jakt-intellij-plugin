@@ -45,8 +45,8 @@ TopLevelDefinition ::=
     | StructDeclaration
     | EnumDeclaration
     | NamespaceDeclaration
-    | ImportExternStatement
-    | ImportStatement {
+    | ExternImport
+    | Import {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     // For some reason this gets a getExternKeyword() function which conflicts
     // with ExternStructDeclaration
@@ -94,15 +94,19 @@ upper NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
         "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
     ]
-    mixin="org.serenityos.jakt.psi.declaration.JaktNamespacedDeclarationMixin"
+    mixin="org.serenityos.jakt.psi.declaration.JaktNamespaceDeclarationMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktNamespaceDeclarationStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 
 // Import Statement
-upper ImportStatement ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+upper Import ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktImportStatementMixin"
+    mixin="org.serenityos.jakt.psi.declaration.JaktImportMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktImportStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 private ImportAs ::= KEYWORD_AS IDENTIFIER
 ImportBraceList ::= CURLY_OPEN NL <<commaOrEolList ImportBraceEntry>>? NL CURLY_CLOSE
@@ -111,9 +115,11 @@ ImportBraceEntry ::= IDENTIFIER {
     mixin="org.serenityos.jakt.psi.declaration.JaktImportBraceEntryMixin"
 }
 
-upper ImportExternStatement ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITERAL ImportExternBody {
+upper ExternImport ::= IMPORT_KEYWORD EXTERN_KEYWORD CSpecifier? STRING_LITERAL ImportExternBody {
     implements="org.serenityos.jakt.psi.JaktScope"
-    mixin="org.serenityos.jakt.psi.declaration.JaktImportExternStatementMixin"
+    mixin="org.serenityos.jakt.psi.declaration.JaktExternImportMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktExternImportStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 CSpecifier ::= 'c' | 'C'
@@ -137,6 +143,8 @@ upper Function ::= FunctionHeader FunctionBody? {
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktFunctionMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktFunctionStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 FunctionHelper ::= Function { elementType=toBeUpped }
@@ -168,6 +176,8 @@ upper StructDeclaration ::= StructHeader StructBody {
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktStructDeclarationMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktStructDeclarationStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 private StructHeader ::= EXTERN_KEYWORD? (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
@@ -197,6 +207,8 @@ upper EnumDeclaration ::= EnumHead EnumBody {
         "org.serenityos.jakt.psi.declaration.JaktGeneric"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktEnumDeclarationMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktEnumDeclarationStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 private EnumHead ::= BOXED_KEYWORD? ENUM_KEYWORD NL IDENTIFIER NL
 private EnumBody ::= UnderlyingTypeEnumBody | NormalEnumBody

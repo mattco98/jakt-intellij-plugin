@@ -41,6 +41,4 @@ abstract class JaktStubbedNamedElement<T> : StubBasedPsiElementBase<T>, JaktName
     }
 
     override fun getTextOffset() = nameIdentifier?.textOffset ?: super.getTextOffset()
-
-
 }

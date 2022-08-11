@@ -9,11 +9,11 @@ import com.intellij.psi.PsiManager
 import com.intellij.util.ProcessingContext
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
-import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktImport
 
-object JaktImportStatementCompletion : JaktCompletion() {
+object JaktImportCompletion : JaktCompletion() {
     override val pattern: PsiPattern = psiElement(JaktTypes.IDENTIFIER)
-        .withSuperParent(1, psiElement<JaktImportStatement>())
+        .withSuperParent(1, psiElement<JaktImport>())
 
     override fun addCompletions(
         parameters: CompletionParameters,

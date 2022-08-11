@@ -3,7 +3,7 @@ package org.serenityos.jakt.psi.declaration
 import com.intellij.lang.ASTNode
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktImportBraceEntry
-import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.type.JaktResolver
@@ -16,13 +16,13 @@ abstract class JaktImportBraceEntryMixin(
 ) : JaktNamedElement(node), JaktImportBraceEntry {
     override val jaktType: Type
         get() {
-            val importType = ancestorOfType<JaktImportStatement>()?.jaktType as? NamespaceType
+            val importType = ancestorOfType<JaktImport>()?.jaktType as? NamespaceType
             return importType?.members?.firstOrNull { it.name == name } ?: UnknownType
         }
 
     override fun getReference() = singleRef { resolveElement() }
 }
 
-fun JaktImportBraceEntry.resolveElement() = ancestorOfType<JaktImportStatement>()?.resolveFile()?.let { file ->
-    JaktResolver(file).findDeclaration(nameNonNull) { it !is JaktImportStatement }
+fun JaktImportBraceEntry.resolveElement() = ancestorOfType<JaktImport>()?.resolveFile()?.let { file ->
+    JaktResolver(file).findDeclaration(nameNonNull) { it !is JaktImport }
 }

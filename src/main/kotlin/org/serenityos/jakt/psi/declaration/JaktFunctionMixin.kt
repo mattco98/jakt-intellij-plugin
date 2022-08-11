@@ -1,6 +1,7 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestorOfType
@@ -8,13 +9,15 @@ import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
 import org.serenityos.jakt.psi.jaktType
-import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
+import org.serenityos.jakt.stubs.JaktFunctionStub
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktFunctionMixin(
-    node: ASTNode,
-) : JaktNamedElement(node), JaktFunction, JaktModificationBoundary {
+abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, JaktFunction, JaktModificationBoundary {
+    constructor(node: ASTNode) : super(node)
+    constructor(stub: JaktFunctionStub, type: IStubElementType<*, *>) : super(stub, type)
+
     override val tracker = JaktModificationTracker()
 
     override val jaktType by recursivelyGuarded<Type> {

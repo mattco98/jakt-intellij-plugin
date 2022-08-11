@@ -205,7 +205,7 @@ class JaktResolver(private val scope: PsiElement) {
         }
 
         private fun JaktDeclaration.unwrapImport(): JaktDeclaration? = when (this) {
-            is JaktImportStatement -> resolveFile()
+            is JaktImport -> resolveFile()
             is JaktImportBraceEntry -> resolveElement()
             else -> this
         }

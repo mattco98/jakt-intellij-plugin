@@ -6,8 +6,8 @@ import com.intellij.psi.FileViewProvider
 import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.allChildren
-import org.serenityos.jakt.psi.api.JaktImportExternStatement
-import org.serenityos.jakt.psi.api.JaktImportStatement
+import org.serenityos.jakt.psi.api.JaktExternImport
+import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 import org.serenityos.jakt.psi.findChildrenOfType
 import org.serenityos.jakt.type.DeclarationType
@@ -19,10 +19,10 @@ class JaktFile(
 ) : PsiFileBase(viewProvider, JaktLanguage), JaktScope, JaktDeclaration {
     override val jaktType: Type
         get() = findChildrenOfType<JaktTypeable>()
-            .filter { it !is JaktImportStatement }
+            .filter { it !is JaktImport }
             .flatMap {
                 // Fold any "import extern" declarations into this namespace
-                if (it is JaktImportExternStatement) it.getDeclarations() else listOf(it)
+                if (it is JaktExternImport) it.getDeclarations() else listOf(it)
             }
             .map { it.jaktType }
             .filterIsInstance<DeclarationType>()
@@ -31,8 +31,8 @@ class JaktFile(
     override fun getDeclarations(): List<JaktDeclaration> {
         return allChildren.flatMap {
             when (it) {
-                is JaktImportExternStatement -> it.getDeclarations()
-                is JaktImportStatement -> listOf(it) + it.importBraceList?.importBraceEntryList.orEmpty()
+                is JaktExternImport -> it.getDeclarations()
+                is JaktImport -> listOf(it) + it.importBraceList?.importBraceEntryList.orEmpty()
                 is JaktDeclaration -> listOf(it)
                 else -> emptyList()
             }
