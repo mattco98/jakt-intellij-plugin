@@ -496,20 +496,20 @@ fake BinaryExpression ::= Expression+ {
 LogicalOrBinaryExpression ::= Expression NL LogicalOrOp NL Expression
 LogicalAndBinaryExpression ::= Expression NL KEYWORD_AND NL Expression
 // &ExpressionLead helps disambiguate rules in PatternHead production
-BitwiseOrBinaryExpression ::= Expression NL PIPE NL &ExpressionLead Expression
-BitwiseXorBinaryExpression ::= Expression NL CARET NL Expression
-BitwiseAndBinaryExpression ::= Expression NL AMPERSAND NL Expression
-RelationalBinaryExpression ::= Expression NL RelationalOp NL Expression
-ShiftBinaryExpression ::= Expression NL ShiftOp NL Expression
-AddBinaryExpression ::= Expression NL AddOp NL Expression
-MultiplyBinaryExpression ::= Expression NL MultiplyOp NL Expression
+BitwiseOrBinaryExpression ::= Expression PIPE NL &ExpressionLead Expression
+BitwiseXorBinaryExpression ::= Expression CARET NL Expression
+BitwiseAndBinaryExpression ::= Expression AMPERSAND NL Expression
+RelationalBinaryExpression ::= Expression RelationalOp NL Expression
+ShiftBinaryExpression ::= Expression ShiftOp NL Expression
+AddBinaryExpression ::= Expression AddOp NL Expression
+MultiplyBinaryExpression ::= Expression MultiplyOp NL Expression
 // TODO: Restrict LHS?
 // TODO: Invert Expression{WithoutAssignment} => Expression{WithAssignment}, as this can't be a part
 //       of the expression tree root
-AssignmentBinaryExpression ::= Expression NL AssignmentOp NL Expression {rightAssociative=true}
+AssignmentBinaryExpression ::= Expression AssignmentOp NL Expression {rightAssociative=true}
 
 fake UnaryExpression ::= PrefixOp? NL Expression PostfixOp?
-PrefixUnaryExpression ::= PrefixOp Expression {elementType=UnaryExpression}
+PrefixUnaryExpression ::= PrefixOp NL Expression {elementType=UnaryExpression}
 PostfixUnaryExpression ::= Expression PostfixOp {elementType=UnaryExpression}
 
 CastExpression ::= Expression KEYWORD_AS (QUESTION_MARK | EXCLAMATION_POINT) Type
