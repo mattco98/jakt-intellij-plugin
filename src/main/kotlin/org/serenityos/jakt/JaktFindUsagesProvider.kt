@@ -11,6 +11,7 @@ import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.declaration.isClass
 import org.serenityos.jakt.psi.declaration.isExtern
 import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.reference.isLabeled
 import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.syntax.JaktLexerAdapter
 import org.serenityos.jakt.utils.unreachable
@@ -40,7 +41,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String {
         return when (element) {
-            is JaktArgument -> if (element.labeledArgument != null) "labeled argument" else unreachable()
+            is JaktArgument -> if (element.isLabeled) "labeled argument" else unreachable()
             is JaktCallExpression -> "function call"
             is JaktFunction -> (if (element.isExtern) "extern " else "") + "function"
             is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
@@ -71,7 +72,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
 
     override fun getDescriptiveName(element: PsiElement): String {
         return when (element) {
-            is JaktArgument -> element.labeledArgument!!.identifier.text
+            is JaktArgument -> element.identifier!!.text
             is JaktNamedElement -> element.name ?: return "ERROR"
             else -> "TODO(getDescriptiveName => ${element::class.simpleName})"
         }

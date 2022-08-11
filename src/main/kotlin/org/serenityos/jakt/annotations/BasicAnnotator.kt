@@ -71,7 +71,9 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
-            is JaktLabeledArgument -> {
+            is JaktArgument -> {
+                val ident = element.identifier ?: return@with
+
                 val isCtorLabel = if (!DumbService.isDumb(element.project)) {
                     element.reference?.resolve() is JaktStructField
                 } else false
@@ -80,7 +82,7 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
                     Highlights.STRUCT_FIELD
                 } else Highlights.FUNCTION_LABELED_ARGUMENT
 
-                TextRange.create(element.identifier.startOffset, element.colon.endOffset)
+                TextRange.create(ident.startOffset, element.colon!!.endOffset)
                     .highlight(highlight)
             }
             is JaktNamespaceDeclaration -> element.identifier.highlight(Highlights.NAMESPACE_NAME)

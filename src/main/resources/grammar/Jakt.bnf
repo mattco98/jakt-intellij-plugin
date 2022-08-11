@@ -393,12 +393,10 @@ upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE 
 
 CallExpression ::= Expression ArgumentList
 ArgumentList ::= PAREN_OPEN NL [<<separatedList Argument>>] PAREN_CLOSE
-Argument ::= LabeledArgument | UnlabeledArgument
-LabeledArgument ::= IDENTIFIER COLON NL Expression {
+Argument ::= [IDENTIFIER COLON NL] Expression {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
-    mixin="org.serenityos.jakt.psi.reference.JaktLabeledArgumentMixin"
+    mixin="org.serenityos.jakt.psi.reference.JaktArgumentMixin"
 }
-UnlabeledArgument ::= Expression
 
 AccessExpression ::= Expression (DOT | DOT_QUESTION_MARK) Access {
     implements=[
@@ -539,7 +537,7 @@ private PrefixOp ::=
     | MINUS
     | KEYWORD_NOT
     | TILDE
-    | AMPERSAND (RAW_KEYWORD | MUT_KEYWORD)?
+    | AMPERSAND [RAW_KEYWORD | MUT_KEYWORD]
     | ASTERISK
 private PostfixOp ::=
       PLUS_PLUS

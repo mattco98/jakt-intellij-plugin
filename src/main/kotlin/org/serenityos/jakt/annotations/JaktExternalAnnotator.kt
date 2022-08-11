@@ -56,8 +56,9 @@ class JaktExternalAnnotator : ExternalAnnotator<PsiFile, List<JaktExternalAnnota
                 continue
 
             val span = result.span
+            val range = TextRange.from(span.start - 1, span.end - span.start - 1)
             holder.newAnnotation(HighlightSeverity.ERROR, result.message)
-                .range(TextRange.from(span.start - 1, span.end - span.start - 1))
+                .range(range)
                 .needsUpdateOnTyping()
                 .create()
         }

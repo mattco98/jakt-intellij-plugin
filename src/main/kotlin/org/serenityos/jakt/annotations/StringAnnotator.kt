@@ -7,7 +7,7 @@ import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.api.JaktArgument
 import org.serenityos.jakt.psi.api.JaktCallExpression
 import org.serenityos.jakt.psi.api.JaktPlainQualifierExpression
-import org.serenityos.jakt.psi.api.JaktUnlabeledArgument
+import org.serenityos.jakt.psi.reference.isLabeled
 import org.serenityos.jakt.syntax.Highlights
 import org.serenityos.jakt.type.TypeInference
 
@@ -33,8 +33,10 @@ object StringAnnotator : JaktAnnotator() {
     }
 
     private fun getFormatSpecifiers(element: PsiElement): FormatStringInfo? {
-        val unlabeledArgument = element.parent?.parent as? JaktUnlabeledArgument ?: return null
-        val argument = unlabeledArgument.parent as? JaktArgument ?: return null
+        val argument = element.parent?.parent as? JaktArgument ?: return null
+        if (argument.isLabeled)
+            return null
+
         val call = argument.parent?.parent as? JaktCallExpression ?: return null
         if (argument != call.argumentList.argumentList.firstOrNull())
             return null

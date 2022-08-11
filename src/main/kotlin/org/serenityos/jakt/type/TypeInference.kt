@@ -218,7 +218,7 @@ object TypeInference {
         if (qualifier != null && !qualifier.hasNamespace) {
             when (qualifier.name) {
                 "Some" -> {
-                    val arg = call.argumentList.argumentList.singleOrNull()?.unlabeledArgument?.expression
+                    val arg = call.argumentList.argumentList.singleOrNull()?.expression
                     if (arg != null)
                         return OptionalType(arg.jaktType)
                 }

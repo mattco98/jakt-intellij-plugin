@@ -38,11 +38,7 @@ fun specialize(type: Type, psi: PsiElement): Type {
         }
 
     val arguments = psi.argumentList.argumentList.mapNotNull {
-        when (val arg = it.labeledArgument ?: it.unlabeledArgument) {
-            is JaktLabeledArgument -> arg.name!! to arg.expression.jaktType
-            is JaktUnlabeledArgument -> null to arg.expression.jaktType
-            else -> null
-        }
+        it.name to it.expression.jaktType
     }
 
     // A "map" of (potentially-)generic types to concrete types

@@ -7,11 +7,15 @@ import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
-abstract class JaktLabeledArgumentMixin(
+abstract class JaktArgumentMixin(
     node: ASTNode,
-) : JaktNamedElement(node), JaktLabeledArgument {
-    override fun getReference() = object : JaktRef<JaktLabeledArgument>(this) {
+) : JaktNamedElement(node), JaktArgument {
+    override fun getReference() = object : JaktRef<JaktArgument>(this) {
         override fun singleResolve(): PsiElement? {
+            // Unlabled arguments have no references
+            if (identifier == null)
+                return null
+
             val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType
             return when (val callTarget = exprType?.psiElement) {
                 is JaktFunction -> callTarget.parameterList.parameterList.find {
@@ -40,3 +44,6 @@ abstract class JaktLabeledArgumentMixin(
         }
     }
 }
+
+val JaktArgument.isLabeled: Boolean
+    get() = identifier != null
