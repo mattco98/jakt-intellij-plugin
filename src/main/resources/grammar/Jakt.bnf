@@ -25,9 +25,10 @@
     extends(".+Expression")=Expression
     extends(".+Statement")=Statement
 
-    name(".+Expression")="expression"
-    name(".+Statement")="statement"
+    name(".*Expression")="expression"
+    name(".*Statement")="statement"
 
+    consumeTokenMethod(".*Expression")="consumeTokenFast"
     generateTokenAccessors=true
 }
 
@@ -264,11 +265,6 @@ DeferStatement ::= DEFER_KEYWORD Statement
 WhileStatement ::= WHILE_KEYWORD Expression Block
 LoopStatement ::= LOOP_KEYWORD Block
 
-CatchDecl ::= IDENTIFIER {
-    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
-    mixin="org.serenityos.jakt.psi.declaration.JaktCatchDeclMixin"
-}
-
 GuardStatement ::= GUARD_KEYWORD Expression ELSE_KEYWORD Block
 
 BreakStatement ::= BREAK_KEYWORD
@@ -355,7 +351,7 @@ Expression ::=
     | AssignmentBinaryExpression
     | ThisExpression
     | FieldAccessExpression
-    | RangeExpression
+    | RangeExpressions
     | LogicalOrBinaryExpression
     | LogicalAndBinaryExpression
     | BitwiseOrBinaryExpression
@@ -422,7 +418,10 @@ IndexedAccessExpression ::= Expression IndexedAccess
 // Do not inline
 private IndexedAccess ::= BRACKET_OPEN Expression BRACKET_CLOSE
 
-RangeExpression ::= Expression DOT_DOT Expression
+fake RangeExpression ::= Expression? DOT_DOT Expression?
+RangeExpressionWithLhs ::= Expression DOT_DOT Expression? { elementType=RangeExpression }
+RangeExpressionWithoutLhs ::= DOT_DOT Expression? { elementType=RangeExpression }
+private RangeExpressions ::= RangeExpressionWithLhs | RangeExpressionWithoutLhs
 
 ArrayExpression ::= BRACKET_OPEN NL [SizedArrayBody | ElementsArrayBody] NL BRACKET_CLOSE
 SizedArrayBody ::= Expression SEMICOLON NumericLiteral
@@ -458,6 +457,11 @@ TryExpression ::= TRY_KEYWORD (Expression | Block) [CATCH_KEYWORD CatchDecl? Blo
         "org.serenityos.jakt.psi.JaktScope"
     ]
     mixin="org.serenityos.jakt.psi.declaration.JaktTryExpressionMixin"
+}
+
+CatchDecl ::= IDENTIFIER {
+    implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
+    mixin="org.serenityos.jakt.psi.declaration.JaktCatchDeclMixin"
 }
 
 fake PlainQualifier ::= (PlainQualifier COLON_COLON)? IDENTIFIER GenericSpecialization? {
