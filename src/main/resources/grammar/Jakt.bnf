@@ -379,11 +379,11 @@ Expression ::=
 fake ParenExpression ::= PAREN_OPEN Expression PAREN_CLOSE { pin=1 }
 fake TupleExpression ::= PAREN_OPEN Expression+ PAREN_CLOSE
 
-TupleOrParenExpression ::= PAREN_OPEN Expression (TupleExpressionUpper | PAREN_CLOSE) {
+TupleOrParenExpression ::= PAREN_OPEN NL Expression (TupleExpressionUpper | PAREN_CLOSE) {
     pin=1
     elementType=ParenExpression
 }
-upper TupleExpressionUpper ::= COMMA <<commaOrEolList Expression>>? PAREN_CLOSE {
+upper TupleExpressionUpper ::= MemberSeparator <<commaOrEolList Expression>>? PAREN_CLOSE {
     elementType=TupleExpression
 }
 
