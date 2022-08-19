@@ -424,7 +424,7 @@ RangeExpressionWithoutLhs ::= DOT_DOT Expression? { elementType=RangeExpression 
 private RangeExpressions ::= RangeExpressionWithLhs | RangeExpressionWithoutLhs
 
 ArrayExpression ::= BRACKET_OPEN NL [SizedArrayBody | ElementsArrayBody] NL BRACKET_CLOSE
-SizedArrayBody ::= Expression SEMICOLON NumericLiteral
+SizedArrayBody ::= Expression SEMICOLON Expression
 ElementsArrayBody ::= <<commaOrEolList Expression>>
 
 DictionaryExpression ::= BRACKET_OPEN NL [<<commaOrEolList DictionaryElement>> | COLON] NL BRACKET_CLOSE
