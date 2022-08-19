@@ -1,7 +1,10 @@
 package org.serenityos.jakt.psi
 
+import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.StubBasedPsiElement
+import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
@@ -39,4 +42,3 @@ fun PsiElement.prevSiblings() = generateSequence(prevSibling) { it.prevSibling }
 fun PsiElement.prevNonWSSibling() = prevSiblings().find {
     it is JaktPsiElement && it.elementType != JaktTypes.NEWLINE
 }
-

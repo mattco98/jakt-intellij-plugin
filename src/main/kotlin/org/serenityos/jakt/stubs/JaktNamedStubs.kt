@@ -2,6 +2,7 @@ package org.serenityos.jakt.stubs
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.*
+import org.serenityos.jakt.index.JaktStructElementIndex
 import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.impl.*
 import org.serenityos.jakt.psi.named.JaktNamedStub
@@ -11,7 +12,7 @@ class JaktStructDeclarationStub(
     type: IStubElementType<*, *>,
     override val name: String?,
 ) : StubBase<JaktStructDeclaration>(parent, type), JaktNamedStub {
-    object Type : JaktStubElementType<JaktStructDeclarationStub, JaktStructDeclaration>("STRUCT_DECLARATION") {
+    object Type : JaktNamedStubElementType<JaktStructDeclarationStub, JaktStructDeclaration>("STRUCT_DECLARATION") {
         override fun serialize(stub: JaktStructDeclarationStub, dataStream: StubOutputStream) =
             dataStream.writeName(stub.name)
 
@@ -24,6 +25,13 @@ class JaktStructDeclarationStub(
         ) = JaktStructDeclarationStub(parentStub, Type, psi.name)
 
         override fun createPsi(stub: JaktStructDeclarationStub) = JaktStructDeclarationImpl(stub, Type)
+
+        override fun indexStub(stub: JaktStructDeclarationStub, sink: IndexSink) {
+            super.indexStub(stub, sink)
+            stub.name?.let {
+                sink.occurrence(JaktStructElementIndex.KEY, it)
+            }
+        }
     }
 }
 
@@ -32,7 +40,7 @@ class JaktEnumDeclarationStub(
     type: IStubElementType<*, *>,
     override val name: String?,
 ) : StubBase<JaktEnumDeclaration>(parent, type), JaktNamedStub {
-    object Type : JaktStubElementType<JaktEnumDeclarationStub, JaktEnumDeclaration>("ENUM_DECLARATION") {
+    object Type : JaktNamedStubElementType<JaktEnumDeclarationStub, JaktEnumDeclaration>("ENUM_DECLARATION") {
         override fun serialize(stub: JaktEnumDeclarationStub, dataStream: StubOutputStream) =
             dataStream.writeName(stub.name)
 
@@ -45,6 +53,13 @@ class JaktEnumDeclarationStub(
         ) = JaktEnumDeclarationStub(parentStub, Type, psi.name)
 
         override fun createPsi(stub: JaktEnumDeclarationStub) = JaktEnumDeclarationImpl(stub, Type)
+
+        override fun indexStub(stub: JaktEnumDeclarationStub, sink: IndexSink) {
+            super.indexStub(stub, sink)
+            stub.name?.let {
+                sink.occurrence(JaktStructElementIndex.KEY, it)
+            }
+        }
     }
 }
 
@@ -53,7 +68,7 @@ class JaktNamespaceDeclarationStub(
     type: IStubElementType<*, *>,
     override val name: String?,
 ) : StubBase<JaktNamespaceDeclaration>(parent, type), JaktNamedStub {
-    object Type : JaktStubElementType<JaktNamespaceDeclarationStub, JaktNamespaceDeclaration>("NAMESPACE_DECLARATION") {
+    object Type : JaktNamedStubElementType<JaktNamespaceDeclarationStub, JaktNamespaceDeclaration>("NAMESPACE_DECLARATION") {
         override fun serialize(stub: JaktNamespaceDeclarationStub, dataStream: StubOutputStream) =
             dataStream.writeName(stub.name)
 
@@ -74,7 +89,7 @@ class JaktFunctionStub(
     type: IStubElementType<*, *>,
     override val name: String?
 ) : StubBase<JaktFunction>(parent, type), JaktNamedStub {
-    object Type : JaktStubElementType<JaktFunctionStub, JaktFunction>("FUNCTION") {
+    object Type : JaktNamedStubElementType<JaktFunctionStub, JaktFunction>("FUNCTION") {
         override fun serialize(stub: JaktFunctionStub, dataStream: StubOutputStream) =
             dataStream.writeName(stub.name)
 
@@ -96,7 +111,7 @@ class JaktImportStub(
     override val name: String?,
     val imports: List<String>,
 ) : StubBase<JaktImport>(parent, type), JaktNamedStub {
-    object Type : JaktStubElementType<JaktImportStub, JaktImport>("IMPORT") {
+    object Type : JaktNamedStubElementType<JaktImportStub, JaktImport>("IMPORT") {
         override fun serialize(stub: JaktImportStub, dataStream: StubOutputStream) = with(dataStream) {
             writeName(stub.name)
             writeInt(stub.imports.size)

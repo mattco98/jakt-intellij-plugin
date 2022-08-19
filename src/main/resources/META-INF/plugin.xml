@@ -167,6 +167,11 @@
         <liveTemplateContext implementation="org.serenityos.jakt.JaktTemplateContextType$File" />
         <liveTemplateContext implementation="org.serenityos.jakt.JaktTemplateContextType$Declaration" />
 
+        <gotoClassContributor implementation="org.serenityos.jakt.navigation.JaktClassNavigationContributor" />
+        <gotoSymbolContributor implementation="org.serenityos.jakt.navigation.JaktSymbolNavigationContributor" />
+        <stubIndex implementation="org.serenityos.jakt.index.JaktNamedElementIndex" />
+        <stubIndex implementation="org.serenityos.jakt.index.JaktStructElementIndex" />
+
         <intentionAction>
             <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>
             <category>Jakt</category>
