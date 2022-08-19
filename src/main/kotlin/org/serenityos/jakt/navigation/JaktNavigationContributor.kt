@@ -11,10 +11,11 @@ import com.intellij.util.indexing.FindSymbolParameters
 import com.intellij.util.indexing.IdFilter
 import org.serenityos.jakt.index.JaktNamedElementIndex
 import org.serenityos.jakt.index.JaktStructElementIndex
+import org.serenityos.jakt.psi.named.JaktNameIdentifierOwner
 import org.serenityos.jakt.psi.named.JaktNamedElement
 
 abstract class JaktNavigationContributor(
-    private val key: StubIndexKey<String, JaktNamedElement>
+    private val key: StubIndexKey<String, JaktNameIdentifierOwner>
 ) : ChooseByNameContributorEx, GotoClassContributor {
     override fun getElementKind() = "Structs"
 
@@ -32,7 +33,7 @@ abstract class JaktNavigationContributor(
             name,
             parameters.project,
             null,
-            JaktNamedElement::class.java,
+            JaktNameIdentifierOwner::class.java,
         ) { processor.process(it) }
     }
 
