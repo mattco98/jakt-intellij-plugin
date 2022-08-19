@@ -21,7 +21,7 @@ abstract class JaktNamespaceDeclarationMixin : JaktStubbedNamedElement<JaktNames
                 (it as? JaktDeclaration)?.jaktType as? DeclarationType ?: return@mapNotNull null
             }
 
-            return NamespaceType(nameNonNull, members).also { ns ->
+            return NamespaceType(name, members).also { ns ->
                 ns.members.forEach {
                     it.namespace = ns
                 }

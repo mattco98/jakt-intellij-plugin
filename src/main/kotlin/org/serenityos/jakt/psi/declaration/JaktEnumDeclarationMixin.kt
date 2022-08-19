@@ -6,6 +6,7 @@ import org.serenityos.jakt.psi.api.JaktEnumDeclaration
 import org.serenityos.jakt.psi.api.JaktGenericBound
 import org.serenityos.jakt.psi.api.JaktNormalEnumBody
 import org.serenityos.jakt.psi.api.JaktUnderlyingTypeEnumBody
+import org.serenityos.jakt.psi.greenStub
 import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.psi.reference.function
 import org.serenityos.jakt.stubs.JaktEnumDeclarationStub
@@ -19,16 +20,16 @@ abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclar
     override val jaktType by recursivelyGuarded<EnumType> {
         val variants = mutableMapOf<String, EnumVariantType>()
         val methods = mutableMapOf<String, FunctionType>()
+        val typeParameters = mutableListOf<TypeParameter>()
 
         producer {
             variants.clear()
             methods.clear()
-
-            val typeParameters = getDeclGenericBounds().map { TypeParameter(it.nameNonNull) }
+            typeParameters.clear()
 
             EnumType(
-                nameNonNull,
-                boxedKeyword != null,
+                name,
+                isBoxed,
                 null, // TODO: Why does calculating this in the producer cause a StackOverflow?
                 typeParameters,
                 variants,
@@ -39,6 +40,8 @@ abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclar
         }
 
         initializer { enum ->
+            typeParameters.addAll(getDeclGenericBounds().map { TypeParameter(it.nameNonNull) })
+
             variants.putAll(underlyingTypeEnumBody?.enumVariantList?.associate {
                 it.nameNonNull to it.jaktType as EnumVariantType
             } ?: normalEnumBody?.normalEnumMemberList?.mapNotNull {
@@ -73,3 +76,6 @@ abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclar
     override fun getDeclGenericBounds(): List<JaktGenericBound> =
         normalEnumBody?.genericBounds?.genericBoundList.orEmpty()
 }
+
+val JaktEnumDeclaration.isBoxed: Boolean
+    get() = greenStub?.isBoxed ?: (boxedKeyword != null)

@@ -5,6 +5,7 @@ import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.psi.api.JaktStructMethod
+import org.serenityos.jakt.psi.greenStub
 import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.psi.reference.function
 import org.serenityos.jakt.stubs.JaktStructDeclarationStub
@@ -20,19 +21,19 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, FunctionType>()
 
-        val linkage = if (isExtern) Linkage.External else Linkage.Internal
-
         producer {
             typeParameters.clear()
             fields.clear()
             methods.clear()
 
+            val linkage = if (isExtern) Linkage.External else Linkage.Internal
+
             StructType(
-                identifier.text,
+                name,
                 typeParameters,
                 fields,
                 methods,
-                classKeyword != null,
+                isClass,
                 linkage,
             ).also {
                 it.psiElement = this@JaktStructDeclarationMixin
@@ -65,7 +66,7 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
 }
 
 val JaktStructDeclaration.isExtern: Boolean
-    get() = externKeyword != null
+    get() = greenStub?.isExtern ?: (externKeyword != null)
 
 val JaktStructDeclaration.isClass: Boolean
-    get() = classKeyword != null
+    get() = greenStub?.isClass ?: (classKeyword != null)

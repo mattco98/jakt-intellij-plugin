@@ -8,6 +8,7 @@ import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
+import org.serenityos.jakt.psi.greenStub
 import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.stubs.JaktFunctionStub
@@ -21,33 +22,33 @@ abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, Ja
     override val tracker = JaktModificationTracker()
 
     override val jaktType by recursivelyGuarded<Type> {
-        val linkage = if (isExtern) Linkage.External else Linkage.Internal
         val parameters = mutableListOf<FunctionType.Parameter>()
+        val typeParameters = mutableListOf<TypeParameter>()
 
         producer {
             parameters.clear()
+            typeParameters.clear()
 
-            val typeParameters = if (genericBounds != null) {
-                getDeclGenericBounds().map { TypeParameter(it.identifier.text) }
-            } else emptyList()
-
-            val thisParam = parameterList.thisParameter
+            val linkage = if (isExtern) Linkage.External else Linkage.Internal
 
             FunctionType(
-                identifier?.text,
+                name,
                 typeParameters,
                 parameters,
                 PrimitiveType.Void,
-                functionReturnType.throwsKeyword != null,
+                throws,
                 linkage,
-                thisParam != null,
-                thisParam?.mutKeyword != null,
+                hasThis,
+                thisIsMutable,
             ).also {
                 it.psiElement = this@JaktFunctionMixin
             }
         }
 
         initializer { type ->
+            if (genericBounds != null)
+                typeParameters.addAll(getDeclGenericBounds().map { TypeParameter(it.identifier.text) })
+
             parameters.addAll(parameterList.parameterList.map {
                 FunctionType.Parameter(
                     it.identifier.text,
@@ -69,7 +70,16 @@ abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, Ja
 }
 
 val JaktFunction.isExtern: Boolean
-    get() = externKeyword != null
+    get() = greenStub?.isExtern ?: (externKeyword != null)
+
+val JaktFunction.hasThis: Boolean
+    get() = greenStub?.hasThis ?: (parameterList.thisParameter != null)
+
+val JaktFunction.thisIsMutable: Boolean
+    get() = greenStub?.thisIsMutable ?: (parameterList.thisParameter?.mutKeyword != null)
+
+val JaktFunction.throws: Boolean
+    get() = greenStub?.throws ?: (functionReturnType.throwsKeyword != null)
 
 val JaktFunction.isTopLevel: Boolean
     get() = ancestorOfType<JaktScope>() is JaktFile

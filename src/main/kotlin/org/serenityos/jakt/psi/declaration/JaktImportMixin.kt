@@ -12,14 +12,14 @@ import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.psi.reference.singleRef
 import org.serenityos.jakt.stubs.JaktImportStub
 import org.serenityos.jakt.type.Type
-import org.serenityos.jakt.type.UnknownType
+import org.serenityos.jakt.utils.unreachable
 
 abstract class JaktImportMixin : JaktStubbedNamedElement<JaktImportStub>, JaktImport {
     constructor(node: ASTNode) : super(node)
     constructor(stub: JaktImportStub, type: IStubElementType<*, *>) : super(stub, type)
 
     override val jaktType: Type
-        get() = resolveFile()?.jaktType ?: UnknownType
+        get() = unreachable()
 
     override fun getReference() = singleRef { resolveFile() }
 }

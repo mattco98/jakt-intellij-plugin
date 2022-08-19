@@ -13,9 +13,7 @@ abstract class JaktStubElementType<StubT : StubElement<*>, PsiT : PsiElement>(
 ) : IStubElementType<StubT, PsiT>(debugName, JaktLanguage) {
     final override fun getExternalId() = "jakt.${super.toString()}"
 
-    override fun indexStub(stub: StubT, sink: IndexSink) {
-        // TODO
-    }
+    override fun indexStub(stub: StubT, sink: IndexSink) {}
 }
 
 abstract class JaktNamedStubElementType<StubT, PsiT>(debugName: String) : JaktStubElementType<StubT, PsiT>(debugName)

@@ -42,3 +42,7 @@ fun PsiElement.prevSiblings() = generateSequence(prevSibling) { it.prevSibling }
 fun PsiElement.prevNonWSSibling() = prevSiblings().find {
     it is JaktPsiElement && it.elementType != JaktTypes.NEWLINE
 }
+
+@Suppress("UNCHECKED_CAST")
+inline val <T : StubElement<*>> StubBasedPsiElement<T>.greenStub: T?
+    get() = (this as? StubBasedPsiElementBase<T>)?.greenStub

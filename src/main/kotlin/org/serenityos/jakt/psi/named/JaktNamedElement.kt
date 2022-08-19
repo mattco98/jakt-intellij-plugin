@@ -34,7 +34,7 @@ abstract class JaktStubbedNamedElement<T> : StubBasedPsiElementBase<T>, JaktName
 
     override fun getNameIdentifier(): PsiElement? = findChildByType(JaktTypes.IDENTIFIER)
 
-    override fun getName(): String? = greenStub?.name ?: nameIdentifier?.text
+    override fun getName(): String = greenStub?.name ?: nameIdentifier?.text.orEmpty()
 
     override fun setName(name: String): PsiElement? = apply {
         nameIdentifier?.replace(JaktPsiFactory(project).createIdentifier(name))
