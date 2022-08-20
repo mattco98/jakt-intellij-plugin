@@ -1,15 +1,15 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.psi.api.JaktEnumVariant
-import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
+import org.serenityos.jakt.stubs.JaktEnumVariantStub
 import org.serenityos.jakt.type.EnumVariantType
 import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktEnumVariantMixin(
-    node: ASTNode,
-) : JaktNamedElement(node), JaktEnumVariant {
+abstract class JaktEnumVariantMixin : JaktStubbedNamedElement<JaktEnumVariantStub>, JaktEnumVariant {
     override val jaktType by recursivelyGuarded<Type> {
         val members = mutableListOf<Pair<String?, Type>>()
 
@@ -17,7 +17,7 @@ abstract class JaktEnumVariantMixin(
             members.clear()
 
             EnumVariantType(
-                nameNonNull,
+                name,
                 expression?.text.let { it?.toIntOrNull() ?: 0 },
                 members,
             ).also {
@@ -37,4 +37,7 @@ abstract class JaktEnumVariantMixin(
             }
         }
     }
+
+    constructor(node: ASTNode) : super(node)
+    constructor(stub: JaktEnumVariantStub, type: IStubElementType<*, *>) : super(stub, type)
 }

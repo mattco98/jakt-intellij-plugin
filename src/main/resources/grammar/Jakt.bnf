@@ -223,6 +223,8 @@ fake EnumVariant ::= IDENTIFIER [(EQUALS Expression) | NormalEnumMemberBody] {
     name="enum variant"
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktEnumVariantMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktEnumVariantStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 private UnderlyingTypeEnumMembers ::= <<commaOrEolList UnderlyingTypeEnumVariant>>?

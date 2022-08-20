@@ -29,6 +29,7 @@ fun getIcon(psi: JaktPsiElement): Icon? = when (psi) {
     is JaktNamespaceDeclaration -> AllIcons.Nodes.Module
     is JaktImport -> AllIcons.Nodes.Include
     is JaktEnumDeclaration -> AllIcons.Nodes.Enum
+    is JaktEnumVariant -> AllIcons.Nodes.Enum
     is JaktParameter -> AllIcons.Nodes.Parameter
     else -> null
 }
