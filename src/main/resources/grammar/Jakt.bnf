@@ -190,6 +190,8 @@ StructMember ::= StructField | StructMethod
 StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktStructFieldStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 StructMethod ::= StructVisibility? FunctionHelper

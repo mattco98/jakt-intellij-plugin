@@ -61,6 +61,27 @@ class JaktStructDeclarationStub(
     }
 }
 
+class JaktStructFieldStub(
+    parent: StubElement<*>?,
+    type: IStubElementType<*, *>,
+    override val name: String?,
+) : StubBase<JaktStructField>(parent, type), JaktNamedStub {
+    object Type : JaktNamedStubElementType<JaktStructFieldStub, JaktStructField>("STRUCT_FIELD") {
+        override fun serialize(stub: JaktStructFieldStub, dataStream: StubOutputStream) =
+            dataStream.writeName(stub.name)
+
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+            JaktStructFieldStub(parentStub, Type, dataStream.readNameString())
+
+        override fun createStub(
+            psi: JaktStructField,
+            parentStub: StubElement<out PsiElement>?,
+        ) = JaktStructFieldStub(parentStub, Type, psi.name)
+
+        override fun createPsi(stub: JaktStructFieldStub) = JaktStructFieldImpl(stub, Type)
+    }
+}
+
 class JaktEnumDeclarationStub(
     parent: StubElement<*>?,
     type: IStubElementType<*, *>,

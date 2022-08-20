@@ -2,6 +2,7 @@ package org.serenityos.jakt.stubs
 
 fun jaktStubFactory(name: String): JaktStubElementType<*, *> = when (name) {
     "STRUCT_DECLARATION" -> JaktStructDeclarationStub.Type
+    "STRUCT_FIELD" -> JaktStructFieldStub.Type
     "ENUM_DECLARATION" -> JaktEnumDeclarationStub.Type
     "NAMESPACE_DECLARATION" -> JaktNamespaceDeclarationStub.Type
     "FUNCTION" -> JaktFunctionStub.Type
