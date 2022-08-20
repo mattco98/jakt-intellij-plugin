@@ -170,6 +170,27 @@ class JaktFunctionStub(
     }
 }
 
+class JaktParameterStub(
+    parent: StubElement<*>?,
+    type: IStubElementType<*, *>,
+    override val name: String?,
+) : StubBase<JaktParameter>(parent, type), JaktNamedStub {
+    object Type : JaktStubElementType<JaktParameterStub, JaktParameter>("PARAMETER") {
+        override fun serialize(stub: JaktParameterStub, dataStream: StubOutputStream) =
+            dataStream.writeName(stub.name)
+
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+            JaktParameterStub(parentStub, Type, dataStream.readNameString())
+
+        override fun createStub(
+            psi: JaktParameter,
+            parentStub: StubElement<out PsiElement>?
+        ) = JaktParameterStub(parentStub, Type, psi.name)
+
+        override fun createPsi(stub: JaktParameterStub) = JaktParameterImpl(stub, Type)
+    }
+}
+
 class JaktImportStub(
     parent: StubElement<*>?,
     type: IStubElementType<*, *>,

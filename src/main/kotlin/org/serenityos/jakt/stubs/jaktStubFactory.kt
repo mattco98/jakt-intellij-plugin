@@ -7,5 +7,6 @@ fun jaktStubFactory(name: String): JaktStubElementType<*, *> = when (name) {
     "FUNCTION" -> JaktFunctionStub.Type
     "IMPORT" -> JaktImportStub.Type
     "EXTERN_IMPORT" -> JaktExternImportStub.Type
+    "PARAMETER" -> JaktParameterStub.Type
     else -> error("unknown stub element $name")
 }

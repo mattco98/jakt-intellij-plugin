@@ -160,6 +160,8 @@ ThisParameter ::= MUT_KEYWORD? THIS_KEYWORD
 Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [EQUALS Expression] {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktParameterMixin"
+    stubClass="org.serenityos.jakt.stubs.JaktParameterStub"
+    elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
 LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture>> BRACKET_CLOSE

@@ -1,16 +1,16 @@
 package org.serenityos.jakt.psi.declaration
 
-import com.intellij.icons.AllIcons
 import com.intellij.lang.ASTNode
+import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.psi.api.JaktParameter
-import org.serenityos.jakt.psi.named.JaktNamedElement
+import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
+import org.serenityos.jakt.stubs.JaktParameterStub
 import org.serenityos.jakt.type.Type
 
-abstract class JaktParameterMixin(
-    node: ASTNode,
-) : JaktNamedElement(node), JaktParameter {
+abstract class JaktParameterMixin : JaktStubbedNamedElement<JaktParameterStub>, JaktParameter {
     override val jaktType: Type
         get() = typeAnnotation.jaktType
 
-    override fun getIcon(flags: Int) = AllIcons.Nodes.Parameter
+    constructor(node: ASTNode) : super(node)
+    constructor(stub: JaktParameterStub, type: IStubElementType<*, *>) : super(stub, type)
 }
