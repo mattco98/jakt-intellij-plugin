@@ -3,11 +3,14 @@ package org.serenityos.jakt.psi.named
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.lang.ASTNode
+import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubElement
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.JaktPsiFactory
+import org.serenityos.jakt.render.getPresentation
+import org.serenityos.jakt.render.getIcon
 
 abstract class JaktNamedElement(node: ASTNode) : ASTWrapperPsiElement(node), JaktNameIdentifierOwner {
     override fun getNameIdentifier(): PsiElement? = findChildByType(JaktTypes.IDENTIFIER)
@@ -41,4 +44,8 @@ abstract class JaktStubbedNamedElement<T> : StubBasedPsiElementBase<T>, JaktName
     }
 
     override fun getTextOffset() = nameIdentifier?.textOffset ?: super.getTextOffset()
+
+    override fun getPresentation(): ItemPresentation? = getPresentation(this)
+
+    override fun getIcon(flags: Int) = getIcon(this)
 }
