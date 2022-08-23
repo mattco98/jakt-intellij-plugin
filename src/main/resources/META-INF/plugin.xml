@@ -21,8 +21,23 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Allow commas after match cases</li>
-            <li>Add intention to convert function expression bodies to block bodies (and vice versa)</li>
+            <li>
+                Add index support! This comes with the ability to use the "Navigate | Class" feature for finding
+                structs, classes, and enums, and "Navigate | Symbol" for finding everything else. Nothing inside of
+                function bodies is indexed.
+            </li>
+            <li>Add intention to convert a function expr body to block body, and vice versa (if applicable)</li>
+            <li>Fix not being able to find usages for struct methods</li>
+            <li>
+                Grammar changes:
+                <ul>
+                    <li>Fix allowing invalid newlines before certain operators</li>
+                    <li>Support open-ended ranges</li>
+                    <li>Allow newlines between tuple members</li>
+                    <li>Allow arbitrary expressions in sized-array count position (instead of just numeric literals)</li>
+                    <li>Add destructuring declaration support for for-statements</li>
+                </ul>
+            </li>
         </ul>
     ]]></change-notes>
 
