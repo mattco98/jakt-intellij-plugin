@@ -165,7 +165,7 @@ class JaktInlayHintsProvider : InlayHintsProvider<JaktInlayHintsProvider.Setting
                 }
                 // Note that Enum variants aren't actually types, so we just show
                 // the type hint for the parent instead
-                is EnumVariantType -> hintFor(type.parent, specializations)
+                is EnumVariantType -> hintFor(type.parentType, specializations)
                 is FunctionType -> {
                     val elements = mutableListOf(text("function"))
 

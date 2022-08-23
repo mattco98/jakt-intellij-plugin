@@ -66,7 +66,7 @@ object TypeInference {
                 }
 
                 when (baseType) {
-                    is EnumVariantType -> return baseType.parent
+                    is EnumVariantType -> return baseType.parentType
                     is UnknownType -> return tryConstructOptionalType(element) ?: UnknownType
                     else -> {}
                 }
@@ -196,7 +196,7 @@ object TypeInference {
 
                 when (targetType) {
                     is StructType -> targetType.isClass
-                    is EnumVariantType -> targetType.parent.isBoxed
+                    is EnumVariantType -> (targetType.parentType as? EnumType)?.isBoxed ?: false
                     is FunctionType -> targetType.throws
                     else -> false
                 }
@@ -280,12 +280,12 @@ object TypeInference {
 
         return when (lhs) {
             is EnumVariantType -> when (rhs) {
-                is EnumVariantType -> if (lhs.parent equivalentTo rhs.parent) lhs.parent else UnknownType
-                is EnumType -> if (lhs.parent equivalentTo rhs) rhs else UnknownType
+                is EnumVariantType -> if (lhs.parentType equivalentTo rhs.parentType) lhs.parentType else UnknownType
+                is EnumType -> if (lhs.parentType equivalentTo rhs) rhs else UnknownType
                 else -> UnknownType
             }
             is EnumType -> when (rhs) {
-                is EnumVariantType -> if (lhs equivalentTo rhs.parent) lhs else UnknownType
+                is EnumVariantType -> if (lhs equivalentTo rhs.parentType) lhs else UnknownType
                 is EnumType -> if (lhs equivalentTo rhs) rhs else UnknownType
                 else -> UnknownType
             }

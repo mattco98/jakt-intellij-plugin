@@ -31,7 +31,8 @@ abstract class JaktAccessExpressionMixin(
                         is StructType -> it.fields[name]
                             ?: it.methods[name]?.takeIf(FunctionType::hasThis)
                             ?: UnknownType
-                        is EnumVariantType -> it.parent.methods[name]?.takeIf(FunctionType::hasThis)
+                        is EnumVariantType -> (it.parentType as? EnumType)?.methods?.get(name)
+                            ?.takeIf(FunctionType::hasThis)
                             ?: UnknownType
                         is EnumType -> it.methods[name]?.takeIf(FunctionType::hasThis) ?: UnknownType
                         else -> UnknownType

@@ -3,6 +3,8 @@ package org.serenityos.jakt.type
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.serenityos.jakt.project.jaktProject
+import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.psi.api.JaktEnumDeclaration
 
 sealed interface Type {
     var namespace: NamespaceType?
@@ -120,12 +122,14 @@ class EnumType(
 // _lot_ of code, particularly in the resolution parts.
 class EnumVariantType(
     override val name: String,
-    var parent: EnumType,
     val value: Int?,
     val members: List<Pair<String?, Type>>,
 ) : BaseType(), DeclarationType, ContainerType {
     val isStructLike: Boolean
         get() = members.any { it.first != null }
+
+    val parentType: Type
+        get() = psiElement?.ancestorOfType<JaktEnumDeclaration>()?.jaktType as? EnumType ?: UnknownType
 
     override fun findTypeIn(name: String) = members.find { it.first == name }?.second
 }

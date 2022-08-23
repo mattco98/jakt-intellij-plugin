@@ -20,7 +20,7 @@ class JaktTypeDeclarationProvider : TypeDeclarationProvider {
         val type = BoundType.withInner(symbolType) {
             when (it) {
                 is FunctionType -> it.returnType
-                is EnumVariantType -> it.parent
+                is EnumVariantType -> it.parentType
                 else -> it
             }
         }

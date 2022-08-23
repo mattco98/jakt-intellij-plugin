@@ -178,7 +178,7 @@ sealed class JaktRenderer {
                 renderGenerics(type, specializations, options)
             }
             is EnumVariantType -> {
-                appendStyled(type.parent.name, Highlights.ENUM_NAME)
+                appendStyled((type.parentType as? EnumType)?.name ?: "??", Highlights.ENUM_NAME)
                 appendStyled("::", Highlights.NAMESPACE_QUALIFIER)
                 appendStyled(type.name, Highlights.ENUM_VARIANT_NAME)
             }

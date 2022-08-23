@@ -46,12 +46,13 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
 
             fieldLookups + methodLookups
         }
-        is EnumVariantType -> type
-            .parent
-            .methods
-            .filterValues { it.hasThis }
-            .toList()
-            .sortedBy { it.first }
+        is EnumVariantType -> (type
+            .parentType as? EnumType)
+            ?.methods
+            ?.filterValues { it.hasThis }
+            ?.toList()
+            ?.sortedBy { it.first }
+            .orEmpty()
         is ReferenceType -> getTypeCompletionPairs(project, type.underlyingType)
         is BoundType -> getTypeCompletionPairs(project, type.type).map {
             it.first to BoundType(it.second, type.specializations)
