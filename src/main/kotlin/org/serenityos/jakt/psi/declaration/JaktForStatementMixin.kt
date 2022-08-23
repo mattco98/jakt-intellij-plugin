@@ -5,5 +5,5 @@ import com.intellij.lang.ASTNode
 import org.serenityos.jakt.psi.api.JaktForStatement
 
 abstract class JaktForStatementMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktForStatement {
-    override fun getDeclarations(): List<JaktDeclaration> = listOf(forDecl)
+    override fun getDeclarations(): List<JaktDeclaration> = forDeclList
 }

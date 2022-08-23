@@ -12,10 +12,10 @@ import org.serenityos.jakt.type.*
 abstract class JaktForDeclMixin(node: ASTNode) : JaktNamedElement(node), JaktForDecl {
     override val jaktType: Type
         get() = typeCache().resolveWithCaching(this) {
-            val forStatement = ancestorOfType<JaktForStatement>() ?: return@resolveWithCaching UnknownType
-            val iteratorType = forStatement.expression.jaktType.resolveToBuiltinType(project)
+            val statement = ancestorOfType<JaktForStatement>() ?: return@resolveWithCaching UnknownType
+            val iteratorType = statement.expression.jaktType.resolveToBuiltinType(project)
 
-            BoundType.withInner(iteratorType) {
+            val itemType = BoundType.withInner(iteratorType) {
                 if (it is StructType) {
                     when (val type = it.methods["next"]?.returnType) {
                         is OptionalType -> type.underlyingType
@@ -23,6 +23,17 @@ abstract class JaktForDeclMixin(node: ASTNode) : JaktNamedElement(node), JaktFor
                         else -> type
                     }
                 } else UnknownType
+            }
+
+            when {
+                statement.parenOpen == null -> itemType
+                itemType is TupleType -> {
+                    val thisIndex = statement.forDeclList.indexOf(this)
+                    if (thisIndex == -1 || thisIndex > itemType.types.size) {
+                        UnknownType
+                    } else itemType.types[thisIndex]
+                }
+                else -> UnknownType
             }
         }
 }

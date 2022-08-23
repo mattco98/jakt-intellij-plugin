@@ -271,10 +271,11 @@ BreakStatement ::= BREAK_KEYWORD
 ContinueStatement ::= CONTINUE_KEYWORD
 YieldStatement ::= YIELD_KEYWORD Expression
 
-ForStatement ::= FOR_KEYWORD ForDecl IN_KEYWORD Expression Block {
+ForStatement ::= FOR_KEYWORD ForDeclLhs IN_KEYWORD Expression Block {
     implements="org.serenityos.jakt.psi.JaktScope"
     mixin="org.serenityos.jakt.psi.declaration.JaktForStatementMixin"
 }
+private ForDeclLhs ::= ForDecl | (PAREN_OPEN <<commaOrEolList ForDecl>>? PAREN_CLOSE)
 ForDecl ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktForDeclMixin"

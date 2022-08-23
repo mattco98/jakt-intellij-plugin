@@ -63,4 +63,14 @@ class JaktExpressionTypeTest : JaktTypeTest() {
           //^T
         } 
     """, "i64?")
+
+    // TODO: Requires support for prelude in tests
+    // fun `test destructured for loop type`() = doTest("""
+    //     function main() {
+    //         let arr = [(1, "a"), (2, "b"), (3, "c")]
+    //         for (a,  b) in arr {
+    //            //^T1 ^T2
+    //         }
+    //     }
+    // """, "i64", "String")
 }
