@@ -30,7 +30,7 @@ abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclar
             EnumType(
                 name,
                 isBoxed,
-                null, // TODO: Why does calculating this in the producer cause a StackOverflow?
+                null,
                 typeParameters,
                 variants,
                 methods,

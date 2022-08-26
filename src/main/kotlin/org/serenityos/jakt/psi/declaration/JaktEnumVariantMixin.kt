@@ -10,7 +10,7 @@ import org.serenityos.jakt.type.Type
 import org.serenityos.jakt.utils.recursivelyGuarded
 
 abstract class JaktEnumVariantMixin : JaktStubbedNamedElement<JaktEnumVariantStub>, JaktEnumVariant {
-    override val jaktType by recursivelyGuarded<Type> {
+    override val jaktType by recursivelyGuarded<EnumVariantType> {
         val members = mutableListOf<Pair<String?, Type>>()
 
         producer {
@@ -18,14 +18,16 @@ abstract class JaktEnumVariantMixin : JaktStubbedNamedElement<JaktEnumVariantStu
 
             EnumVariantType(
                 name,
-                expression?.text.let { it?.toIntOrNull() ?: 0 },
+                null,
                 members,
             ).also {
                 it.psiElement = this@JaktEnumVariantMixin
             }
         }
 
-        initializer {
+        initializer { type ->
+            type.value = expression?.text.let { it?.toIntOrNull() ?: 0 }
+
             if (normalEnumMemberBody?.structEnumMemberBodyPartList?.isNotEmpty() == true) {
                 normalEnumMemberBody?.structEnumMemberBodyPartList?.forEach {
                     members.add(it.structEnumMemberLabel.name to it.typeAnnotation.jaktType)

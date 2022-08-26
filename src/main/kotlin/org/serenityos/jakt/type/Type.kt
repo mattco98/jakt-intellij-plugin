@@ -122,7 +122,7 @@ class EnumType(
 // _lot_ of code, particularly in the resolution parts.
 class EnumVariantType(
     override val name: String,
-    val value: Int?,
+    var value: Int?,
     val members: List<Pair<String?, Type>>,
 ) : BaseType(), DeclarationType, ContainerType {
     val isStructLike: Boolean
