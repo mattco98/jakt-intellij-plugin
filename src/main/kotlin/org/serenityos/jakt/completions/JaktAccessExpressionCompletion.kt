@@ -44,7 +44,9 @@ object JaktAccessExpressionCompletion : JaktCompletion() {
                 .toList()
                 .sortedBy { it.first }
 
-            fieldLookups + methodLookups
+            val superLookups = type.superType?.let { getTypeCompletionPairs(project, it) }.orEmpty()
+
+            fieldLookups + methodLookups + superLookups
         }
         is EnumVariantType -> (type
             .parentType as? EnumType)
