@@ -85,6 +85,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "never"                { return NEVER_KEYWORD; }
   "not"                  { return KEYWORD_NOT; }
   "or"                   { return KEYWORD_OR; }
+  "override"             { return OVERRIDE_KEYWORD; }
   "private"              { return PRIVATE_KEYWORD; }
   "public"               { return PUBLIC_KEYWORD; }
   "raw"                  { return RAW_KEYWORD; }
@@ -97,6 +98,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "true"                 { return TRUE_KEYWORD; }
   "try"                  { return TRY_KEYWORD; }
   "unsafe"               { return UNSAFE_KEYWORD; }
+  "virtual"              { return VIRTUAL_KEYWORD; }
   "void"                 { return VOID_KEYWORD; }
   "weak"                 { return WEAK_KEYWORD; }
   "while"                { return WHILE_KEYWORD; }

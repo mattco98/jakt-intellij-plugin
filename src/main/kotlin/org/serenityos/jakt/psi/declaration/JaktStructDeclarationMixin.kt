@@ -16,7 +16,7 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
     constructor(node: ASTNode) : super(node)
     constructor(stub: JaktStructDeclarationStub, type: IStubElementType<*, *>) : super(stub, type)
 
-    override val jaktType by recursivelyGuarded<Type> {
+    override val jaktType by recursivelyGuarded<StructType> {
         val typeParameters = mutableListOf<TypeParameter>()
         val fields = mutableMapOf<String, Type>()
         val methods = mutableMapOf<String, FunctionType>()
@@ -33,6 +33,7 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
                 typeParameters,
                 fields,
                 methods,
+                null,
                 isClass,
                 linkage,
             ).also {
@@ -40,9 +41,11 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
             }
         }
 
-        initializer {
+        initializer { structType ->
             if (genericBounds != null)
                 typeParameters.addAll(getDeclGenericBounds().map { it.jaktType as TypeParameter })
+
+            structType.superType = superType?.type?.jaktType
 
             // TODO: Visibility
             val members = structBody.structMemberList.map { it.structMethod ?: it.structField }
@@ -70,3 +73,6 @@ val JaktStructDeclaration.isExtern: Boolean
 
 val JaktStructDeclaration.isClass: Boolean
     get() = greenStub?.isClass ?: (classKeyword != null)
+
+val JaktStructDeclaration.parentName: String?
+    get() = greenStub?.parentName ?: (superType?.type?.jaktType as? DeclarationType)?.name

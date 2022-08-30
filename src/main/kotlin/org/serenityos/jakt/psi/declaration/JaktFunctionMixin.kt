@@ -81,6 +81,12 @@ val JaktFunction.thisIsMutable: Boolean
 val JaktFunction.throws: Boolean
     get() = greenStub?.throws ?: (functionReturnType.throwsKeyword != null)
 
+val JaktFunction.isVirtual: Boolean
+    get() = greenStub?.isVirtual ?: (virtualKeyword != null)
+
+val JaktFunction.isOverride: Boolean
+    get() = greenStub?.isOverride ?: (overrideKeyword != null)
+
 val JaktFunction.isTopLevel: Boolean
     get() = ancestorOfType<JaktScope>() is JaktFile
 

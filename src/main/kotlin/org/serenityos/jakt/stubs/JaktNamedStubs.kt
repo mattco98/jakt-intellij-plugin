@@ -14,6 +14,7 @@ class JaktStructDeclarationStub(
     parent: StubElement<*>?,
     type: IStubElementType<*, *>,
     override val name: String?,
+    val parentName: String?,
     val flags: Int,
 ) : StubBase<JaktStructDeclaration>(parent, type), JaktNamedStub {
     val isExtern get() = flags.isSet(Flags.IsExtern)
@@ -22,12 +23,14 @@ class JaktStructDeclarationStub(
     object Type : JaktNamedStubElementType<JaktStructDeclarationStub, JaktStructDeclaration>("STRUCT_DECLARATION") {
         override fun serialize(stub: JaktStructDeclarationStub, dataStream: StubOutputStream) = with(dataStream) {
             writeName(stub.name)
+            writeName(stub.parentName)
             writeByte(stub.flags)
         }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) = JaktStructDeclarationStub(
             parentStub,
             Type,
+            dataStream.readNameString(),
             dataStream.readNameString(),
             dataStream.readByte().toInt(),
         )
@@ -39,6 +42,7 @@ class JaktStructDeclarationStub(
             parentStub,
             Type,
             psi.name,
+            psi.parentName,
             BitMask.makeMask(
                 Flags.IsExtern to psi.isExtern,
                 Flags.IsClass to psi.isClass,
@@ -176,6 +180,8 @@ class JaktFunctionStub(
     val hasThis get() = flags.isSet(Flags.HasThis)
     val thisIsMutable get() = flags.isSet(Flags.ThisIsMutable)
     val throws get() = flags.isSet(Flags.Throws)
+    val isVirtual get() = flags.isSet(Flags.IsVirtual)
+    val isOverride get() = flags.isSet(Flags.IsOverride)
 
     object Type : JaktNamedStubElementType<JaktFunctionStub, JaktFunction>("FUNCTION") {
         override fun serialize(stub: JaktFunctionStub, dataStream: StubOutputStream) = with(dataStream) {
@@ -198,6 +204,8 @@ class JaktFunctionStub(
                 Flags.HasThis to psi.hasThis,
                 Flags.ThisIsMutable to psi.thisIsMutable,
                 Flags.Throws to psi.throws,
+                Flags.IsVirtual to psi.isVirtual,
+                Flags.IsOverride to psi.isOverride,
             )
         )
 
@@ -209,6 +217,8 @@ class JaktFunctionStub(
         HasThis,
         ThisIsMutable,
         Throws,
+        IsVirtual,
+        IsOverride,
     }
 }
 

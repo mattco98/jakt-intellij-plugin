@@ -98,6 +98,7 @@ class StructType(
     override var typeParameters: List<TypeParameter>,
     val fields: Map<String, Type>,
     val methods: Map<String, FunctionType>,
+    var superType: Type?,
     val isClass: Boolean,
     val linkage: Linkage,
 ) : BaseType(), DeclarationType, ContainerType, GenericType {

@@ -149,8 +149,9 @@ upper Function ::= FunctionHeader FunctionBody? {
 
 FunctionHelper ::= Function { elementType=toBeUpped }
 
-private FunctionHeader ::= EXTERN_KEYWORD? (COMPTIME_KEYWORD | FUNCTION_KEYWORD)
-    IDENTIFIER? GenericBounds? LambdaCaptures? ParameterList FunctionReturnType
+private FunctionHeader ::= FunctionModifiers (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? GenericBounds?
+    LambdaCaptures? ParameterList FunctionReturnType
+private FunctionModifiers ::= EXTERN_KEYWORD? VIRTUAL_KEYWORD? OVERRIDE_KEYWORD?
 
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression
@@ -182,7 +183,8 @@ upper StructDeclaration ::= StructHeader StructBody {
     elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
-private StructHeader ::= EXTERN_KEYWORD? (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? NL
+private StructHeader ::= EXTERN_KEYWORD? (CLASS_KEYWORD | STRUCT_KEYWORD) IDENTIFIER GenericBounds? SuperType? NL
+SuperType ::= COLON Type
 
 StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
 StructMember ::= StructField | StructMethod
