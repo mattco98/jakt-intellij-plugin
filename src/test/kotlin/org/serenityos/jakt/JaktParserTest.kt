@@ -14,11 +14,11 @@ import java.io.File
 import java.nio.file.Files
 
 /**
- * Runs through all Jakt files in the jakt/samples directory and tests that
- * each of them lex/parse successfully.
+ * Runs through most Jakt files in the jakt/{samples, tests} directories and
+ * tests that each of them lex/parse successfully.
  */
 @RunWith(Parameterized::class)
-class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, private val file: File) : JaktBaseTest() {
+class JaktParserTest(@Suppress("UNUSED_PARAMETER") ignored: String, private val file: File) : JaktBaseTest() {
     @Test
     fun test() {
         // Print a clickable link in test output
@@ -62,12 +62,18 @@ class JaktParserSamplesTest(@Suppress("UNUSED_PARAMETER") ignored: String, priva
                     .call()
             }
 
-            return File(jaktDirectory, "samples").walk().filter {
-                val name = it.parentFile.name + File.separator + it.name
-                if (name in IGNORED_TESTS) {
-                    false
-                } else !it.isDirectory && it.extension == "jakt"
-            }.map { arrayOf<Any>(it.name, it) }.toList()
+            // Can't use tests/parser as most of those don't parse
+            // TODO: Add flags to tests to mark which of them are supposed to not parse?
+            val directories = listOf("samples", "tests/codegen", "tests/typechecker")
+
+            return directories.flatMap { directory ->
+                File(jaktDirectory, directory).walk().filter {
+                    val name = it.parentFile.name + File.separator + it.name
+                    if (name in IGNORED_TESTS) {
+                        false
+                    } else !it.isDirectory && it.extension == "jakt"
+                }.map { arrayOf<Any>(it.name, it) }.toList()
+            }
         }
     }
 }
