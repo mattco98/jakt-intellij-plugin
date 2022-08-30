@@ -32,7 +32,7 @@ abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, Ja
             val linkage = if (isExtern) Linkage.External else Linkage.Internal
 
             FunctionType(
-                name,
+                name.ifBlank { null },
                 typeParameters,
                 parameters,
                 PrimitiveType.Void,
