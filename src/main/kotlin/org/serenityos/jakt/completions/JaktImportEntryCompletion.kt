@@ -6,8 +6,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.util.ProcessingContext
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
-import org.serenityos.jakt.psi.api.JaktImportBraceEntry
 import org.serenityos.jakt.psi.api.JaktImport
+import org.serenityos.jakt.psi.api.JaktImportBraceEntry
+import org.serenityos.jakt.psi.declaration.resolveFile
 import org.serenityos.jakt.type.NamespaceType
 
 object JaktImportEntryCompletion : JaktCompletion() {
@@ -22,7 +23,7 @@ object JaktImportEntryCompletion : JaktCompletion() {
         ProgressManager.checkCanceled()
         val importStatement = parameters.position.ancestorOfType<JaktImport>()!!
         val project = importStatement.project
-        val type = importStatement.jaktType as? NamespaceType ?: return
+        val type = importStatement.resolveFile()?.jaktType as? NamespaceType ?: return
 
         for (subtype in type.members)
             result.addElement(lookupElementFromType(
