@@ -103,6 +103,10 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.lineMarkers.JaktParentClassLineMarkerProvider"
         />
+        <codeInsight.lineMarkerProvider
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.lineMarkers.JaktParentMethodLineMarkerProvider"
+        />
         <lang.psiStructureViewFactory
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.structure.JaktStructureViewFactory"
