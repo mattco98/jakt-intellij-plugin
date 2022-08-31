@@ -2,36 +2,37 @@ package org.serenityos.jakt.stubs
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.*
-import org.serenityos.jakt.index.JaktStructElementIndex
+import org.serenityos.jakt.index.*
 import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.declaration.*
 import org.serenityos.jakt.psi.impl.*
 import org.serenityos.jakt.psi.named.JaktNamedStub
+import org.serenityos.jakt.psi.named.JaktPathedStub
 import org.serenityos.jakt.utils.BitMask
 import org.serenityos.jakt.utils.isSet
 
 class JaktStructDeclarationStub(
     parent: StubElement<*>?,
     type: IStubElementType<*, *>,
-    override val name: String?,
-    val parentName: String?,
+    override val path: JaktPath,
+    val parentPath: JaktPath?,
     val flags: Int,
-) : StubBase<JaktStructDeclaration>(parent, type), JaktNamedStub {
+) : StubBase<JaktStructDeclaration>(parent, type), JaktPathedStub {
     val isExtern get() = flags.isSet(Flags.IsExtern)
     val isClass get() = flags.isSet(Flags.IsClass)
 
     object Type : JaktNamedStubElementType<JaktStructDeclarationStub, JaktStructDeclaration>("STRUCT_DECLARATION") {
         override fun serialize(stub: JaktStructDeclarationStub, dataStream: StubOutputStream) = with(dataStream) {
-            writeName(stub.name)
-            writeName(stub.parentName)
+            writePath(stub.path)
+            writePath(stub.parentPath)
             writeByte(stub.flags)
         }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) = JaktStructDeclarationStub(
             parentStub,
             Type,
-            dataStream.readNameString(),
-            dataStream.readNameString(),
+            dataStream.readPath()!!,
+            dataStream.readPath(),
             dataStream.readByte().toInt(),
         )
 
@@ -41,8 +42,8 @@ class JaktStructDeclarationStub(
         ) = JaktStructDeclarationStub(
             parentStub,
             Type,
-            psi.name,
-            psi.parentName,
+            psi.toPath(),
+            psi.parentPath,
             BitMask.makeMask(
                 Flags.IsExtern to psi.isExtern,
                 Flags.IsClass to psi.isClass,
@@ -53,8 +54,9 @@ class JaktStructDeclarationStub(
 
         override fun indexStub(stub: JaktStructDeclarationStub, sink: IndexSink) {
             super.indexStub(stub, sink)
-            stub.name?.let {
-                sink.occurrence(JaktStructElementIndex.KEY, it)
+            sink.occurrence(JaktStructElementIndex.KEY, stub.path.toString())
+            stub.parentPath?.let {
+                sink.occurrence(JaktStructInheritanceIndex.KEY, it.toString())
             }
         }
     }
@@ -89,19 +91,19 @@ class JaktStructFieldStub(
 class JaktEnumDeclarationStub(
     parent: StubElement<*>?,
     type: IStubElementType<*, *>,
-    override val name: String?,
+    override val path: JaktPath,
     val flags: Int,
-) : StubBase<JaktEnumDeclaration>(parent, type), JaktNamedStub {
+) : StubBase<JaktEnumDeclaration>(parent, type), JaktPathedStub {
     val isBoxed get() = flags.isSet(Flags.IsBoxed)
 
     object Type : JaktNamedStubElementType<JaktEnumDeclarationStub, JaktEnumDeclaration>("ENUM_DECLARATION") {
         override fun serialize(stub: JaktEnumDeclarationStub, dataStream: StubOutputStream) = with(dataStream) {
-            writeName(stub.name)
+            writePath(stub.path)
             writeByte(stub.flags)
         }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-            JaktEnumDeclarationStub(parentStub, Type, dataStream.readNameString(), dataStream.readByte().toInt())
+            JaktEnumDeclarationStub(parentStub, Type, dataStream.readPath()!!, dataStream.readByte().toInt())
 
         override fun createStub(
             psi: JaktEnumDeclaration,
@@ -109,7 +111,7 @@ class JaktEnumDeclarationStub(
         ) = JaktEnumDeclarationStub(
             parentStub,
             Type,
-            psi.name,
+            psi.toPath(),
             BitMask.makeMask(Flags.IsBoxed to psi.isBoxed),
         )
 
@@ -117,9 +119,7 @@ class JaktEnumDeclarationStub(
 
         override fun indexStub(stub: JaktEnumDeclarationStub, sink: IndexSink) {
             super.indexStub(stub, sink)
-            stub.name?.let {
-                sink.occurrence(JaktStructElementIndex.KEY, it)
-            }
+            sink.occurrence(JaktStructElementIndex.KEY, stub.path.toString())
         }
     }
 

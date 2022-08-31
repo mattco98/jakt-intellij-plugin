@@ -10,6 +10,6 @@ class JaktNamedElementIndex : StringStubIndexExtension<JaktNameIdentifierOwner>(
     override fun getKey() = KEY
 
     companion object {
-        val KEY = StubIndexKey.createIndexKey<String, JaktNameIdentifierOwner>("org.serenityos.jakt.JaktNamedElementIndex")
+        val KEY = StubIndexKey.createIndexKey<String, JaktNameIdentifierOwner>("JaktNamedElementIndex")
     }
 }

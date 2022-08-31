@@ -8,9 +8,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubElement
 import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.index.JaktPath
 import org.serenityos.jakt.psi.JaktPsiFactory
-import org.serenityos.jakt.render.getPresentation
 import org.serenityos.jakt.render.getIcon
+import org.serenityos.jakt.render.getPresentation
 
 abstract class JaktNamedElement(node: ASTNode) : ASTWrapperPsiElement(node), JaktNameIdentifierOwner {
     override fun getNameIdentifier(): PsiElement? = findChildByType(JaktTypes.IDENTIFIER)
@@ -26,6 +27,13 @@ abstract class JaktNamedElement(node: ASTNode) : ASTWrapperPsiElement(node), Jak
 
 interface JaktNamedStub {
     val name: String?
+}
+
+interface JaktPathedStub : JaktNamedStub {
+    val path: JaktPath
+
+    override val name: String?
+        get() = path.name
 }
 
 abstract class JaktStubbedNamedElement<T> : StubBasedPsiElementBase<T>, JaktNameIdentifierOwner

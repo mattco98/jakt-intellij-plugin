@@ -170,6 +170,7 @@
         <gotoSymbolContributor implementation="org.serenityos.jakt.navigation.JaktSymbolNavigationContributor" />
         <stubIndex implementation="org.serenityos.jakt.index.JaktNamedElementIndex" />
         <stubIndex implementation="org.serenityos.jakt.index.JaktStructElementIndex" />
+        <stubIndex implementation="org.serenityos.jakt.index.JaktStructInheritanceIndex" />
 
         <intentionAction>
             <className>org.serenityos.jakt.intentions.ClassToStructKeywordIntention</className>

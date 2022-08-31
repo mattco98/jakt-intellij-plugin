@@ -2,6 +2,8 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
+import org.serenityos.jakt.index.JaktPath
+import org.serenityos.jakt.index.toPath
 import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.psi.api.JaktStructMethod
@@ -74,5 +76,5 @@ val JaktStructDeclaration.isExtern: Boolean
 val JaktStructDeclaration.isClass: Boolean
     get() = greenStub?.isClass ?: (classKeyword != null)
 
-val JaktStructDeclaration.parentName: String?
-    get() = greenStub?.parentName ?: (superType?.type?.jaktType as? DeclarationType)?.name
+val JaktStructDeclaration.parentPath: JaktPath?
+    get() = greenStub?.parentPath ?: (superType?.type?.jaktType?.psiElement as? JaktDeclaration)?.toPath()
