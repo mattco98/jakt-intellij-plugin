@@ -14,7 +14,6 @@ import org.serenityos.jakt.psi.named.JaktNamedElement
 import org.serenityos.jakt.psi.reference.isLabeled
 import org.serenityos.jakt.render.renderElement
 import org.serenityos.jakt.syntax.JaktLexerAdapter
-import org.serenityos.jakt.utils.unreachable
 
 class JaktFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner {
@@ -31,7 +30,9 @@ class JaktFindUsagesProvider : FindUsagesProvider {
     }
 
     override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
-        if (psiElement is JaktThisExpression || psiElement is JaktThisParameter)
+        if (psiElement is JaktArgument && !psiElement.isLabeled)
+            return false
+        if (psiElement is JaktThisExpression || psiElement is JaktThisParameter || psiElement is JaktLiteral)
             return false
 
         return psiElement is PsiNamedElement
@@ -41,7 +42,7 @@ class JaktFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String {
         return when (element) {
-            is JaktArgument -> if (element.isLabeled) "labeled argument" else unreachable()
+            is JaktArgument -> "labeled argument"
             is JaktCallExpression -> "function call"
             is JaktFunction -> (if (element.isExtern) "extern " else "") + "function"
             is JaktParameter -> if (element.anonKeyword != null) "anonymous parameter" else "parameter"
