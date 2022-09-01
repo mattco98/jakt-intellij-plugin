@@ -4,6 +4,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.StoragePathMacros
 import com.intellij.openapi.components.service
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -47,6 +48,9 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
     }
 
     override fun resolveImportedFile(from: VirtualFile, name: String): JaktFile? {
+        if (DumbService.isDumb(project))
+            return null
+
         val scope = GlobalSearchScopes.directoryScope(project, from.parent ?: return null, false)
         val virtualFiles = FilenameIndex.getVirtualFilesByName("$name.jakt", scope)
         return virtualFiles.firstOrNull()?.let {
