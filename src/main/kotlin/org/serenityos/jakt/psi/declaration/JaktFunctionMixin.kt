@@ -1,15 +1,14 @@
 package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.JaktFile
-import org.serenityos.jakt.psi.JaktScope
-import org.serenityos.jakt.psi.ancestorOfType
+import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.caching.JaktModificationBoundary
 import org.serenityos.jakt.psi.caching.JaktModificationTracker
-import org.serenityos.jakt.psi.greenStub
-import org.serenityos.jakt.psi.jaktType
 import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.stubs.JaktFunctionStub
 import org.serenityos.jakt.type.*
@@ -68,6 +67,15 @@ abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, Ja
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList.orEmpty()
 }
+
+val JaktFunction.externKeyword: PsiElement?
+    get() = findChildOfType(JaktTypes.EXTERN_KEYWORD)
+
+val JaktFunction.virtualKeyword: PsiElement?
+    get() = findChildOfType(JaktTypes.VIRTUAL_KEYWORD)
+
+val JaktFunction.overrideKeyword: PsiElement?
+    get() = findChildOfType(JaktTypes.OVERRIDE_KEYWORD)
 
 val JaktFunction.isExtern: Boolean
     get() = greenStub?.isExtern ?: (externKeyword != null)

@@ -7,6 +7,7 @@ import org.serenityos.jakt.psi.api.JaktEnumDeclaration
 import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.api.JaktNamespaceDeclaration
 import org.serenityos.jakt.psi.api.JaktStructDeclaration
+import org.serenityos.jakt.psi.declaration.externKeyword
 
 abstract class JaktDeclarationRangeHandler<T : PsiElement> : DeclarationRangeHandler<T> {
     abstract fun T.start(): PsiElement

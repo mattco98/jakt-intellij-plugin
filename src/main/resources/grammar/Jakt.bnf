@@ -149,9 +149,11 @@ upper Function ::= FunctionHeader FunctionBody? {
 
 FunctionHelper ::= Function { elementType=toBeUpped }
 
-private FunctionHeader ::= FunctionModifiers (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? GenericBounds?
+private FunctionHeader ::= FunctionModifiers* (COMPTIME_KEYWORD | FUNCTION_KEYWORD) IDENTIFIER? GenericBounds?
     LambdaCaptures? ParameterList FunctionReturnType
-private FunctionModifiers ::= EXTERN_KEYWORD? VIRTUAL_KEYWORD? OVERRIDE_KEYWORD?
+private FunctionModifiers ::= EXTERN_KEYWORD | VIRTUAL_KEYWORD | OVERRIDE_KEYWORD | StructVisibility
+// This is invalid for non-member functions, but we'll let the compiler worry about that
+StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD | RestrictedVisibility
 
 FunctionReturnType ::= THROWS_KEYWORD? [ARROW Type]
 private FunctionBody ::= Block | FAT_ARROW NL Expression
@@ -196,9 +198,8 @@ StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
     elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
 
-StructMethod ::= StructVisibility? FunctionHelper
+StructMethod ::= FunctionHelper
 
-StructVisibility ::= PUBLIC_KEYWORD | PRIVATE_KEYWORD |  RestrictedVisibility
 private RestrictedVisibility ::= RESTRICTED_KEYWORD PAREN_OPEN <<commaOrEolList Type>>? PAREN_CLOSE
 MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
 
