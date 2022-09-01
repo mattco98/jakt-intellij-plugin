@@ -20,8 +20,20 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        This is a major release. There are no major-version-worthy features, but I feel this plugin is now
+        stable. If you find any issues, please open an issue on the project's GitHub page. Thanks for using
+        the plugin!
+
+        Change log:
+
         <ul>
-            <li>Fix StackOverflow that can occur when an enum variant appears in indexed results</li>
+            <li>Update the grammar and highlighting for the recent polymorphism changes</li>
+            <li>Add line markers for parent classes as well as parent/child methods</li>
+            <li>Completions now show methods for parent classes as well</li>
+            <li>Fix compiler error messages being off my one column</li>
+            <li>Fix function modifier keywords having to follow a strict ordering</li>
+            <li>Fix the prelude.jakt file being editable when opened for resolution</li>
+            <li>Fix indexing error when opening a project with a file opened</li>
         </ul>
     ]]></change-notes>
 
