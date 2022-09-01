@@ -40,6 +40,7 @@
                 language="Jakt"
                 extensions="jakt"
         />
+        <writingAccessProvider implementation="org.serenityos.jakt.project.JaktWritingAccessProvider" />
         <lang.parserDefinition
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.syntax.JaktParserDefinition"

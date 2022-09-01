@@ -38,6 +38,8 @@ class JaktProjectServiceImpl(private val project: Project) : JaktProjectService 
 
     override fun getPreludeTypes() = preludeDeclarations.values.toList()
 
+    override fun isPreludeFile(file: VirtualFile) = file == prelude?.virtualFile
+
     override fun findPreludeDeclaration(type: String): JaktDeclaration? = preludeDeclarations[type]
 
     override fun findPreludeTypeDeclaration(type: String): JaktDeclaration? = preludeDeclarations[type]?.takeIf {

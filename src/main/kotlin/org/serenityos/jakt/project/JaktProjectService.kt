@@ -14,6 +14,8 @@ interface JaktProjectService : PersistentStateComponent<JaktProjectService.JaktS
 
     fun getPreludeTypes(): List<JaktDeclaration>
 
+    fun isPreludeFile(file: VirtualFile): Boolean
+
     fun findPreludeDeclaration(type: String): JaktDeclaration?
 
     fun findPreludeTypeDeclaration(type: String): JaktDeclaration?
