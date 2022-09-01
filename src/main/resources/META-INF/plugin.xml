@@ -149,6 +149,7 @@
         <declarationRangeHandler
                 key="org.serenityos.jakt.psi.api.JaktFunction"
                 implementationClass="org.serenityos.jakt.JaktFunctionDeclRangeHandler" />
+        <notificationGroup displayType="BALLOON" id="Jakt Update Group" />
 
         <projectService
                 serviceInterface="org.serenityos.jakt.project.JaktProjectService"

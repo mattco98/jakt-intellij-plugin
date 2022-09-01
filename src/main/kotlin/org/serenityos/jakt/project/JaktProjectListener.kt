@@ -6,5 +6,6 @@ import com.intellij.openapi.project.ProjectManagerListener
 class JaktProjectListener : ProjectManagerListener {
     override fun projectOpened(project: Project) {
         JaktProjectServiceImpl.copyPreludeFile(project)
+        JaktUpdateNotification.showIfNecessary(project)
     }
 }
