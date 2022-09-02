@@ -48,6 +48,6 @@ class JaktFormattingBlock(
     }
 
     companion object {
-        private val IGNORED_TYPES = setOf(TokenType.WHITE_SPACE, JaktTypes.NEWLINE)
+        private val IGNORED_TYPES = setOf(TokenType.WHITE_SPACE, JaktTypes.NEWLINE, JaktTypes.MEMBER_SEPARATOR)
     }
 }
