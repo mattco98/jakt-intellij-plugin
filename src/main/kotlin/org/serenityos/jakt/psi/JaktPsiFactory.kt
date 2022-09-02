@@ -13,6 +13,10 @@ import org.serenityos.jakt.psi.api.JaktPlainQualifier
 import org.serenityos.jakt.psi.declaration.JaktDeclaration
 
 class JaktPsiFactory(private val project: Project) {
+    val newline by lazy {
+        createFile("\n").findChildOfType(JaktTypes.NEWLINE) ?: error("Failed to create newline")
+    }
+
     fun createFile(text: String, fileName: String = "dummy.jakt") = PsiFileFactory
         .getInstance(project)
         .createFileFromText(
@@ -44,6 +48,10 @@ class JaktPsiFactory(private val project: Project) {
         val text = "function foo() => 10"
         val file = createFile(text)
         return file.findChildOfType<JaktFunction>()?.findChildOfType(JaktTypes.FAT_ARROW) ?: error("Failed to create fat arrow")
+    }
+
+    fun createFunction(text: String): JaktFunction {
+        return createFile(text).findChildOfType() ?: error("Failed to create function")
     }
 
     private fun createNamespace(name: String) =

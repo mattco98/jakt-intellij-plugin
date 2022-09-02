@@ -2,10 +2,8 @@ package org.serenityos.jakt.psi.declaration
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
-import org.serenityos.jakt.psi.api.JaktEnumDeclaration
-import org.serenityos.jakt.psi.api.JaktGenericBound
-import org.serenityos.jakt.psi.api.JaktNormalEnumBody
-import org.serenityos.jakt.psi.api.JaktUnderlyingTypeEnumBody
+import org.serenityos.jakt.psi.JaktADT
+import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.greenStub
 import org.serenityos.jakt.psi.named.JaktStubbedNamedElement
 import org.serenityos.jakt.psi.reference.function
@@ -13,7 +11,7 @@ import org.serenityos.jakt.stubs.JaktEnumDeclarationStub
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclarationStub>, JaktEnumDeclaration {
+abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclarationStub>, JaktEnumDeclaration, JaktADT {
     constructor(node: ASTNode) : super(node)
     constructor(stub: JaktEnumDeclarationStub, type: IStubElementType<*, *>) : super(stub, type)
 
@@ -75,6 +73,18 @@ abstract class JaktEnumDeclarationMixin : JaktStubbedNamedElement<JaktEnumDeclar
 
     override fun getDeclGenericBounds(): List<JaktGenericBound> =
         normalEnumBody?.genericBounds?.genericBoundList.orEmpty()
+
+    override fun canHaveMethods(): Boolean {
+        return normalEnumBody != null
+    }
+
+    override fun getMethods(): List<JaktFunction> {
+        return normalEnumBody?.normalEnumMemberList?.mapNotNull {
+            it.structMethod?.function
+        }.orEmpty()
+    }
+
+    override fun getBodyStartAnchor() = normalEnumBody?.curlyOpen ?: underlyingTypeEnumBody?.curlyOpen
 }
 
 val JaktEnumDeclaration.isBoxed: Boolean

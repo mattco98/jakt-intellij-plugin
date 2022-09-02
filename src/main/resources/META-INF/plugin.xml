@@ -124,6 +124,10 @@
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.lineMarkers.JaktChildMethodLineMarkerProvider"
         />
+        <codeInsight.overrideMethod
+                language="Jakt"
+                implementationClass="org.serenityos.jakt.codeInsight.JaktOverrideMethodsHandler"
+        />
         <lang.psiStructureViewFactory
                 language="Jakt"
                 implementationClass="org.serenityos.jakt.structure.JaktStructureViewFactory"

@@ -4,6 +4,8 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import org.serenityos.jakt.index.JaktPath
 import org.serenityos.jakt.index.toPath
+import org.serenityos.jakt.psi.JaktADT
+import org.serenityos.jakt.psi.api.JaktFunction
 import org.serenityos.jakt.psi.api.JaktStructDeclaration
 import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.psi.api.JaktStructMethod
@@ -14,7 +16,7 @@ import org.serenityos.jakt.stubs.JaktStructDeclarationStub
 import org.serenityos.jakt.type.*
 import org.serenityos.jakt.utils.recursivelyGuarded
 
-abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDeclarationStub>, JaktStructDeclaration {
+abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDeclarationStub>, JaktStructDeclaration, JaktADT {
     constructor(node: ASTNode) : super(node)
     constructor(stub: JaktStructDeclarationStub, type: IStubElementType<*, *>) : super(stub, type)
 
@@ -64,10 +66,20 @@ abstract class JaktStructDeclarationMixin : JaktStubbedNamedElement<JaktStructDe
     }
 
     override fun getDeclarations(): List<JaktDeclaration> {
-        return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.function as JaktDeclaration }
+        return structBody.structMemberList.mapNotNull { it.structField ?: it.structMethod?.function }
     }
 
     override fun getDeclGenericBounds() = genericBounds?.genericBoundList.orEmpty()
+
+    override fun getMethods(): List<JaktFunction> {
+        return structBody.structMemberList.mapNotNull { it.structMethod?.function }
+    }
+
+    override fun getSuperElement(): JaktADT? {
+        return superType?.type?.jaktType?.psiElement as? JaktADT
+    }
+
+    override fun getBodyStartAnchor() = structBody.curlyOpen
 }
 
 val JaktStructDeclaration.isExtern: Boolean
