@@ -1,0 +1,6 @@
+<idea-plugin package="org.serenityos.jakt.idea">
+    <!--suppress PluginXmlValidity -->
+    <dependencies>
+        <plugin id="com.intellij.modules.java" />
+    </dependencies>
+</idea-plugin>
