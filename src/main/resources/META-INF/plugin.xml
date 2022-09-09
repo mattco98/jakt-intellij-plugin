@@ -84,7 +84,7 @@
         />
         <lang.foldingBuilder
                 language="Jakt"
-                implementationClass="org.serenityos.jakt.JaktFoldingBuilder"
+                implementationClass="org.serenityos.jakt.folding.JaktBlockFoldingBuilder"
         />
         <lang.documentationProvider
                 language="Jakt"

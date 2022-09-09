@@ -1,4 +1,4 @@
-package org.serenityos.jakt
+package org.serenityos.jakt.folding
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.folding.CustomFoldingBuilder
@@ -12,7 +12,7 @@ import com.intellij.refactoring.suggested.startOffset
 import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.api.*
 
-class JaktFoldingBuilder : CustomFoldingBuilder() {
+class JaktBlockFoldingBuilder : CustomFoldingBuilder() {
     override fun buildLanguageFoldRegions(
         descriptors: MutableList<FoldingDescriptor>,
         root: PsiElement,
