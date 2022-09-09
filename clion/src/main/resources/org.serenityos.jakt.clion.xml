@@ -1,0 +1,13 @@
+<idea-plugin package="org.serenityos.jakt.clion">
+    <!--suppress PluginXmlValidity -->
+    <dependencies>
+        <plugin id="com.intellij.clion" />
+        <plugin id="com.intellij.cidr.base" />
+        <plugin id="com.intellij.cidr.lang" />
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <annotator language="Jakt" implementationClass="org.serenityos.jakt.clion.DummyAnnotator" />
+        <multiHostInjector implementation="org.serenityos.jakt.clion.JaktCppHostInjector" />
+    </extensions>
+</idea-plugin>

@@ -1,4 +1,4 @@
-
+import groovy.xml.XmlParser
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -34,7 +34,42 @@ allprojects {
         plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
     }
 
+    // Collects all jars produced by compilation of project modules and merges them into singe one.
+    // We need to put all plugin manifest files into single jar to make new plugin model work
+    val mergePluginJarTask = task<Jar>("mergePluginJars") {
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+        archiveBaseName.set("jakt-intellij-plugin")
+
+        exclude("META-INF/MANIFEST.MF")
+
+        val pluginLibDir by lazy {
+            val sandboxTask = tasks.prepareSandbox.get()
+            sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
+        }
+
+        val pluginJars by lazy {
+            pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+        }
+
+        destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
+
+        doFirst {
+            for (file in pluginJars) {
+                from(zipTree(file))
+            }
+        }
+
+        doLast {
+            delete(pluginJars)
+        }
+    }
+
     tasks {
+        prepareSandbox {
+            finalizedBy(mergePluginJarTask)
+            enabled = true
+        }
+
         // Set the JVM compatibility versions
         properties("javaVersion").let {
             withType<JavaCompile> {
@@ -79,6 +114,25 @@ allprojects {
         }
     }
 }
+
+fun File.isPluginJar(): Boolean {
+    if (!isFile) return false
+    if (extension != "jar") return false
+    return zipTree(this).files.any { it.isManifestFile() }
+}
+
+fun File.isManifestFile(): Boolean {
+    if (extension != "xml") return false
+    val rootNode = try {
+        val parser = XmlParser()
+        parser.parse(this)
+    } catch (e: Exception) {
+        logger.error("Failed to parse $path", e)
+        return false
+    }
+    return rootNode.name() == "idea-plugin"
+}
+
 
 project(":") {
     intellij {
@@ -135,7 +189,11 @@ project(":") {
 project(":clion") {
     intellij {
         type.set("CL")
-        plugins.set(listOf("com.intellij.cidr.base", "com.intellij.clion"))
+        plugins.set(listOf(
+            "com.intellij.clion",
+            "com.intellij.cidr.base",
+            "com.intellij.cidr.lang",
+        ))
     }
 
     dependencies {

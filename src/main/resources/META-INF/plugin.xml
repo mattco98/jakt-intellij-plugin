@@ -5,6 +5,7 @@
     <vendor>SerenityOS</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="org.serenityos.jakt.clion.xml">com.intellij.clion</depends>
 
     <description><![CDATA[
         Adds support for the <a href="https://github.com/SerenityOS/jakt">Jakt</a> language.
@@ -36,6 +37,10 @@
             <li>Fix indexing error when opening a project with a file opened</li>
         </ul>
     ]]></change-notes>
+
+<!--    <content>-->
+<!--        <module name="org.serenityos.jakt.clion" />-->
+<!--    </content>-->
 
     <applicationListeners>
         <listener
