@@ -7,6 +7,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import org.serenityos.jakt.psi.JaktTypeable
 import org.serenityos.jakt.psi.api.JaktFieldAccessExpression
+import org.serenityos.jakt.psi.api.JaktImportBraceEntry
 import org.serenityos.jakt.psi.api.JaktStructField
 import org.serenityos.jakt.psi.api.JaktVariableDeclarationStatement
 import org.serenityos.jakt.psi.jaktType
@@ -80,6 +81,11 @@ sealed class JaktRenderer {
                 append(element.name!!)
                 append(": ")
                 appendType(element.jaktType, emptyMap(), options.withExpression())
+            }
+            is JaktImportBraceEntry -> {
+                element.reference?.resolve()?.also {
+                    append(renderElement(it, options))
+                }
             }
             is JaktTypeable -> appendType(element.jaktType, emptyMap(), options)
             else -> append("TODO: JaktRenderer(${element::class.simpleName})")
