@@ -17,17 +17,32 @@ abstract class JaktArgumentMixin(
                 return null
 
             val exprType = element.ancestorOfType<JaktCallExpression>()?.expression?.jaktType
-            return when (val callTarget = exprType?.psiElement) {
-                is JaktFunction -> callTarget.parameterList.parameterList.find {
-                    it.name == element.name
+            return findArgument(
+                element.name ?: return null,
+                exprType?.psiElement ?: return null,
+            )
+        }
+
+        private fun findArgument(name: String, element: PsiElement): PsiElement? {
+            return when (element) {
+                is JaktFunction -> element.parameterList.parameterList.find {
+                    it.name == name
                 }
-                is JaktStructDeclaration -> callTarget.structBody.structMemberList
-                    .mapNotNull { it.structField }
-                    .find { it.name == element.name }
-                is JaktEnumVariant -> callTarget.normalEnumMemberBody?.structEnumMemberBodyPartList?.map {
+                is JaktStructDeclaration -> {
+                    val field = element.structBody.structMemberList
+                        .mapNotNull { it.structField }
+                        .find { it.name == name }
+
+                    if (field != null)
+                        return field
+
+                    val parent = element.superType?.type?.jaktType?.psiElement ?: return null
+                    findArgument(name, parent)
+                }
+                is JaktEnumVariant -> element.normalEnumMemberBody?.structEnumMemberBodyPartList?.map {
                     it.structEnumMemberLabel
                 }?.find {
-                    it.identifier.text == element.name
+                    it.identifier.text == name
                 }
                 else -> null
             }
