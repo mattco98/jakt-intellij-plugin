@@ -114,6 +114,9 @@ tasks {
         systemProperty("ide.mac.message.dialogs.as.sheets", "false")
         systemProperty("jb.privacy.policy.text", "<!--999.999-->")
         systemProperty("jb.consents.confirmation.enabled", "false")
+
+        jvmArgs("-Didea.ProcessCanceledException=disabled")
+        jvmArgs("-Dide.show.tips.on.startup.default.value=false")
     }
 }
 
