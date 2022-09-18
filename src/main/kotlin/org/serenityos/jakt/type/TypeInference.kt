@@ -106,13 +106,19 @@ object TypeInference {
                 thisDecl.getDeclarations().find { it.name == element.name }?.jaktType ?: UnknownType
             }
             is JaktLambdaExpression -> element.findChildOfType<JaktFunction>()?.jaktType ?: UnknownType
-            is JaktIndexedAccessExpression -> element.expressionList.firstOrNull()?.jaktType.let {
-                when (it) {
-                    is ArrayType -> it.underlyingType
-                    is SetType -> it.underlyingType
-                    is DictionaryType -> it.valueType
-                    else -> UnknownType
+            is JaktIndexedAccessExpression -> {
+                val underlyingType = element.expressionList.firstOrNull()?.jaktType.let {
+                    when (it) {
+                        is ArrayType -> it.underlyingType
+                        is SetType -> it.underlyingType
+                        is DictionaryType -> it.valueType
+                        else -> UnknownType
+                    }
                 }
+
+                if (element.expressionList.getOrNull(1) is JaktRangeExpression) {
+                    ArrayType(underlyingType)
+                } else underlyingType
             }
             is JaktIsExpression -> PrimitiveType.Bool
             is JaktLiteral -> when (element.firstChild.elementType) {
