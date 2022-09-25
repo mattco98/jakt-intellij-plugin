@@ -64,6 +64,19 @@ class JaktExpressionTypeTest : JaktTypeTest() {
         } 
     """, "i64?")
 
+    fun `test type in else pattern`() = doTest("""
+        enum Foo {
+            A(x: i64)
+            B(x: i64)
+            C(x: i64)
+        }
+
+        function match_else(anon a: Foo) -> i64 => match a {
+            else(x) => x
+               //^T
+        }
+    """, "i64")
+
     // TODO: Requires support for prelude in tests
     // fun `test destructured for loop type`() = doTest("""
     //     function main() {

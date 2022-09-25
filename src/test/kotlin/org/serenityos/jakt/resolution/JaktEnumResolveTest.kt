@@ -52,4 +52,18 @@ class JaktEnumResolveTest : JaktResolveTest() {
                            //^R1      ^R2
         }
     """)
+
+    fun `test enum resolving in else pattern`() = doTest("""
+        enum Foo {
+            A(x: i64)
+            //^D
+            B(x: i64)
+            C(x: i64)
+        }
+        
+        function match_else(anon a: Foo) -> i64 => match a {
+            else(x: x) => x
+               //^R
+        }
+    """)
 }
