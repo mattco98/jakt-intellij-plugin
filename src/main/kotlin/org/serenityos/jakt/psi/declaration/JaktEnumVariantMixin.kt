@@ -26,7 +26,7 @@ abstract class JaktEnumVariantMixin : JaktStubbedNamedElement<JaktEnumVariantStu
         }
 
         initializer { type ->
-            type.value = expression?.text.let { it?.toIntOrNull() ?: 0 }
+            type.value = expression?.text?.toIntOrNull()
 
             if (normalEnumMemberBody?.structEnumMemberBodyPartList?.isNotEmpty() == true) {
                 normalEnumMemberBody?.structEnumMemberBodyPartList?.forEach {

@@ -119,7 +119,7 @@ class EnumType(
 // Technically in Jakt (and pretty much all other programming languages that have
 // enums), a variant of an Enum isn't technically a type. That is to say,
 // `let a: Foo::Bar = Foo::Bar(10)` isn't valid Jakt code, since that type annotation
-// doesn't resolve to a type. However, in this plugin, this slight hack simplies a
+// doesn't resolve to a type. However, in this plugin, this slight hack simplifies a
 // _lot_ of code, particularly in the resolution parts.
 class EnumVariantType(
     override val name: String,

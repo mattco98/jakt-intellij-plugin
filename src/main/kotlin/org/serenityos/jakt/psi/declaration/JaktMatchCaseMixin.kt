@@ -9,5 +9,7 @@ abstract class JaktMatchCaseMixin(
 ) : ASTWrapperPsiElement(node), JaktMatchCase {
     override fun getDeclarations(): List<JaktDeclaration> = matchCaseHead.matchPatternList.flatMap { pattern ->
         pattern.destructuringPartList.map { it.destructuringBinding }
+    } + matchCaseHead.matchCaseElseHeadList.flatMap { pattern ->
+        pattern.destructuringPartList.map { it.destructuringBinding }
     }
 }
