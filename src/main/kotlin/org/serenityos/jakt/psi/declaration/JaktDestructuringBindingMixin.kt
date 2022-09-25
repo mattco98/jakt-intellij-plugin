@@ -48,9 +48,19 @@ abstract class JaktDestructuringBindingMixin(
         } ?: return UnknownType
 
         var resultType: Type? = null
+        val variantsToExclude = match.matchBody?.matchCaseList?.flatMap { case ->
+            case.matchCaseHead.matchPatternList.mapNotNull { pattern ->
+                (pattern.plainQualifierExpression.jaktType as? EnumVariantType)?.name
+            } + case.matchCaseHead.expressionList.mapNotNull { expr ->
+                (expr.reference?.resolve() as? JaktEnumVariant)?.name
+            }
+        }?.toSet().orEmpty()
 
         for (variantType in enumType.variants.values) {
-            // All enum variant must match a pattern in order to compile
+            if (variantType.name in variantsToExclude)
+                continue
+
+            // All remaining enum variant must match a pattern in order to compile
             if (!elsePatternMatchesVariant(variantType, elseHead))
                 return UnknownType
 
