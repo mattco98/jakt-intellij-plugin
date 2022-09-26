@@ -20,20 +20,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        This is a major release. There are no major-version-worthy features, but I feel this plugin is now
-        stable. If you find any issues, please open an issue on the project's GitHub page. Thanks for using
-        the plugin!
-
-        Change log:
-
         <ul>
-            <li>Update the grammar and highlighting for the recent polymorphism changes</li>
-            <li>Add line markers for parent classes as well as parent/child methods</li>
-            <li>Completions now show methods for parent classes as well</li>
-            <li>Fix compiler error messages being off my one column</li>
-            <li>Fix function modifier keywords having to follow a strict ordering</li>
-            <li>Fix the prelude.jakt file being editable when opened for resolution</li>
-            <li>Fix indexing error when opening a project with a file opened</li>
+            <li>Add method overriding support (Ctrl+O)</li>
+            <li>Add folding support for imports which take up multiple lines (thanks @AtkinsSJ!)</li>
+            <li>Add inference support for array slices</li>
+            <li>Add support for resolving class super-fields, and display them in the parameter info popup</li>
+            <li>Add support for else-patterns in match cases</li>
         </ul>
     ]]></change-notes>
 
