@@ -17,8 +17,13 @@ class Interpreter(element: JaktPsiElement) {
         }.map {
             val scope = Scope(null)
             if (it is JaktScope) {
-                for (decl in it.getDeclarations())
-                    scope[decl.name ?: continue] = evaluate(decl)!!
+                for (decl in it.getDeclarations()) {
+                    try {
+                        scope[decl.name ?: continue] = evaluate(decl)!!
+                    } catch (e: Throwable) {
+                        // Ignore and attempt to continue execution
+                    }
+                }
             }
             if (it is JaktFile)
                 initializeGlobalScope(scope)

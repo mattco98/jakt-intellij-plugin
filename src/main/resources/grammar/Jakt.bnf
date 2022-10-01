@@ -102,12 +102,13 @@ upper NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
 NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 
 // Import Statement
-upper Import ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+upper Import ::= IMPORT_KEYWORD !EXTERN_KEYWORD ImportTarget ImportAs? ImportBraceList? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportMixin"
     stubClass="org.serenityos.jakt.stubs.JaktImportStub"
     elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
+ImportTarget ::= IDENTIFIER !PAREN_OPEN | CallExpression
 private ImportAs ::= KEYWORD_AS IDENTIFIER
 ImportBraceList ::= CURLY_OPEN NL <<commaOrEolList ImportBraceEntry>>? NL CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {

@@ -11,7 +11,7 @@ import com.intellij.refactoring.suggested.startOffset
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.*
-import org.serenityos.jakt.psi.findChildrenOfType
+import org.serenityos.jakt.psi.findChildOfType
 import org.serenityos.jakt.psi.reference.JaktPlainQualifierMixin
 import org.serenityos.jakt.psi.reference.exprAncestor
 import org.serenityos.jakt.psi.reference.hasNamespace
@@ -61,14 +61,14 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
             is JaktExternImport -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
             is JaktImport -> {
-                val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
-                idents.first().highlight(Highlights.IMPORT_MODULE)
+                element.importTarget.identifier?.highlight(Highlights.IMPORT_MODULE)
 
-                if (idents.size > 1) {
+
+                if (element.keywordAs != null) {
+                    element.findChildOfType(JaktTypes.IDENTIFIER)?.highlight(Highlights.IMPORT_ALIAS)
                     // The 'as' keyword will be highlighted as an operator here without
                     // the annotation
                     element.keywordAs!!.highlight(Highlights.KEYWORD_IMPORT)
-                    idents[1].highlight(Highlights.IMPORT_ALIAS)
                 }
             }
             is JaktArgument -> {
