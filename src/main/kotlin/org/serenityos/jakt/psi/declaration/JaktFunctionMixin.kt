@@ -36,6 +36,7 @@ abstract class JaktFunctionMixin : JaktStubbedNamedElement<JaktFunctionStub>, Ja
                 parameters,
                 PrimitiveType.Void,
                 throws,
+                comptimeKeyword != null,
                 linkage,
                 hasThis,
                 thisIsMutable,

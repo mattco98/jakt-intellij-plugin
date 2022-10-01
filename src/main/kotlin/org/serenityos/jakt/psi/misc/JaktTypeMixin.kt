@@ -33,7 +33,8 @@ abstract class JaktTypeMixin(node: ASTNode) : ASTWrapperPsiElement(node), JaktTy
                 }.orEmpty(),
                 functionReturnType?.type?.jaktType ?: PrimitiveType.Void,
                 functionReturnType?.throwsKeyword != null,
-                Linkage.Internal,
+                comptime = false,
+                linkage = Linkage.Internal,
                 hasThis = false,
                 thisIsMutable = false,
             )

@@ -141,6 +141,7 @@ class FunctionType(
     val parameters: List<Parameter>,
     var returnType: Type,
     var throws: Boolean,
+    var comptime: Boolean,
     val linkage: Linkage,
     var hasThis: Boolean,
     var thisIsMutable: Boolean,

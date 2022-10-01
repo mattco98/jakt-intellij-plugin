@@ -27,8 +27,9 @@ object TypeInference {
             )
         ),
         if (name == "format") PrimitiveType.String else PrimitiveType.Void,
-        false,
-        Linkage.External,
+        throws = false,
+        comptime = false,
+        linkage = Linkage.External,
         hasThis = false,
         thisIsMutable = false,
     )
@@ -203,7 +204,7 @@ object TypeInference {
                 when (targetType) {
                     is StructType -> targetType.isClass
                     is EnumVariantType -> (targetType.parentType as? EnumType)?.isBoxed ?: false
-                    is FunctionType -> targetType.throws
+                    is FunctionType -> targetType.throws && !targetType.comptime
                     else -> false
                 }
             }
