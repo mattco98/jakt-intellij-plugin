@@ -55,6 +55,8 @@ abstract class JaktCache(project: Project) : Disposable {
 
 class JaktResolveCache(project: Project) : JaktCache(project)
 class JaktTypeCache(project: Project) : JaktCache(project)
+class JaktComptimeCache(project: Project) : JaktCache(project)
 
 fun PsiElement.resolveCache() = project.service<JaktResolveCache>()
 fun PsiElement.typeCache() = project.service<JaktTypeCache>()
+fun PsiElement.comptimeCache() = project.service<JaktComptimeCache>()
