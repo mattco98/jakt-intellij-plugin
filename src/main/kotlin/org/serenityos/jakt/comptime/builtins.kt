@@ -436,7 +436,7 @@ data class DictionaryIterator(val dictionary: DictionaryValue) : Value() {
             require(thisValue is DictionaryIterator)
             val nextKey = thisValue.remainingKeys.random()
             thisValue.remainingKeys.remove(nextKey)
-            TupleValue(listOf(nextKey, thisValue.dictionary.elements[nextKey]!!))
+            TupleValue(mutableListOf(nextKey, thisValue.dictionary.elements[nextKey]!!))
         }
     }
 }

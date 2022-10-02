@@ -10,6 +10,8 @@ import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.findChildOfType
+import org.serenityos.jakt.psi.reference.hasNamespace
+import org.serenityos.jakt.utils.unreachable
 
 class Interpreter(element: JaktPsiElement) {
     var scope: Scope
@@ -55,14 +57,106 @@ class Interpreter(element: JaktPsiElement) {
     // A return value of null indicates the expression is not comptime. An exception being
     // thrown indicates the expression is comptime, but it malformed in some way and cannot
     // be evaluated.
-    private fun evaluate(element: JaktPsiElement): ExecutionResult {
+    fun evaluate(element: JaktPsiElement): ExecutionResult {
         return when (element) {
             /*** EXPRESSIONS ***/
 
             is JaktMatchExpression -> TODO()
             is JaktTryExpression -> TODO()
             is JaktLambdaExpression -> TODO()
-            is JaktAssignmentBinaryExpression -> TODO()
+            is JaktAssignmentBinaryExpression -> {
+                val binaryOp = when {
+                    element.plusEquals != null -> BinaryOperator.Add
+                    element.minusEquals != null -> BinaryOperator.Subtract
+                    element.asteriskEquals != null -> BinaryOperator.Multiply
+                    element.slashEquals != null -> BinaryOperator.Divide
+                    element.percentEquals != null -> BinaryOperator.Modulo
+                    element.arithLeftShiftEquals != null -> BinaryOperator.ArithLeftShift
+                    element.leftShiftEquals != null -> BinaryOperator.LeftShift
+                    element.arithRightShiftEquals != null -> BinaryOperator.ArithRightShift
+                    element.rightShiftEquals != null -> BinaryOperator.RightShift
+                    else -> null
+                }
+
+                val newValue = if (binaryOp != null) {
+                    applyBinaryOperator(element.left, element.right!!, binaryOp).let {
+                        when (it) {
+                            is ExecutionResult.Normal -> it.value
+                            is ExecutionResult.Yield -> error(
+                                "Unexpected yield",
+                                TextRange(element.left.startOffset, element.right!!.endOffset),
+                            )
+                            else -> return it
+                        }
+                    }
+                } else {
+                    evaluate(element.right!!).let {
+                        when (it) {
+                            is ExecutionResult.Normal -> it.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", element.right!!)
+                            else -> return it
+                        }
+                    }
+                }
+
+                when (val assignmentTarget = element.left) {
+                    is JaktPlainQualifierExpression -> {
+                        if (assignmentTarget.plainQualifier.hasNamespace)
+                            error("Invalid assignment target", assignmentTarget)
+
+                        val name = assignmentTarget.plainQualifier.name!!
+                        if (!assign(name, newValue, initialize = false))
+                            error("Unknown identifier \"$name\"", assignmentTarget)
+                    }
+                    is JaktIndexedAccessExpression -> {
+                        val target = when (val result = evaluate(element.left)) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", element.left)
+                            else -> return result
+                        }
+
+                        if (target !is ArrayValue)
+                            error("Expected array, found ${target.typeName()}", element.left)
+
+                        val index = when (val result = evaluate(element.right!!)) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", element.right!!)
+                            else -> return result
+                        }
+
+                        if (index !is IntegerValue)
+                            error("Expected integer, found ${index.typeName()}", element.right!!)
+
+                        if (index.value.toInt() > target.values.size)
+                            error("Out-of-bounds assignment to array of length ${target.values.size} with index ${index.value}", assignmentTarget)
+
+                        target.values[index.value.toInt()] = newValue
+                    }
+                    is JaktAccessExpression -> {
+                        val target = when (val result = evaluate(element.left)) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", element.left)
+                            else -> return result
+                        }
+
+                        if (assignmentTarget.decimalLiteral != null) {
+                            if (target !is TupleValue)
+                                error("Expected tuple, found ${target.typeName()}", element.left)
+
+                            val index = assignmentTarget.decimalLiteral!!.text.toInt()
+                            if (index > target.values.size)
+                                error("Cannot assign to index $index of tuple of length ${target.values.size}")
+
+                            target.values[index] = newValue
+                        } else {
+                            target[assignmentTarget.identifier!!.text] = newValue
+                        }
+                    }
+                    else -> error("Invalid assignment target", assignmentTarget)
+                }
+
+                ExecutionResult.Normal(VoidValue)
+            }
             is JaktThisExpression -> TODO()
             is JaktFieldAccessExpression -> TODO()
             is JaktRangeExpression -> {
@@ -328,7 +422,7 @@ class Interpreter(element: JaktPsiElement) {
                     is ExecutionResult.Yield -> error("Unexpected yield", it)
                     else -> return result
                 }
-            }))
+            }.toMutableList()))
 
             /*** STATEMENTS ***/
 
@@ -393,9 +487,7 @@ class Interpreter(element: JaktPsiElement) {
                     else -> return result
                 }
 
-                // TODO: Ensure variable exists
-                val name = element.variableDeclList[0].name!!
-                scope[name] = rhs
+                assign(element.variableDeclList[0].name!!, rhs, initialize = true)
 
                 ExecutionResult.Normal(VoidValue)
             }
@@ -446,19 +538,218 @@ class Interpreter(element: JaktPsiElement) {
         }
     }
 
+    private fun applyBinaryOperator(lhsExpr: JaktExpression, rhsExpr: JaktExpression, op: BinaryOperator): ExecutionResult {
+        if (op == BinaryOperator.LogicalOr || op == BinaryOperator.LogicalAnd) {
+            val shortCircuitValue = op == BinaryOperator.LogicalOr
+
+            val lhsValue = when (val result = evaluate(lhsExpr)) {
+                is ExecutionResult.Normal -> result.value
+                else -> return result
+            }
+            if (lhsValue !is BoolValue)
+                error("Expected bool, found ${lhsValue.typeName()}", lhsExpr)
+
+            if (lhsValue.value == shortCircuitValue)
+                return ExecutionResult.Normal(BoolValue(shortCircuitValue))
+
+            val rhsValue = when (val result = evaluate(rhsExpr)) {
+                is ExecutionResult.Normal -> result.value
+                else -> return result
+            }
+            if (rhsValue !is BoolValue)
+                error("Expected bool, found ${rhsValue.typeName()}", rhsExpr)
+
+            ExecutionResult.Normal(rhsValue)
+        }
+
+        val lhsValue = when (val result = evaluate(lhsExpr)) {
+            is ExecutionResult.Normal -> result.value
+            else -> return result
+        }
+
+        val rhsValue = when (val result = evaluate(rhsExpr)) {
+            is ExecutionResult.Normal -> result.value
+            else -> return result
+        }
+
+        fun incompatError(): Nothing {
+            error(
+                "Incompatible types \"${lhsValue.typeName()}\" and \"${rhsValue.typeName()}\" for operator ${op.op}",
+                TextRange(lhsExpr.textRange.startOffset, rhsExpr.textRange.endOffset)
+            )
+        }
+
+        if (lhsValue.typeName() != rhsValue.typeName())
+            incompatError()
+
+        // TODO: Separator integer types
+
+        val value = when (op) {
+            BinaryOperator.BitwiseOr,
+            BinaryOperator.BitwiseXor,
+            BinaryOperator.BitwiseAnd,
+            BinaryOperator.LeftShift,
+            BinaryOperator.RightShift,
+            BinaryOperator.ArithLeftShift,
+            BinaryOperator.ArithRightShift -> {
+                if (lhsValue !is IntegerValue || rhsValue !is IntegerValue)
+                    incompatError()
+
+                val value = when (op) {
+                    BinaryOperator.BitwiseOr -> lhsValue.value or rhsValue.value
+                    BinaryOperator.BitwiseXor -> lhsValue.value xor rhsValue.value
+                    BinaryOperator.BitwiseAnd -> lhsValue.value and rhsValue.value
+                    BinaryOperator.LeftShift, BinaryOperator.ArithLeftShift -> lhsValue.value shl rhsValue.value.toInt()
+                    BinaryOperator.RightShift, BinaryOperator.ArithRightShift -> lhsValue.value shr rhsValue.value.toInt()
+                    else -> unreachable()
+                }
+
+                IntegerValue(value)
+            }
+            BinaryOperator.Add,
+            BinaryOperator.Subtract,
+            BinaryOperator.Multiply,
+            BinaryOperator.Divide,
+            BinaryOperator.Modulo -> {
+                val lhsNum = when (lhsValue) {
+                    is IntegerValue -> lhsValue.value.toDouble()
+                    is FloatValue -> lhsValue.value
+                    else -> incompatError()
+                }
+
+                val rhsNum = when (rhsValue) {
+                    is IntegerValue -> rhsValue.value.toDouble()
+                    is FloatValue -> rhsValue.value
+                    else -> incompatError()
+                }
+
+                val result = when (op) {
+                    BinaryOperator.Add -> lhsNum + rhsNum
+                    BinaryOperator.Subtract -> lhsNum - rhsNum
+                    BinaryOperator.Multiply -> lhsNum * rhsNum
+                    BinaryOperator.Divide -> lhsNum / rhsNum
+                    BinaryOperator.Modulo -> lhsNum % rhsNum
+                    else -> unreachable()
+                }
+
+                if (lhsValue is IntegerValue) {
+                    IntegerValue(result.toLong())
+                } else FloatValue(result)
+            }
+            BinaryOperator.Equals -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value == (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value == (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value == (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value == (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value == (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value == (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            BinaryOperator.NotEquals -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value != (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value != (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value != (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value != (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value != (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value != (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            BinaryOperator.GreaterThan -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value > (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value > (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value > (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value > (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value > (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value > (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            BinaryOperator.GreaterThanEq -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value >= (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value >= (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value >= (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value >= (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value >= (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value >= (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            BinaryOperator.LessThan -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value < (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value < (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value < (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value < (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value < (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value < (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            BinaryOperator.LessThanEq -> when (lhsValue) {
+                is BoolValue -> BoolValue(lhsValue.value <= (rhsValue as BoolValue).value)
+                is IntegerValue -> BoolValue(lhsValue.value <= (rhsValue as IntegerValue).value)
+                is FloatValue -> BoolValue(lhsValue.value <= (rhsValue as FloatValue).value)
+                is CharValue -> BoolValue(lhsValue.value <= (rhsValue as CharValue).value)
+                is ByteCharValue -> BoolValue(lhsValue.value <= (rhsValue as ByteCharValue).value)
+                is StringValue -> BoolValue(lhsValue.value <= (rhsValue as StringValue).value)
+                else -> incompatError()
+            }
+            else -> unreachable()
+        }
+
+        return ExecutionResult.Normal(value)
+    }
+
+    private fun assign(name: String, value: Value, initialize: Boolean): Boolean {
+        // TODO: Ensure bindings already exists in the scope
+
+        var currScope: Scope? = scope
+        while (currScope != null) {
+            if (name in currScope) {
+                currScope[name] = value
+                return true
+            }
+
+            currScope = currScope.outer
+        }
+
+        return if (initialize) {
+            scope[name] = value
+            true
+        } else false
+    }
+
     private fun initializeGlobalScope(scope: Scope) {
-        scope.initialize("String", StringStruct)
-        scope.initialize("StringBuilder", StringBuilderStruct)
-        scope.initialize("Error", ErrorStruct)
-        scope.initialize("File", FileStruct)
-        scope.initialize("___jakt_get_target_triple_string", jaktGetTargetTripleStringFunction)
-        scope.initialize("abort", abortFunction)
+        scope["String"] = StringStruct
+        scope["StringBuilder"] = StringBuilderStruct
+        scope["Error"] = ErrorStruct
+        scope["File"] = FileStruct
+        scope["___jakt_get_target_triple_string"] = jaktGetTargetTripleStringFunction
+        scope["abort"] = abortFunction
     }
 
     fun error(message: String, element: PsiElement): Nothing = error(message, element.textRange)
 
-    fun error(message: String, range: TextRange): Nothing =
-        throw InterpreterException(message, range)
+    fun error(message: String, range: TextRange): Nothing = throw InterpreterException(message, range)
+
+    enum class BinaryOperator(val op: String) {
+        LogicalOr("or"),
+        LogicalAnd("and"),
+        BitwiseOr("|"),
+        BitwiseXor("^"),
+        BitwiseAnd("&"),
+        LeftShift("<<"),
+        RightShift(">>"),
+        ArithLeftShift("<<<"),
+        ArithRightShift(">>>"),
+        Equals("=="),
+        NotEquals("!="),
+        GreaterThan(">"),
+        GreaterThanEq(">="),
+        LessThan("<"),
+        LessThanEq("<="),
+        Add("+"),
+        Subtract("-"),
+        Multiply("*"),
+        Divide("/"),
+        Modulo("%"),
+    }
 
     open class Scope(var outer: Scope?) {
         protected val bindings = mutableMapOf<String, Value>()
@@ -468,20 +759,6 @@ class Interpreter(element: JaktPsiElement) {
         operator fun get(name: String): Value? = bindings[name] ?: outer?.get(name)
 
         operator fun set(name: String, value: Value) {
-            var scope: Scope? = this
-
-            while (scope != null) {
-                if (name in scope) {
-                    scope[name] = value
-                    return
-                }
-                scope = scope.outer
-            }
-
-            initialize(name, value)
-        }
-
-        fun initialize(name: String, value: Value) {
             bindings[name] = value
         }
     }

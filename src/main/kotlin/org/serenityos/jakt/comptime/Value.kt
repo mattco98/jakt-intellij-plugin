@@ -50,7 +50,7 @@ data class ByteCharValue(val value: Byte) : Value() {
     override fun toString() = "b'$value'"
 }
 
-data class TupleValue(val values: List<Value>) : Value() {
+data class TupleValue(val values: MutableList<Value>) : Value() {
     override fun typeName() = "Tuple"
     override fun toString() = values.joinToString(prefix = "(", postfix = ")")
 }
@@ -81,10 +81,10 @@ class UserFunctionValue(
 
         for ((index, param) in parameters.withIndex()) {
             if (index <= arguments.lastIndex) {
-                newScope.initialize(param.name, arguments[index])
+                newScope[param.name] = arguments[index]
             } else {
                 check(param.default != null)
-                newScope.initialize(param.name, param.default)
+                newScope[param.name] = param.default
             }
         }
 
