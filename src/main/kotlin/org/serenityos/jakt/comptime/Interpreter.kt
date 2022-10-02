@@ -1,12 +1,17 @@
 package org.serenityos.jakt.comptime
 
 import com.intellij.openapi.util.Ref
+import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiElement
+import com.intellij.refactoring.suggested.endOffset
+import com.intellij.refactoring.suggested.startOffset
 import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.*
 import org.serenityos.jakt.psi.caching.comptimeCache
+import org.serenityos.jakt.psi.findChildOfType
 
 class Interpreter(element: JaktPsiElement) {
     var scope: Scope
@@ -18,10 +23,12 @@ class Interpreter(element: JaktPsiElement) {
             val scope = Scope(null)
             if (it is JaktScope) {
                 for (decl in it.getDeclarations()) {
-                    try {
-                        scope[decl.name ?: continue] = evaluate(decl)!!
-                    } catch (e: Throwable) {
-                        // Ignore and attempt to continue execution
+                    if (decl is JaktImportBraceEntry)
+                        continue // TODO
+
+                    scope[decl.name ?: continue] = when (val result = evaluate(decl)) {
+                        is ExecutionResult.Normal -> result.value
+                        else -> continue
                     }
                 }
             }
@@ -50,21 +57,16 @@ class Interpreter(element: JaktPsiElement) {
     // A return value of null indicates the expression is not comptime. An exception being
     // thrown indicates the expression is comptime, but it malformed in some way and cannot
     // be evaluated.
-    fun evaluate(element: JaktPsiElement): Value? {
+    fun evaluate(element: JaktPsiElement): ExecutionResult {
         val cache = element.comptimeCache()
-        cache.resolve<JaktPsiElement, Ref<Value>>(element)?.let { return it.get() }
+        cache.resolve<JaktPsiElement, Ref<ExecutionResult>>(element)?.get()?.let { return it }
 
-        try {
-            val value = evaluateImpl(element)
-            cache.set(element, Ref(value))
-            return value
-        } catch (e: Throwable) {
-            cache.set(element, Ref(null))
-            throw e
-        }
+        val value = evaluateImpl(element)
+        cache.set(element, Ref(value))
+        return value
     }
 
-    private fun evaluateImpl(element: JaktPsiElement): Value? {
+    private fun evaluateImpl(element: JaktPsiElement): ExecutionResult {
         return when (element) {
             /*** EXPRESSIONS ***/
 
@@ -75,9 +77,37 @@ class Interpreter(element: JaktPsiElement) {
             is JaktThisExpression -> TODO()
             is JaktFieldAccessExpression -> TODO()
             is JaktRangeExpression -> {
-                val start = (element.expressionList[0]?.let { evaluate(it)!! } as? IntegerValue) ?: IntegerValue(0)
-                val end = evaluate(element.expressionList[1])!! as IntegerValue
-                RangeValue(start.value, end.value, isInclusive = false)
+                val (startExpr, endExpr) = when {
+                    element.expressionList.size == 2 -> element.expressionList[0] to element.expressionList[1]
+                    element.expressionList.isEmpty() -> null to null
+                    element.expressionList[0].textRange.endOffset < element.dotDot.textRange.startOffset ->
+                        element.expressionList[0] to null
+                    else -> null to element.expressionList[0]
+                }
+
+                val start = startExpr?.let {
+                    when (val result = evaluate(it)) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", it)
+                        else -> return result
+                    }
+                } ?: IntegerValue(0)
+
+                val end = startExpr?.let {
+                    when (val result = evaluate(it)) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", it)
+                        else -> return result
+                    }
+                } ?: IntegerValue(Long.MAX_VALUE)
+
+                if (start !is IntegerValue)
+                    error("Expected range start value to be an integer", startExpr!!)
+
+                if (end !is IntegerValue)
+                    error("Expected range end value to be an integer", endExpr!!)
+
+                ExecutionResult.Normal(RangeValue(start.value, end.value, isInclusive = false))
             }
             is JaktLogicalOrBinaryExpression -> TODO()
             is JaktLogicalAndBinaryExpression -> TODO()
@@ -91,169 +121,339 @@ class Interpreter(element: JaktPsiElement) {
             is JaktCastExpression -> TODO()
             is JaktIsExpression -> TODO()
             is JaktUnaryExpression -> TODO()
-            is JaktBooleanLiteral -> BoolValue(element.trueKeyword != null)
+            is JaktBooleanLiteral -> ExecutionResult.Normal(BoolValue(element.trueKeyword != null))
             is JaktNumericLiteral -> {
                 element.binaryLiteral?.let {
-                    return IntegerValue(it.text.toLong(2))
+                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(2)))
                 }
 
                 element.octalLiteral?.let {
-                    return IntegerValue(it.text.toLong(8))
+                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(8)))
                 }
 
                 element.hexLiteral?.let {
-                    return IntegerValue(it.text.toLong(16))
+                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(16)))
                 }
 
                 val decimalText = element.decimalLiteral!!.text
-                return if ("." in decimalText) {
-                    FloatValue(decimalText.toDouble())
-                } else IntegerValue(decimalText.toLong(10))
+                return ExecutionResult.Normal(
+                    if ("." in decimalText) {
+                        FloatValue(decimalText.toDouble())
+                    } else IntegerValue(decimalText.toLong(10))
+                )
             }
             is JaktLiteral -> {
                 element.byteCharLiteral?.let {
-                    return ByteCharValue(it.text[2].code.toByte())
+                    return ExecutionResult.Normal(ByteCharValue(it.text[2].code.toByte()))
                 }
 
                 element.charLiteral?.let {
-                    return CharValue(it.text.single())
+                    return ExecutionResult.Normal(CharValue(it.text.single()))
                 }
 
-                return StringValue(element.stringLiteral!!.text.drop(1).dropLast(1))
+                ExecutionResult.Normal(StringValue(element.stringLiteral!!.text.drop(1).dropLast(1)))
             }
             is JaktAccessExpression -> {
-                val target = evaluate(element.expression)!!
+                val target = when (val result = evaluate(element.expression)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                    else -> return result
+                }
+
                 if (element.dotQuestionMark != null)
                     TODO()
+
                 if (element.decimalLiteral != null) {
-                    (target as TupleValue).values[element.decimalLiteral!!.text.toInt()]
+                    if (target !is TupleValue)
+                        error("Invalid tuple index into non-tuple value", element.decimalLiteral!!)
+
+                    ExecutionResult.Normal(target.values[element.decimalLiteral!!.text.toInt()])
                 } else {
-                    target[element.identifier!!.text]
+                    val value = target[element.identifier!!.text] ?: error("Unknown field ${element.identifier!!.text}")
+                    ExecutionResult.Normal(value)
                 }
             }
             is JaktIndexedAccessExpression -> {
-                val target = evaluate(element.expressionList[0])!!
-                val value = evaluate(element.expressionList[1])!!
-                if (target is ArrayValue && value is RangeValue) {
-                    ArraySlice(target, value.range)
-                } else target[(value as StringValue).value]
+                val target = when (val result = evaluate(element.expressionList[0])) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expressionList[0])
+                    else -> return result
+                }
+
+                val value = when (val result = evaluate(element.expressionList[1])) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expressionList[1])
+                    else -> return result
+                }
+
+                if (target !is ArrayValue)
+                    error("Unexpected index into non-array value", element.expressionList[0])
+
+                when (value) {
+                    is RangeValue -> ExecutionResult.Normal(ArraySlice(target, value.range))
+                    is IntegerValue -> {
+                        val result = target.values.getOrNull(value.value.toInt())
+                            ?: error("Index ${value.value} out-of-range for array of length ${target.values.size}")
+                        ExecutionResult.Normal(result)
+                    }
+                    else -> error("Expected integer or range in array indexing expression", element.expressionList[1])
+                }
             }
             is JaktPlainQualifierExpression -> {
                 val qualifier = element.plainQualifier
 
                 val parts = generateSequence(qualifier) { it.plainQualifier }
-                    .map { it.identifier.text }
+                    .map { it to it.identifier.text }
                     .toMutableList()
                     .asReversed()
 
-                var value: Value? = scope[parts[0]]
-                parts.removeFirst()
+                var value: Value? = null
+                var currScope: Scope? = scope
 
-                for (part in parts)
-                   value = value!![part]
+                while (currScope != null) {
+                    if (parts[0].second in currScope) {
+                        value = scope[parts[0].second]
+                        parts.removeFirst()
+                        break
+                    }
 
-                value!!
+                    currScope = currScope.outer
+                }
+
+                if (value == null) {
+                    val type = if (parts.size > 1) "qualifier" else "identifier"
+                    error("Unknown $type \"${parts[0].second}\"", parts[0].first)
+                }
+
+                for (part in parts) {
+                    if (part.second !in value!!)
+                        error("\"${value.typeName()}\" has no member named ${part.second}", part.first)
+
+                    value = value[part.second]!!
+                }
+
+                ExecutionResult.Normal(value!!)
             }
             is JaktCallExpression -> {
-                val target = evaluate(element.expression)!!
-                check(target is FunctionValue)
+                val target = when (val result = evaluate(element.expression)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                    else -> return result
+                }
 
-                val args = element.argumentList.argumentList.map { evaluate(it.expression)!! }
-                check(args.size in target.validParamCount)
+                if (target !is FunctionValue)
+                    error("\"${target.typeName()}\" is not callable", element.expression)
 
-                target.call(this, getThisValue(element.expression), args)
+                val args = element.argumentList.argumentList.map {
+                    when (val result = evaluate(it.expression)) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                        else -> return result
+                    }
+                }
+
+                if (args.size !in target.validParamCount) {
+                    error(
+                        "Expected between ${target.validParamCount.first} and ${target.validParamCount.last} " +
+                            "arguments, but found ${args.size} arguments",
+                        element.argumentList
+                    )
+                }
+
+                val thisValue = when (val expr = element.expression) {
+                    is JaktAccessExpression -> when (val result = evaluate(expr.expression)) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", expr.expression)
+                        else -> return result
+                    }
+                    is JaktFieldAccessExpression -> (scope as FunctionScope).thisBinding!!
+                    is JaktIndexedAccessExpression -> when (val result = evaluate(expr.expressionList.first())) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                        else -> return result
+                    }
+                    else -> null
+                }
+
+                target.call(this, thisValue, args)
             }
             is JaktArrayExpression -> {
-                element.elementsArrayBody?.let {  body ->
-                    return ArrayValue(body.expressionList.map { evaluate(it)!! }.toMutableList())
+                element.elementsArrayBody?.let { body ->
+                    val array = ArrayValue(body.expressionList.map {
+                        when (val result = evaluate(it)) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", it)
+                            else -> return result
+                        }
+                    }.toMutableList())
+
+                    return ExecutionResult.Normal(array)
                 }
 
                 val body = element.sizedArrayBody!!
-                val value = evaluate(body.expressionList[0])!!
-                val size = evaluate(body.expressionList[1])!!
-                check(size is IntegerValue)
-                ArrayValue((0 until size.value).map { value }.toMutableList())
+
+                val value = when (val result = evaluate(body.expressionList[0])) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", body.expressionList[0])
+                    else -> return result
+                }
+
+                val size = when (val result = evaluate(body.expressionList[1])) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", body.expressionList[1])
+                    else -> return result
+                }
+
+                if (size !is IntegerValue)
+                    error("Array size initializer must be an integer", body.expressionList[1])
+
+                ExecutionResult.Normal(ArrayValue((0 until size.value).map { value }.toMutableList()))
             }
-            is JaktDictionaryExpression -> DictionaryValue(
+            is JaktDictionaryExpression -> ExecutionResult.Normal(DictionaryValue(
                 element.dictionaryElementList.associate {
-                    evaluate(it.expressionList[0])!! to evaluate(it.expressionList[1])!!
+                    val key = when (val result = evaluate(it.expressionList[0])) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[0])
+                        else -> return result
+                    }
+
+                    val value = when (val result = evaluate(it.expressionList[1])) {
+                        is ExecutionResult.Normal -> result.value
+                        is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[1])
+                        else -> return result
+                    }
+
+                    key to value
                 }.toMutableMap()
-            )
-            is JaktSetExpression -> SetValue(element.expressionList.map { evaluate(it)!! }.toMutableSet())
-            is JaktTupleExpression -> TupleValue(element.expressionList.map { evaluate(it)!! })
+            ))
+            is JaktSetExpression -> ExecutionResult.Normal(SetValue(element.expressionList.map {
+                when (val result = evaluate(it)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", it)
+                    else -> return result
+                }
+            }.toMutableSet()))
+            is JaktTupleExpression -> ExecutionResult.Normal(TupleValue(element.expressionList.map {
+                when (val result = evaluate(it)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", it)
+                    else -> return result
+                }
+            }))
 
             /*** STATEMENTS ***/
 
-            is JaktExpressionStatement -> {
-                evaluate(element.expression)
-                VoidValue
+            is JaktExpressionStatement -> when (val result = evaluate(element.expression)) {
+                is ExecutionResult.Normal -> ExecutionResult.Normal(result.value)
+                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                else -> return result
             }
-            is JaktReturnStatement -> throw ReturnException(element.expression?.let { evaluate(it)!! })
-            is JaktThrowStatement -> TODO()
+            is JaktReturnStatement -> ExecutionResult.Return(element.expression?.let {
+                when (val result = evaluate(it)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", it)
+                    else -> return result
+                }
+            } ?: VoidValue)
+            is JaktThrowStatement -> ExecutionResult.Throw(when (val result = evaluate(element.expression)) {
+                is ExecutionResult.Normal -> result.value
+                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                else -> return result
+            })
             is JaktDeferStatement -> TODO()
             is JaktIfStatement -> {
-                val canBeExpr = element.canBeExpr
-                val condition = evaluate(element.expression)!!
-                check(condition is BoolValue)
+                val condition = when (val result = evaluate(element.expression)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                    else -> return result
+                }
+
+                if (condition !is BoolValue)
+                    error("Expected bool", element.expression)
 
                 if (condition.value) {
-                    evaluate(element.block).let {
-                        if (canBeExpr) it else VoidValue
+                    when (val result = evaluate(element.block)) {
+                        is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
+                        is ExecutionResult.Yield -> error("Unexpected yield", element.block.findChildOfType<JaktYieldStatement>()!!)
+                        else -> return result
                     }
-                } else {
-                    element.ifStatement?.let(::evaluate)
-                        ?: element.elseBlock?.let(::evaluate)
-                        ?: VoidValue
-                }
+                } else if (element.ifStatement != null) {
+                    evaluate(element.ifStatement!!)
+                } else if (element.elseBlock != null) {
+                    when (val result = evaluate(element.elseBlock!!)) {
+                        is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
+                        is ExecutionResult.Yield -> error("Unexpected yield", element.block.findChildOfType<JaktYieldStatement>()!!)
+                        else -> return result
+                    }
+                } else ExecutionResult.Normal(VoidValue)
             }
             is JaktWhileStatement -> TODO()
             is JaktLoopStatement -> TODO()
             is JaktForStatement -> TODO()
             is JaktVariableDeclarationStatement -> {
-                if (element.parenOpen != null)
-                    TODO()
-
-                val rhs = evaluate(element.expression)!!
-                val name = element.variableDeclList[0].name!!
-                scope[name] = rhs
-                VoidValue
-            }
-            is JaktGuardStatement -> TODO()
-            is JaktYieldStatement -> TODO()
-            is JaktBreakStatement -> TODO()
-            is JaktContinueStatement -> TODO()
-            is JaktUnsafeStatement -> TODO()
-            is JaktInlineCppStatement -> TODO()
-            is JaktBlock -> {
-                pushScope(Scope(scope))
-                element.statementList.forEach(::evaluate)
-                popScope()
-                VoidValue
-            }
-
-            /*** DECLARATIONS ***/
-
-            is JaktFunction -> {
-                val parameters = element.parameterList.parameterList.map { param ->
-                    FunctionValue.Parameter(
-                        param.identifier.text,
-                        param.expression?.let { evaluate(it)!! }
+                if (element.parenOpen != null) {
+                    error(
+                        "Destructuring variable assignments are not supported",
+                        TextRange(element.parenOpen!!.startOffset, element.parenClose!!.endOffset),
                     )
                 }
 
-                UserFunctionValue(parameters, element.block ?: element.expression!!)
+                val rhs = when (val result = evaluate(element.expression)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                    else -> return result
+                }
+
+                // TODO: Ensure variable exists
+                val name = element.variableDeclList[0].name!!
+                scope[name] = rhs
+
+                ExecutionResult.Normal(VoidValue)
+            }
+            is JaktGuardStatement -> TODO()
+            is JaktYieldStatement -> ExecutionResult.Yield(when (val result = evaluate(element.expression)) {
+                is ExecutionResult.Normal -> result.value
+                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                else -> return result
+            })
+            is JaktBreakStatement -> ExecutionResult.Break
+            is JaktContinueStatement -> ExecutionResult.Continue
+            is JaktUnsafeStatement -> error("Cannot evaluate unsafe blocks at comptime", element)
+            is JaktInlineCppStatement -> error("Cannot evaluate inline cpp blocks at comptime")
+            is JaktBlock -> {
+                pushScope(Scope(scope))
+                try {
+                    element.statementList.forEach {
+                        val result = evaluate(it)
+                        if (result is ExecutionResult.Yield || result is ExecutionResult.Return)
+                            return result
+                    }
+                    ExecutionResult.Normal(VoidValue)
+                } finally {
+                    popScope()
+                }
+            }
+            is JaktFunction -> {
+                val parameters = element.parameterList.parameterList.map { param ->
+                    val default = param.expression?.let {
+                        when (val result = evaluate(it)) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", it)
+                            else -> return result
+                        }
+                    }
+
+                    FunctionValue.Parameter(param.identifier.text, default)
+                }
+
+                val target = element.block ?: element.expression ?: return ExecutionResult.Normal(VoidValue)
+                ExecutionResult.Normal(UserFunctionValue(parameters, target))
             }
 
-            else -> error("${element::class.simpleName} is not support at comptime")
-        }
-    }
+            // Ignored declarations (hoisted at scope initialization)
+            is JaktImport -> ExecutionResult.Normal(VoidValue)
 
-    private fun getThisValue(expression: JaktExpression): Value? {
-        return when (expression) {
-            is JaktAccessExpression -> evaluate(expression.expression)!!
-            is JaktFieldAccessExpression -> (scope as FunctionScope).thisBinding!!
-            is JaktIndexedAccessExpression -> evaluate(expression.expressionList.first())!!
-            else -> null
+            else -> error("${element::class.simpleName} is not support at comptime")
         }
     }
 
@@ -265,6 +465,11 @@ class Interpreter(element: JaktPsiElement) {
         scope.initialize("___jakt_get_target_triple_string", jaktGetTargetTripleStringFunction)
         scope.initialize("abort", abortFunction)
     }
+
+    fun error(message: String, element: PsiElement): Nothing = error(message, element.textRange)
+
+    fun error(message: String, range: TextRange): Nothing =
+        throw InterpreterException(message, range)
 
     open class Scope(var outer: Scope?) {
         protected val bindings = mutableMapOf<String, Value>()
@@ -296,14 +501,22 @@ class Interpreter(element: JaktPsiElement) {
         fun argument(name: String) = bindings[name]!!
     }
 
-    abstract class FlowException : Error()
+    sealed interface ExecutionResult {
+        class Return(val value: Value) : ExecutionResult
 
-    class ReturnException(val value: Value?) : FlowException()
+        class Yield(val value: Value) : ExecutionResult
 
-    class YieldException(val value: Value?) : FlowException()
+        class Throw(val value: Value) : ExecutionResult
+
+        class Normal(val value: Value) : ExecutionResult
+
+        object Continue : ExecutionResult
+
+        object Break : ExecutionResult
+    }
 
     companion object {
-        fun evaluate(element: JaktPsiElement): Value? {
+        fun evaluate(element: JaktPsiElement): ExecutionResult {
             return Interpreter(element).evaluate(element)
         }
     }

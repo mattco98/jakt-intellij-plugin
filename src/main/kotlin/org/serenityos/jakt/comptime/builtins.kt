@@ -7,8 +7,8 @@ class BuiltinFunction(
     parameterCount: Int,
     private val func: (Value?, List<Value>) -> Value,
 ) : FunctionValue(parameterCount, parameterCount) {
-    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): Value {
-        return func(thisValue, arguments)
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): Interpreter.ExecutionResult {
+        return Interpreter.ExecutionResult.Normal(func(thisValue, arguments))
     }
 }
 
@@ -18,6 +18,8 @@ data class OptionalValue(val value: Value?) : Value() {
         this["value"] = getValue
         this["value_or"] = getValueOr
     }
+
+    override fun typeName() = "Optional"
 
     override fun toString() = "Optional(${value?.toString() ?: "<empty>"})"
 
@@ -48,6 +50,10 @@ data class ArrayIterator(
         this["next"] = next
     }
 
+    override fun typeName() = "ArrayIterator"
+
+    override fun toString() = "ArrayIterator($nextIndex..$endInclusiveIndex)"
+
     companion object {
         private val next = BuiltinFunction(0) { thisValue, _ ->
             require(thisValue is ArrayIterator)
@@ -61,8 +67,6 @@ data class ArrayIterator(
 }
 
 data class ArrayValue(val values: MutableList<Value>) : Value() {
-    override fun toString() = values.joinToString(prefix = "[", postfix = "]")
-
     init {
         this["is_empty"] = isEmpty
         this["size"] = size
@@ -73,6 +77,10 @@ data class ArrayValue(val values: MutableList<Value>) : Value() {
         this["first"] = first
         this["last"] = last
     }
+
+    override fun typeName() = "Array"
+
+    override fun toString() = values.joinToString(prefix = "[", postfix = "]")
 
     companion object {
         private val isEmpty = BuiltinFunction(0) { thisValue, _ ->
@@ -130,6 +138,10 @@ data class ArraySlice(val array: ArrayValue, val range: IntRange) : Value() {
         this["first"] = first
         this["last"] = last
     }
+
+    override fun typeName() = "ArraySlice"
+
+    override fun toString() = "ArraySlice($range)"
 
     companion object {
         private val isEmpty = BuiltinFunction(0) { thisValue, _ ->
@@ -194,6 +206,10 @@ object StringStruct : Value() {
         this["number"] = number
         this["repeated"] = repeated
     }
+
+    override fun typeName() = "String"
+
+    override fun toString() = "StringStruct"
 }
 
 data class StringValue(val value: String) : Value() {
@@ -212,6 +228,8 @@ data class StringValue(val value: String) : Value() {
         this["starts_with"] = startsWith
         this["ends_with"] = endsWith
     }
+
+    override fun typeName() = "String"
 
     override fun toString() = "\"$value\""
 
@@ -327,6 +345,10 @@ object StringBuilderStruct : Value() {
     init {
         this["create"] = create
     }
+
+    override fun typeName() = "StringBuilder"
+
+    override fun toString() = "StringBuilderStruct"
 }
 
 class StringBuilderInstance : Value() {
@@ -342,7 +364,9 @@ class StringBuilderInstance : Value() {
         this["clear"] = clear
     }
 
-    override fun toString() = "StringBuilder(content = \"$builder\")"
+    override fun typeName() = "StringBuilder"
+
+    override fun toString() = "StringBuilder(\"$builder\")"
 
     companion object {
         private val append = BuiltinFunction(1) { thisValue, arguments ->
@@ -403,6 +427,10 @@ data class DictionaryIterator(val dictionary: DictionaryValue) : Value() {
         this["next"] = next
     }
 
+    override fun typeName() = "DictionaryIterator"
+
+    override fun toString() = "DictionaryIterator"
+
     companion object {
         private val next = BuiltinFunction(0) { thisValue, _ ->
             require(thisValue is DictionaryIterator)
@@ -425,6 +453,8 @@ data class DictionaryValue(val elements: MutableMap<Value, Value>) : Value() {
         this["keys"] = keys
         this["iterator"] = iterator
     }
+
+    override fun typeName() = "Dictionary"
 
     override fun toString() = elements.entries.joinToString(prefix = "{", postfix = "}") {
         "${it.key}: ${it.value}"
@@ -487,6 +517,10 @@ data class SetIterator(val values: MutableSet<Value>) : Value() {
         this["next"] = next
     }
 
+    override fun typeName() = "SetIterator"
+
+    override fun toString() = "SetIterator"
+
     companion object {
         private val next = BuiltinFunction(0) { thisValue, _ ->
             require(thisValue is SetIterator)
@@ -507,6 +541,8 @@ data class SetValue(val values: MutableSet<Value>) : Value() {
         this["size"] = size
         this["iterator"] = iterator
     }
+
+    override fun typeName() = "Set"
 
     override fun toString() = values.joinToString(prefix = "{", postfix = "}")
 
@@ -563,6 +599,10 @@ data class RangeValue(val start: Long, val end: Long, val isInclusive: Boolean) 
         this["exclusive"] = exclusive
     }
 
+    override fun typeName() = "Range"
+
+    override fun toString() = "Range($start..$end, inclusive = $isInclusive)"
+
     private fun getAndAdvance(): Long {
         return current.also {
             if (forwards) current++ else current--
@@ -609,9 +649,15 @@ object ErrorStruct : Value() {
     init {
         this["from_errno"] = fromErrno
     }
+
+    override fun typeName() = "Error"
+
+    override fun toString() = "ErrorStruct"
 }
 
 class ErrorInstance(private val codeValue: Long) : Value() {
+    override fun typeName() = "Error"
+
     override fun toString() = "Error(code = $codeValue)"
 }
 
@@ -634,12 +680,20 @@ object FileStruct : Value() {
         this["exists"] = exists
         this["open_for_reading"] = openForReading
     }
+
+    override fun typeName() = "File"
+
+    override fun toString() = "FileStruct"
 }
 
 class FileInstance(val file: File) : Value() {
     init {
         this["read_all"] = readAll
     }
+
+    override fun typeName() = "File"
+
+    override fun toString() = "File($file)"
 
     companion object {
         private val readAll = BuiltinFunction(0) { thisValue, arguments ->

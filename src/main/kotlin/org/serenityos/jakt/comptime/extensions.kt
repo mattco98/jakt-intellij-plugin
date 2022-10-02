@@ -11,8 +11,11 @@ import org.serenityos.jakt.psi.findChildOfType
 val JaktPsiElement.comptimeValue: Value?
     get() = comptimeCache().resolveWithCaching(this) {
         try {
-            Interpreter.evaluate(this)
-        } catch (e: Throwable) {
+            when (val result = Interpreter.evaluate(this)) {
+                is Interpreter.ExecutionResult.Normal -> result.value
+                else -> null
+            }
+        } catch (e: InterpreterException) {
             null
         }.let(::Ref)
     }.get()
@@ -23,6 +26,3 @@ val JaktIfStatement.ifStatement: JaktIfStatement?
 
 val JaktIfStatement.elseBlock: JaktBlock?
     get() = childrenOfType<JaktBlock>().getOrNull(1)
-
-val JaktIfStatement.canBeExpr: Boolean
-    get() = elseKeyword != null && (ifStatement != null || elseBlock != null)
