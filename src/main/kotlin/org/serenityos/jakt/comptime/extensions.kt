@@ -1,6 +1,5 @@
 package org.serenityos.jakt.comptime
 
-import com.intellij.openapi.util.Ref
 import com.intellij.psi.util.childrenOfType
 import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.api.JaktBlock
@@ -8,17 +7,11 @@ import org.serenityos.jakt.psi.api.JaktIfStatement
 import org.serenityos.jakt.psi.caching.comptimeCache
 import org.serenityos.jakt.psi.findChildOfType
 
-val JaktPsiElement.comptimeValue: Value?
-    get() = comptimeCache().resolveWithCaching(this) {
-        try {
-            when (val result = Interpreter.evaluate(this)) {
-                is Interpreter.ExecutionResult.Normal -> result.value
-                else -> null
-            }
-        } catch (e: InterpreterException) {
-            null
-        }.let(::Ref)
-    }.get()
+fun JaktPsiElement.performComptimeEvaluation(): Interpreter.Result {
+    return comptimeCache().resolveWithCaching(this) {
+        Interpreter.evaluate(this)
+    }
+}
 
 // Utility accessors
 val JaktIfStatement.ifStatement: JaktIfStatement?

@@ -6,7 +6,7 @@ import org.serenityos.jakt.JaktFile
 import org.serenityos.jakt.JaktTypes
 import org.serenityos.jakt.comptime.ArrayValue
 import org.serenityos.jakt.comptime.StringValue
-import org.serenityos.jakt.comptime.comptimeValue
+import org.serenityos.jakt.comptime.performComptimeEvaluation
 import org.serenityos.jakt.project.jaktProject
 import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.psi.caching.typeCache
@@ -33,7 +33,7 @@ val JaktImport.targetString: String
     get() = typeCache().resolveWithCaching(this) {
         importTarget.identifier?.let { return@resolveWithCaching it.text }
 
-        when (val comptimeValue = importTarget.callExpression?.comptimeValue) {
+        when (val comptimeValue = importTarget.callExpression?.performComptimeEvaluation()?.value) {
             is StringValue -> comptimeValue.value
             is ArrayValue -> {
                 val project = jaktProject

@@ -1,5 +1,6 @@
 package org.serenityos.jakt.comptime
 
+import org.serenityos.jakt.comptime.Interpreter.ExecutionResult
 import org.serenityos.jakt.project.JaktProjectListener
 import java.io.File
 
@@ -7,8 +8,8 @@ class BuiltinFunction(
     parameterCount: Int,
     private val func: (Value?, List<Value>) -> Value,
 ) : FunctionValue(parameterCount, parameterCount) {
-    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): Interpreter.ExecutionResult {
-        return Interpreter.ExecutionResult.Normal(func(thisValue, arguments))
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        return ExecutionResult.Normal(func(thisValue, arguments))
     }
 }
 
@@ -212,7 +213,7 @@ object StringStruct : Value() {
     override fun toString() = "StringStruct"
 }
 
-data class StringValue(val value: String) : Value() {
+data class StringValue(override val value: String) : Value(), PrimitiveValue {
     init {
         this["is_empty"] = isEmpty
         this["length"] = length
@@ -712,7 +713,52 @@ val jaktGetTargetTripleStringFunction = BuiltinFunction(0) { _, _ ->
 
 val abortFunction = BuiltinFunction(0) { _, _ -> error("aborted") }
 
+abstract class FormatLikeFunction : FunctionValue(1, Int.MAX_VALUE) {
+    protected fun getFormatString(arguments: List<Value>): String {
+        require(arguments.isNotEmpty())
+        val fmtSpecifier = arguments[0]
+        require(fmtSpecifier is StringValue)
+
+        val fmtString = FormatStringParser(fmtSpecifier.value).parse()
+        return fmtString.apply(arguments.drop(1))
+    }
+}
+
+object FormatFunction : FormatLikeFunction() {
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        return ExecutionResult.Normal(StringValue(getFormatString(arguments)))
+    }
+}
+
+object PrintFunction : FormatLikeFunction() {
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        interpreter.stdout.append(getFormatString(arguments))
+        return ExecutionResult.Normal(VoidValue)
+    }
+}
+
+object PrintlnFunction : FormatLikeFunction() {
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        interpreter.stdout.append(getFormatString(arguments))
+        interpreter.stdout.append('\n')
+        return ExecutionResult.Normal(VoidValue)
+    }
+}
+
+object EprintFunction : FormatLikeFunction() {
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        interpreter.stderr.append(getFormatString(arguments))
+        return ExecutionResult.Normal(VoidValue)
+    }
+}
+
+object EprintlnFunction : FormatLikeFunction() {
+    override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): ExecutionResult {
+        interpreter.stderr.append(getFormatString(arguments))
+        interpreter.stderr.append('\n')
+        return ExecutionResult.Normal(VoidValue)
+    }
+}
+
 // TODO: saturated/truncated functions when we have generic information
 
-// TODO: Format functions, not trivial since Kotlin does not support the
-//       Serenity/Python-style format arguments

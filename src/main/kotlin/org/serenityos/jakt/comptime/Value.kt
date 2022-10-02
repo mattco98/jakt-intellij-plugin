@@ -20,32 +20,36 @@ sealed class Value {
     }
 }
 
+interface PrimitiveValue {
+    val value: Any
+}
+
 object VoidValue : Value() {
     override fun typeName() = "void"
     override fun toString() = "void"
 }
 
-data class BoolValue(val value: Boolean) : Value() {
+data class BoolValue(override val value: Boolean) : Value(), PrimitiveValue {
     override fun typeName() = "bool"
     override fun toString() = value.toString()
 }
 
-data class IntegerValue(val value: Long) : Value() {
+data class IntegerValue(override val value: Long) : Value(), PrimitiveValue {
     override fun typeName() = "i64"
     override fun toString() = value.toString()
 }
 
-data class FloatValue(val value: Double) : Value() {
+data class FloatValue(override val value: Double) : Value(), PrimitiveValue {
     override fun typeName() = "f64"
     override fun toString() = value.toString()
 }
 
-data class CharValue(val value: Char) : Value() {
+data class CharValue(override val value: Char) : Value(), PrimitiveValue {
     override fun typeName() = "c_char"
     override fun toString() = "'$value'"
 }
 
-data class ByteCharValue(val value: Byte) : Value() {
+data class ByteCharValue(override val value: Byte) : Value(), PrimitiveValue {
     override fun typeName() = "u8"
     override fun toString() = "b'$value'"
 }

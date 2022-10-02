@@ -16,6 +16,9 @@ import org.serenityos.jakt.utils.unreachable
 class Interpreter(element: JaktPsiElement) {
     var scope: Scope
 
+    val stdout = StringBuilder()
+    val stderr = StringBuilder()
+
     init {
         val outerScopes = element.ancestors().filter {
             it is JaktFile || it is JaktFunction || it is JaktStructDeclaration || it is JaktBlock
@@ -722,6 +725,11 @@ class Interpreter(element: JaktPsiElement) {
         scope["File"] = FileStruct
         scope["___jakt_get_target_triple_string"] = jaktGetTargetTripleStringFunction
         scope["abort"] = abortFunction
+        scope["format"] = FormatFunction
+        scope["print"] = PrintFunction
+        scope["println"] = PrintlnFunction
+        scope["eprint"] = EprintFunction
+        scope["eprintln"] = EprintlnFunction
     }
 
     fun error(message: String, element: PsiElement): Nothing = error(message, element.textRange)
@@ -781,9 +789,22 @@ class Interpreter(element: JaktPsiElement) {
         object Break : ExecutionResult
     }
 
+    data class Result(
+        val value: Value?,
+        val stdout: String,
+        val stderr: String,
+    )
+
     companion object {
-        fun evaluate(element: JaktPsiElement): ExecutionResult {
-            return Interpreter(element).evaluate(element)
+        fun evaluate(element: JaktPsiElement): Result {
+            val interpreter = Interpreter(element)
+
+            val value = when (val result = interpreter.evaluate(element)) {
+                is ExecutionResult.Normal -> result.value
+                else -> null
+            }
+
+            return Result(value, interpreter.stdout.toString(), interpreter.stderr.toString())
         }
     }
 }
