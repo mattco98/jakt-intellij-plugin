@@ -39,6 +39,17 @@ abstract class JaktCache(project: Project) : Disposable {
         return map.getOrPut(key) { resolver(key) } as V
     }
 
+    @Suppress("UNCHECKED_CAST")
+    fun <K : PsiElement, V : Any> resolve(key: K): V? {
+        ProgressManager.checkCanceled()
+        return getCacheFor(key)[key] as V?
+    }
+
+    fun <K : PsiElement, V : Any> set(key: K, value: V) {
+        ProgressManager.checkCanceled()
+        getCacheFor(key)[key] = value
+    }
+
     private fun getCacheFor(element: PsiElement): ConcurrentMap<PsiElement, Any> {
         val owner = element.modificationBoundary
 

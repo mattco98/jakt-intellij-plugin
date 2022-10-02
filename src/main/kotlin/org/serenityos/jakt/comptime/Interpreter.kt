@@ -108,28 +108,50 @@ class Interpreter(element: JaktPsiElement) {
                 parts.removeFirst()
 
                 for (part in parts)
-                   value = (value as StructValue)[part]
+                   value = value!![part]
 
                 value!!
             }
             is JaktTupleExpression -> TupleValue(element.expressionList.map { evaluate(it)!! })
             is JaktArrayExpression -> {
                 element.elementsArrayBody?.let {  body ->
-                    return ArrayValue(body.expressionList.map { evaluate(it)!! })
+                    return ArrayValue(body.expressionList.map { evaluate(it)!! }.toMutableList())
                 }
 
                 val body = element.sizedArrayBody!!
                 val value = evaluate(body.expressionList[0])!!
                 val size = evaluate(body.expressionList[1])!!
                 check(size is IntegerValue)
-                ArrayValue((0 until size.value).map { value })
+                ArrayValue((0 until size.value).map { value }.toMutableList())
             }
-            is JaktSetExpression -> SetValue(element.expressionList.map { evaluate(it)!! }.toSet())
+            is JaktSetExpression -> SetValue(element.expressionList.map { evaluate(it)!! }.toMutableSet())
             is JaktDictionaryExpression -> DictionaryValue(
                 element.dictionaryElementList.associate {
                     evaluate(it.expressionList[0])!! to evaluate(it.expressionList[1])!!
-                }
+                }.toMutableMap()
             )
+            is JaktRangeExpression -> {
+                val start = evaluate(element.expressionList[0])!! as IntegerValue
+                val end = evaluate(element.expressionList[1])!! as IntegerValue
+                RangeValue(start.value, end.value, isInclusive = false)
+            }
+            is JaktIndexedAccessExpression -> {
+                val target = evaluate(element.expressionList[0])!!
+                val value = evaluate(element.expressionList[1])!!
+                if (target is ArrayValue && value is RangeValue) {
+                    ArraySlice(target, value.range)
+                } else target[(value as StringValue).value]
+            }
+            is JaktAccessExpression -> {
+                val target = evaluate(element.expression)!!
+                if (element.dotQuestionMark != null)
+                    TODO()
+                if (element.decimalLiteral != null) {
+                    (target as TupleValue).values[element.decimalLiteral!!.text.toInt()]
+                } else {
+                    target[element.identifier!!.text]
+                }
+            }
             is JaktFunction -> {
                 val parameters = element.parameterList.parameterList.map { param ->
                     FunctionValue.Parameter(
@@ -179,16 +201,6 @@ class Interpreter(element: JaktPsiElement) {
                         ?: VoidValue
                 }
             }
-            is JaktAccessExpression -> {
-                val target = evaluate(element.expression)!!
-                if (element.dotQuestionMark != null)
-                    TODO()
-                if (element.decimalLiteral != null) {
-                    (target as TupleValue).values[element.decimalLiteral!!.text.toInt()]
-                } else {
-                    (target as StructValue)[element.identifier!!.text]
-                }
-            }
             is JaktReturnStatement -> throw ReturnException(element.expression?.let { evaluate(it)!! })
             is JaktExpressionStatement -> {
                 evaluate(element.expression)
@@ -209,7 +221,12 @@ class Interpreter(element: JaktPsiElement) {
     }
 
     private fun initializeGlobalScope(scope: Scope) {
+        scope.initialize("String", StringStruct)
         scope.initialize("StringBuilder", StringBuilderStruct)
+        scope.initialize("Error", ErrorStruct)
+        scope.initialize("File", FileStruct)
+        scope.initialize("___jakt_get_target_triple_string", jaktGetTargetTripleStringFunction)
+        scope.initialize("abort", abortFunction)
     }
 
     open class Scope(var outer: Scope?) {

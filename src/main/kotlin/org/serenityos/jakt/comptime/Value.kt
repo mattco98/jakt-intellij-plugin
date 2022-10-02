@@ -7,66 +7,55 @@ import org.serenityos.jakt.psi.api.JaktExpression
 // All integers are treated as i64, just to make my life easier. Similarly, all float
 // types are treated as f64. If we produce a value for something that doesn't actually
 // compile, we'll get an IDE error for it anyways
-sealed interface Value
+sealed class Value {
+    private val fields = mutableMapOf<String, Value>()
 
-object VoidValue : Value {
-    override fun toString() = "void"
-}
+    open operator fun contains(name: String) = name in fields
 
-data class BoolValue(val value: Boolean) : Value {
-    override fun toString() = value.toString()
-}
+    open operator fun get(name: String) = fields[name]
 
-data class IntegerValue(val value: Long) : Value {
-    override fun toString() = value.toString()
-}
-
-data class FloatValue(val value: Double) : Value {
-    override fun toString() = value.toString()
-}
-
-data class CharValue(val value: Char) : Value {
-    override fun toString() = "'$value'"
-}
-
-data class ByteCharValue(val value: Byte) : Value {
-    override fun toString() = "b'$value'"
-}
-
-data class StringValue(val value: String) : Value {
-    override fun toString() = "\"$value\""
-}
-
-data class TupleValue(val values: List<Value>) : Value {
-    override fun toString() = values.joinToString(prefix = "(", postfix = ")")
-}
-
-data class ArrayValue(val values: List<Value>) : Value {
-    override fun toString() = values.joinToString(prefix = "[", postfix = "]")
-}
-
-data class SetValue(val values: Set<Value>) : Value {
-    override fun toString() = values.joinToString(prefix = "{", postfix = "}")
-}
-
-data class DictionaryValue(val elements: Map<Value, Value>) : Value {
-    override fun toString() = elements.entries.joinToString(prefix = "{", postfix = "}") {
-        "${it.key}: ${it.value}"
+    open operator fun set(name: String, value: Value) {
+        fields[name] = value
     }
 }
 
-open class StructValue : Value {
-    protected val fieldsBacker = mutableMapOf<String, Value>()
-
-    val fields: Map<String, Value>
-        get() = fieldsBacker
-
-    open operator fun get(name: String) = fields[name]
+object VoidValue : Value() {
+    override fun toString() = "void"
 }
 
-abstract class FunctionValue(val parameters: List<Parameter>) : Value {
+data class BoolValue(val value: Boolean) : Value() {
+    override fun toString() = value.toString()
+}
+
+data class IntegerValue(val value: Long) : Value() {
+    override fun toString() = value.toString()
+}
+
+data class FloatValue(val value: Double) : Value() {
+    override fun toString() = value.toString()
+}
+
+data class CharValue(val value: Char) : Value() {
+    override fun toString() = "'$value'"
+}
+
+data class ByteCharValue(val value: Byte) : Value() {
+    override fun toString() = "b'$value'"
+}
+
+data class TupleValue(val values: List<Value>) : Value() {
+    override fun toString() = values.joinToString(prefix = "(", postfix = ")")
+}
+
+abstract class FunctionValue(private val minParamCount: Int, private val maxParamCount: Int) : Value() {
     val validParamCount: IntRange
-        get() = parameters.count { it.default != null }..parameters.size
+        get() = minParamCount..maxParamCount
+
+    init {
+        require(minParamCount <= maxParamCount)
+    }
+
+    constructor(parameters: List<Parameter>) : this(parameters.count { it.default == null }, parameters.size)
 
     abstract fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): Value
 
@@ -74,7 +63,7 @@ abstract class FunctionValue(val parameters: List<Parameter>) : Value {
 }
 
 class UserFunctionValue(
-    parameters: List<Parameter>,
+    private val parameters: List<Parameter>,
     val body: JaktPsiElement /* JaktBlock | JaktExpression */, // TODO: Storing PSI is bad, right?
 ) : FunctionValue(parameters) {
     override fun call(interpreter: Interpreter, thisValue: Value?, arguments: List<Value>): Value {
