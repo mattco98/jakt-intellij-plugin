@@ -54,6 +54,8 @@ class Interpreter(element: JaktPsiElement) {
     }
 
     fun popScope() {
+        for (defer in scope.defers)
+            evaluate(defer) // TODO: Do something with the return value?
         scope = scope.outer!!
     }
 
@@ -503,7 +505,10 @@ class Interpreter(element: JaktPsiElement) {
                 is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
                 else -> return result
             })
-            is JaktDeferStatement -> TODO()
+            is JaktDeferStatement -> {
+                scope.defers.add(element.statement)
+                ExecutionResult.Normal(VoidValue)
+            }
             is JaktIfStatement -> {
                 val condition = when (val result = evaluate(element.expression)) {
                     is ExecutionResult.Normal -> result.value
@@ -829,6 +834,8 @@ class Interpreter(element: JaktPsiElement) {
     }
 
     open class Scope(var outer: Scope?) {
+        val defers = mutableListOf<JaktStatement>()
+
         protected val bindings = mutableMapOf<String, Value>()
 
         operator fun contains(name: String) = name in bindings
