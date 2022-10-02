@@ -9,7 +9,7 @@ import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.*
-import org.serenityos.jakt.psi.findChildOfType
+import org.serenityos.jakt.psi.descendantOfType
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
@@ -94,15 +94,7 @@ class Interpreter(element: JaktPsiElement) {
                             else -> return it
                         }
                     }
-                } else {
-                    evaluate(element.right!!).let {
-                        when (it) {
-                            is ExecutionResult.Normal -> it.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", element.right!!)
-                            else -> return it
-                        }
-                    }
-                }
+                } else evaluateNonYield(element.right!!) { return it }
 
                 when (val assignmentTarget = element.left) {
                     is JaktPlainQualifierExpression -> {
@@ -114,20 +106,12 @@ class Interpreter(element: JaktPsiElement) {
                             error("Unknown identifier \"$name\"", assignmentTarget)
                     }
                     is JaktIndexedAccessExpression -> {
-                        val target = when (val result = evaluate(element.left)) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", element.left)
-                            else -> return result
-                        }
+                        val target = evaluateNonYield(element.left) { return it }
 
                         if (target !is ArrayValue)
                             error("Expected array, found ${target.typeName()}", element.left)
 
-                        val index = when (val result = evaluate(element.right!!)) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", element.right!!)
-                            else -> return result
-                        }
+                        val index = evaluateNonYield(element.right!!) { return it }
 
                         if (index !is IntegerValue)
                             error("Expected integer, found ${index.typeName()}", element.right!!)
@@ -141,11 +125,7 @@ class Interpreter(element: JaktPsiElement) {
                         target.values[index.value.toInt()] = newValue
                     }
                     is JaktAccessExpression -> {
-                        val target = when (val result = evaluate(element.left)) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", element.left)
-                            else -> return result
-                        }
+                        val target = evaluateNonYield(element.left) { return it }
 
                         if (assignmentTarget.decimalLiteral != null) {
                             if (target !is TupleValue)
@@ -176,21 +156,9 @@ class Interpreter(element: JaktPsiElement) {
                     else -> null to element.expressionList[0]
                 }
 
-                val start = startExpr?.let {
-                    when (val result = evaluate(it)) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", it)
-                        else -> return result
-                    }
-                } ?: IntegerValue(0)
+                val start = startExpr?.let { e -> evaluateNonYield(e) { return it } } ?: IntegerValue(0)
 
-                val end = startExpr?.let {
-                    when (val result = evaluate(it)) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", it)
-                        else -> return result
-                    }
-                } ?: IntegerValue(Long.MAX_VALUE)
+                val end = startExpr?.let { e -> evaluateNonYield(e) { return it } } ?: IntegerValue(Long.MAX_VALUE)
 
                 if (start !is IntegerValue)
                     error("Expected range start value to be an integer", startExpr!!)
@@ -297,11 +265,7 @@ class Interpreter(element: JaktPsiElement) {
                 ExecutionResult.Normal(StringValue(element.stringLiteral!!.text.drop(1).dropLast(1)))
             }
             is JaktAccessExpression -> {
-                val target = when (val result = evaluate(element.expression)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                    else -> return result
-                }
+                val target = evaluateNonYield(element.expression) { return it }
 
                 if (element.dotQuestionMark != null)
                     TODO()
@@ -317,17 +281,8 @@ class Interpreter(element: JaktPsiElement) {
                 }
             }
             is JaktIndexedAccessExpression -> {
-                val target = when (val result = evaluate(element.expressionList[0])) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expressionList[0])
-                    else -> return result
-                }
-
-                val value = when (val result = evaluate(element.expressionList[1])) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expressionList[1])
-                    else -> return result
-                }
+                val target = evaluateNonYield(element.expressionList[0]) { return it }
+                val value = evaluateNonYield(element.expressionList[1]) { return it }
 
                 if (target !is ArrayValue)
                     error("Unexpected index into non-array value", element.expressionList[0])
@@ -378,21 +333,13 @@ class Interpreter(element: JaktPsiElement) {
                 ExecutionResult.Normal(value!!)
             }
             is JaktCallExpression -> {
-                val target = when (val result = evaluate(element.expression)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                    else -> return result
-                }
+                val target = evaluateNonYield(element.expression) { return it }
 
                 if (target !is FunctionValue)
                     error("\"${target.typeName()}\" is not callable", element.expression)
 
-                val args = element.argumentList.argumentList.map {
-                    when (val result = evaluate(it.expression)) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                        else -> return result
-                    }
+                val args = element.argumentList.argumentList.map { arg ->
+                    evaluateNonYield(arg.expression) { return it }
                 }
 
                 if (args.size !in target.validParamCount) {
@@ -404,17 +351,9 @@ class Interpreter(element: JaktPsiElement) {
                 }
 
                 val thisValue = when (val expr = element.expression) {
-                    is JaktAccessExpression -> when (val result = evaluate(expr.expression)) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", expr.expression)
-                        else -> return result
-                    }
+                    is JaktAccessExpression -> evaluateNonYield(expr.expression) { return it }
                     is JaktFieldAccessExpression -> (scope as FunctionScope).thisBinding!!
-                    is JaktIndexedAccessExpression -> when (val result = evaluate(expr.expressionList.first())) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                        else -> return result
-                    }
+                    is JaktIndexedAccessExpression -> evaluateNonYield(expr.expressionList.first()) { return it }
                     else -> null
                 }
 
@@ -422,12 +361,8 @@ class Interpreter(element: JaktPsiElement) {
             }
             is JaktArrayExpression -> {
                 element.elementsArrayBody?.let { body ->
-                    val array = ArrayValue(body.expressionList.map {
-                        when (val result = evaluate(it)) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", it)
-                            else -> return result
-                        }
+                    val array = ArrayValue(body.expressionList.map { expr ->
+                        evaluateNonYield(expr) { return it }
                     }.toMutableList())
 
                     return ExecutionResult.Normal(array)
@@ -435,17 +370,8 @@ class Interpreter(element: JaktPsiElement) {
 
                 val body = element.sizedArrayBody!!
 
-                val value = when (val result = evaluate(body.expressionList[0])) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", body.expressionList[0])
-                    else -> return result
-                }
-
-                val size = when (val result = evaluate(body.expressionList[1])) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", body.expressionList[1])
-                    else -> return result
-                }
+                val value = evaluateNonYield(body.expressionList[0]) { return it }
+                val size = evaluateNonYield(body.expressionList[1]) { return it }
 
                 if (size !is IntegerValue)
                     error("Array size initializer must be an integer", body.expressionList[1])
@@ -454,92 +380,49 @@ class Interpreter(element: JaktPsiElement) {
             }
             is JaktDictionaryExpression -> ExecutionResult.Normal(
                 DictionaryValue(
-                    element.dictionaryElementList.associate {
-                        val key = when (val result = evaluate(it.expressionList[0])) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[0])
-                            else -> return result
-                        }
-
-                        val value = when (val result = evaluate(it.expressionList[1])) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[1])
-                            else -> return result
-                        }
-
+                    element.dictionaryElementList.associate { pair ->
+                        val key = evaluateNonYield(pair.expressionList[0]) { return it }
+                        val value = evaluateNonYield(pair.expressionList[1]) { return it }
                         key to value
                     }.toMutableMap()
                 )
             )
-            is JaktSetExpression -> ExecutionResult.Normal(SetValue(element.expressionList.map {
-                when (val result = evaluate(it)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", it)
-                    else -> return result
-                }
+            is JaktSetExpression -> ExecutionResult.Normal(SetValue(element.expressionList.map { e ->
+                evaluateNonYield(e) { return it }
             }.toMutableSet()))
-            is JaktTupleExpression -> ExecutionResult.Normal(TupleValue(element.expressionList.map {
-                when (val result = evaluate(it)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", it)
-                    else -> return result
-                }
+            is JaktTupleExpression -> ExecutionResult.Normal(TupleValue(element.expressionList.map { e ->
+                evaluateNonYield(e) { return it }
             }.toMutableList()))
 
             /*** STATEMENTS ***/
 
-            is JaktExpressionStatement -> when (val result = evaluate(element.expression)) {
-                is ExecutionResult.Normal -> ExecutionResult.Normal(result.value)
-                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                else -> return result
+            is JaktExpressionStatement -> {
+                evaluateNonYield(element.expression) { return it }
+                ExecutionResult.Normal(VoidValue)
             }
-            is JaktReturnStatement -> ExecutionResult.Return(element.expression?.let {
-                when (val result = evaluate(it)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", it)
-                    else -> return result
-                }
+            is JaktReturnStatement -> ExecutionResult.Return(element.expression?.let {e ->
+                evaluateNonYield(e) { return it }
             } ?: VoidValue)
-            is JaktThrowStatement -> ExecutionResult.Throw(when (val result = evaluate(element.expression)) {
-                is ExecutionResult.Normal -> result.value
-                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                else -> return result
-            })
+            is JaktThrowStatement -> ExecutionResult.Throw(evaluateNonYield(element.expression) { return it })
             is JaktDeferStatement -> {
                 scope.defers.add(element.statement)
                 ExecutionResult.Normal(VoidValue)
             }
             is JaktIfStatement -> {
-                val condition = when (val result = evaluate(element.expression)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                    else -> return result
-                }
+                val condition = evaluateNonYield(element.expression) { return it }
 
                 if (condition !is BoolValue)
                     error("Expected bool", element.expression)
 
                 if (condition.value) {
-                    when (val result = evaluate(element.block)) {
-                        is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
-                        is ExecutionResult.Yield -> error(
-                            "Unexpected yield",
-                            element.block.findChildOfType<JaktYieldStatement>()!!
-                        )
-                        else -> return result
-                    }
+                    evaluateNonYield(element.block) { return it }
                 } else if (element.ifStatement != null) {
-                    evaluate(element.ifStatement!!)
+                    evaluateNonYield(element.ifStatement!!) { return it }
                 } else if (element.elseBlock != null) {
-                    when (val result = evaluate(element.elseBlock!!)) {
-                        is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
-                        is ExecutionResult.Yield -> error(
-                            "Unexpected yield",
-                            element.block.findChildOfType<JaktYieldStatement>()!!
-                        )
-                        else -> return result
-                    }
-                } else ExecutionResult.Normal(VoidValue)
+                    evaluateNonYield(element.elseBlock!!) { return it }
+                }
+
+                ExecutionResult.Normal(VoidValue)
             }
             is JaktWhileStatement -> TODO()
             is JaktLoopStatement -> TODO()
@@ -552,24 +435,13 @@ class Interpreter(element: JaktPsiElement) {
                     )
                 }
 
-                val rhs = when (val result = evaluate(element.expression)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                    else -> return result
-                }
-
+                val rhs = evaluateNonYield(element.expression) { return it }
                 assign(element.variableDeclList[0].name!!, rhs, initialize = true)
 
                 ExecutionResult.Normal(VoidValue)
             }
             is JaktGuardStatement -> TODO()
-            is JaktYieldStatement -> ExecutionResult.Yield(
-                when (val result = evaluate(element.expression)) {
-                    is ExecutionResult.Normal -> result.value
-                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                    else -> return result
-                }
-            )
+            is JaktYieldStatement -> ExecutionResult.Yield(evaluateNonYield(element.expression) { return it })
             is JaktBreakStatement -> ExecutionResult.Break
             is JaktContinueStatement -> ExecutionResult.Continue
             is JaktUnsafeStatement -> error("Cannot evaluate unsafe blocks at comptime", element)
@@ -589,12 +461,8 @@ class Interpreter(element: JaktPsiElement) {
             }
             is JaktFunction -> {
                 val parameters = element.parameterList.parameterList.map { param ->
-                    val default = param.expression?.let {
-                        when (val result = evaluate(it)) {
-                            is ExecutionResult.Normal -> result.value
-                            is ExecutionResult.Yield -> error("Unexpected yield", it)
-                            else -> return result
-                        }
+                    val default = param.expression?.let { e ->
+                        evaluateNonYield(e) { return it }
                     }
 
                     FunctionValue.Parameter(param.identifier.text, default)
@@ -607,7 +475,7 @@ class Interpreter(element: JaktPsiElement) {
             // Ignored declarations (hoisted at scope initialization)
             is JaktImport -> ExecutionResult.Normal(VoidValue)
 
-            else -> error("${element::class.simpleName} is not support at comptime")
+            else -> error("${element::class.simpleName} is not supported at comptime")
         }
     }
 
@@ -619,35 +487,22 @@ class Interpreter(element: JaktPsiElement) {
         if (op == BinaryOperator.LogicalOr || op == BinaryOperator.LogicalAnd) {
             val shortCircuitValue = op == BinaryOperator.LogicalOr
 
-            val lhsValue = when (val result = evaluate(lhsExpr)) {
-                is ExecutionResult.Normal -> result.value
-                else -> return result
-            }
+            val lhsValue = evaluateNonYield(lhsExpr) { return it }
             if (lhsValue !is BoolValue)
                 error("Expected bool, found ${lhsValue.typeName()}", lhsExpr)
 
             if (lhsValue.value == shortCircuitValue)
                 return ExecutionResult.Normal(BoolValue(shortCircuitValue))
 
-            val rhsValue = when (val result = evaluate(rhsExpr)) {
-                is ExecutionResult.Normal -> result.value
-                else -> return result
-            }
+            val rhsValue = evaluateNonYield(rhsExpr) { return it }
             if (rhsValue !is BoolValue)
                 error("Expected bool, found ${rhsValue.typeName()}", rhsExpr)
 
             ExecutionResult.Normal(rhsValue)
         }
 
-        val lhsValue = when (val result = evaluate(lhsExpr)) {
-            is ExecutionResult.Normal -> result.value
-            else -> return result
-        }
-
-        val rhsValue = when (val result = evaluate(rhsExpr)) {
-            is ExecutionResult.Normal -> result.value
-            else -> return result
-        }
+        val lhsValue = evaluateNonYield(lhsExpr) { return it }
+        val rhsValue = evaluateNonYield(rhsExpr) { return it }
 
         fun incompatError(): Nothing {
             error(
@@ -804,6 +659,14 @@ class Interpreter(element: JaktPsiElement) {
         scope["println"] = PrintlnFunction
         scope["eprint"] = EprintFunction
         scope["eprintln"] = EprintlnFunction
+    }
+
+    private inline fun evaluateNonYield(element: JaktPsiElement, returner: (ExecutionResult) -> Nothing): Value {
+        when (val result = evaluate(element)) {
+            is ExecutionResult.Normal -> return result.value
+            is ExecutionResult.Yield -> error("Unexpected yield", element.descendantOfType<JaktYieldStatement>() ?: element)
+            else -> returner(result)
+        }
     }
 
     fun error(message: String, element: PsiElement): Nothing = error(message, element.textRange)
