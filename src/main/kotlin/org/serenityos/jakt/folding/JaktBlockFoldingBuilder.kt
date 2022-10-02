@@ -66,6 +66,11 @@ class JaktBlockFoldingBuilder : CustomFoldingBuilder() {
             descriptors += FoldingDescriptor(o, o.textRange)
         }
 
+        override fun visitMatchExpression(o: JaktMatchExpression) {
+            val body = o.matchBody ?: return
+            descriptors += FoldingDescriptor(o, TextRange(body.curlyOpen.startOffset, body.curlyClose.endOffset))
+        }
+
         private fun FoldingDescriptor(element: PsiElement) = FoldingDescriptor(element, element.textRange)
     }
 }
