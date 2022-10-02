@@ -66,6 +66,31 @@ class Interpreter(element: JaktPsiElement) {
 
     private fun evaluateImpl(element: JaktPsiElement): Value? {
         return when (element) {
+            /*** EXPRESSIONS ***/
+
+            is JaktMatchExpression -> TODO()
+            is JaktTryExpression -> TODO()
+            is JaktLambdaExpression -> TODO()
+            is JaktAssignmentBinaryExpression -> TODO()
+            is JaktThisExpression -> TODO()
+            is JaktFieldAccessExpression -> TODO()
+            is JaktRangeExpression -> {
+                val start = (element.expressionList[0]?.let { evaluate(it)!! } as? IntegerValue) ?: IntegerValue(0)
+                val end = evaluate(element.expressionList[1])!! as IntegerValue
+                RangeValue(start.value, end.value, isInclusive = false)
+            }
+            is JaktLogicalOrBinaryExpression -> TODO()
+            is JaktLogicalAndBinaryExpression -> TODO()
+            is JaktBitwiseOrBinaryExpression -> TODO()
+            is JaktBitwiseXorBinaryExpression -> TODO()
+            is JaktBitwiseAndBinaryExpression -> TODO()
+            is JaktRelationalBinaryExpression -> TODO()
+            is JaktShiftBinaryExpression -> TODO()
+            is JaktAddBinaryExpression -> TODO()
+            is JaktMultiplyBinaryExpression -> TODO()
+            is JaktCastExpression -> TODO()
+            is JaktIsExpression -> TODO()
+            is JaktUnaryExpression -> TODO()
             is JaktBooleanLiteral -> BoolValue(element.trueKeyword != null)
             is JaktNumericLiteral -> {
                 element.binaryLiteral?.let {
@@ -96,6 +121,23 @@ class Interpreter(element: JaktPsiElement) {
 
                 return StringValue(element.stringLiteral!!.text.drop(1).dropLast(1))
             }
+            is JaktAccessExpression -> {
+                val target = evaluate(element.expression)!!
+                if (element.dotQuestionMark != null)
+                    TODO()
+                if (element.decimalLiteral != null) {
+                    (target as TupleValue).values[element.decimalLiteral!!.text.toInt()]
+                } else {
+                    target[element.identifier!!.text]
+                }
+            }
+            is JaktIndexedAccessExpression -> {
+                val target = evaluate(element.expressionList[0])!!
+                val value = evaluate(element.expressionList[1])!!
+                if (target is ArrayValue && value is RangeValue) {
+                    ArraySlice(target, value.range)
+                } else target[(value as StringValue).value]
+            }
             is JaktPlainQualifierExpression -> {
                 val qualifier = element.plainQualifier
 
@@ -112,7 +154,15 @@ class Interpreter(element: JaktPsiElement) {
 
                 value!!
             }
-            is JaktTupleExpression -> TupleValue(element.expressionList.map { evaluate(it)!! })
+            is JaktCallExpression -> {
+                val target = evaluate(element.expression)!!
+                check(target is FunctionValue)
+
+                val args = element.argumentList.argumentList.map { evaluate(it.expression)!! }
+                check(args.size in target.validParamCount)
+
+                target.call(this, getThisValue(element.expression), args)
+            }
             is JaktArrayExpression -> {
                 element.elementsArrayBody?.let {  body ->
                     return ArrayValue(body.expressionList.map { evaluate(it)!! }.toMutableList())
@@ -124,68 +174,23 @@ class Interpreter(element: JaktPsiElement) {
                 check(size is IntegerValue)
                 ArrayValue((0 until size.value).map { value }.toMutableList())
             }
-            is JaktSetExpression -> SetValue(element.expressionList.map { evaluate(it)!! }.toMutableSet())
             is JaktDictionaryExpression -> DictionaryValue(
                 element.dictionaryElementList.associate {
                     evaluate(it.expressionList[0])!! to evaluate(it.expressionList[1])!!
                 }.toMutableMap()
             )
-            is JaktRangeExpression -> {
-                val start = evaluate(element.expressionList[0])!! as IntegerValue
-                val end = evaluate(element.expressionList[1])!! as IntegerValue
-                RangeValue(start.value, end.value, isInclusive = false)
-            }
-            is JaktIndexedAccessExpression -> {
-                val target = evaluate(element.expressionList[0])!!
-                val value = evaluate(element.expressionList[1])!!
-                if (target is ArrayValue && value is RangeValue) {
-                    ArraySlice(target, value.range)
-                } else target[(value as StringValue).value]
-            }
-            is JaktAccessExpression -> {
-                val target = evaluate(element.expression)!!
-                if (element.dotQuestionMark != null)
-                    TODO()
-                if (element.decimalLiteral != null) {
-                    (target as TupleValue).values[element.decimalLiteral!!.text.toInt()]
-                } else {
-                    target[element.identifier!!.text]
-                }
-            }
-            is JaktFunction -> {
-                val parameters = element.parameterList.parameterList.map { param ->
-                    FunctionValue.Parameter(
-                        param.identifier.text,
-                        param.expression?.let { evaluate(it)!! }
-                    )
-                }
+            is JaktSetExpression -> SetValue(element.expressionList.map { evaluate(it)!! }.toMutableSet())
+            is JaktTupleExpression -> TupleValue(element.expressionList.map { evaluate(it)!! })
 
-                UserFunctionValue(parameters, element.block ?: element.expression!!)
-            }
-            is JaktCallExpression -> {
-                val target = evaluate(element.expression)!!
-                check(target is FunctionValue)
+            /*** STATEMENTS ***/
 
-                val args = element.argumentList.argumentList.map { evaluate(it.expression)!! }
-                check(args.size in target.validParamCount)
-
-                target.call(this, getThisValue(element.expression), args)
-            }
-            is JaktVariableDeclarationStatement -> {
-                if (element.parenOpen != null)
-                    TODO()
-
-                val rhs = evaluate(element.expression)!!
-                val name = element.variableDeclList[0].name!!
-                scope[name] = rhs
+            is JaktExpressionStatement -> {
+                evaluate(element.expression)
                 VoidValue
             }
-            is JaktBlock -> {
-                pushScope(Scope(scope))
-                element.statementList.forEach(::evaluate)
-                popScope()
-                VoidValue
-            }
+            is JaktReturnStatement -> throw ReturnException(element.expression?.let { evaluate(it)!! })
+            is JaktThrowStatement -> TODO()
+            is JaktDeferStatement -> TODO()
             is JaktIfStatement -> {
                 val canBeExpr = element.canBeExpr
                 val condition = evaluate(element.expression)!!
@@ -201,13 +206,45 @@ class Interpreter(element: JaktPsiElement) {
                         ?: VoidValue
                 }
             }
-            is JaktReturnStatement -> throw ReturnException(element.expression?.let { evaluate(it)!! })
-            is JaktExpressionStatement -> {
-                evaluate(element.expression)
+            is JaktWhileStatement -> TODO()
+            is JaktLoopStatement -> TODO()
+            is JaktForStatement -> TODO()
+            is JaktVariableDeclarationStatement -> {
+                if (element.parenOpen != null)
+                    TODO()
+
+                val rhs = evaluate(element.expression)!!
+                val name = element.variableDeclList[0].name!!
+                scope[name] = rhs
+                VoidValue
+            }
+            is JaktGuardStatement -> TODO()
+            is JaktYieldStatement -> TODO()
+            is JaktBreakStatement -> TODO()
+            is JaktContinueStatement -> TODO()
+            is JaktUnsafeStatement -> TODO()
+            is JaktInlineCppStatement -> TODO()
+            is JaktBlock -> {
+                pushScope(Scope(scope))
+                element.statementList.forEach(::evaluate)
+                popScope()
                 VoidValue
             }
 
-            else -> TODO("${element::class.java} it not handled by the Interpreter")
+            /*** DECLARATIONS ***/
+
+            is JaktFunction -> {
+                val parameters = element.parameterList.parameterList.map { param ->
+                    FunctionValue.Parameter(
+                        param.identifier.text,
+                        param.expression?.let { evaluate(it)!! }
+                    )
+                }
+
+                UserFunctionValue(parameters, element.block ?: element.expression!!)
+            }
+
+            else -> error("${element::class.simpleName} is not support at comptime")
         }
     }
 
