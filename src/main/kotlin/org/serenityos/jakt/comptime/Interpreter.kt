@@ -1,6 +1,5 @@
 package org.serenityos.jakt.comptime
 
-import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.refactoring.suggested.endOffset
@@ -10,7 +9,6 @@ import org.serenityos.jakt.psi.JaktPsiElement
 import org.serenityos.jakt.psi.JaktScope
 import org.serenityos.jakt.psi.ancestors
 import org.serenityos.jakt.psi.api.*
-import org.serenityos.jakt.psi.caching.comptimeCache
 import org.serenityos.jakt.psi.findChildOfType
 
 class Interpreter(element: JaktPsiElement) {
@@ -57,16 +55,7 @@ class Interpreter(element: JaktPsiElement) {
     // A return value of null indicates the expression is not comptime. An exception being
     // thrown indicates the expression is comptime, but it malformed in some way and cannot
     // be evaluated.
-    fun evaluate(element: JaktPsiElement): ExecutionResult {
-        val cache = element.comptimeCache()
-        cache.resolve<JaktPsiElement, Ref<ExecutionResult>>(element)?.get()?.let { return it }
-
-        val value = evaluateImpl(element)
-        cache.set(element, Ref(value))
-        return value
-    }
-
-    private fun evaluateImpl(element: JaktPsiElement): ExecutionResult {
+    private fun evaluate(element: JaktPsiElement): ExecutionResult {
         return when (element) {
             /*** EXPRESSIONS ***/
 
