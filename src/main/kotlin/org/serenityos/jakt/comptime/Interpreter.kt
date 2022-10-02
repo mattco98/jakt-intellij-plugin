@@ -131,7 +131,10 @@ class Interpreter(element: JaktPsiElement) {
                             error("Expected integer, found ${index.typeName()}", element.right!!)
 
                         if (index.value.toInt() > target.values.size)
-                            error("Out-of-bounds assignment to array of length ${target.values.size} with index ${index.value}", assignmentTarget)
+                            error(
+                                "Out-of-bounds assignment to array of length ${target.values.size} with index ${index.value}",
+                                assignmentTarget
+                            )
 
                         target.values[index.value.toInt()] = newValue
                     }
@@ -195,15 +198,67 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(RangeValue(start.value, end.value, isInclusive = false))
             }
-            is JaktLogicalOrBinaryExpression -> TODO()
-            is JaktLogicalAndBinaryExpression -> TODO()
-            is JaktBitwiseOrBinaryExpression -> TODO()
-            is JaktBitwiseXorBinaryExpression -> TODO()
-            is JaktBitwiseAndBinaryExpression -> TODO()
-            is JaktRelationalBinaryExpression -> TODO()
-            is JaktShiftBinaryExpression -> TODO()
-            is JaktAddBinaryExpression -> TODO()
-            is JaktMultiplyBinaryExpression -> TODO()
+            is JaktLogicalOrBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                BinaryOperator.LogicalOr
+            )
+            is JaktLogicalAndBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                BinaryOperator.LogicalAnd
+            )
+            is JaktBitwiseOrBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                BinaryOperator.BitwiseOr
+            )
+            is JaktBitwiseXorBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                BinaryOperator.BitwiseXor
+            )
+            is JaktBitwiseAndBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                BinaryOperator.BitwiseAnd
+            )
+            is JaktRelationalBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                when {
+                    element.doubleEquals != null -> BinaryOperator.Equals
+                    element.notEquals != null -> BinaryOperator.NotEquals
+                    element.greaterThan != null -> BinaryOperator.GreaterThan
+                    element.greaterThanEquals != null -> BinaryOperator.GreaterThanEq
+                    element.lessThan != null -> BinaryOperator.LessThan
+                    else -> BinaryOperator.LessThanEq
+                },
+            )
+            is JaktShiftBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                when {
+                    element.leftShift != null -> BinaryOperator.LeftShift
+                    element.arithLeftShift != null -> BinaryOperator.ArithLeftShift
+                    element.rightShift != null -> BinaryOperator.RightShift
+                    else -> BinaryOperator.ArithRightShift
+                },
+            )
+            is JaktAddBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                if (element.plus != null) BinaryOperator.Add else BinaryOperator.Subtract,
+            )
+            is JaktMultiplyBinaryExpression -> applyBinaryOperator(
+                element.left,
+                element.right!!,
+                when {
+                    element.asterisk != null -> BinaryOperator.Multiply
+                    element.slash != null -> BinaryOperator.Divide
+                    else -> BinaryOperator.Modulo
+                },
+            )
             is JaktCastExpression -> TODO()
             is JaktIsExpression -> TODO()
             is JaktUnaryExpression -> TODO()
@@ -395,23 +450,25 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(ArrayValue((0 until size.value).map { value }.toMutableList()))
             }
-            is JaktDictionaryExpression -> ExecutionResult.Normal(DictionaryValue(
-                element.dictionaryElementList.associate {
-                    val key = when (val result = evaluate(it.expressionList[0])) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[0])
-                        else -> return result
-                    }
+            is JaktDictionaryExpression -> ExecutionResult.Normal(
+                DictionaryValue(
+                    element.dictionaryElementList.associate {
+                        val key = when (val result = evaluate(it.expressionList[0])) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[0])
+                            else -> return result
+                        }
 
-                    val value = when (val result = evaluate(it.expressionList[1])) {
-                        is ExecutionResult.Normal -> result.value
-                        is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[1])
-                        else -> return result
-                    }
+                        val value = when (val result = evaluate(it.expressionList[1])) {
+                            is ExecutionResult.Normal -> result.value
+                            is ExecutionResult.Yield -> error("Unexpected yield", it.expressionList[1])
+                            else -> return result
+                        }
 
-                    key to value
-                }.toMutableMap()
-            ))
+                        key to value
+                    }.toMutableMap()
+                )
+            )
             is JaktSetExpression -> ExecutionResult.Normal(SetValue(element.expressionList.map {
                 when (val result = evaluate(it)) {
                     is ExecutionResult.Normal -> result.value
@@ -460,7 +517,10 @@ class Interpreter(element: JaktPsiElement) {
                 if (condition.value) {
                     when (val result = evaluate(element.block)) {
                         is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
-                        is ExecutionResult.Yield -> error("Unexpected yield", element.block.findChildOfType<JaktYieldStatement>()!!)
+                        is ExecutionResult.Yield -> error(
+                            "Unexpected yield",
+                            element.block.findChildOfType<JaktYieldStatement>()!!
+                        )
                         else -> return result
                     }
                 } else if (element.ifStatement != null) {
@@ -468,7 +528,10 @@ class Interpreter(element: JaktPsiElement) {
                 } else if (element.elseBlock != null) {
                     when (val result = evaluate(element.elseBlock!!)) {
                         is ExecutionResult.Normal -> ExecutionResult.Normal(VoidValue)
-                        is ExecutionResult.Yield -> error("Unexpected yield", element.block.findChildOfType<JaktYieldStatement>()!!)
+                        is ExecutionResult.Yield -> error(
+                            "Unexpected yield",
+                            element.block.findChildOfType<JaktYieldStatement>()!!
+                        )
                         else -> return result
                     }
                 } else ExecutionResult.Normal(VoidValue)
@@ -495,11 +558,13 @@ class Interpreter(element: JaktPsiElement) {
                 ExecutionResult.Normal(VoidValue)
             }
             is JaktGuardStatement -> TODO()
-            is JaktYieldStatement -> ExecutionResult.Yield(when (val result = evaluate(element.expression)) {
-                is ExecutionResult.Normal -> result.value
-                is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
-                else -> return result
-            })
+            is JaktYieldStatement -> ExecutionResult.Yield(
+                when (val result = evaluate(element.expression)) {
+                    is ExecutionResult.Normal -> result.value
+                    is ExecutionResult.Yield -> error("Unexpected yield", element.expression)
+                    else -> return result
+                }
+            )
             is JaktBreakStatement -> ExecutionResult.Break
             is JaktContinueStatement -> ExecutionResult.Continue
             is JaktUnsafeStatement -> error("Cannot evaluate unsafe blocks at comptime", element)
@@ -541,7 +606,11 @@ class Interpreter(element: JaktPsiElement) {
         }
     }
 
-    private fun applyBinaryOperator(lhsExpr: JaktExpression, rhsExpr: JaktExpression, op: BinaryOperator): ExecutionResult {
+    private fun applyBinaryOperator(
+        lhsExpr: JaktExpression,
+        rhsExpr: JaktExpression,
+        op: BinaryOperator
+    ): ExecutionResult {
         if (op == BinaryOperator.LogicalOr || op == BinaryOperator.LogicalAnd) {
             val shortCircuitValue = op == BinaryOperator.LogicalOr
 
