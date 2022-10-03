@@ -221,4 +221,12 @@
         </intentionAction>
 
     </extensions>
+    <actions>
+        <action id="org.serenityos.jakt.comptime.ShowComptimeValueAction"
+                class="org.serenityos.jakt.comptime.ShowComptimeValueAction"
+                text="Show Jakt Comptime Value"
+                description="Display the comptime value of the hovered expression, if possible">
+            <add-to-group group-id="EditorPopupMenu3" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
