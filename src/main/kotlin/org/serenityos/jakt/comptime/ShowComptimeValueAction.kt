@@ -18,9 +18,6 @@ import com.intellij.util.ui.HTMLEditorKitBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import org.serenityos.jakt.psi.JaktPsiElement
-import org.serenityos.jakt.psi.ancestors
-import org.serenityos.jakt.psi.api.JaktCallExpression
-import org.serenityos.jakt.psi.api.JaktVariableDeclarationStatement
 import java.awt.Font
 import java.awt.Point
 import javax.swing.JEditorPane
@@ -28,11 +25,11 @@ import javax.swing.text.StyledDocument
 
 class ShowComptimeValueAction : AnAction() {
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = e.getComptimeTargetElement() != null
+        e.presentation.isEnabledAndVisible = e.element?.getComptimeTargetElement() != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val element = e.getComptimeTargetElement() ?: return
+        val element = e.element?.getComptimeTargetElement() ?: return
         val hint = LightweightHint(ComptimePopup(element))
         val editor = e.getData(CommonDataKeys.EDITOR)!!
 
@@ -44,18 +41,6 @@ class ShowComptimeValueAction : AnAction() {
             0,
             false,
         )
-    }
-
-    private fun AnActionEvent.getComptimeTargetElement(): JaktPsiElement? {
-        val baseElement = element ?: return null
-
-        return baseElement.ancestors(withSelf = true).firstOrNull {
-            when (it) {
-                is JaktCallExpression,
-                is JaktVariableDeclarationStatement -> true
-                else -> false
-            }
-        } as? JaktPsiElement
     }
 
     private val AnActionEvent.element: PsiElement?
