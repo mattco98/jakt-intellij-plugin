@@ -217,6 +217,7 @@ class Interpreter(element: JaktPsiElement) {
                         else -> UnaryOperator.Reference
                     }
                     element.asterisk != null -> UnaryOperator.Dereference
+                    element.exclamationPoint != null -> UnaryOperator.Unwrap
                     else -> {
                         val plusPlus = element.findChildOfType(JaktTypes.PLUS_PLUS)
                         if (plusPlus != null) {
@@ -235,15 +236,15 @@ class Interpreter(element: JaktPsiElement) {
             is JaktBooleanLiteral -> ExecutionResult.Normal(BoolValue(element.trueKeyword != null))
             is JaktNumericLiteral -> {
                 element.binaryLiteral?.let {
-                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(2)))
+                    return ExecutionResult.Normal(IntegerValue(it.text.drop(2).toLong(2)))
                 }
 
                 element.octalLiteral?.let {
-                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(8)))
+                    return ExecutionResult.Normal(IntegerValue(it.text.drop(2).toLong(8)))
                 }
 
                 element.hexLiteral?.let {
-                    return ExecutionResult.Normal(IntegerValue(it.text.toLong(16)))
+                    return ExecutionResult.Normal(IntegerValue(it.text.drop(2).toLong(16)))
                 }
 
                 val decimalText = element.decimalLiteral!!.text
@@ -259,7 +260,7 @@ class Interpreter(element: JaktPsiElement) {
                 }
 
                 element.charLiteral?.let {
-                    return ExecutionResult.Normal(CharValue(it.text.single()))
+                    return ExecutionResult.Normal(CharValue(it.text[1].code.toChar()))
                 }
 
                 ExecutionResult.Normal(StringValue(element.stringLiteral!!.text.drop(1).dropLast(1)))
@@ -538,7 +539,7 @@ class Interpreter(element: JaktPsiElement) {
             if (rhsValue !is BoolValue)
                 error("Expected bool, found ${rhsValue.typeName()}", rhsExpr)
 
-            ExecutionResult.Normal(rhsValue)
+            return ExecutionResult.Normal(rhsValue)
         }
 
         val lhsValue = evaluateNonYield(lhsExpr) { return it }
@@ -785,6 +786,11 @@ class Interpreter(element: JaktPsiElement) {
     private fun assign(name: String, value: Value, initialize: Boolean): Boolean {
         // TODO: Ensure bindings already exists in the scope
 
+        if (initialize) {
+            scope[name] = value
+            return true
+        }
+
         var currScope: Scope? = scope
         while (currScope != null) {
             if (name in currScope) {
@@ -795,10 +801,7 @@ class Interpreter(element: JaktPsiElement) {
             currScope = currScope.outer
         }
 
-        return if (initialize) {
-            scope[name] = value
-            true
-        } else false
+        return false
     }
 
     private fun initializeGlobalScope(scope: Scope) {

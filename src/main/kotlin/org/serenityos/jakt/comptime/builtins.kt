@@ -192,7 +192,7 @@ object StringStruct : Value() {
         val (char, count) = arguments
         require(char is CharValue && count is IntegerValue)
         StringValue(buildString {
-            repeat(count.value.toInt()) { append(char) }
+            repeat(count.value.toInt()) { append(char.value) }
         })
     }
 
@@ -274,17 +274,17 @@ data class StringValue(override val value: String) : Value(), PrimitiveValue {
             require(thisValue is StringValue)
             val (start, end) = arguments
             require(start is IntegerValue && end is IntegerValue)
-            StringValue(thisValue.value.substring(start.value.toInt(), end.value.toInt()))
+            StringValue(thisValue.value.substring(start.value.toInt(), (start.value + end.value).toInt()))
         }
 
         private val toUInt = BuiltinFunction(0) { thisValue, _ ->
             require(thisValue is StringValue)
-            IntegerValue(thisValue.value.toLong())
+            OptionalValue(thisValue.value.toLongOrNull()?.let(::IntegerValue))
         }
 
         private val toInt = BuiltinFunction(0) { thisValue, _ ->
             require(thisValue is StringValue)
-            IntegerValue(thisValue.value.toLong())
+            OptionalValue(thisValue.value.toLongOrNull()?.let(::IntegerValue))
         }
 
         private val isWhitespace = BuiltinFunction(0) { thisValue, _ ->

@@ -1,6 +1,7 @@
 package org.serenityos.jakt.comptime
 
 import org.serenityos.jakt.psi.JaktPsiElement
+import org.serenityos.jakt.psi.api.JaktExpression
 
 // As with everything else in the plugin, we are very lenient when it comes to types.
 // All integers are treated as i64, just to make my life easier. Similarly, all float
@@ -95,7 +96,9 @@ class UserFunctionValue(
         interpreter.pushScope(newScope)
 
         return when (val result = interpreter.evaluate(body)) {
-            is Interpreter.ExecutionResult.Normal -> Interpreter.ExecutionResult.Normal(VoidValue)
+            is Interpreter.ExecutionResult.Normal -> if (body is JaktExpression) {
+                Interpreter.ExecutionResult.Normal(result.value)
+            } else Interpreter.ExecutionResult.Normal(VoidValue)
             is Interpreter.ExecutionResult.Return -> Interpreter.ExecutionResult.Normal(result.value)
             is Interpreter.ExecutionResult.Throw -> result
             else -> interpreter.error("Unexpected control flow", body)
