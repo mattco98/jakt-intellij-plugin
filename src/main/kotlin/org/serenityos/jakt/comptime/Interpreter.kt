@@ -394,6 +394,7 @@ class Interpreter(element: JaktPsiElement) {
             is JaktTupleExpression -> ExecutionResult.Normal(TupleValue(element.expressionList.map { e ->
                 evaluateNonYield(e) { return it }
             }.toMutableList()))
+            is JaktParenExpression -> evaluate(element.expression!!)
 
             /*** STATEMENTS ***/
 
