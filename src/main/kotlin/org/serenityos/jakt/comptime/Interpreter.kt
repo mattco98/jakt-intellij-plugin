@@ -66,9 +66,9 @@ class Interpreter(element: JaktPsiElement) {
         return when (element) {
             /*** EXPRESSIONS ***/
 
-            is JaktMatchExpression -> TODO()
-            is JaktTryExpression -> TODO()
-            is JaktLambdaExpression -> TODO()
+            is JaktMatchExpression -> TODO("comptime match expressions")
+            is JaktTryExpression -> TODO("comptime try expressions")
+            is JaktLambdaExpression -> TODO("comptime lambdas")
             is JaktAssignmentBinaryExpression -> {
                 val binaryOp = when {
                     element.plusEquals != null -> BinaryOperator.Add
@@ -145,8 +145,8 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(VoidValue)
             }
-            is JaktThisExpression -> TODO()
-            is JaktFieldAccessExpression -> TODO()
+            is JaktThisExpression -> TODO("comptime this expressions")
+            is JaktFieldAccessExpression -> TODO("comptime field access")
             is JaktRangeExpression -> {
                 val (startExpr, endExpr) = when {
                     element.expressionList.size == 2 -> element.expressionList[0] to element.expressionList[1]
@@ -229,9 +229,9 @@ class Interpreter(element: JaktPsiElement) {
                     else -> BinaryOperator.Modulo
                 },
             )
-            is JaktCastExpression -> TODO()
-            is JaktIsExpression -> TODO()
-            is JaktUnaryExpression -> TODO()
+            is JaktCastExpression -> TODO("comptime casts")
+            is JaktIsExpression -> TODO("comptime is expressions")
+            is JaktUnaryExpression -> TODO("comptime unary expressions")
             is JaktBooleanLiteral -> ExecutionResult.Normal(BoolValue(element.trueKeyword != null))
             is JaktNumericLiteral -> {
                 element.binaryLiteral?.let {
@@ -424,9 +424,9 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(VoidValue)
             }
-            is JaktWhileStatement -> TODO()
-            is JaktLoopStatement -> TODO()
-            is JaktForStatement -> TODO()
+            is JaktWhileStatement -> TODO("comptime while statements")
+            is JaktLoopStatement -> TODO("comptime loop statements")
+            is JaktForStatement -> TODO("comptime for statements")
             is JaktVariableDeclarationStatement -> {
                 if (element.parenOpen != null) {
                     error(
@@ -440,7 +440,7 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(VoidValue)
             }
-            is JaktGuardStatement -> TODO()
+            is JaktGuardStatement -> TODO("comptime guard statements")
             is JaktYieldStatement -> ExecutionResult.Yield(evaluateNonYield(element.expression) { return it })
             is JaktBreakStatement -> ExecutionResult.Break
             is JaktContinueStatement -> ExecutionResult.Continue

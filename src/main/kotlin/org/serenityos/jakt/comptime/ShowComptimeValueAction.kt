@@ -60,7 +60,6 @@ class ShowComptimeValueAction : AnAction() {
 
     private val AnActionEvent.element: PsiElement?
         get() {
-            // TODO: CommonDataKeys.PSI_ELEMENT?
             val file = dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
             val editor = dataContext.getData(CommonDataKeys.EDITOR) ?: return null
             return file.findElementAt(editor.caretModel.offset)
