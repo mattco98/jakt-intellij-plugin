@@ -5,11 +5,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.serenityos.jakt.JaktFile
-import org.serenityos.jakt.psi.JaktPsiElement
-import org.serenityos.jakt.psi.JaktScope
-import org.serenityos.jakt.psi.ancestors
+import org.serenityos.jakt.JaktTypes
+import org.serenityos.jakt.psi.*
 import org.serenityos.jakt.psi.api.*
-import org.serenityos.jakt.psi.descendantOfType
 import org.serenityos.jakt.psi.reference.hasNamespace
 import org.serenityos.jakt.utils.unreachable
 
@@ -67,7 +65,28 @@ class Interpreter(element: JaktPsiElement) {
             /*** EXPRESSIONS ***/
 
             is JaktMatchExpression -> TODO("comptime match expressions")
-            is JaktTryExpression -> TODO("comptime try expressions")
+            is JaktTryExpression -> {
+                when (val result = evaluate(element.expression ?: element.blockList[0])) {
+                    is ExecutionResult.Throw -> if (element.catchKeyword != null) {
+                        val pushedScope = if (element.catchDecl != null) {
+                            val newScope = Scope(scope)
+                            newScope[element.catchDecl!!.identifier.text] = result.value
+                            pushScope(newScope)
+                            true
+                        } else false
+
+                        evaluate(element.blockList[1])
+
+                        if (pushedScope)
+                            popScope()
+
+                    }
+                    !is ExecutionResult.Normal -> return result
+                    else -> {}
+                }
+
+                ExecutionResult.Normal(VoidValue)
+            }
             is JaktLambdaExpression -> TODO("comptime lambdas")
             is JaktAssignmentBinaryExpression -> {
                 val binaryOp = when {
@@ -96,52 +115,7 @@ class Interpreter(element: JaktPsiElement) {
                     }
                 } else evaluateNonYield(element.right!!) { return it }
 
-                when (val assignmentTarget = element.left) {
-                    is JaktPlainQualifierExpression -> {
-                        if (assignmentTarget.plainQualifier.hasNamespace)
-                            error("Invalid assignment target", assignmentTarget)
-
-                        val name = assignmentTarget.plainQualifier.name!!
-                        if (!assign(name, newValue, initialize = false))
-                            error("Unknown identifier \"$name\"", assignmentTarget)
-                    }
-                    is JaktIndexedAccessExpression -> {
-                        val target = evaluateNonYield(element.left) { return it }
-
-                        if (target !is ArrayValue)
-                            error("Expected array, found ${target.typeName()}", element.left)
-
-                        val index = evaluateNonYield(element.right!!) { return it }
-
-                        if (index !is IntegerValue)
-                            error("Expected integer, found ${index.typeName()}", element.right!!)
-
-                        if (index.value.toInt() > target.values.size)
-                            error(
-                                "Out-of-bounds assignment to array of length ${target.values.size} with index ${index.value}",
-                                assignmentTarget
-                            )
-
-                        target.values[index.value.toInt()] = newValue
-                    }
-                    is JaktAccessExpression -> {
-                        val target = evaluateNonYield(element.left) { return it }
-
-                        if (assignmentTarget.decimalLiteral != null) {
-                            if (target !is TupleValue)
-                                error("Expected tuple, found ${target.typeName()}", element.left)
-
-                            val index = assignmentTarget.decimalLiteral!!.text.toInt()
-                            if (index > target.values.size)
-                                error("Cannot assign to index $index of tuple of length ${target.values.size}")
-
-                            target.values[index] = newValue
-                        } else {
-                            target[assignmentTarget.identifier!!.text] = newValue
-                        }
-                    }
-                    else -> error("Invalid assignment target", assignmentTarget)
-                }
+                assign(element.left, newValue)
 
                 ExecutionResult.Normal(VoidValue)
             }
@@ -231,7 +205,33 @@ class Interpreter(element: JaktPsiElement) {
             )
             is JaktCastExpression -> TODO("comptime casts")
             is JaktIsExpression -> TODO("comptime is expressions")
-            is JaktUnaryExpression -> TODO("comptime unary expressions")
+            is JaktUnaryExpression -> applyUnaryOperator(
+                element.expression,
+                when {
+                    element.minus != null -> UnaryOperator.Minus
+                    element.keywordNot != null -> UnaryOperator.Not
+                    element.tilde != null -> UnaryOperator.BitwiseNot
+                    element.ampersand != null -> when {
+                        element.rawKeyword != null -> UnaryOperator.RawReference
+                        element.mutKeyword != null -> UnaryOperator.MutReference
+                        else -> UnaryOperator.Reference
+                    }
+                    element.asterisk != null -> UnaryOperator.Dereference
+                    else -> {
+                        val plusPlus = element.findChildOfType(JaktTypes.PLUS_PLUS)
+                        if (plusPlus != null) {
+                            if (plusPlus.startOffset < element.expression.startOffset) {
+                                UnaryOperator.PrefixIncrement
+                            } else UnaryOperator.PostfixIncrement
+                        } else {
+                            val minusMinus = element.findChildOfType(JaktTypes.MINUS_MINUS)!!
+                            if (minusMinus.startOffset < element.expression.startOffset) {
+                                UnaryOperator.PrefixDecrement
+                            } else UnaryOperator.PostfixDecrement
+                        }
+                    }
+                }
+            )
             is JaktBooleanLiteral -> ExecutionResult.Normal(BoolValue(element.trueKeyword != null))
             is JaktNumericLiteral -> {
                 element.binaryLiteral?.let {
@@ -424,8 +424,35 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(VoidValue)
             }
-            is JaktWhileStatement -> TODO("comptime while statements")
-            is JaktLoopStatement -> TODO("comptime loop statements")
+            is JaktWhileStatement -> {
+                while (true) {
+                    val exprResult = evaluateNonYield(element.expression) { return it }
+                    if (exprResult !is BoolValue)
+                        error("Expected bool value, found ${exprResult.typeName()}", element.expression)
+
+                    if (!exprResult.value)
+                        break
+
+                    when (val blockResult = evaluate(element.block)) {
+                        is ExecutionResult.Break -> break
+                        is ExecutionResult.Continue, is ExecutionResult.Normal -> {}
+                        else -> return blockResult
+                    }
+                }
+
+                ExecutionResult.Normal(VoidValue)
+            }
+            is JaktLoopStatement -> {
+                while (true) {
+                    when (val blockResult = evaluate(element.block)) {
+                        is ExecutionResult.Break -> break
+                        is ExecutionResult.Continue, is ExecutionResult.Normal -> {}
+                        else -> return blockResult
+                    }
+                }
+
+                ExecutionResult.Normal(VoidValue)
+            }
             is JaktForStatement -> TODO("comptime for statements")
             is JaktVariableDeclarationStatement -> {
                 if (element.parenOpen != null) {
@@ -440,7 +467,20 @@ class Interpreter(element: JaktPsiElement) {
 
                 ExecutionResult.Normal(VoidValue)
             }
-            is JaktGuardStatement -> TODO("comptime guard statements")
+            is JaktGuardStatement -> {
+                val condition = evaluateNonYield(element.expression) { return it }
+                if (condition !is BoolValue)
+                    error("Expected bool value, found ${condition.typeName()}", element.expression)
+
+                if (condition.value) {
+                    when (val result = evaluate(element.block)) {
+                        is ExecutionResult.Normal -> error("Unexpected fallthrough from guard block", element.block)
+                        else -> return result
+                    }
+                }
+
+                ExecutionResult.Normal(VoidValue)
+            }
             is JaktYieldStatement -> ExecutionResult.Yield(evaluateNonYield(element.expression) { return it })
             is JaktBreakStatement -> ExecutionResult.Break
             is JaktContinueStatement -> ExecutionResult.Continue
@@ -451,7 +491,7 @@ class Interpreter(element: JaktPsiElement) {
                 try {
                     element.statementList.forEach {
                         val result = evaluate(it)
-                        if (result is ExecutionResult.Yield || result is ExecutionResult.Return)
+                        if (result !is ExecutionResult.Normal)
                             return result
                     }
                     ExecutionResult.Normal(VoidValue)
@@ -628,6 +668,120 @@ class Interpreter(element: JaktPsiElement) {
         return ExecutionResult.Normal(value)
     }
 
+    private fun applyUnaryOperator(expr: JaktExpression, op: UnaryOperator): ExecutionResult {
+        return when (op) {
+            UnaryOperator.PostfixIncrement, UnaryOperator.PostfixDecrement,
+            UnaryOperator.PrefixIncrement, UnaryOperator.PrefixDecrement -> {
+                val isPrefix = op == UnaryOperator.PrefixIncrement || op == UnaryOperator.PrefixDecrement
+                val isIncrement = op == UnaryOperator.PrefixIncrement || op == UnaryOperator.PostfixIncrement
+
+                val delta = if (isIncrement) 1 else -1
+
+                val currValue = evaluateNonYield(expr) { return it }
+                val newValue = when (currValue) {
+                    is IntegerValue -> IntegerValue(currValue.value + delta)
+                    is FloatValue -> FloatValue(currValue.value + delta)
+                    else -> error("Invalid type ${currValue.typeName()} for numeric prefix operator '${op.op}'", expr)
+                }
+
+                assign(expr, newValue)?.let { return it }
+
+                ExecutionResult.Normal(if (isPrefix) newValue else currValue)
+            }
+            UnaryOperator.Minus -> {
+                val value = evaluateNonYield(expr) { return it }
+                when (value) {
+                    is IntegerValue -> IntegerValue(-value.value)
+                    is FloatValue -> FloatValue(-value.value)
+                    else -> error("Invalid type ${value.typeName()} for unary integer '-' operator", expr)
+                }.let(ExecutionResult::Normal)
+            }
+            UnaryOperator.Not -> {
+                val value = evaluateNonYield(expr) { return it }
+                if (value is BoolValue) {
+                    ExecutionResult.Normal(BoolValue(!value.value))
+                } else {
+                    error("Invalid type ${value.typeName()} for boolean 'not' operator", expr)
+                }
+            }
+            UnaryOperator.BitwiseNot -> {
+                val value = evaluateNonYield(expr) { return it }
+                if (value is IntegerValue) {
+                    ExecutionResult.Normal(IntegerValue(value.value.inv()))
+                } else {
+                    error("Invalid type ${value.typeName()} for integer '~' operator", expr)
+                }
+            }
+            UnaryOperator.Reference -> TODO("comptime unary reference operator")
+            UnaryOperator.RawReference -> TODO("comptime unary reference operator")
+            UnaryOperator.MutReference -> TODO("comptime unary reference operator")
+            UnaryOperator.Dereference -> TODO("comptime unary dereference operator")
+            UnaryOperator.Unwrap -> {
+                val value = evaluateNonYield(expr) { return it }
+
+                when (value) {
+                    is OptionalValue -> if (value.value == null) {
+                        error("Attempt to unwrap empty optional value", expr)
+                    } else {
+                        ExecutionResult.Normal(value.value)
+                    }
+                    else -> error("Invalid type ${value.typeName()} for optional unwrap operator '!'", expr)
+                }
+            }
+        }
+    }
+
+    private fun assign(expr: JaktExpression, value: Value): ExecutionResult? {
+        when (expr) {
+            is JaktPlainQualifierExpression -> {
+                if (expr.plainQualifier.hasNamespace)
+                    error("Invalid assignment target", expr)
+
+                val name = expr.plainQualifier.name!!
+                if (!assign(name, value, initialize = false))
+                    error("Unknown identifier \"$name\"", expr)
+            }
+            is JaktIndexedAccessExpression -> {
+                val target = evaluateNonYield(expr.expressionList[0]) { return it }
+
+                if (target !is ArrayValue)
+                    error("Expected array, found ${target.typeName()}", expr.expressionList[0])
+
+                val index = evaluateNonYield(expr.expressionList[1]!!) { return it }
+
+                if (index !is IntegerValue)
+                    error("Expected integer, found ${index.typeName()}", expr.expressionList[1]!!)
+
+                if (index.value.toInt() > target.values.size)
+                    error(
+                        "Out-of-bounds assignment to array of length ${target.values.size} with index ${index.value}",
+                        expr
+                    )
+
+                target.values[index.value.toInt()] = value
+            }
+            is JaktAccessExpression -> {
+                val target = evaluateNonYield(expr.expression) { return it }
+
+                if (expr.decimalLiteral != null) {
+                    if (target !is TupleValue)
+                        error("Expected tuple, found ${target.typeName()}", expr.expression)
+
+                    val index = expr.decimalLiteral!!.text.toInt()
+                    if (index > target.values.size)
+                        error("Cannot assign to index $index of tuple of length ${target.values.size}")
+
+                    target.values[index] = value
+                } else {
+                    target[expr.identifier!!.text] = value
+                }
+            }
+            else -> error("Invalid assignment target", expr)
+        }
+
+        return null
+    }
+
     private fun assign(name: String, value: Value, initialize: Boolean): Boolean {
         // TODO: Ensure bindings already exists in the scope
 
@@ -672,6 +826,21 @@ class Interpreter(element: JaktPsiElement) {
     fun error(message: String, element: PsiElement): Nothing = error(message, element.textRange)
 
     fun error(message: String, range: TextRange): Nothing = throw InterpreterException(message, range)
+
+    enum class UnaryOperator(val op: String) {
+        PrefixIncrement("++"),
+        PrefixDecrement("--"),
+        PostfixIncrement("++"),
+        PostfixDecrement("--"),
+        Minus("-"),
+        Not("not"),
+        BitwiseNot("~"),
+        Reference("&"),
+        RawReference("&raw"),
+        MutReference("&mut"),
+        Dereference("*"),
+        Unwrap("!"),
+    }
 
     enum class BinaryOperator(val op: String) {
         LogicalOr("or"),
