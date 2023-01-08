@@ -170,6 +170,7 @@
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktPsiManager" />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktResolveCache" />
         <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktTypeCache" />
+        <projectService serviceImplementation="org.serenityos.jakt.psi.caching.JaktComptimeCache" />
         <projectConfigurable
                 instance="org.serenityos.jakt.project.JaktLanguageProjectConfigurable"
                 groupId="language"
@@ -220,4 +221,12 @@
         </intentionAction>
 
     </extensions>
+    <actions>
+        <action id="org.serenityos.jakt.comptime.ShowComptimeValueAction"
+                class="org.serenityos.jakt.comptime.ShowComptimeValueAction"
+                text="Show Jakt Comptime Value"
+                description="Display the comptime value of the hovered expression, if possible">
+            <add-to-group group-id="EditorPopupMenu3" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

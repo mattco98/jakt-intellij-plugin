@@ -8,8 +8,8 @@ import org.serenityos.jakt.psi.JaktPsiFactory
 import org.serenityos.jakt.psi.ancestorOfType
 import org.serenityos.jakt.psi.api.JaktImport
 import org.serenityos.jakt.psi.api.JaktPlainQualifier
-import org.serenityos.jakt.psi.declaration.aliasIdent
-import org.serenityos.jakt.psi.declaration.nameIdent
+import org.serenityos.jakt.psi.declaration.aliasString
+import org.serenityos.jakt.psi.declaration.targetString
 import org.serenityos.jakt.psi.reference.index
 
 class ImportNSDeclarationIntention : JaktIntention<ImportNSDeclarationIntention.Context>("Add import for member") {
@@ -27,7 +27,7 @@ class ImportNSDeclarationIntention : JaktIntention<ImportNSDeclarationIntention.
             return null
 
         val importStatement = file.getDeclarations().filterIsInstance<JaktImport>()
-            .find { it.nameIdent.text == resolvedFile.name.substringBefore(".jakt") }
+            .find { it.targetString == resolvedFile.name.substringBefore(".jakt") }
             ?: return null
 
         description = "Add import for \"${qualifier.text}\""
@@ -51,9 +51,9 @@ class ImportNSDeclarationIntention : JaktIntention<ImportNSDeclarationIntention.
         val newImportText = if (import.importBraceList?.importBraceEntryList?.isEmpty() != false) {
             buildString {
                 append("import ")
-                append(import.nameIdent.text)
+                append(import.targetString)
                 append(" ")
-                val alias = import.aliasIdent?.text
+                val alias = import.aliasString
                 if (alias != null)
                     append("as $alias ")
                 append("{ $newImportName }")

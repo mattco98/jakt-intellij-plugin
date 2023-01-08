@@ -27,9 +27,8 @@ abstract class JaktBaseTest : BasePlatformTestCase() {
         tagElements.forEach { comment ->
             val matches = tagRegex.findAll(comment.text).toList()
 
-            check(matches.isNotEmpty()) {
-                "Comment in test with no tags"
-            }
+            if (matches.isEmpty())
+                return@forEach
 
             for (match in matches) {
                 val group = match.groups[1] ?: error("Invalid tag comment")
@@ -50,6 +49,10 @@ abstract class JaktBaseTest : BasePlatformTestCase() {
                     ::mutableListOf
                 ).add(myFixture.file.findElementAt(elementOffset)!!)
             }
+        }
+
+        check(taggedElements.isNotEmpty()) {
+            "No tagged elements found"
         }
 
         return taggedElements
