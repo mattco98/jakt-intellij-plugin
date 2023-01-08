@@ -7,10 +7,10 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     idea
-    kotlin("jvm") version "1.7.10"
-    id("org.jetbrains.intellij") version "1.9.0"
+    kotlin("jvm") version "1.8.0"
+    id("org.jetbrains.intellij") version "1.11.0"
     id("org.jetbrains.grammarkit") version "2021.2.2"
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("plugin.serialization") version "1.8.0"
 }
 
 group = properties("pluginGroup")
@@ -21,12 +21,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("net.java.dev.jna:jna:5.12.1")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:6.4.0.202211300538-r")
 }
 
 intellij {
