@@ -102,13 +102,14 @@ upper NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
 NamespaceBody ::= CURLY_OPEN NL TopLevelDefinitionList? NL CURLY_CLOSE
 
 // Import Statement
-upper Import ::= IMPORT_KEYWORD !EXTERN_KEYWORD IDENTIFIER ImportAs? ImportBraceList? {
+upper Import ::= IMPORT_KEYWORD !EXTERN_KEYWORD ImportPath ImportAs? ImportBraceList? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktImportMixin"
     stubClass="org.serenityos.jakt.stubs.JaktImportStub"
     elementTypeFactory="org.serenityos.jakt.stubs.JaktStubFactoryKt.jaktStubFactory"
 }
-private ImportAs ::= KEYWORD_AS IDENTIFIER
+ImportPath ::= <<colonColonList IDENTIFIER>> ArgumentList?
+ImportAs ::= KEYWORD_AS IDENTIFIER
 ImportBraceList ::= CURLY_OPEN NL <<commaOrEolList ImportBraceEntry>>? NL CURLY_CLOSE
 ImportBraceEntry ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -607,6 +608,7 @@ private NL ::= NEWLINE*
 private NLSEMI ::= (NEWLINE | SEMICOLON)*
 private meta commaList ::= <<p>> (COMMA <<p>>)* COMMA?
 private meta pipeList ::= <<p>> (NL PIPE NL <<p>>)*
+private meta colonColonList ::= <<p>> (COLON_COLON <<p>>)*
 private meta commaOrEolList ::= <<p>> (MemberSeparator <<p>>)* MemberSeparator?
 private meta separatedList ::= <<p>> (MemberSeparator? <<p>>)* MemberSeparator?
 fake toBeUpped ::=
