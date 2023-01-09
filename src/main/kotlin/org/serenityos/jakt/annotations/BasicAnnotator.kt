@@ -61,14 +61,14 @@ object BasicAnnotator : JaktAnnotator(), DumbAware {
             is JaktImportBraceEntry -> element.identifier.highlight(Highlights.IMPORT_ENTRY)
             is JaktExternImport -> element.cSpecifier?.highlight(Highlights.KEYWORD_DECLARATION)
             is JaktImport -> {
-                val idents = element.findChildrenOfType(JaktTypes.IDENTIFIER)
-                idents.first().highlight(Highlights.IMPORT_MODULE)
+                element.findChildrenOfType(JaktTypes.IDENTIFIER).forEach { ident -> ident.highlight(Highlights.IMPORT_MODULE) }
 
-                if (idents.size > 1) {
+                if (element.importAs != null) {
                     // The 'as' keyword will be highlighted as an operator here without
                     // the annotation
-                    element.keywordAs!!.highlight(Highlights.KEYWORD_IMPORT)
-                    idents[1].highlight(Highlights.IMPORT_ALIAS)
+                    val importAs = element.importAs!!
+                    importAs.keywordAs.highlight(Highlights.KEYWORD_IMPORT)
+                    importAs.identifier.highlight(Highlights.IMPORT_ALIAS)
                 }
             }
             is JaktArgument -> {
