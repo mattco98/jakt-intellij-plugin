@@ -65,6 +65,7 @@ COMMENT=(\/\/[^\r\n]*)+
   "comptime"             { return COMPTIME_KEYWORD; }
   "continue"             { return CONTINUE_KEYWORD; }
   "cpp"                  { return CPP_KEYWORD; }
+  "default"              { return DEFAULT_KEYWORD; }
   "defer"                { return DEFER_KEYWORD; }
   "else"                 { return ELSE_KEYWORD; }
   "enum"                 { return ENUM_KEYWORD; }
