@@ -148,6 +148,27 @@ class JaktEnumVariantStub(
         override fun createPsi(stub: JaktEnumVariantStub) = JaktEnumVariantImpl(stub, Type)
     }
 }
+class JaktCommonEnumMemberStub(
+        parent: StubElement<*>?,
+        type: IStubElementType<*, *>,
+        override val name: String?,
+) : StubBase<JaktCommonEnumMember>(parent, type), JaktNamedStub {
+    object Type : JaktNamedStubElementType<JaktCommonEnumMemberStub, JaktCommonEnumMember>("COMMON_ENUM_MEMBER") {
+        override fun serialize(stub: JaktCommonEnumMemberStub, dataStream: StubOutputStream) =
+                dataStream.writeName(stub.name)
+
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+                JaktCommonEnumMemberStub(parentStub, Type, dataStream.readNameString())
+
+        override fun createStub(
+                psi: JaktCommonEnumMember,
+                parentStub: StubElement<out PsiElement>?,
+        ) = JaktCommonEnumMemberStub(parentStub, Type, psi.name)
+
+        override fun createPsi(stub: JaktCommonEnumMemberStub) = JaktCommonEnumMemberImpl(stub, Type)
+    }
+}
+
 
 class JaktNamespaceDeclarationStub(
     parent: StubElement<*>?,
