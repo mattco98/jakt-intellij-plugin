@@ -484,8 +484,10 @@ MatchCaseTrail ::= NL FAT_ARROW (Block | Expression) COMMA?
 MatchCaseHead ::= <<pipeList (MatchCaseElseHead | MatchPattern | Expression)>>
 MatchCaseElseHead ::= ELSE_KEYWORD MatchPatternTrail?
 
-MatchPattern ::= PlainQualifierExpression MatchPatternTrail?
+MatchPattern ::= PlainQualifierExpression MatchPatternTrail? MatchPatternDefault?
 private MatchPatternTrail ::= PAREN_OPEN <<commaOrEolList DestructuringPart>>? PAREN_CLOSE
+MatchPatternDefault ::= DEFAULT_KEYWORD PAREN_OPEN ([AMPERSAND? MUT_KEYWORD?] IDENTIFIER [EQUALS Expression])* PAREN_CLOSE
+
 DestructuringPart ::= [DestructuringLabel COLON] DestructuringBinding
 DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
