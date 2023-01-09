@@ -493,7 +493,7 @@ DestructuringLabel ::= IDENTIFIER {
     implements="org.serenityos.jakt.psi.named.JaktNameIdentifierOwner"
     mixin="org.serenityos.jakt.psi.reference.JaktDestructuringLabelMixin"
 }
-DestructuringBinding ::= IDENTIFIER {
+DestructuringBinding ::= AMPERSAND? MUT_KEYWORD? IDENTIFIER {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktDestructuringBindingMixin"
 }
