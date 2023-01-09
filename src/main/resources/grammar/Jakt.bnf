@@ -40,6 +40,14 @@ File ::= NL TopLevelDefinitionList? NL
 
 private TopLevelDefinitionList ::= TopLevelDefinition (StatementSeparator TopLevelDefinition)*
 
+
+Attribute ::= BRACKET_OPEN BRACKET_OPEN (AttributeEntry COMMA?)* BRACKET_CLOSE BRACKET_CLOSE
+
+AttributeEntry ::= AttributeName [PAREN_OPEN AttributeParameters PAREN_CLOSE] [EQUALS AttributeName]
+AttributeName ::= IDENTIFIER | STRING_LITERAL
+AttributeParameters ::= (AttributeParameter COMMA?)*
+AttributeParameter ::= AttributeName [COLON AttributeName]
+
 TopLevelDefinition ::=
       Function
     | StructDeclaration
@@ -89,7 +97,7 @@ private ExpressionLead ::=
     | IDENTIFIER
     | Literal
 
-upper NamespaceDeclaration ::= NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
+upper NamespaceDeclaration ::= Attribute* NAMESPACE_KEYWORD IDENTIFIER NamespaceBody {
     implements=[
         "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -136,7 +144,7 @@ ImportExternDeclaration ::= Function | StructDeclaration | NamespaceDeclaration 
 
 // Note that this grammar is not strict, i.e., allows constructs in places where they
 // shouldn't be allowed. We let the compiler worry about that.
-upper Function ::= FunctionHeader FunctionBody? {
+upper Function ::= Attribute* FunctionHeader FunctionBody? {
     implements=[
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
         "org.serenityos.jakt.psi.JaktScope"
@@ -169,13 +177,13 @@ Parameter ::= ANON_KEYWORD? MUT_KEYWORD? IDENTIFIER TypeAnnotation [EQUALS Expre
 }
 
 LambdaCaptures ::= BRACKET_OPEN <<commaOrEolList LambdaCapture>> BRACKET_CLOSE
-LambdaCapture ::= [AMPERSAND MUT_KEYWORD?] PlainQualifierExpression
+LambdaCapture ::= [AMPERSAND MUT_KEYWORD?] (THIS_KEYWORD | PlainQualifierExpression)
 
 /*************************
  *       STRUCTS         *
  *************************/
 
-upper StructDeclaration ::= StructHeader StructBody {
+upper StructDeclaration ::= Attribute* StructHeader StructBody {
     implements=[
         "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
@@ -192,7 +200,7 @@ SuperType ::= COLON Type
 StructBody ::= CURLY_OPEN NL <<commaOrEolList StructMember>>? NL CURLY_CLOSE
 StructMember ::= StructField | StructMethod
 
-StructField ::= StructVisibility? IDENTIFIER TypeAnnotation {
+StructField ::= Attribute* StructVisibility? IDENTIFIER TypeAnnotation (EQUALS Expression)? {
     implements="org.serenityos.jakt.psi.declaration.JaktDeclaration"
     mixin="org.serenityos.jakt.psi.declaration.JaktStructFieldMixin"
     stubClass="org.serenityos.jakt.stubs.JaktStructFieldStub"
@@ -208,7 +216,7 @@ MemberSeparator ::= COMMA? NEWLINE+ | COMMA {name="comma or newline"}
  *      Enums      *
  *******************/
 
-upper EnumDeclaration ::= EnumHead EnumBody {
+upper EnumDeclaration ::= Attribute* EnumHead EnumBody {
     implements=[
         "org.serenityos.jakt.psi.JaktScope"
         "org.serenityos.jakt.psi.declaration.JaktDeclaration"
