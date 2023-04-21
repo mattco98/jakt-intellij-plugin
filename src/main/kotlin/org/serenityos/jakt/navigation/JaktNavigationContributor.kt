@@ -37,7 +37,7 @@ abstract class JaktNavigationContributor(
         ) { processor.process(it) }
     }
 
-    override fun getQualifiedName(item: NavigationItem?) = (item as? JaktNamedElement)?.name
+    override fun getQualifiedName(item: NavigationItem) = (item as? JaktNamedElement)?.name
 
     override fun getQualifiedNameSeparator() = "::"
 }
